@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "@/components/ui/use-toast";
 
 interface ProductCardProps {
   product: Product;
@@ -11,19 +13,32 @@ interface ProductCardProps {
 
 const ProductCard = ({ product, currentLanguage }: ProductCardProps) => {
   const { id, name, shortDescription, price, image } = product;
+  const { addItem } = useCart();
   
   const translations = {
     en: {
       addToCart: "Add to Cart",
-      viewDetails: "View Details"
+      viewDetails: "View Details",
+      addedToCart: "Added to cart!"
     },
     th: {
       addToCart: "เพิ่มลงตะกร้า",
-      viewDetails: "ดูรายละเอียด"
+      viewDetails: "ดูรายละเอียด",
+      addedToCart: "เพิ่มลงตะกร้าแล้ว!"
     }
   };
 
   const t = translations[currentLanguage];
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(product, 1);
+    toast({
+      title: t.addedToCart,
+      description: `${name[currentLanguage]} x 1`,
+    });
+  };
 
   return (
     <div className="thai-card group">
@@ -52,6 +67,7 @@ const ProductCard = ({ product, currentLanguage }: ProductCardProps) => {
           <Button 
             size="sm" 
             className="bg-thai-purple hover:bg-thai-purple-dark"
+            onClick={handleAddToCart}
           >
             <ShoppingCart className="h-4 w-4 mr-1" />
             {t.addToCart}

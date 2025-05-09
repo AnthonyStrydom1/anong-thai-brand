@@ -4,9 +4,10 @@ import { useParams, Link } from 'react-router-dom';
 import { products } from '@/data/products';
 import { recipes } from '@/data/recipes';
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Info, ChevronRight } from "lucide-react";
+import { ShoppingCart, ChevronRight } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
+import { useCart } from "@/contexts/CartContext";
 
 interface ProductDetailProps {
   currentLanguage: 'en' | 'th';
@@ -15,6 +16,7 @@ interface ProductDetailProps {
 const ProductDetail = ({ currentLanguage }: ProductDetailProps) => {
   const { id } = useParams<{ id: string }>();
   const [quantity, setQuantity] = useState(1);
+  const { addItem } = useCart();
   
   const product = products.find(p => p.id === id);
   
@@ -66,7 +68,7 @@ const ProductDetail = ({ currentLanguage }: ProductDetailProps) => {
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
   
   const handleAddToCart = () => {
-    // In a real app, this would add the product to a cart state or context
+    addItem(product, quantity);
     toast({
       title: t.addedToCart,
       description: `${product.name[currentLanguage]} x ${quantity}`,

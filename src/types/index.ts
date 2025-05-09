@@ -50,3 +50,8 @@ export interface Recipe {
   relatedProducts: string[]; // Product IDs
   category: string[];
 }
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
