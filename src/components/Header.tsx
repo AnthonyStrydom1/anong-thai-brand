@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Menu, Search, User, X } from "lucide-react";
+import { useLanguage } from '@/contexts/LanguageContext';
+import CartDropdown from './CartDropdown';
 
 interface HeaderProps {
   currentLanguage: 'en' | 'th';
@@ -11,8 +13,10 @@ interface HeaderProps {
 
 const Header = ({ currentLanguage, toggleLanguage }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
 
   const translations = {
     en: {
@@ -23,7 +27,8 @@ const Header = ({ currentLanguage, toggleLanguage }: HeaderProps) => {
       contact: "Contact",
       search: "Search",
       cart: "Cart",
-      account: "Account"
+      account: "Account",
+      searchPlaceholder: "Search products or recipes..."
     },
     th: {
       home: "หน้าหลัก",
@@ -33,7 +38,8 @@ const Header = ({ currentLanguage, toggleLanguage }: HeaderProps) => {
       contact: "ติดต่อเรา",
       search: "ค้นหา",
       cart: "ตะกร้า",
-      account: "บัญชี"
+      account: "บัญชี",
+      searchPlaceholder: "ค้นหาสินค้าหรือสูตรอาหาร..."
     }
   };
 
@@ -69,17 +75,25 @@ const Header = ({ currentLanguage, toggleLanguage }: HeaderProps) => {
             </Button>
             
             <div className="hidden md:flex items-center space-x-2">
-              <Button variant="ghost" size="icon">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={toggleSearch}
+                aria-label={t.search}
+              >
                 <Search className="h-5 w-5" />
               </Button>
               
-              <Button variant="ghost" size="icon">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => console.log('Account functionality to be implemented')}
+                aria-label={t.account}
+              >
                 <User className="h-5 w-5" />
               </Button>
               
-              <Button variant="ghost" size="icon">
-                <ShoppingCart className="h-5 w-5" />
-              </Button>
+              <CartDropdown />
             </div>
             
             <Button 
@@ -92,6 +106,27 @@ const Header = ({ currentLanguage, toggleLanguage }: HeaderProps) => {
             </Button>
           </div>
         </div>
+
+        {/* Search overlay */}
+        {isSearchOpen && (
+          <div className="absolute left-0 right-0 bg-white shadow-md p-4 animate-fade-in">
+            <div className="container mx-auto flex items-center">
+              <input 
+                type="text" 
+                placeholder={t.searchPlaceholder}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-thai-purple focus:border-transparent"
+              />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleSearch}
+                className="ml-2"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mobile menu */}
@@ -135,7 +170,15 @@ const Header = ({ currentLanguage, toggleLanguage }: HeaderProps) => {
             </Link>
             <hr className="border-gray-200" />
             <div className="flex justify-between">
-              <Button variant="ghost" size="sm" className="flex items-center">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="flex items-center"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsSearchOpen(true);
+                }}
+              >
                 <Search className="h-4 w-4 mr-2" />
                 {t.search}
               </Button>
@@ -143,10 +186,12 @@ const Header = ({ currentLanguage, toggleLanguage }: HeaderProps) => {
                 <User className="h-4 w-4 mr-2" />
                 {t.account}
               </Button>
-              <Button variant="ghost" size="sm" className="flex items-center">
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                {t.cart}
-              </Button>
+              <Link to="/cart" onClick={() => setIsMenuOpen(false)}>
+                <Button variant="ghost" size="sm" className="flex items-center">
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  {t.cart}
+                </Button>
+              </Link>
             </div>
           </nav>
         </div>
