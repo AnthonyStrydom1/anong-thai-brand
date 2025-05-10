@@ -1,16 +1,17 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Button } from "@/components/ui/button";
-import { ShoppingCart, Menu, Search, X } from "lucide-react";
-import CartDropdown from './CartDropdown';
 import { toast } from "@/components/ui/use-toast";
+import { ShoppingCart, Menu, Search, X } from "lucide-react";
+
+import { navigationTranslations } from '@/translations/navigation';
+
 import NavItem from './navigation/NavItem';
 import SearchOverlay from './navigation/SearchOverlay';
 import MobileMenu from './navigation/MobileMenu';
 import UserMenu from './navigation/UserMenu';
-import { navigationTranslations } from '@/translations/navigation';
+import CartDropdown from './CartDropdown';
+import NavButton from './navigation/NavButton'; // Import shared button
 
 const NavigationBanner = () => {
   const location = useLocation();
@@ -25,30 +26,21 @@ const NavigationBanner = () => {
   
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
-    if (isSearchOpen) {
-      setSearchQuery('');
-    }
+    if (isSearchOpen) setSearchQuery('');
   };
 
-  const handleClearSearch = () => {
-    setSearchQuery('');
-  };
+  const handleClearSearch = () => setSearchQuery('');
 
   const handleLogin = () => {
     setIsLoggedIn(true);
-    toast({
-      title: t.loginSuccess,
-      description: t.welcomeBack,
-    });
+    toast({ title: t.loginSuccess, description: t.welcomeBack });
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    toast({
-      title: t.logoutSuccess,
-    });
+    toast({ title: t.logoutSuccess });
   };
-  
+
   const t = navigationTranslations[language];
 
   const navItems = [
@@ -61,25 +53,23 @@ const NavigationBanner = () => {
 
   const isActive = (path: string) => {
     if (path === '/' && currentPath === '/') return true;
-    if (path !== '/' && currentPath.startsWith(path)) return true;
-    return false;
+    return path !== '/' && currentPath.startsWith(path);
   };
 
   return (
     <div className="bg-[#520F7A] sticky top-0 z-40 thai-motif-bg">
-      {/* Add a thin decorative gold line along the top */}
       <div className="h-1 bg-gradient-to-r from-thai-gold/20 via-thai-gold to-thai-gold/20"></div>
-      
+
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-3">
-          {/* Logo and Navigation */}
+          {/* Logo & Navigation */}
           <div className="flex items-center">
             <Link to="/" className="mr-4 lg:mr-8">
               <h1 className="text-xl lg:text-2xl font-bold text-white">
                 Anong Thai
               </h1>
             </Link>
-            
+
             <nav className="hidden md:flex space-x-4">
               {navItems.map((item) => (
                 <NavItem 
@@ -92,49 +82,33 @@ const NavigationBanner = () => {
             </nav>
           </div>
 
-          {/* Right side actions */}
+          {/* Actions */}
           <div className="flex items-center space-x-2">
-            <Button 
-              variant="ghost" 
-              onClick={toggleLanguage}
-              className="font-bold text-white"
-            >
+            <NavButton onClick={toggleLanguage}>
               {language === 'en' ? 'TH' : 'EN'}
-            </Button>
-            
+            </NavButton>
+
             <div className="hidden md:flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={toggleSearch}
-                aria-label={t.search}
-                className="text-white hover:bg-[#631E8B]"
-              >
+              <NavButton onClick={toggleSearch} aria-label={t.search}>
                 <Search className="h-5 w-5" />
-              </Button>
-              
+              </NavButton>
+
               <UserMenu 
                 isLoggedIn={isLoggedIn}
                 onLogin={handleLogin}
                 onLogout={handleLogout}
                 translations={t}
               />
-              
+
               <CartDropdown />
             </div>
-            
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="md:hidden text-white hover:bg-[#631E8B]" 
-              onClick={toggleMenu}
-            >
+
+            <NavButton onClick={toggleMenu} className="md:hidden">
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+            </NavButton>
           </div>
         </div>
 
-        {/* Search overlay */}
         <SearchOverlay 
           isOpen={isSearchOpen}
           searchQuery={searchQuery}
@@ -144,8 +118,7 @@ const NavigationBanner = () => {
           translations={t}
         />
       </div>
-      
-      {/* Mobile menu */}
+
       <MobileMenu 
         isOpen={isMenuOpen}
         navItems={navItems}
@@ -155,9 +128,9 @@ const NavigationBanner = () => {
         onLoginClick={handleLogin}
         onLogoutClick={handleLogout}
         translations={t}
+        NavButton={NavButton} // pass NavButton down
       />
-      
-      {/* Add a thin decorative gold line along the bottom */}
+
       <div className="h-0.5 bg-gradient-to-r from-thai-gold/20 via-thai-gold to-thai-gold/20"></div>
     </div>
   );
