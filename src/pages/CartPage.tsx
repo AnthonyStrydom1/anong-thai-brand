@@ -234,7 +234,7 @@ const CartPage = () => {
         )}
       </main>
       
-      <Footer currentLanguage={language} />
+      <Footer />
     </div>
   );
 };

@@ -14,12 +14,12 @@ const Index = () => {
       <Header currentLanguage={language} toggleLanguage={toggleLanguage} />
       
       <main className="flex-grow">
-        <HeroBanner currentLanguage={language} />
-        <FeaturedProducts currentLanguage={language} />
-        <AboutPreview currentLanguage={language} />
+        <HeroBanner />
+        <FeaturedProducts />
+        <AboutPreview />
       </main>
       
-      <Footer currentLanguage={language} />
+      <Footer />
     </div>
   );
 };

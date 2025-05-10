@@ -12,10 +12,10 @@ const Shop = () => {
       <Header currentLanguage={language} toggleLanguage={toggleLanguage} />
       
       <main className="flex-grow">
-        <ProductGrid currentLanguage={language} />
+        <ProductGrid />
       </main>
       
-      <Footer currentLanguage={language} />
+      <Footer />
     </div>
   );
 };

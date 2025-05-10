@@ -109,7 +109,7 @@ const Recipes = () => {
         </div>
       </main>
       
-      <Footer currentLanguage={language} />
+      <Footer />
     </div>
   );
 };

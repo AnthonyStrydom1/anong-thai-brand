@@ -28,7 +28,7 @@ const RecipeDetail = () => {
             </Link>
           </div>
         </main>
-        <Footer currentLanguage={language} />
+        <Footer />
       </div>
     );
   }
@@ -181,7 +181,7 @@ const RecipeDetail = () => {
         </div>
       </main>
       
-      <Footer currentLanguage={language} />
+      <Footer />
     </div>
   );
 };

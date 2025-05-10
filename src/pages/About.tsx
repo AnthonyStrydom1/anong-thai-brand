@@ -108,7 +108,7 @@ const About = () => {
         </div>
       </main>
       
-      <Footer currentLanguage={language} />
+      <Footer />
     </div>
   );
 };

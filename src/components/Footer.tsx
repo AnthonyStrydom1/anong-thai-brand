@@ -8,7 +8,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 const Footer = () => {
   const { language } = useLanguage();
-  const currentLanguage = language as 'en' | 'th';
   
   const translations = {
     en: {
@@ -49,13 +48,13 @@ const Footer = () => {
     }
   };
 
-  const t = translations[currentLanguage];
+  const t = translations[language];
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
-      title: currentLanguage === 'en' ? "Thank you for subscribing!" : "ขอบคุณสำหรับการติดตาม!",
-      description: currentLanguage === 'en' ? "You'll receive our next newsletter." : "คุณจะได้รับจดหมายข่าวฉบับต่อไปของเรา",
+      title: language === 'en' ? "Thank you for subscribing!" : "ขอบคุณสำหรับการติดตาม!",
+      description: language === 'en' ? "You'll receive our next newsletter." : "คุณจะได้รับจดหมายข่าวฉบับต่อไปของเรา",
     });
   };
 

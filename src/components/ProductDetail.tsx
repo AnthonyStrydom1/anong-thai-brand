@@ -8,15 +8,13 @@ import { ShoppingCart, ChevronRight } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { useCart } from "@/contexts/CartContext";
+import { useLanguage } from '@/contexts/LanguageContext';
 
-interface ProductDetailProps {
-  currentLanguage: 'en' | 'th';
-}
-
-const ProductDetail = ({ currentLanguage }: ProductDetailProps) => {
+const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
+  const { language } = useLanguage();
   
   const product = products.find(p => p.id === id);
   
@@ -24,10 +22,10 @@ const ProductDetail = ({ currentLanguage }: ProductDetailProps) => {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h2 className="text-2xl font-semibold mb-4">
-          {currentLanguage === 'en' ? 'Product not found' : 'ไม่พบสินค้า'}
+          {language === 'en' ? 'Product not found' : 'ไม่พบสินค้า'}
         </h2>
         <Link to="/shop" className="text-thai-purple hover:underline">
-          {currentLanguage === 'en' ? 'Return to shop' : 'กลับไปที่ร้านค้า'}
+          {language === 'en' ? 'Return to shop' : 'กลับไปที่ร้านค้า'}
         </Link>
       </div>
     );
@@ -62,7 +60,7 @@ const ProductDetail = ({ currentLanguage }: ProductDetailProps) => {
     }
   };
 
-  const t = translations[currentLanguage];
+  const t = translations[language];
   
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
@@ -71,7 +69,7 @@ const ProductDetail = ({ currentLanguage }: ProductDetailProps) => {
     addItem(product, quantity);
     toast({
       title: t.addedToCart,
-      description: `${product.name[currentLanguage]} x ${quantity}`,
+      description: `${product.name[language]} x ${quantity}`,
     });
   };
 
@@ -80,14 +78,14 @@ const ProductDetail = ({ currentLanguage }: ProductDetailProps) => {
       {/* Breadcrumb */}
       <div className="mb-6 flex items-center text-sm text-gray-500">
         <Link to="/" className="hover:text-thai-purple transition">
-          {currentLanguage === 'en' ? 'Home' : 'หน้าหลัก'}
+          {language === 'en' ? 'Home' : 'หน้าหลัก'}
         </Link>
         <ChevronRight className="h-4 w-4 mx-2" />
         <Link to="/shop" className="hover:text-thai-purple transition">
-          {currentLanguage === 'en' ? 'Shop' : 'ซื้อสินค้า'}
+          {language === 'en' ? 'Shop' : 'ซื้อสินค้า'}
         </Link>
         <ChevronRight className="h-4 w-4 mx-2" />
-        <span className="text-gray-700">{product.name[currentLanguage]}</span>
+        <span className="text-gray-700">{product.name[language]}</span>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -95,7 +93,7 @@ const ProductDetail = ({ currentLanguage }: ProductDetailProps) => {
         <div className="bg-white rounded-lg overflow-hidden shadow-md">
           <img 
             src={product.image} 
-            alt={product.name[currentLanguage]} 
+            alt={product.name[language]} 
             className="w-full h-auto object-cover"
           />
         </div>
@@ -103,14 +101,14 @@ const ProductDetail = ({ currentLanguage }: ProductDetailProps) => {
         {/* Product Info */}
         <div>
           <h1 className="text-3xl font-semibold text-gray-800 mb-2">
-            {product.name[currentLanguage]}
+            {product.name[language]}
           </h1>
           <p className="text-2xl font-semibold text-thai-purple mb-6">
             ${product.price.toFixed(2)}
           </p>
           
           <p className="text-gray-700 mb-6">
-            {product.shortDescription[currentLanguage]}
+            {product.shortDescription[language]}
           </p>
           
           {/* Quantity Selector */}
@@ -157,18 +155,18 @@ const ProductDetail = ({ currentLanguage }: ProductDetailProps) => {
               <TabsTrigger value="howToUse">{t.howToUse}</TabsTrigger>
             </TabsList>
             <TabsContent value="description" className="pt-4 text-gray-700">
-              {product.description[currentLanguage]}
+              {product.description[language]}
             </TabsContent>
             <TabsContent value="ingredients" className="pt-4">
               <ul className="list-disc list-inside text-gray-700 space-y-1">
-                {product.ingredients[currentLanguage].map((ingredient, index) => (
+                {product.ingredients[language].map((ingredient, index) => (
                   <li key={index}>{ingredient}</li>
                 ))}
               </ul>
             </TabsContent>
             <TabsContent value="howToUse" className="pt-4">
               <ul className="list-disc list-inside text-gray-700 space-y-1">
-                {product.useIn[currentLanguage].map((use, index) => (
+                {product.useIn[language].map((use, index) => (
                   <li key={index}>{use}</li>
                 ))}
               </ul>
@@ -186,15 +184,15 @@ const ProductDetail = ({ currentLanguage }: ProductDetailProps) => {
               <div key={recipe.id} className="thai-card">
                 <img 
                   src={recipe.image} 
-                  alt={recipe.name[currentLanguage]} 
+                  alt={recipe.name[language]} 
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-4">
                   <h4 className="text-lg font-semibold mb-2">
-                    {recipe.name[currentLanguage]}
+                    {recipe.name[language]}
                   </h4>
                   <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                    {recipe.description[currentLanguage]}
+                    {recipe.description[language]}
                   </p>
                   <Button 
                     asChild

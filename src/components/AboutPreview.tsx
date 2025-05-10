@@ -1,12 +1,11 @@
 
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import { useLanguage } from '@/contexts/LanguageContext';
 
-interface AboutPreviewProps {
-  currentLanguage: 'en' | 'th';
-}
-
-const AboutPreview = ({ currentLanguage }: AboutPreviewProps) => {
+const AboutPreview = () => {
+  const { language } = useLanguage();
+  
   const translations = {
     en: {
       title: "Meet Anong",
@@ -20,7 +19,7 @@ const AboutPreview = ({ currentLanguage }: AboutPreviewProps) => {
     }
   };
 
-  const t = translations[currentLanguage];
+  const t = translations[language];
 
   return (
     <section className="bg-thai-ivory py-16">

@@ -2,12 +2,11 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useLanguage } from '@/contexts/LanguageContext';
 
-interface HeroBannerProps {
-  currentLanguage: 'en' | 'th';
-}
-
-const HeroBanner = ({ currentLanguage }: HeroBannerProps) => {
+const HeroBanner = () => {
+  const { language } = useLanguage();
+  
   const translations = {
     en: {
       tagline: "Authentic Thai Flavors – Crafted by Anong",
@@ -23,7 +22,7 @@ const HeroBanner = ({ currentLanguage }: HeroBannerProps) => {
     }
   };
 
-  const t = translations[currentLanguage];
+  const t = translations[language];
 
   return (
     <div className="relative h-[80vh] max-h-[600px] w-full overflow-hidden">

@@ -5,15 +5,16 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "@/components/ui/use-toast";
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProductCardProps {
   product: Product;
-  currentLanguage: 'en' | 'th';
 }
 
-const ProductCard = ({ product, currentLanguage }: ProductCardProps) => {
+const ProductCard = ({ product }: ProductCardProps) => {
   const { id, name, shortDescription, price, image } = product;
   const { addItem } = useCart();
+  const { language } = useLanguage();
   
   const translations = {
     en: {
@@ -28,7 +29,7 @@ const ProductCard = ({ product, currentLanguage }: ProductCardProps) => {
     }
   };
 
-  const t = translations[currentLanguage];
+  const t = translations[language];
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -36,7 +37,7 @@ const ProductCard = ({ product, currentLanguage }: ProductCardProps) => {
     addItem(product, 1);
     toast({
       title: t.addedToCart,
-      description: `${name[currentLanguage]} x 1`,
+      description: `${name[language]} x 1`,
     });
   };
 
@@ -46,7 +47,7 @@ const ProductCard = ({ product, currentLanguage }: ProductCardProps) => {
         <div className="h-48 overflow-hidden">
           <img 
             src={image} 
-            alt={name[currentLanguage]} 
+            alt={name[language]} 
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
@@ -54,11 +55,11 @@ const ProductCard = ({ product, currentLanguage }: ProductCardProps) => {
       <div className="p-4">
         <Link to={`/product/${id}`}>
           <h3 className="text-lg font-semibold text-gray-800 mb-1 hover:text-thai-purple transition">
-            {name[currentLanguage]}
+            {name[language]}
           </h3>
         </Link>
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-          {shortDescription[currentLanguage]}
+          {shortDescription[language]}
         </p>
         <div className="flex justify-between items-center">
           <span className="text-lg font-semibold text-thai-purple">

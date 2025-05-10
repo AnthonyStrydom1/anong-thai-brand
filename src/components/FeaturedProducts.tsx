@@ -5,13 +5,11 @@ import { products } from '@/data/products';
 import ProductCard from './ProductCard';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useLanguage } from '@/contexts/LanguageContext';
 
-interface FeaturedProductsProps {
-  currentLanguage: 'en' | 'th';
-}
-
-const FeaturedProducts = ({ currentLanguage }: FeaturedProductsProps) => {
+const FeaturedProducts = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const { language } = useLanguage();
   
   const translations = {
     en: {
@@ -34,7 +32,7 @@ const FeaturedProducts = ({ currentLanguage }: FeaturedProductsProps) => {
     }
   };
 
-  const t = translations[currentLanguage];
+  const t = translations[language];
 
   const filteredProducts = activeCategory === 'all'
     ? products.slice(0, 3)
@@ -68,7 +66,7 @@ const FeaturedProducts = ({ currentLanguage }: FeaturedProductsProps) => {
                   : "border-thai-purple text-thai-purple hover:bg-thai-purple/10"
               }
             >
-              {category.name[currentLanguage]}
+              {category.name[language]}
             </Button>
           ))}
         </div>
@@ -79,7 +77,6 @@ const FeaturedProducts = ({ currentLanguage }: FeaturedProductsProps) => {
             <ProductCard
               key={product.id}
               product={product}
-              currentLanguage={currentLanguage}
             />
           ))}
         </div>

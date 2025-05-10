@@ -12,10 +12,10 @@ const ProductDetailPage = () => {
       <Header currentLanguage={language} toggleLanguage={toggleLanguage} />
       
       <main className="flex-grow">
-        <ProductDetail currentLanguage={language} />
+        <ProductDetail />
       </main>
       
-      <Footer currentLanguage={language} />
+      <Footer />
     </div>
   );
 };

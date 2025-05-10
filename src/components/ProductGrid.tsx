@@ -7,16 +7,14 @@ import ProductCard from './ProductCard';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter } from "lucide-react";
+import { useLanguage } from '@/contexts/LanguageContext';
 
-interface ProductGridProps {
-  currentLanguage: 'en' | 'th';
-}
-
-const ProductGrid = ({ currentLanguage }: ProductGridProps) => {
+const ProductGrid = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
+  const { language } = useLanguage();
   
   const translations = {
     en: {
@@ -41,7 +39,7 @@ const ProductGrid = ({ currentLanguage }: ProductGridProps) => {
     }
   };
 
-  const t = translations[currentLanguage];
+  const t = translations[language];
   
   const categories = [
     { id: 'all', name: { en: t.all, th: t.all } },
@@ -69,13 +67,13 @@ const ProductGrid = ({ currentLanguage }: ProductGridProps) => {
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       results = results.filter(product => 
-        product.name[currentLanguage].toLowerCase().includes(searchLower) ||
-        product.shortDescription[currentLanguage].toLowerCase().includes(searchLower)
+        product.name[language].toLowerCase().includes(searchLower) ||
+        product.shortDescription[language].toLowerCase().includes(searchLower)
       );
     }
     
     setFilteredProducts(results);
-  }, [activeCategory, searchTerm, currentLanguage]);
+  }, [activeCategory, searchTerm, language]);
 
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
@@ -125,7 +123,7 @@ const ProductGrid = ({ currentLanguage }: ProductGridProps) => {
                     : "border-thai-purple text-thai-purple hover:bg-thai-purple/10"
                 }
               >
-                {category.name[currentLanguage]}
+                {category.name[language]}
               </Button>
             ))}
           </div>
@@ -138,7 +136,6 @@ const ProductGrid = ({ currentLanguage }: ProductGridProps) => {
               <ProductCard
                 key={product.id}
                 product={product}
-                currentLanguage={currentLanguage}
               />
             ))}
           </div>

@@ -226,7 +226,7 @@ const Contact = () => {
         </div>
       </main>
       
-      <Footer currentLanguage={language} />
+      <Footer />
     </div>
   );
 };
