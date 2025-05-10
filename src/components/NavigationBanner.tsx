@@ -69,7 +69,7 @@ const NavigationBanner = () => {
   const buttonStyle = "text-white hover:bg-white hover:bg-opacity-20 transition-colors";
 
   return (
-    <div className="bg-[#520F7A] sticky top-0 z-40 thai-motif-bg">
+    <div className="bg-[#520F7A] sticky top-0 z-40">
       {/* Add a thin decorative gold line along the top */}
       <div className="h-1 bg-gradient-to-r from-thai-gold/20 via-thai-gold to-thai-gold/20"></div>
       
