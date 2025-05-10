@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,7 +8,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 const Recipes = () => {
-  const { language, toggleLanguage } = useLanguage();
+  const { language } = useLanguage();
+  const [activeCategory, setActiveCategory] = useState('all');
   
   const translations = {
     en: {
@@ -17,8 +19,7 @@ const Recipes = () => {
       viewRecipe: "View Recipe",
       all: "All Recipes",
       curry: "Curry Dishes",
-      stirFry: "Stir-Fry Dishes",
-      vegetarian: "Vegetarian"
+      stirFry: "Stir-Fry Dishes"
     },
     th: {
       title: "สูตรอาหารไทย",
@@ -27,16 +28,29 @@ const Recipes = () => {
       viewRecipe: "ดูสูตรอาหาร",
       all: "สูตรทั้งหมด",
       curry: "อาหารประเภทแกง",
-      stirFry: "อาหารประเภทผัด",
-      vegetarian: "อาหารเจ/มังสวิรัติ"
+      stirFry: "อาหารประเภทผัด"
     }
   };
 
   const t = translations[language];
   
+  const categories = [
+    { id: 'all', name: t.all },
+    { id: 'curry', name: t.curry },
+    { id: 'stir-fry', name: t.stirFry }
+  ];
+  
+  const handleCategoryChange = (categoryId) => {
+    setActiveCategory(categoryId);
+  };
+  
+  const filteredRecipes = activeCategory === 'all' 
+    ? recipes 
+    : recipes.filter(recipe => recipe.category === activeCategory);
+  
   return (
     <div className="min-h-screen flex flex-col">
-      <Header currentLanguage={language} toggleLanguage={toggleLanguage} />
+      <Header />
       
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-12">
@@ -49,36 +63,25 @@ const Recipes = () => {
           <div className="mb-10">
             <h2 className="text-xl font-medium mb-4">{t.categories}</h2>
             <div className="flex flex-wrap gap-2">
-              <Button 
-                variant="default" 
-                className="bg-thai-purple hover:bg-thai-purple-dark"
-              >
-                {t.all}
-              </Button>
-              <Button 
-                variant="outline"
-                className="border-thai-purple text-thai-purple hover:bg-thai-purple/10"
-              >
-                {t.curry}
-              </Button>
-              <Button 
-                variant="outline"
-                className="border-thai-purple text-thai-purple hover:bg-thai-purple/10"
-              >
-                {t.stirFry}
-              </Button>
-              <Button 
-                variant="outline"
-                className="border-thai-purple text-thai-purple hover:bg-thai-purple/10"
-              >
-                {t.vegetarian}
-              </Button>
+              {categories.map((category) => (
+                <Button 
+                  key={category.id}
+                  variant={activeCategory === category.id ? "default" : "outline"}
+                  className={activeCategory === category.id 
+                    ? "bg-thai-purple hover:bg-thai-purple-dark" 
+                    : "border-thai-purple text-thai-purple hover:bg-thai-purple/10"
+                  }
+                  onClick={() => handleCategoryChange(category.id)}
+                >
+                  {category.name}
+                </Button>
+              ))}
             </div>
           </div>
           
           {/* Recipe Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recipes.map(recipe => (
+            {filteredRecipes.map(recipe => (
               <div key={recipe.id} className="thai-card">
                 <img 
                   src={recipe.image} 

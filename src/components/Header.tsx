@@ -14,17 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 
-interface HeaderProps {
-  currentLanguage: 'en' | 'th';
-  toggleLanguage: () => void;
-}
-
-const Header = ({ currentLanguage, toggleLanguage }: HeaderProps) => {
+const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { language } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleSearch = () => {
@@ -124,7 +119,7 @@ const Header = ({ currentLanguage, toggleLanguage }: HeaderProps) => {
                 onClick={toggleLanguage}
                 className="font-bold"
               >
-                {currentLanguage === 'en' ? 'TH' : 'EN'}
+                {language === 'en' ? 'TH' : 'EN'}
               </Button>
               
               <div className="hidden md:flex items-center space-x-2">

@@ -6,7 +6,7 @@ import { products } from '@/data/products';
 import ProductCard from './ProductCard';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, X } from "lucide-react";
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const ProductGrid = () => {
@@ -25,7 +25,8 @@ const ProductGrid = () => {
       stirFrySauces: "Stir-Fry Sauces",
       dippingSauces: "Dipping Sauces",
       filterButton: "Filter",
-      noProducts: "No products found matching your criteria."
+      noProducts: "No products found matching your criteria.",
+      clearSearch: "Clear"
     },
     th: {
       title: "สินค้าของเรา",
@@ -35,7 +36,8 @@ const ProductGrid = () => {
       stirFrySauces: "ซอสผัด",
       dippingSauces: "น้ำจิ้ม",
       filterButton: "กรอง",
-      noProducts: "ไม่พบสินค้าที่ตรงกับเงื่อนไขของคุณ"
+      noProducts: "ไม่พบสินค้าที่ตรงกับเงื่อนไขของคุณ",
+      clearSearch: "ล้าง"
     }
   };
 
@@ -90,6 +92,10 @@ const ProductGrid = () => {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
+  
+  const handleClearSearch = () => {
+    setSearchTerm('');
+  };
 
   return (
     <section className="py-12 px-4">
@@ -109,6 +115,16 @@ const ProductGrid = () => {
               value={searchTerm}
               onChange={handleSearch}
             />
+            {searchTerm && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2"
+                onClick={handleClearSearch}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
           
           <div className="flex-shrink-0 flex flex-wrap gap-2 md:flex-nowrap justify-start">
