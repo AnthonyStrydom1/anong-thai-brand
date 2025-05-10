@@ -60,7 +60,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-[#520F7A] text-white border-t border-thai-purple thai-lotus-bg relative">
-      <div className="absolute inset-0 opacity-80 mix-blend-overlay pattern-wavy pattern-thai-gold pattern-bg-transparent pattern-size-4 pattern-opacity-20 pointer-events-none"></div>
+  
       
       <div className="container mx-auto px-4 py-12 relative z-10">
         {/* Thai decorative element at the top of the footer */}
