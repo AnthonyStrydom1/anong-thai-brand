@@ -65,6 +65,9 @@ const NavigationBanner = () => {
     return false;
   };
 
+  // Common button style for consistent white box highlighting
+  const buttonStyle = "text-white hover:bg-white hover:bg-opacity-20 transition-colors";
+
   return (
     <div className="bg-[#520F7A] sticky top-0 z-40 thai-motif-bg">
       {/* Add a thin decorative gold line along the top */}
@@ -97,7 +100,7 @@ const NavigationBanner = () => {
             <Button 
               variant="ghost" 
               onClick={toggleLanguage}
-              className="font-bold text-white"
+              className={buttonStyle + " font-bold"}
             >
               {language === 'en' ? 'TH' : 'EN'}
             </Button>
@@ -108,7 +111,7 @@ const NavigationBanner = () => {
                 size="icon"
                 onClick={toggleSearch}
                 aria-label={t.search}
-                className="text-white hover:bg-[#631E8B]"
+                className={buttonStyle}
               >
                 <Search className="h-5 w-5" />
               </Button>
@@ -121,12 +124,12 @@ const NavigationBanner = () => {
               />
               
               <CartDropdown />
-            <div className="hidden md:flex items-center space-x-2">
+            </div>
             
             <Button 
               variant="ghost" 
               size="icon" 
-              className="md:hidden text-white hover:bg-[#631E8B]" 
+              className={buttonStyle + " md:hidden"} 
               onClick={toggleMenu}
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
