@@ -37,7 +37,6 @@ const CartDropdown = () => {
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
-   const buttonStyle = "text-white hover:bg-white hover:bg-opacity-20 transition-colors";
 
   return (
     <div className="relative">
