@@ -37,13 +37,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
     addItem(product, 1);
     toast({
       title: t.addedToCart,
-      description: `${name[language]} x 1`,
+      description: `R{name[language]} x 1`,
     });
   };
 
   return (
     <div className="thai-card group">
-      <Link to={`/product/${id}`} className="block overflow-hidden">
+      <Link to={`/product/R{id}`} className="block overflow-hidden">
         <div className="h-48 overflow-hidden">
           <img 
             src={image} 
@@ -53,7 +53,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </div>
       </Link>
       <div className="p-4">
-        <Link to={`/product/${id}`}>
+        <Link to={`/product/R{id}`}>
           <h3 className="text-lg font-semibold text-gray-800 mb-1 hover:text-thai-purple transition">
             {name[language]}
           </h3>
@@ -63,7 +63,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </p>
         <div className="flex justify-between items-center">
           <span className="text-lg font-semibold text-thai-purple">
-            ${price.toFixed(2)}
+            R{price.toFixed(2)}
           </span>
           <Button 
             size="sm" 
