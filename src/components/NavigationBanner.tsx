@@ -42,8 +42,11 @@ const NavigationBanner = () => {
   };
 
   return (
-    <div className="bg-[#520F7A] sticky top-0 z-40">
-      <div className="container mx-auto">
+    <div className="bg-[#520F7A] sticky top-0 z-40 relative thai-motif-bg">
+      {/* Add a thin decorative gold line along the top */}
+      <div className="h-1 bg-gradient-to-r from-thai-gold/20 via-thai-gold to-thai-gold/20"></div>
+      
+      <div className="container mx-auto relative z-10">
         <nav className="flex justify-center">
           {navItems.map((item) => (
             <Link 
@@ -61,6 +64,9 @@ const NavigationBanner = () => {
           ))}
         </nav>
       </div>
+      
+      {/* Add a thin decorative gold line along the bottom */}
+      <div className="h-0.5 bg-gradient-to-r from-thai-gold/20 via-thai-gold to-thai-gold/20"></div>
     </div>
   );
 };

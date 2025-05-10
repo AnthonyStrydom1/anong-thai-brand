@@ -97,8 +97,17 @@ export default {
 			},
 			backgroundImage: {
 				'thai-pattern': "url('/thai-pattern.png')"
-			}
+			},
+			patterns: {
+				'wavy': {
+					'bg-size': '20px 20px',
+					'bg-image': `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10c2.5 0 5-2.5 5-5s2.5-5 5-5 5 2.5 5 5 2.5 5 5 5 5-2.5 5-5 2.5-5 5-5 5 2.5 5 5-2.5 5-5 5-5-2.5-5-5-2.5-5-5-5-5 2.5-5 5-2.5 5-5 5-5-2.5-5-5 2.5-5 5-5z' fill='%23D4AF37' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+				},
+			},
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		require('tailwindcss-bg-patterns'),
+	],
 } satisfies Config;
