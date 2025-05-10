@@ -37,7 +37,7 @@ const HeroBanner = () => {
       
       {/* Content */}
       <div className="container relative z-10 h-full mx-auto px-4 flex items-center">
-        <div className="max-w-2xl text-black">
+        <div className="max-w-2xl text-white">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
             {t.tagline}
           </h1>
