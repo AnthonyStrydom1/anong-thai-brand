@@ -69,9 +69,6 @@ const HeroBanner = () => {
         </div>
       </div>
       
-      {/* Thai pattern border at the bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-4 thai-gradient"></div>
-    </div>
   );
 };
 
