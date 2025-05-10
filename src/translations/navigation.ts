@@ -1,5 +1,6 @@
 
-import { Language } from "@/contexts/LanguageContext";
+// Import Language type directly instead of from the context
+type Language = 'en' | 'th';
 
 export type NavigationTranslation = {
   home: string;
