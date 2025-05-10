@@ -1,3 +1,4 @@
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -75,8 +76,11 @@ const About = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
             <div className="bg-gray-100 rounded-lg flex items-center justify-center min-h-[400px]">
               {/* Placeholder for founder image */}
-            <img 
-              src="https://i.postimg.cc/MpX5T8h5/upscalemedia-transformed-4.png" 
+              <img 
+                src="https://i.postimg.cc/MpX5T8h5/upscalemedia-transformed-4.png" 
+                alt="Anong Surasiang, founder of Anong Thai"
+                className="rounded-lg max-h-[400px] w-auto"
+              />
             </div>
             
             <div>
