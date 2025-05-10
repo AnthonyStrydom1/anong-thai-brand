@@ -42,12 +42,7 @@ const NavigationBanner = () => {
   };
 
   return (
-    <div className="bg-[#520F7A] sticky top-0 z-40 relative">
-      {/* Thai motifs decoration - top */}
-      <div className="absolute top-0 left-0 w-full h-2 bg-repeat-x" 
-           style={{ backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"8\" viewBox=\"0 0 24 8\"><path d=\"M0,0 L8,4 L0,8 L0,0 Z M8,0 L16,4 L8,8 L8,0 Z M16,0 L24,4 L16,8 L16,0 Z\" fill=\"%23D4AF37\"/></svg>')" }}>
-      </div>
-
+    <div className="bg-[#520F7A] sticky top-0 z-40">
       <div className="container mx-auto">
         <nav className="flex justify-center">
           {navItems.map((item) => (
@@ -65,11 +60,6 @@ const NavigationBanner = () => {
             </Link>
           ))}
         </nav>
-      </div>
-      
-      {/* Thai motifs decoration - bottom */}
-      <div className="absolute bottom-0 left-0 w-full h-2 bg-repeat-x" 
-           style={{ backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"8\" viewBox=\"0 0 24 8\"><path d=\"M0,0 L8,4 L0,8 L0,0 Z M8,0 L16,4 L8,8 L8,0 Z M16,0 L24,4 L16,8 L16,0 Z\" fill=\"%23D4AF37\"/></svg>')" }}>
       </div>
     </div>
   );
