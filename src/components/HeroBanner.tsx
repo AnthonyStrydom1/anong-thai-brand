@@ -27,13 +27,13 @@ const HeroBanner = () => {
   const t = translations[language];
 
   return (
-    <div className={`relative w-full overflow-hidden ${isMobile ? 'h-[500px]' : 'h-[80vh] max-h-[600px]'}`}>
+    <div className={`relative w-full ${isMobile ? 'h-[100vh]' : 'h-[80vh] max-h-[600px]'} overflow-hidden`}>
       {/* Hero image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover"
         style={{ 
           backgroundImage: "url('https://i.postimg.cc/FKqGLFMG/Grand-Palace-final.png')",
-          backgroundPosition: isMobile ? 'center center' : 'center'
+          backgroundPosition: isMobile ? 'center top' : 'center'
         }}
       >
         {/* Gradient overlay */}
@@ -41,35 +41,37 @@ const HeroBanner = () => {
       </div>
       
       {/* Content */}
-      <div className={`container relative z-10 h-full mx-auto px-4 flex ${isMobile ? 'items-end pb-10' : 'items-center'}`}>
-        <div className="max-w-2xl text-white">
-          <h1 className={`font-display ${isMobile ? 'text-3xl' : 'text-4xl md:text-5xl lg:text-6xl'} font-bold mb-4 leading-tight`}>
-            {t.tagline}
-          </h1>
-          <p className={`font-sarabun ${isMobile ? 'text-lg' : 'text-xl md:text-2xl'} mb-6 text-white/90`}>
-            {t.subtitle}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button 
-              asChild
-              size={isMobile ? "default" : "lg"}
-              className="bg-thai-purple hover:bg-thai-purple-dark text-white"
-            >
-              <Link to="/shop">
-                {t.cta}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button 
-              asChild
-              variant="outline" 
-              size={isMobile ? "default" : "lg"}
-              className="bg-transparent text-white border-white hover:bg-white/10"
-            >
-              <Link to="/recipes">
-                {t.secondaryCta}
-              </Link>
-            </Button>
+      <div className="absolute inset-0 flex items-center">
+        <div className={`container mx-auto px-6 ${isMobile ? 'pt-16 pb-24' : ''}`}>
+          <div className="max-w-2xl text-white">
+            <h1 className={`font-display ${isMobile ? 'text-3xl' : 'text-4xl md:text-5xl lg:text-6xl'} font-bold mb-4 leading-tight`}>
+              {t.tagline}
+            </h1>
+            <p className={`font-sarabun ${isMobile ? 'text-lg' : 'text-xl md:text-2xl'} mb-6 text-white/90`}>
+              {t.subtitle}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button 
+                asChild
+                size={isMobile ? "default" : "lg"}
+                className="bg-thai-purple hover:bg-thai-purple-dark text-white"
+              >
+                <Link to="/shop">
+                  {t.cta}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button 
+                asChild
+                variant="outline" 
+                size={isMobile ? "default" : "lg"}
+                className="bg-transparent text-white border-white hover:bg-white/10"
+              >
+                <Link to="/recipes">
+                  {t.secondaryCta}
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
