@@ -129,7 +129,7 @@ const NavigationBanner = () => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className={buttonStyle + " md:hidden"} 
+              className={buttonStyle} 
               onClick={toggleMenu}
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
