@@ -60,10 +60,20 @@ const Footer = () => {
 
   return (
     <footer className="bg-[#520F7A] text-white border-t border-thai-purple thai-lotus-bg relative">
-  
+      <div className="absolute inset-0 opacity-80 mix-blend-overlay pattern-wavy pattern-thai-gold pattern-bg-transparent pattern-size-4 pattern-opacity-20 pointer-events-none"></div>
       
       <div className="container mx-auto px-4 py-12 relative z-10">
-
+        {/* Thai decorative element at the top of the footer */}
+        <div className="flex justify-center mb-8">
+          <div className="w-32 h-6 relative">
+            <div className="absolute inset-0 bg-thai-gold opacity-30 rounded-full"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <svg width="120" height="16" viewBox="0 0 120 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M60 0L65 4L70 0L75 4L80 0L85 4L90 0L95 4L100 0L105 4L110 0L115 4L120 0V2L115 6L110 2L105 6L100 2L95 6L90 2L85 6L80 2L75 6L70 2L65 6L60 2L55 6L50 2L45 6L40 2L35 6L30 2L25 6L20 2L15 6L10 2L5 6L0 2V0L5 4L10 0L15 4L20 0L25 4L30 0L35 4L40 0L45 4L50 0L55 4L60 0Z" fill="#D4AF37"/>
+              </svg>
+            </div>
+          </div>
+        </div>
 
         {/* Newsletter */}
         <div className="max-w-2xl mx-auto mb-12">
@@ -129,7 +139,17 @@ const Footer = () => {
           </div>
         </div>
 
-
+        {/* Thai decorative element before copyright */}
+        <div className="flex justify-center mb-6">
+          <div className="w-48 h-6 relative">
+            <div className="absolute inset-0 bg-thai-gold opacity-30 rounded-full"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <svg width="180" height="16" viewBox="0 0 180 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M90 0L95 4L100 0L105 4L110 0L115 4L120 0L125 4L130 0L135 4L140 0L145 4L150 0L155 4L160 0L165 4L170 0L175 4L180 0V2L175 6L170 2L165 6L160 2L155 6L150 2L145 6L140 2L135 6L130 2L125 6L120 2L115 6L110 2L105 6L100 2L95 6L90 2L85 6L80 2L75 6L70 2L65 6L60 2L55 6L50 2L45 6L40 2L35 6L30 2L25 6L20 2L15 6L10 2L5 6L0 2V0L5 4L10 0L15 4L20 0L25 4L30 0L35 4L40 0L45 4L50 0L55 4L60 0L65 4L70 0L75 4L80 0L85 4L90 0Z" fill="#D4AF37"/>
+              </svg>
+            </div>
+          </div>
+        </div>
 
         {/* Copyright */}
         <div className="border-t border-white/20 pt-8">
