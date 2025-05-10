@@ -60,24 +60,24 @@ const Footer = ({ currentLanguage }: FooterProps) => {
   };
 
   return (
-    <footer className="bg-gray-50 border-t border-gray-200">
+    <footer className="bg-thai-purple-dark text-white border-t border-thai-purple">
       <div className="container mx-auto px-4 py-12">
         {/* Newsletter */}
         <div className="max-w-2xl mx-auto mb-12">
-          <h3 className="text-xl font-semibold text-center text-thai-purple mb-2">
+          <h3 className="text-xl font-semibold text-center text-thai-gold mb-2">
             {t.subscribe}
           </h3>
-          <p className="text-gray-600 text-center mb-4">
+          <p className="text-gray-200 text-center mb-4">
             {t.subscribeDesc}
           </p>
           <form className="flex gap-2" onSubmit={handleSubscribe}>
             <Input 
               type="email" 
               placeholder={t.email} 
-              className="flex-1" 
+              className="flex-1 bg-white/10 border-thai-gold/50 text-white placeholder:text-gray-300" 
               required 
             />
-            <Button type="submit" className="bg-thai-purple hover:bg-thai-purple-dark">
+            <Button type="submit" className="bg-thai-gold hover:bg-thai-gold/80 text-thai-purple-dark">
               {t.submit}
             </Button>
           </form>
@@ -86,40 +86,40 @@ const Footer = ({ currentLanguage }: FooterProps) => {
         {/* Footer links */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div className="space-y-3">
-            <h4 className="font-semibold text-lg">{t.shop}</h4>
+            <h4 className="font-semibold text-lg text-thai-gold">{t.shop}</h4>
             <ul className="space-y-2">
-              <li><Link to="/shop?category=curry-pastes" className="text-gray-600 hover:text-thai-purple transition">{t.curryPastes}</Link></li>
-              <li><Link to="/shop?category=stir-fry-sauces" className="text-gray-600 hover:text-thai-purple transition">{t.stirFrySauces}</Link></li>
-              <li><Link to="/shop?category=dipping-sauces" className="text-gray-600 hover:text-thai-purple transition">{t.dippingSauces}</Link></li>
+              <li><Link to="/shop?category=curry-pastes" className="text-gray-200 hover:text-thai-gold transition">{t.curryPastes}</Link></li>
+              <li><Link to="/shop?category=stir-fry-sauces" className="text-gray-200 hover:text-thai-gold transition">{t.stirFrySauces}</Link></li>
+              <li><Link to="/shop?category=dipping-sauces" className="text-gray-200 hover:text-thai-gold transition">{t.dippingSauces}</Link></li>
             </ul>
           </div>
           <div className="space-y-3">
-            <h4 className="font-semibold text-lg">Anong Thai</h4>
+            <h4 className="font-semibold text-lg text-thai-gold">Anong Thai</h4>
             <ul className="space-y-2">
-              <li><Link to="/recipes" className="text-gray-600 hover:text-thai-purple transition">{t.recipes}</Link></li>
-              <li><Link to="/about" className="text-gray-600 hover:text-thai-purple transition">{t.about}</Link></li>
-              <li><Link to="/contact" className="text-gray-600 hover:text-thai-purple transition">{t.contact}</Link></li>
+              <li><Link to="/recipes" className="text-gray-200 hover:text-thai-gold transition">{t.recipes}</Link></li>
+              <li><Link to="/about" className="text-gray-200 hover:text-thai-gold transition">{t.about}</Link></li>
+              <li><Link to="/contact" className="text-gray-200 hover:text-thai-gold transition">{t.contact}</Link></li>
             </ul>
           </div>
           <div className="space-y-3">
-            <h4 className="font-semibold text-lg">Support</h4>
+            <h4 className="font-semibold text-lg text-thai-gold">Support</h4>
             <ul className="space-y-2">
-              <li><Link to="/shipping" className="text-gray-600 hover:text-thai-purple transition">{t.shipping}</Link></li>
-              <li><Link to="/returns" className="text-gray-600 hover:text-thai-purple transition">{t.returns}</Link></li>
-              <li><Link to="/privacy" className="text-gray-600 hover:text-thai-purple transition">{t.privacy}</Link></li>
-              <li><Link to="/terms" className="text-gray-600 hover:text-thai-purple transition">{t.terms}</Link></li>
+              <li><Link to="/shipping" className="text-gray-200 hover:text-thai-gold transition">{t.shipping}</Link></li>
+              <li><Link to="/returns" className="text-gray-200 hover:text-thai-gold transition">{t.returns}</Link></li>
+              <li><Link to="/privacy" className="text-gray-200 hover:text-thai-gold transition">{t.privacy}</Link></li>
+              <li><Link to="/terms" className="text-gray-200 hover:text-thai-gold transition">{t.terms}</Link></li>
             </ul>
           </div>
           <div className="space-y-3">
-            <h4 className="font-semibold text-lg">Anong Thai Brand</h4>
+            <h4 className="font-semibold text-lg text-thai-gold">Anong Thai Brand</h4>
             <div className="flex space-x-3">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-thai-purple hover:text-thai-purple-dark transition">
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-thai-gold hover:text-thai-gold/80 transition">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-thai-purple hover:text-thai-purple-dark transition">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-thai-gold hover:text-thai-gold/80 transition">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-thai-purple hover:text-thai-purple-dark transition">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-thai-gold hover:text-thai-gold/80 transition">
                 <Twitter className="h-5 w-5" />
               </a>
             </div>
@@ -127,8 +127,8 @@ const Footer = ({ currentLanguage }: FooterProps) => {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-200 pt-8">
-          <p className="text-gray-600 text-center text-sm">
+        <div className="border-t border-thai-purple/50 pt-8">
+          <p className="text-gray-300 text-center text-sm">
             {t.rights}
           </p>
         </div>
