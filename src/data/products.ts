@@ -16,7 +16,7 @@ export const products: Product[] = [
       en: "A rich, aromatic paste for authentic Thai red curry",
       th: "พริกแกงเผ็ดสูตรต้นตำรับจากอนงค์ เหมาะสำหรับแกงไทยแท้"
     },
-    price: 5.99,
+    price: 120.00,
 image: "https://i.postimg.cc/CxkK0ZsW/Red-Curry.png",
     category: "curry-pastes",
     ingredients: {
@@ -42,7 +42,7 @@ image: "https://i.postimg.cc/CxkK0ZsW/Red-Curry.png",
       en: "Sweet, tangy, and savory for authentic Pad Thai",
       th: "ซอสผัดไทย รสกลมกล่อม ใช้ง่ายพร้อมปรุง"
     },
-    price: 4.49,
+    price: 75.00,
     image: "/placeholder.svg",
     category: "stir-fry-sauces",
     ingredients: {
@@ -68,7 +68,7 @@ image: "https://i.postimg.cc/CxkK0ZsW/Red-Curry.png",
       en: "A perfect dip for fried appetizers and grilled meats",
       th: "น้ำจิ้มไก่หวานเผ็ดเล็กน้อย เหมาะสำหรับของทอดและซีฟู้ด"
     },
-    price: 3.99,
+    price: 75.00,
     image: "/placeholder.svg",
     category: "dipping-sauces",
     ingredients: {
