@@ -1,8 +1,8 @@
 
 import { Link } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
 import { Search, LogIn, LogOut, ShoppingCart } from "lucide-react";
 import { NavigationTranslation } from "@/translations/navigation";
-import React from 'react';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -13,7 +13,6 @@ interface MobileMenuProps {
   onLoginClick: () => void;
   onLogoutClick: () => void;
   translations: NavigationTranslation;
-  NavButton: React.ComponentType<any>; // Add NavButton as a component prop
 }
 
 const MobileMenu = ({ 
@@ -24,8 +23,7 @@ const MobileMenu = ({
   onSearchClick, 
   onLoginClick, 
   onLogoutClick,
-  translations,
-  NavButton
+  translations
 }: MobileMenuProps) => {
   if (!isOpen) return null;
   
@@ -44,7 +42,10 @@ const MobileMenu = ({
         ))}
         <hr className="border-thai-gold/30" />
         <div className="flex justify-between">
-          <NavButton
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center text-white hover:text-thai-gold"
             onClick={() => {
               onMenuItemClick();
               onSearchClick();
@@ -52,28 +53,33 @@ const MobileMenu = ({
           >
             <Search className="h-4 w-4 mr-2" />
             {translations.search}
-          </NavButton>
+          </Button>
           {isLoggedIn ? (
-            <NavButton
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex items-center text-red-300"
               onClick={onLogoutClick}
-              className="text-red-300"
             >
               <LogOut className="h-4 w-4 mr-2" />
               {translations.logout}
-            </NavButton>
+            </Button>
           ) : (
-            <NavButton
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex items-center text-white hover:text-thai-gold"
               onClick={onLoginClick}
             >
               <LogIn className="h-4 w-4 mr-2" />
               {translations.login}
-            </NavButton>
+            </Button>
           )}
           <Link to="/cart" onClick={onMenuItemClick}>
-            <NavButton>
+            <Button variant="ghost" size="sm" className="flex items-center text-white hover:text-thai-gold">
               <ShoppingCart className="h-4 w-4 mr-2" />
               {translations.cart}
-            </NavButton>
+            </Button>
           </Link>
         </div>
       </nav>
