@@ -17,7 +17,7 @@ export const products: Product[] = [
       th: "พริกแกงเผ็ดสูตรต้นตำรับจากอนงค์ เหมาะสำหรับแกงไทยแท้"
     },
     price: 5.99,
-    image: "https://drive.google.com/file/d/1vao4jh_4CyqhZhT2mMqsVbCcH8J17ZDN/view?usp=sharing",
+    image: "https://drive.google.com/uc?export=view&id=1vao4jh_4CyqhZhT2mMqsVbCcH8J17ZDN",
     category: "curry-pastes",
     ingredients: {
       en: ["Dried red chili", "Garlic", "Lemongrass", "Galangal", "Shallots", "Kaffir lime zest", "Shrimp paste", "Salt"],
