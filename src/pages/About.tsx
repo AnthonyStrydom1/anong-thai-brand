@@ -75,7 +75,8 @@ const About = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
             <div className="bg-gray-100 rounded-lg flex items-center justify-center min-h-[400px]">
               {/* Placeholder for founder image */}
-              <p className="text-gray-500">Anong Surasiang Photo</p>
+            <img 
+              src="https://i.postimg.cc/MpX5T8h5/upscalemedia-transformed-4.png" 
             </div>
             
             <div>
