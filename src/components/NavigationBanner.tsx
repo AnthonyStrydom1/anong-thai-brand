@@ -42,7 +42,7 @@ const NavigationBanner = () => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-thai-purple-dark to-thai-purple sticky top-0 z-40">
+    <div className="bg-[#520F7A] sticky top-0 z-40">
       <div className="container mx-auto">
         <nav className="flex justify-center">
           {navItems.map((item) => (
@@ -53,7 +53,7 @@ const NavigationBanner = () => {
                 "px-4 py-3 text-white transition-all duration-200 relative",
                 isActive(item.path) 
                   ? "font-semibold after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-thai-gold" 
-                  : "hover:bg-thai-purple-light"
+                  : "hover:bg-[#631E8B]"
               )}
             >
               {item.label}

@@ -60,7 +60,7 @@ const Footer = ({ currentLanguage }: FooterProps) => {
   };
 
   return (
-    <footer className="bg-[#1A1F2C] text-white border-t border-thai-purple">
+    <footer className="bg-[#520F7A] text-white border-t border-thai-purple">
       <div className="container mx-auto px-4 py-12">
         {/* Newsletter */}
         <div className="max-w-2xl mx-auto mb-12">
@@ -77,7 +77,7 @@ const Footer = ({ currentLanguage }: FooterProps) => {
               className="flex-1 bg-white/10 border-thai-gold/50 text-white placeholder:text-gray-300" 
               required 
             />
-            <Button type="submit" className="bg-thai-gold hover:bg-thai-gold/80 text-[#1A1F2C]">
+            <Button type="submit" className="bg-thai-gold hover:bg-thai-gold/80 text-[#520F7A]">
               {t.submit}
             </Button>
           </form>
@@ -127,7 +127,7 @@ const Footer = ({ currentLanguage }: FooterProps) => {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-thai-purple/50 pt-8">
+        <div className="border-t border-white/20 pt-8">
           <p className="text-gray-300 text-center text-sm">
             {t.rights}
           </p>
