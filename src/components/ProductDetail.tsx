@@ -16,7 +16,11 @@ const ProductDetail = () => {
   const { addItem } = useCart();
   const { language } = useLanguage();
   
+  console.log("Product ID from params:", id);
+  console.log("Available products:", products);
+  
   const product = products.find(p => p.id === id);
+  console.log("Found product:", product);
   
   if (!product) {
     return (
