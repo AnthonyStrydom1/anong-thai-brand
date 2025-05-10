@@ -69,7 +69,7 @@ const HeroBanner = () => {
         </div>
       </div>
       
-  );
+
 };
 
 export default HeroBanner;
