@@ -56,8 +56,8 @@ export default {
 				// Thai brand custom colors
 				"thai-purple": {
 					light: "#9b87f5",
-					DEFAULT: "#7E69AB",
-					dark: "#6E59A5"
+					DEFAULT: "#520F7A",
+					dark: "#3E0B5C"
 				},
 				"thai-gold": "#D4AF37",
 				"thai-ivory": "#FFFFF0"

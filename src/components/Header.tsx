@@ -203,11 +203,12 @@ const Header = ({ currentLanguage, toggleLanguage }: HeaderProps) => {
                 {searchQuery && (
                   <Button 
                     variant="ghost" 
+                    size="icon"
                     onClick={handleClearSearch}
                     className="ml-2"
+                    aria-label={t.clearSearch}
                   >
-                    <X className="h-4 w-4 mr-1" />
-                    {t.clearSearch}
+                    <X className="h-5 w-5" />
                   </Button>
                 )}
                 <Button 

@@ -60,8 +60,13 @@ const Footer = ({ currentLanguage }: FooterProps) => {
   };
 
   return (
-    <footer className="bg-[#520F7A] text-white border-t border-thai-purple">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="bg-[#520F7A] text-white border-t border-thai-purple relative">
+      {/* Thai motifs decoration - top */}
+      <div className="absolute top-0 left-0 w-full h-3 bg-repeat-x" 
+           style={{ backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"12\" viewBox=\"0 0 32 12\"><path d=\"M0,0 C8,0 8,12 16,12 C24,12 24,0 32,0 L32,12 L0,12 Z\" fill=\"%23D4AF37\"/></svg>')" }}>
+      </div>
+      
+      <div className="container mx-auto px-4 py-12 mt-3">
         {/* Newsletter */}
         <div className="max-w-2xl mx-auto mb-12">
           <h3 className="text-xl font-semibold text-center text-thai-gold mb-2">
@@ -132,6 +137,14 @@ const Footer = ({ currentLanguage }: FooterProps) => {
             {t.rights}
           </p>
         </div>
+      </div>
+      
+      {/* Thai motifs decoration - sides */}
+      <div className="absolute left-0 top-0 bottom-0 w-4 bg-repeat-y" 
+           style={{ backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"32\" viewBox=\"0 0 16 32\"><path d=\"M0,0 C0,8 16,8 16,16 C16,24 0,24 0,32 L0,0 Z\" fill=\"%23D4AF37\"/></svg>')" }}>
+      </div>
+      <div className="absolute right-0 top-0 bottom-0 w-4 bg-repeat-y" 
+           style={{ backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"32\" viewBox=\"0 0 16 32\"><path d=\"M16,0 C16,8 0,8 0,16 C0,24 16,24 16,32 L16,0 Z\" fill=\"%23D4AF37\"/></svg>')" }}>
       </div>
     </footer>
   );
