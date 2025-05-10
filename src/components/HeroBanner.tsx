@@ -29,7 +29,7 @@ const HeroBanner = () => {
       {/* Hero image */}
       <div 
         className="absolute inset-0 bg-cover bg-center" 
-        style={{ backgroundImage: "url(/placeholder.svg)" }}
+        style={{ backgroundImage: "https://i.postimg.cc/nzwcnB70/wat-arun.png" }}
       >
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent"></div>
