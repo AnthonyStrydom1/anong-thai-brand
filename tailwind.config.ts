@@ -69,7 +69,9 @@ export default {
 			},
 			fontFamily: {
 				'thai': ['Sriracha', 'sans-serif'],
-				'body': ['Noto Sans Thai', 'sans-serif']
+				'body': ['Noto Sans Thai', 'sans-serif'],
+				'sarabun': ['Sarabun', 'sans-serif'],
+				'display': ['Playfair Display', 'serif']
 			},
 			keyframes: {
 				'accordion-down': {

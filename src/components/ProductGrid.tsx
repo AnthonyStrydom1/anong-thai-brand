@@ -97,11 +97,14 @@ const ProductGrid = () => {
     setSearchTerm('');
   };
 
+  console.log("Available products:", products);
+  console.log("Filtered products:", filteredProducts);
+
   return (
     <section className="py-12 px-4">
       <div className="container mx-auto">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-semibold mb-2 text-gray-800">{t.title}</h2>
+          <h2 className="text-3xl font-semibold mb-2 text-gray-800 font-display">{t.title}</h2>
         </div>
         
         {/* Search and Filter */}

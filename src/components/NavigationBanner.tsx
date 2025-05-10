@@ -70,9 +70,6 @@ const NavigationBanner = () => {
 
   return (
     <div className="bg-[#520F7A] sticky top-0 z-40">
-      {/* Add a thin decorative gold line along the top */}
-      <div className="h-1 bg-gradient-to-r from-thai-gold/20 via-thai-gold to-thai-gold/20"></div>
-      
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-3">
           {/* Logo and Navigation */}
@@ -159,9 +156,6 @@ const NavigationBanner = () => {
         onLogoutClick={handleLogout}
         translations={t}
       />
-      
-      {/* Add a thin decorative gold line along the bottom */}
-      <div className="h-0.5 bg-gradient-to-r from-thai-gold/20 via-thai-gold to-thai-gold/20"></div>
     </div>
   );
 };
