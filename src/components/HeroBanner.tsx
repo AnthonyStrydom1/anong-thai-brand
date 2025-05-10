@@ -29,19 +29,19 @@ const HeroBanner = () => {
       {/* Hero image */}
       <div 
         className="absolute inset-0 bg-cover bg-center" 
-        style={{ backgroundImage: "url('https://i.postimg.cc/T111mGn2/Grand-Palace-final.png')" }}
+        style={{ backgroundImage: "url('https://i.postimg.cc/FKqGLFMG/Grand-Palace-final.png')" }}
       >
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent"></div>
       </div>
       
-      {/* Content - moved to bottom left with updated styling */}
-      <div className="container relative z-10 h-full mx-auto px-4 flex items-end pb-16">
+      {/* Content */}
+      <div className="container relative z-10 h-full mx-auto px-4 flex items-center">
         <div className="max-w-2xl text-white">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-sarabun mb-4 leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
             {t.tagline}
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-white/90 font-sarabun">
+          <p className="text-xl md:text-2xl mb-8 text-white/90">
             {t.subtitle}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
