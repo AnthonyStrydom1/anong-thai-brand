@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 import Header from "@/components/Header";
@@ -10,7 +9,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Mail, Phone, Instagram, Facebook } from "lucide-react";
 
 const Contact = () => {
-  const { language, toggleLanguage } = useLanguage();
+  const { language } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -91,7 +90,7 @@ const Contact = () => {
   
   return (
     <div className="min-h-screen flex flex-col">
-      <Header currentLanguage={language} toggleLanguage={toggleLanguage} />
+      <Header />
       
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-12">

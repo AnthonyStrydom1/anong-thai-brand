@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
@@ -10,14 +9,14 @@ import { ChevronRight, Clock, Users } from "lucide-react";
 
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { language, toggleLanguage } = useLanguage();
+  const { language } = useLanguage();
   
   const recipe = recipes.find(r => r.id === id);
   
   if (!recipe) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header currentLanguage={language} toggleLanguage={toggleLanguage} />
+        <Header />
         <main className="flex-grow">
           <div className="container mx-auto px-4 py-12 text-center">
             <h2 className="text-2xl font-semibold mb-4">
@@ -63,7 +62,7 @@ const RecipeDetail = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header currentLanguage={language} toggleLanguage={toggleLanguage} />
+      <Header />
       
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-12">

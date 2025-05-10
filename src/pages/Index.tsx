@@ -7,11 +7,11 @@ import FeaturedProducts from "@/components/FeaturedProducts";
 import AboutPreview from "@/components/AboutPreview";
 
 const Index = () => {
-  const { language, toggleLanguage } = useLanguage();
+  const { language } = useLanguage();
   
   return (
     <div className="min-h-screen flex flex-col">
-      <Header currentLanguage={language} toggleLanguage={toggleLanguage} />
+      <Header />
       
       <main className="flex-grow">
         <HeroBanner />

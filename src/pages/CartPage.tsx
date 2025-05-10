@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -10,7 +9,7 @@ import { ShoppingCart, Trash2, Plus, Minus, ChevronRight } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 const CartPage = () => {
-  const { language, toggleLanguage } = useLanguage();
+  const { language } = useLanguage();
   const { items, total, updateQuantity, removeItem, clearCart } = useCart();
   
   const translations = {
@@ -71,7 +70,7 @@ const CartPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header currentLanguage={language} toggleLanguage={toggleLanguage} />
+      <Header />
       
       <main className="flex-grow container mx-auto px-4 py-8">
         {/* Breadcrumb */}

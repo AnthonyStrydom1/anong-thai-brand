@@ -46,7 +46,7 @@ const Recipes = () => {
   
   const filteredRecipes = activeCategory === 'all' 
     ? recipes 
-    : recipes.filter(recipe => recipe.category === activeCategory);
+    : recipes.filter(recipe => recipe.category.includes(activeCategory));
   
   return (
     <div className="min-h-screen flex flex-col">
