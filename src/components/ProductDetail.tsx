@@ -36,13 +36,30 @@ const ProductDetail = () => {
       <ProductBreadcrumb productName={product.name[language]} language={language} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Product Image */}
-        <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg overflow-hidden shadow-md flex items-center justify-center p-8">
-          <img 
-            src={product.image} 
-            alt={product.name[language]} 
-            className="max-w-full max-h-[400px] object-contain"
-          />
+        {/* Product Image as Jar Mockup */}
+        <div className="bg-black rounded-lg overflow-hidden shadow-md flex items-center justify-center p-8 min-h-[500px]">
+          <div className="relative w-full max-w-[300px] h-[400px] mx-auto">
+            {/* Jar/bottle container - 3D effect with gradient */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[rgba(255,255,255,0.2)] rounded-lg" style={{
+              clipPath: 'polygon(20% 0%, 80% 0%, 90% 5%, 90% 95%, 80% 100%, 20% 100%, 10% 95%, 10% 5%)'
+            }}></div>
+            
+            {/* Product image as the label */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <img 
+                src={product.image} 
+                alt={product.name[language]} 
+                className="w-full h-full object-contain"
+              />
+            </div>
+            
+            {/* Jar lid */}
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[60%] h-[8%] bg-gradient-to-b from-gray-700 to-gray-900 rounded-t-lg"></div>
+            
+            {/* Jar reflections */}
+            <div className="absolute top-[15%] right-[15%] w-[5%] h-[70%] bg-white opacity-20 rounded-full"></div>
+            <div className="absolute top-[20%] left-[15%] w-[3%] h-[60%] bg-white opacity-10 rounded-full"></div>
+          </div>
         </div>
         
         {/* Product Info */}

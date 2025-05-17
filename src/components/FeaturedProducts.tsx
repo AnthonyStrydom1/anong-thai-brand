@@ -115,12 +115,30 @@ const FeaturedProducts = () => {
                 <CarouselItem key={product.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                   <div className="thai-card group">
                     <Link to={`/product/${product.id}`} className="block overflow-hidden">
-                      <div className="h-48 overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
-                        <img 
-                          src={product.image} 
-                          alt={product.name[language]} 
-                          className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                        />
+                      <div className="h-64 overflow-hidden bg-black flex items-center justify-center p-2 relative">
+                        {/* Jar mockup with product label */}
+                        <div className="relative w-full h-full max-w-[200px] mx-auto">
+                          {/* Jar/bottle container */}
+                          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[rgba(255,255,255,0.2)] rounded-lg" style={{
+                            clipPath: 'polygon(20% 0%, 80% 0%, 90% 5%, 90% 95%, 80% 100%, 20% 100%, 10% 95%, 10% 5%)'
+                          }}></div>
+                          
+                          {/* Product image as the label */}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <img 
+                              src={product.image} 
+                              alt={product.name[language]} 
+                              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                            />
+                          </div>
+                          
+                          {/* Jar lid */}
+                          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[60%] h-[10%] bg-gradient-to-b from-gray-700 to-gray-900 rounded-t-lg"></div>
+                          
+                          {/* Jar reflections */}
+                          <div className="absolute top-[15%] right-[15%] w-[5%] h-[70%] bg-white opacity-20 rounded-full"></div>
+                          <div className="absolute top-[20%] left-[15%] w-[3%] h-[60%] bg-white opacity-10 rounded-full"></div>
+                        </div>
                       </div>
                     </Link>
                     <div className="p-4">
