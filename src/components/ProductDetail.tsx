@@ -9,7 +9,6 @@ import { RelatedRecipes } from './product/RelatedRecipes';
 import { ProductBreadcrumb } from './product/ProductBreadcrumb';
 import { ProductNotFound } from './product/ProductNotFound';
 import { useProductTranslations } from './product/useProductTranslations';
-import ProductJarMockup from './product/ProductJarMockup';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,14 +36,13 @@ const ProductDetail = () => {
       <ProductBreadcrumb productName={product.name[language]} language={language} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Product Image as Jar Mockup */}
-        <div className="bg-black rounded-lg overflow-hidden shadow-md flex items-center justify-center p-8 min-h-[500px]">
-          <div className="relative w-full max-w-[300px] h-[400px] mx-auto">
-            <ProductJarMockup 
-              image={product.image}
-              altText={product.name[language]}
-            />
-          </div>
+        {/* Product Image */}
+        <div className="rounded-lg overflow-hidden shadow-md flex items-center justify-center">
+          <img 
+            src={product.image}
+            alt={product.name[language]}
+            className="w-full h-full object-cover"
+          />
         </div>
         
         {/* Product Info */}

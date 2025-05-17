@@ -6,7 +6,6 @@ import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "@/components/ui/use-toast";
 import { useLanguage } from '@/contexts/LanguageContext';
-import ProductJarMockup from './product/ProductJarMockup';
 
 interface ProductCardProps {
   product: Product;
@@ -45,11 +44,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <div className="thai-card group">
       <Link to={`/product/${id}`} className="block overflow-hidden">
-        <div className="h-64 overflow-hidden bg-black flex items-center justify-center p-2">
-          {/* Jar mockup */}
-          <ProductJarMockup 
-            image={image}
-            altText={name[language]}
+        <div className="h-64 overflow-hidden flex items-center justify-center">
+          <img 
+            src={image} 
+            alt={name[language]}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
           />
         </div>
       </Link>

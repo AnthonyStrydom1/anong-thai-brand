@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "@/components/ui/use-toast";
-import ProductJarMockup from './ProductJarMockup';
 import {
   Carousel,
   CarouselContent,
@@ -55,11 +54,11 @@ const FeaturedProductCarousel: React.FC<FeaturedProductCarouselProps> = ({
             <CarouselItem key={product.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
               <div className="thai-card group">
                 <Link to={`/product/${product.id}`} className="block overflow-hidden">
-                  <div className="h-64 overflow-hidden bg-black flex items-center justify-center p-2">
-                    {/* Jar mockup */}
-                    <ProductJarMockup 
-                      image={product.image}
-                      altText={product.name[language]}
+                  <div className="h-64 overflow-hidden flex items-center justify-center">
+                    <img 
+                      src={product.image}
+                      alt={product.name[language]}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                 </Link>
