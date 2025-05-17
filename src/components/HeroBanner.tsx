@@ -32,7 +32,7 @@ const HeroBanner = () => {
       <div 
         className="absolute inset-0 bg-cover"
         style={{ 
-          backgroundImage: "https://i.postimg.cc/VsMVPbWq/buddah-1.png",
+          backgroundImage: "url('https://i.postimg.cc/VsMVPbWq/buddah-1.png')",
           backgroundPosition: isMobile ? 'center top' : 'center'
         }}
       >
