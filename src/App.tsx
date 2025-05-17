@@ -18,6 +18,10 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import CartPage from "./pages/CartPage";
 import Checkout from "./pages/Checkout";
+import Profile from "./pages/Profile";
+import Account from "./pages/Account";
+import Orders from "./pages/Orders";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +43,10 @@ const App = () => (
               <Route path="/contact" element={<Contact />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/account" element={<Account />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
