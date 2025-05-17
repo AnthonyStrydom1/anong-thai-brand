@@ -1,4 +1,3 @@
-
 import { Product } from "@/types";
 
 export const products: Product[] = [
@@ -78,6 +77,162 @@ image: "https://i.postimg.cc/CxkK0ZsW/Red-Curry.png",
     useIn: {
       en: ["Thai Chicken Wings", "Fried Tofu"],
       th: ["ปีกไก่ทอดไทย", "เต้าหู้ทอด"]
+    }
+  },
+  {
+    id: "red-curry-paste-authentic",
+    name: {
+      en: "Red Curry Paste",
+      th: "พริกแกงเผ็ด"
+    },
+    description: {
+      en: "Traditional Red Curry Paste made with a perfect blend of dried red chili, galangal, lemongrass, garlic, shallots, kaffir lime peel, krachai, coriander root, and shrimp paste.",
+      th: "พริกแกงเผ็ดแบบดั้งเดิมทำจากส่วนผสมที่ลงตัวของพริกแห้ง ข่า ตะไคร้ กระเทียม หอมแดง ผิวมะกรูด กระชาย รากผักชี และกระปิ"
+    },
+    shortDescription: {
+      en: "Authentic Thai red curry paste with traditional ingredients",
+      th: "พริกแกงเผ็ดไทยแท้ทำจากวัตถุดิบดั้งเดิม"
+    },
+    price: 125.00,
+    image: "https://i.postimg.cc/CxkK0ZsW/Red-Curry.png",
+    category: "curry-pastes",
+    ingredients: {
+      en: ["Dried chili", "Galangal", "Lemongrass", "Garlic", "Shallots", "Kaffir lime peel", "Krachai", "Coriander root", "Shrimp paste", "Salt"],
+      th: ["พริกแห้ง", "ข่า", "ตะไคร้", "กระเทียม", "หอมแดง", "ผิวมะกรูด", "กระชาย", "รากผักชี", "กระปิ", "เกลือ"]
+    },
+    useIn: {
+      en: ["Red Curry", "Stir-fried dishes"],
+      th: ["แกงเผ็ด", "อาหารผัด"]
+    }
+  },
+  {
+    id: "panang-curry-paste",
+    name: {
+      en: "Panang Curry Paste",
+      th: "พริกแกงแพนง"
+    },
+    description: {
+      en: "Rich and aromatic Panang Curry Paste featuring dried chili, galangal, lemongrass, kaffir lime peel, shallots, garlic, coriander seeds, krachai, peas, cumin, pepper, and krapid.",
+      th: "พริกแกงแพนงที่มีกลิ่นหอมและรสชาติเข้มข้น ประกอบด้วยพริกแห้ง ข่า ตะไคร้ ผิวมะกรูด หอมแดง กระเทียม เมล็ดผักชี กระชาย ถั่วริสง ยี่หล่า พริกไทย และกระปิด"
+    },
+    shortDescription: {
+      en: "Rich and nutty Thai curry paste with a hint of sweetness",
+      th: "พริกแกงแพนงรสชาติเข้มข้น มีความหอมของถั่ว และหวานนิดๆ"
+    },
+    price: 135.00,
+    image: "/placeholder.svg",
+    category: "curry-pastes",
+    ingredients: {
+      en: ["Dried chili", "Galangal", "Lemongrass", "Kaffir lime peel", "Shallots", "Garlic", "Coriander seeds", "Krachai", "Peas", "Cumin", "Pepper", "Krapid"],
+      th: ["พริกแห้ง", "ข่า", "ตะไคร้", "ผิวมะกรูด", "หอมแดง", "กระเทียม", "เมล็ดผักชี", "กระชาย", "ถั่วริสง", "ยี่หล่า", "พริกไทย", "กระปิด"]
+    },
+    useIn: {
+      en: ["Panang Curry", "Grilled dishes"],
+      th: ["แกงแพนง", "อาหารย่าง"]
+    }
+  },
+  {
+    id: "green-curry-paste",
+    name: {
+      en: "Green Curry Paste",
+      th: "พริกแกงเขียวหวาน"
+    },
+    description: {
+      en: "Fragrant Green Curry Paste made with fresh green chili, shallots, garlic, galangal, lemongrass, shrimp paste, soybean paste, coriander seeds, salt, and sweet dark soy sauce.",
+      th: "พริกแกงเขียวหวานที่มีกลิ่นหอม ทำจากพริกเขียวสด หอมแดง กระเทียม ข่า ตะไคร้ กระปิ เต้าเขี้ยว เมล็ดผักชี เกลือ และซีอิ่วดำหวาน"
+    },
+    shortDescription: {
+      en: "Aromatic green curry paste with a fresh herbaceous flavor",
+      th: "พริกแกงเขียวหวานกลิ่นหอมสดชื่นจากสมุนไพร"
+    },
+    price: 130.00,
+    image: "/placeholder.svg",
+    category: "curry-pastes",
+    ingredients: {
+      en: ["Fresh green chili", "Shallots", "Garlic", "Galangal", "Lemongrass", "Shrimp paste", "Soybean paste", "Coriander seeds", "Salt", "Sweet dark soy sauce"],
+      th: ["พริกเขียวสด", "หอมแดง", "กระเทียม", "ข่า", "ตะไคร้", "กระปิ", "เต้าเขี้ยว", "เมล็ดผักชี", "เกลือ", "ซีอิ่วดำหวาน"]
+    },
+    useIn: {
+      en: ["Green Curry", "Steamed dishes"],
+      th: ["แกงเขียวหวาน", "อาหารนึ่ง"]
+    }
+  },
+  {
+    id: "tom-yum-chili-paste",
+    name: {
+      en: "Tom Yum Chili Paste",
+      th: "พริกเผาต้มยำ"
+    },
+    description: {
+      en: "Spicy and tangy Tom Yum Chili Paste with roasted dry chili, shallots, garlic, coconut sugar, fish sauce, shrimp paste, oyster sauce, and dark soy sauce.",
+      th: "พริกเผาต้มยำรสเผ็ดและเปรี้ยว ทำจากพริกแห้งคั่ว หอมแดง กระเทียม น้ำตาลมะพร้าว น้ำปลา กระปิ น้ำมันหอย และซีอิ่วดำ"
+    },
+    shortDescription: {
+      en: "Spicy and tangy paste perfect for Tom Yum soup",
+      th: "พริกเผารสเผ็ดเปรี้ยว เหมาะสำหรับต้มยำ"
+    },
+    price: 115.00,
+    image: "/placeholder.svg",
+    category: "curry-pastes",
+    ingredients: {
+      en: ["Roasted Dry Chili", "Shallots", "Garlic", "Coconut Sugar", "Fish Sauce", "Shrimp Paste", "Oyster Sauce", "Dark Soy Sauce"],
+      th: ["พริกแห้งคั่ว", "หอมแดง", "กระเทียม", "น้ำตาลมะพร้าว", "น้ำปลา", "กระปิ", "น้ำมันหอย", "ซีอิ่วดำ"]
+    },
+    useIn: {
+      en: ["Tom Yum Soup", "Stir-fried seafood"],
+      th: ["ต้มยำ", "อาหารทะเลผัด"]
+    }
+  },
+  {
+    id: "massaman-curry-paste",
+    name: {
+      en: "Massaman Curry Paste",
+      th: "พริกแกงมัสมั่น"
+    },
+    description: {
+      en: "Complex and aromatic Massaman Curry Paste featuring dried chili, shallots, garlic, galangal, lemongrass, fresh ginger, peanuts, cornstarch, coriander seeds, cumin, cinnamon, rice bran oil, cloves, shrimp paste, and lime peel.",
+      th: "พริกแกงมัสมั่นที่มีรสชาติซับซ้อนและหอม ประกอบด้วยพริกแห้ง หอมแดง กระเทียม ข่า ตะไคร้ ขิงสด เป้ยกั๊ก ลูกจัน เมล็ดผักชี ยี่หล่า อบเชย น้ำมันรำข้าว กานพู กระปิ และผิวมะกรูด"
+    },
+    shortDescription: {
+      en: "Complex curry paste with warm spices and nutty flavors",
+      th: "พริกแกงรสซับซ้อน มีกลิ่นเครื่องเทศอบอุ่นและถั่ว"
+    },
+    price: 140.00,
+    image: "/placeholder.svg",
+    category: "curry-pastes",
+    ingredients: {
+      en: ["Dried chili", "Shallots", "Garlic", "Galangal", "Lemongrass", "Fresh ginger", "Peanuts", "Cornstarch", "Coriander seeds", "Cumin", "Cinnamon", "Rice bran oil", "Cloves", "Shrimp paste", "Lime peel"],
+      th: ["พริกแห้ง", "หอมแดง", "กระเทียม", "ข่า", "ตะไคร้", "ขิงสด", "เป้ยกั๊ก", "ลูกจัน", "เมล็ดผักชี", "ยี่หล่า", "อบเชย", "น้ำมันรำข้าว", "กานพู", "กระปิ", "ผิวมะกรูด"]
+    },
+    useIn: {
+      en: ["Massaman Curry", "Slow-cooked dishes"],
+      th: ["แกงมัสมั่น", "อาหารตุ๋น"]
+    }
+  },
+  {
+    id: "sukiyaki-sauce",
+    name: {
+      en: "Sukiyaki Sauce",
+      th: "น้ำจิ้มสุกี้ยากี้"
+    },
+    description: {
+      en: "Savory and sweet Sukiyaki Sauce with fresh chili, garlic, pickled garlic, coriander seeds, fermented bean curd, roasted sesame seeds, cane sugar, tamarind paste, chili sauce, light soy sauce, sesame oil, oyster sauce, tomato sauce, and salt.",
+      th: "น้ำจิ้มสุกี้ยากี้รสเค็มและหวาน ทำจากพริกสด กระเทียม กระเทียมดอง เมล็ดผักชี เต้าหู้ยี้ งาคั่ว น้ำตาลอ้อย มะขามเปียก ซอสพริก ซีอิ้วขาว น้ำมันงา น้ำมันหอย ซอสมะเขือเทศ และเกลือ"
+    },
+    shortDescription: {
+      en: "Sweet and tangy dipping sauce perfect for hot pot",
+      th: "น้ำจิ้มรสหวานเปรี้ยว เหมาะสำหรับสุกี้"
+    },
+    price: 85.00,
+    image: "/placeholder.svg",
+    category: "dipping-sauces",
+    ingredients: {
+      en: ["Fresh chili", "Garlic", "Pickled garlic", "Coriander seeds", "Fermented bean curd", "Roasted sesame seeds", "Cane sugar", "Tamarind paste", "Chili sauce", "Light soy sauce", "Sesame oil", "Oyster sauce", "Tomato sauce", "Salt"],
+      th: ["พริกสด", "กระเทียม", "กระเทียมดอง", "เมล็ดผักชี", "เต้าหู้ยี้", "งาคั่ว", "น้ำตาลอ้อย", "มะขามเปียก", "ซอสพริก", "ซีอิ้วขาว", "น้ำมันงา", "น้ำมันหอย", "ซอสมะเขือเทศ", "เกลือ"]
+    },
+    useIn: {
+      en: ["Sukiyaki", "Hot Pot", "Grilled meats"],
+      th: ["สุกี้ยากี้", "หม้อไฟ", "เนื้อย่าง"]
     }
   }
 ];
