@@ -40,7 +40,6 @@ const RestaurantBanner = () => {
       {/* Content */}
       <div className="relative container mx-auto px-4 py-16 text-center">
         <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">{t.title}</h2>
-        <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-8">Anong Thai Restaurant</h3>
         <p className="text-lg text-white max-w-2xl mx-auto mb-8">{t.subtitle}</p>
         <p className="text-white mb-2">20 Hettie Street, Cyrildene, Johannesburg, 2198</p>
         <p className="text-white mb-8">
