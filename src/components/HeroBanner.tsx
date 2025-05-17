@@ -35,14 +35,14 @@ const HeroBanner = () => {
           backgroundImage: "url('https://i.postimg.cc/zf31CSRm/Buddah.png')",
         }}
       >
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent"></div>
+        {/* Gradient overlay - changed from left to right, to right to left */}
+        <div className="absolute inset-0 bg-gradient-to-l from-black/70 to-transparent"></div>
       </div>
       
-      {/* Content */}
-      <div className="absolute inset-0 flex items-center">
+      {/* Content - moved to right side with flex justify-end */}
+      <div className="absolute inset-0 flex items-center justify-end">
         <div className="container mx-auto px-6">
-          <div className="max-w-2xl text-white">
+          <div className="ml-auto max-w-2xl text-white">
             <h1 className={`font-display text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 leading-tight`}>
               {t.tagline}
             </h1>
