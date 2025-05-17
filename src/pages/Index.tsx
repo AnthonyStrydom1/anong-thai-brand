@@ -7,7 +7,6 @@ import FeaturedProducts from "@/components/FeaturedProducts";
 import AboutPreview from "@/components/AboutPreview";
 import ContactInfo from "@/components/ContactInfo";
 import RestaurantBanner from "@/components/RestaurantBanner";
-import MenuPreview from "@/components/MenuPreview";
 import { motion } from "framer-motion";
 
 const Index = () => {
@@ -46,15 +45,6 @@ const Index = () => {
             className="pt-12"
           >
             <FeaturedProducts />
-          </motion.div>
-          
-          <motion.div
-            initial="offscreen"
-            whileInView="onscreen"
-            viewport={{ once: true, amount: 0.1 }}
-            variants={sectionVariants}
-          >
-            <MenuPreview />
           </motion.div>
           
           <motion.div
