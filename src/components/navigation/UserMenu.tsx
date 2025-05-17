@@ -30,24 +30,8 @@ const UserMenu = ({
   onLogout,
   translations
 }: UserMenuProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   // Common style for consistent white box highlighting
   const buttonStyle = "text-white hover:bg-white hover:bg-opacity-20 transition-colors";
-
-  if (!isLoggedIn) {
-    return (
-      <Button 
-        variant="ghost" 
-        size="icon"
-        onClick={onLogin}
-        className={buttonStyle}
-        aria-label={translations.login}
-      >
-        <User className="h-5 w-5" />
-      </Button>
-    );
-  }
 
   return (
     <DropdownMenu>
@@ -56,40 +40,55 @@ const UserMenu = ({
           variant="ghost" 
           size="icon"
           className={buttonStyle}
-          aria-label={translations.profile}
+          aria-label={isLoggedIn ? translations.profile : translations.login}
         >
           <User className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>
       
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem asChild>
-          <Link to="/profile" className="w-full cursor-pointer">
-            {translations.profile}
-          </Link>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem asChild>
-          <Link to="/account" className="w-full cursor-pointer">
-            {translations.account}
-          </Link>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem asChild>
-          <Link to="/orders" className="w-full cursor-pointer">
-            {translations.orders}
-          </Link>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem asChild>
-          <Link to="/settings" className="w-full cursor-pointer">
-            {translations.settings}
-          </Link>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={onLogout} className="cursor-pointer">
-          {translations.logout}
-        </DropdownMenuItem>
+        {isLoggedIn ? (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/profile" className="w-full cursor-pointer">
+                {translations.profile}
+              </Link>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem asChild>
+              <Link to="/account" className="w-full cursor-pointer">
+                {translations.account}
+              </Link>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem asChild>
+              <Link to="/orders" className="w-full cursor-pointer">
+                {translations.orders}
+              </Link>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem asChild>
+              <Link to="/settings" className="w-full cursor-pointer">
+                {translations.settings}
+              </Link>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem onClick={onLogout} className="cursor-pointer">
+              {translations.logout}
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            <DropdownMenuItem onClick={onLogin} className="cursor-pointer">
+              {translations.login}
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/account" className="w-full cursor-pointer">
+                {translations.account}
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

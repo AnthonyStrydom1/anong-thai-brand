@@ -5,12 +5,15 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
+import { Input } from '@/components/ui/input';
 
 const Account = () => {
   const { language } = useLanguage();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   
   const translations = {
     en: {
@@ -32,9 +35,14 @@ const Account = () => {
       newPassword: 'New Password',
       confirmPassword: 'Confirm Password',
       email: 'Email',
+      password: 'Password',
       sendResetLink: 'Send Reset Link',
       resetInstructions: 'Enter your email to receive password reset instructions',
-      cancel: 'Cancel'
+      cancel: 'Cancel',
+      loginInstructions: 'Please enter your credentials to login',
+      loginToAccount: 'Login to Your Account',
+      rememberMe: 'Remember me',
+      forgotPassword: 'Forgot Password?'
     },
     th: {
       title: 'บัญชีของฉัน',
@@ -55,19 +63,33 @@ const Account = () => {
       newPassword: 'รหัสผ่านใหม่',
       confirmPassword: 'ยืนยันรหัสผ่าน',
       email: 'อีเมล',
+      password: 'รหัสผ่าน',
       sendResetLink: 'ส่งลิงค์รีเซ็ต',
       resetInstructions: 'ป้อนอีเมลของคุณเพื่อรับคำแนะนำในการรีเซ็ตรหัสผ่าน',
-      cancel: 'ยกเลิก'
+      cancel: 'ยกเลิก',
+      loginInstructions: 'โปรดป้อนข้อมูลประจำตัวของคุณเพื่อเข้าสู่ระบบ',
+      loginToAccount: 'เข้าสู่ระบบบัญชีของคุณ',
+      rememberMe: 'จดจำฉัน',
+      forgotPassword: 'ลืมรหัสผ่าน?'
     }
   };
 
   const t = translations[language];
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    toast({
-      title: t.loginSuccess,
-    });
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email && password) {
+      setIsLoggedIn(true);
+      toast({
+        title: t.loginSuccess,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Please enter both email and password",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleLogout = () => {
@@ -105,7 +127,7 @@ const Account = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#c2b59b]">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6 text-thai-purple">{t.title}</h1>
@@ -231,11 +253,60 @@ const Account = () => {
               </>
             ) : (
               <div className="bg-white shadow-md rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Login Required</h2>
-                <p className="mb-4 text-gray-600">Please login to access your account information and settings.</p>
-                <Button onClick={handleLogin} className="bg-thai-purple hover:bg-thai-purple/90">
-                  {t.login}
-                </Button>
+                <h2 className="text-xl font-semibold mb-4">{t.loginToAccount}</h2>
+                <p className="mb-4 text-gray-600">{t.loginInstructions}</p>
+                
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <label htmlFor="loginEmail" className="block text-sm font-medium text-gray-700">{t.email}</label>
+                    <Input 
+                      type="email" 
+                      id="loginEmail"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="mt-1"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="loginPassword" className="block text-sm font-medium text-gray-700">{t.password}</label>
+                    <Input 
+                      type="password" 
+                      id="loginPassword"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="mt-1"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <input
+                        id="remember"
+                        name="remember"
+                        type="checkbox"
+                        className="h-4 w-4 text-thai-purple focus:ring-thai-purple border-gray-300 rounded"
+                      />
+                      <label htmlFor="remember" className="ml-2 block text-sm text-gray-900">
+                        {t.rememberMe}
+                      </label>
+                    </div>
+                    <Button 
+                      variant="link" 
+                      type="button" 
+                      className="text-thai-purple p-0 h-auto"
+                      onClick={handleResetPassword}
+                    >
+                      {t.forgotPassword}
+                    </Button>
+                  </div>
+                  
+                  <Button type="submit" className="bg-thai-purple hover:bg-thai-purple/90 w-full">
+                    {t.login}
+                  </Button>
+                </form>
               </div>
             )}
           </div>
