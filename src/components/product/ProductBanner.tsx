@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -10,6 +9,8 @@ interface ProductBannerProps {
   description: string;
 }
 
+// This component is no longer used in the application
+// Keeping it for reference or future use if needed
 const ProductBanner: React.FC<ProductBannerProps> = ({ title, description }) => {
   // Animation variants
   const containerVariants = {
