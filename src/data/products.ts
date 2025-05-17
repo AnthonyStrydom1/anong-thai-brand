@@ -173,7 +173,7 @@ export const products: Product[] = [
       th: "น้ำจิ้มรสหวานเปรี้ยว เหมาะสำหรับสุกี้"
     },
     price: 85.00,
-    image: "/lovable-uploads/39cb38d8-7490-4714-ab59-6bfaf2789d96.png",
+    image: "https://i.postimg.cc/2j2CvJg9/moo-kra-ta.png",
     category: "dipping-sauces",
     ingredients: {
       en: ["Fresh chili", "Garlic", "Pickled garlic", "Coriander seeds", "Fermented bean curd", "Roasted sesame seeds", "Cane sugar", "Tamarind paste", "Chili sauce", "Light soy sauce", "Sesame oil", "Oyster sauce", "Tomato sauce", "Salt"],
