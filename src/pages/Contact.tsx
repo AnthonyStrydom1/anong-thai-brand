@@ -177,10 +177,10 @@ const Contact = () => {
                   <div>
                     <p className="font-medium text-gray-700">{t.info.email}</p>
                     <a 
-                      href="mailto:info@anongthai.com" 
+                      href="mailto:anonggroup@outlook.com" 
                       className="text-gray-600 hover:text-thai-purple"
                     >
-                      info@anongthai.com
+                      anonggroup@outlook.com
                     </a>
                   </div>
                 </div>
@@ -190,10 +190,10 @@ const Contact = () => {
                   <div>
                     <p className="font-medium text-gray-700">{t.info.phone}</p>
                     <a 
-                      href="tel:+12345678900" 
+                      href="tel:0765059941" 
                       className="text-gray-600 hover:text-thai-purple"
                     >
-                      +1 (234) 567-8900
+                      0765059941
                     </a>
                   </div>
                 </div>
