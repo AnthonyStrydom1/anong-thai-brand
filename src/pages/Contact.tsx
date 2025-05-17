@@ -210,7 +210,7 @@ const Contact = () => {
                       <Instagram className="h-6 w-6" />
                     </a>
                     <a 
-                      href="https://facebook.com/anongthai" 
+                      href="https://www.facebook.com/AnongThaiFood" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-gray-600 hover:text-thai-purple"
