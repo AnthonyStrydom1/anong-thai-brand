@@ -30,6 +30,38 @@ const ProductDetail = () => {
   
   const t = useProductTranslations(language);
 
+  // Generate the mockup based on product category
+  const renderProductMockup = () => {
+    const isJar = product.category === 'curry-pastes' || product.category === 'dipping-sauces';
+    
+    return (
+      <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg overflow-hidden shadow-md flex items-center justify-center p-8">
+        <div className={`relative ${isJar ? 'w-64 h-80' : 'w-48 h-80'} mx-auto`}>
+          {/* Mockup container */}
+          <div className={`${isJar ? 'rounded-3xl' : 'rounded-lg'} overflow-hidden bg-transparent h-full w-full flex items-center justify-center`}>
+            {/* Glass jar/bottle effect */}
+            <div className={`absolute inset-0 ${isJar ? 'rounded-3xl' : 'rounded-lg'} bg-black bg-opacity-5 backdrop-blur-sm`}></div>
+            
+            {/* Product reflection/highlight */}
+            <div className={`absolute inset-y-0 left-0 w-1/4 ${isJar ? 'rounded-l-3xl' : 'rounded-l-lg'} bg-white bg-opacity-10`}></div>
+            
+            {/* Product label */}
+            <div className={`absolute inset-0 flex items-center justify-center ${isJar ? 'px-6' : 'px-3'}`}>
+              <img 
+                src={product.image} 
+                alt={product.name[language]} 
+                className="max-h-[85%] max-w-[85%] object-contain z-10"
+              />
+            </div>
+            
+            {/* Jar/bottle lid */}
+            <div className={`absolute -top-2 left-1/2 transform -translate-x-1/2 ${isJar ? 'w-40 h-6' : 'w-20 h-8'} rounded-t-lg bg-black`}></div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Breadcrumb */}
@@ -37,13 +69,7 @@ const ProductDetail = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Product Image */}
-        <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg overflow-hidden shadow-md flex items-center justify-center p-8">
-          <img 
-            src={product.image} 
-            alt={product.name[language]} 
-            className="max-w-full max-h-[400px] object-contain"
-          />
-        </div>
+        {renderProductMockup()}
         
         {/* Product Info */}
         <div>
