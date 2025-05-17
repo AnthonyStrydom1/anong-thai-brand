@@ -1,5 +1,13 @@
-
 import { Recipe } from "@/types";
+import { products } from "./products";
+
+// Helper function to get the image of the first related product
+const getProductImage = (productIds: string[]) => {
+  if (!productIds || productIds.length === 0) return "/placeholder.svg";
+  
+  const product = products.find(p => p.id === productIds[0]);
+  return product ? product.image : "/placeholder.svg";
+};
 
 export const recipes: Recipe[] = [
   {
@@ -14,7 +22,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 30,
-    image: "/placeholder.svg",
+    image: getProductImage(["red-curry-paste"]),
     ingredients: {
       en: [
         "2 tbsp Anong Red Curry Paste",
@@ -74,7 +82,7 @@ export const recipes: Recipe[] = [
     },
     servings: 2,
     time: 25,
-    image: "/placeholder.svg",
+    image: getProductImage(["pad-thai-sauce"]),
     ingredients: {
       en: [
         "120g rice noodles",
@@ -134,7 +142,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 35,
-    image: "/placeholder.svg",
+    image: getProductImage(["panang-curry-paste"]),
     ingredients: {
       en: [
         "3 tbsp Anong Panang Curry Paste",
@@ -196,7 +204,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 25,
-    image: "/placeholder.svg",
+    image: getProductImage(["green-curry-paste"]),
     ingredients: {
       en: [
         "3 tbsp Anong Green Curry Paste",
@@ -262,7 +270,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 20,
-    image: "/placeholder.svg",
+    image: getProductImage(["tom-yum-chili-paste"]),
     ingredients: {
       en: [
         "2 tbsp Anong Tom Yum Chili Paste",
@@ -326,7 +334,7 @@ export const recipes: Recipe[] = [
     },
     servings: 6,
     time: 50,
-    image: "/placeholder.svg",
+    image: getProductImage(["massaman-curry-paste"]),
     ingredients: {
       en: [
         "3 tbsp Anong Massaman Curry Paste",
@@ -396,7 +404,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 30,
-    image: "/placeholder.svg",
+    image: getProductImage(["sukiyaki-sauce"]),
     ingredients: {
       en: [
         "Anong Sukiyaki Sauce (for dipping)",
