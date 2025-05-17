@@ -63,7 +63,7 @@ const Index = () => {
             viewport={{ once: true, amount: 0.1 }}
             variants={sectionVariants}
           >
-            <RestaurantBanner />
+            <AboutPreview />
           </motion.div>
           
           <motion.div
@@ -72,7 +72,7 @@ const Index = () => {
             viewport={{ once: true, amount: 0.1 }}
             variants={sectionVariants}
           >
-            <AboutPreview />
+            <RestaurantBanner />
           </motion.div>
           
           <motion.div
