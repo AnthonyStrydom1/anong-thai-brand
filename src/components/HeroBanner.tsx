@@ -28,28 +28,17 @@ const HeroBanner = () => {
 
   return (
     <div className="relative w-full h-[500px] overflow-hidden">
-      {/* Hero image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ 
-          backgroundImage: "url('https://i.postimg.cc/Hx3gCZMh/buddah-fin.png')",
-        }}
-      >
-        {/* Gradient overlay - changed from left to right, to right to left */}
-        <div className="absolute inset-0 bg-gradient-to-l from-black/70 to-transparent"></div>
-      </div>
-      
-      {/* Content - moved to right side with flex justify-end */}
-      <div className="absolute inset-0 flex items-center justify-end">
+      {/* Content moved to center with flex justify-center */}
+      <div className="absolute inset-0 flex items-center justify-center">
         <div className="container mx-auto px-6">
-          <div className="ml-auto max-w-2xl text-white">
-            <h1 className={`font-display text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 leading-tight`}>
+          <div className="max-w-2xl text-center">
+            <h1 className={`font-display text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 leading-tight text-thai-purple`}>
               {t.tagline}
             </h1>
-            <p className={`font-sarabun text-base md:text-xl lg:text-2xl mb-6 text-white/90`}>
+            <p className={`font-sarabun text-base md:text-xl lg:text-2xl mb-6 text-gray-700`}>
               {t.subtitle}
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button 
                 asChild
                 size={isMobile ? "default" : "lg"}
@@ -61,9 +50,8 @@ const HeroBanner = () => {
               </Button>
               <Button 
                 asChild
-                variant="ghost" 
+                variant="outline" 
                 size={isMobile ? "default" : "lg"}
-                className="text-white border border-white"
               >
                 <Link to="/recipes">
                   {t.secondaryCta}
