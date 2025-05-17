@@ -37,11 +37,11 @@ const ProductDetail = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Product Image */}
-        <div className="bg-white rounded-lg overflow-hidden shadow-md">
+        <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg overflow-hidden shadow-md flex items-center justify-center p-6">
           <img 
             src={product.image} 
             alt={product.name[language]} 
-            className="w-full h-auto object-cover"
+            className="max-w-full max-h-[400px] object-contain"
           />
         </div>
         

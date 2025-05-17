@@ -44,11 +44,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <div className="thai-card group">
       <Link to={`/product/${id}`} className="block overflow-hidden">
-        <div className="h-48 overflow-hidden">
+        <div className="h-48 overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800">
           <img 
             src={image} 
             alt={name[language]} 
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
           />
         </div>
       </Link>

@@ -17,11 +17,11 @@ export const products: Product[] = [
       th: "พริกแกงเผ็ดสูตรต้นตำรับจากอนงค์ เหมาะสำหรับแกงไทยแท้"
     },
     price: 120.00,
-    image: "https://i.postimg.cc/CxkK0ZsW/Red-Curry.png",
+    image: "/lovable-uploads/98d0c9cf-6563-4e02-857c-e1ebd69cbb0d.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Dried red chili", "Garlic", "Lemongrass", "Galangal", "Shallots", "Kaffir lime zest", "Shrimp paste", "Salt"],
-      th: ["พริกแห้ง", "กระเทียม", "ตะไคร้", "ข่า", "หอมแดง", "ผิวมะกรูด", "กะปิ", "เกลือ"]
+      th: ["พริกแห้ง", "กระเทียม", "ตะไคร้", "ข่า", "หอมแดง", "ผิวมะกรูด", "กระปิ", "เกลือ"]
     },
     useIn: {
       en: ["Red Curry Chicken", "Spicy Tofu Curry"],
@@ -43,7 +43,7 @@ export const products: Product[] = [
       th: "ซอสผัดไทย รสกลมกล่อม ใช้ง่ายพร้อมปรุง"
     },
     price: 75.00,
-    image: "/placeholder.svg",
+    image: "/lovable-uploads/32fae10c-7bf8-4f64-9775-b82c9e989939.png",
     category: "stir-fry-sauces",
     ingredients: {
       en: ["Tamarind", "Palm sugar", "Fish sauce", "Garlic", "Chili"],
@@ -121,7 +121,7 @@ export const products: Product[] = [
       th: "พริกแกงเขียวหวานกลิ่นหอมสดชื่นจากสมุนไพร"
     },
     price: 130.00,
-    image: "/placeholder.svg",
+    image: "/lovable-uploads/d07a2b67-49c8-4be2-9bbf-a43f28006e38.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Fresh green chili", "Shallots", "Garlic", "Galangal", "Lemongrass", "Shrimp paste", "Soybean paste", "Coriander seeds", "Salt", "Sweet dark soy sauce"],
@@ -147,7 +147,7 @@ export const products: Product[] = [
       th: "พริกเผารสเผ็ดเปรี้ยว เหมาะสำหรับต้มยำ"
     },
     price: 115.00,
-    image: "/placeholder.svg",
+    image: "/lovable-uploads/8a099c49-8e41-43fa-a5d8-ed0313d6dd61.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Roasted Dry Chili", "Shallots", "Garlic", "Coconut Sugar", "Fish Sauce", "Shrimp Paste", "Oyster Sauce", "Dark Soy Sauce"],
@@ -173,7 +173,7 @@ export const products: Product[] = [
       th: "พริกแกงรสซับซ้อน มีกลิ่นเครื่องเทศอบอุ่นและถั่ว"
     },
     price: 140.00,
-    image: "/placeholder.svg",
+    image: "/lovable-uploads/a01451b7-72ac-44ff-a930-f0584773ec38.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Dried chili", "Shallots", "Garlic", "Galangal", "Lemongrass", "Fresh ginger", "Peanuts", "Cornstarch", "Coriander seeds", "Cumin", "Cinnamon", "Rice bran oil", "Cloves", "Shrimp paste", "Lime peel"],
@@ -199,7 +199,7 @@ export const products: Product[] = [
       th: "น้ำจิ้มรสหวานเปรี้ยว เหมาะสำหรับสุกี้"
     },
     price: 85.00,
-    image: "/placeholder.svg",
+    image: "/lovable-uploads/39cb38d8-7490-4714-ab59-6bfaf2789d96.png",
     category: "dipping-sauces",
     ingredients: {
       en: ["Fresh chili", "Garlic", "Pickled garlic", "Coriander seeds", "Fermented bean curd", "Roasted sesame seeds", "Cane sugar", "Tamarind paste", "Chili sauce", "Light soy sauce", "Sesame oil", "Oyster sauce", "Tomato sauce", "Salt"],

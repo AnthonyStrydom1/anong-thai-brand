@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { products } from '@/data/products';
@@ -6,6 +5,8 @@ import ProductCard from './ProductCard';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, ArrowRight as ArrowRightIcon } from "lucide-react";
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "@/components/ui/use-toast";
 import {
   Carousel,
   CarouselContent,
@@ -18,6 +19,7 @@ const FeaturedProducts = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const { language } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { addItem } = useCart();
   
   const translations = {
     en: {
@@ -28,7 +30,9 @@ const FeaturedProducts = () => {
       stirFrySauces: "Stir-Fry Sauces",
       dippingSauces: "Dipping Sauces",
       viewAll: "View All Products",
-      exploreProducts: "Explore Our Best Sellers"
+      exploreProducts: "Explore Our Best Sellers",
+      addToCart: "Add to Cart",
+      addedToCart: "Added to cart!"
     },
     th: {
       title: "สินค้าแนะนำ",
@@ -38,7 +42,9 @@ const FeaturedProducts = () => {
       stirFrySauces: "ซอสผัด",
       dippingSauces: "น้ำจิ้ม",
       viewAll: "ดูสินค้าทั้งหมด",
-      exploreProducts: "สำรวจสินค้าขายดีของเรา"
+      exploreProducts: "สำรวจสินค้าขายดีของเรา",
+      addToCart: "เพิ่มลงตะกร้า",
+      addedToCart: "เพิ่มลงตะกร้าแล้ว!"
     }
   };
 
@@ -106,7 +112,48 @@ const FeaturedProducts = () => {
             <CarouselContent className="-ml-2 md:-ml-4">
               {filteredProducts.map((product) => (
                 <CarouselItem key={product.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                  <ProductCard product={product} />
+                  <div className="thai-card group">
+                    <Link to={`/product/${product.id}`} className="block overflow-hidden">
+                      <div className="h-48 overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800">
+                        <img 
+                          src={product.image} 
+                          alt={product.name[language]} 
+                          className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                    </Link>
+                    <div className="p-4">
+                      <Link to={`/product/${product.id}`}>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-1 hover:text-thai-purple transition">
+                          {product.name[language]}
+                        </h3>
+                      </Link>
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                        {product.shortDescription[language]}
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-lg font-semibold text-thai-purple">
+                          ${product.price.toFixed(2)}
+                        </span>
+                        <Button 
+                          size="sm" 
+                          className="bg-thai-purple hover:bg-thai-purple-dark"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            addItem(product, 1);
+                            toast({
+                              title: t.addedToCart,
+                              description: `${product.name[language]} x 1`,
+                            });
+                          }}
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-1" />
+                          {t.addToCart}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
