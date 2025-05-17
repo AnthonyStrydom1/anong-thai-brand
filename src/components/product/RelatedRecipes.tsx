@@ -68,39 +68,24 @@ export const RelatedRecipes = ({ recipes, language, translations }: RelatedRecip
         >
           {recipesWithProductImages.map(recipe => (
             <motion.div key={recipe.id} variants={itemVariants}>
-              <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-gray-100">
-                <div className="w-full h-52 relative overflow-hidden">
-                  <img 
-                    src={recipe.image} 
-                    alt={recipe.name[language]} 
-                    className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  
-                  {/* Product images overlay */}
-                  {recipe.productImages && recipe.productImages.length > 0 && (
-                    <div className="absolute bottom-3 right-3 flex p-1 gap-2">
-                      {recipe.productImages.slice(0, 2).map((productImg, idx) => (
-                        <div 
-                          key={`${recipe.id}-product-${idx}`}
-                          className="w-12 h-12 rounded-full overflow-hidden bg-white shadow-md flex items-center justify-center p-1"
-                        >
-                          <img 
-                            src={productImg} 
-                            alt={`Product for ${recipe.name[language]}`}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
-                
+              <Card className="premium-card group overflow-hidden">
+                <Link to={`/recipe/${recipe.id}`} className="block overflow-hidden">
+                  <div className="h-64 overflow-hidden flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+                    <motion.img 
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.4 }}
+                      src={recipe.image} 
+                      alt={recipe.name[language]}
+                      className="w-full h-full object-contain p-4"
+                    />
+                  </div>
+                </Link>
                 <CardContent className="p-5">
-                  <h4 className="text-xl font-semibold mb-3 text-[#520F7A] group-hover:text-[#520F7A]">
-                    {recipe.name[language]}
-                  </h4>
+                  <Link to={`/recipe/${recipe.id}`}>
+                    <h4 className="text-lg font-semibold mb-3 text-gray-800 group-hover:text-thai-purple transition">
+                      {recipe.name[language]}
+                    </h4>
+                  </Link>
                   <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                     {recipe.description[language]}
                   </p>
@@ -109,13 +94,13 @@ export const RelatedRecipes = ({ recipes, language, translations }: RelatedRecip
                       <span>{recipe.time} min</span> • <span>{recipe.servings} {language === 'en' ? 'servings' : 'ที่'}</span>
                     </div>
                     <Button 
+                      size="sm" 
+                      className="bg-white border border-thai-purple text-thai-purple hover:bg-thai-purple hover:text-white transition-colors"
                       asChild
-                      variant="outline" 
-                      className="border-thai-purple text-thai-purple hover:bg-thai-purple hover:text-white group overflow-hidden"
                     >
                       <Link to={`/recipe/${recipe.id}`} className="flex items-center">
+                        <ChevronRight className="h-4 w-4 mr-1" />
                         {translations.viewRecipe}
-                        <ChevronRight className="h-4 w-4 ml-1 transform group-hover:translate-x-1 transition-transform" />
                       </Link>
                     </Button>
                   </div>
