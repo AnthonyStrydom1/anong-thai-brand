@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { products } from '@/data/products';
 import ProductCard from './ProductCard';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, ArrowRight as ArrowRightIcon } from "lucide-react";
+import { ArrowRight, ArrowLeft, ArrowRight as ArrowRightIcon, ShoppingCart } from "lucide-react";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "@/components/ui/use-toast";
