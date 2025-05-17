@@ -11,14 +11,14 @@ const ContactInfo = () => {
       address: "Address",
       phone: "Contact",
       operatingHours: "Operating Hours",
-      hoursContent: "Monday - Sunday: 11:00 AM - 10:00 PM",
+      hoursContent: "Monday - Sunday: 9:00 AM - 9:00 PM",
     },
     th: {
       title: "เยี่ยมชมเรา",
       address: "ที่อยู่",
       phone: "ติดต่อ",
       operatingHours: "เวลาทำการ",
-      hoursContent: "จันทร์ - อาทิตย์: 11:00 - 22:00",
+      hoursContent: "จันทร์ - อาทิตย์: 9:00 - 21:00",
     }
   };
   
@@ -35,7 +35,7 @@ const ContactInfo = () => {
           <div className="text-center bg-gray-50 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
             <MapPin className="mx-auto h-8 w-8 text-thai-gold mb-2" />
             <h3 className="font-semibold text-[#520F7A] mb-2">{t.address}</h3>
-            <p className="text-gray-700">0 Hettie Street, Cyrildene</p>
+            <p className="text-gray-700">20 Hettie Street, Cyrildene</p>
             <p className="text-gray-700">Johannesburg, 2198</p>
           </div>
           
