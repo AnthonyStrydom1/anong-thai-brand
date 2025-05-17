@@ -95,7 +95,7 @@ export const products: Product[] = [
       th: "พริกแกงแพนงรสชาติเข้มข้น มีความหอมของถั่ว และหวานนิดๆ"
     },
     price: 135.00,
-    image: "/placeholder.svg",
+    image: "https://i.postimg.cc/CLqbdjQ1/Panang-curry.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Dried chili", "Galangal", "Lemongrass", "Kaffir lime peel", "Shallots", "Garlic", "Coriander seeds", "Krachai", "Peas", "Cumin", "Pepper", "Krapid"],
