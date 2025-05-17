@@ -43,7 +43,7 @@ export const products: Product[] = [
       th: "ซอสผัดไทย รสกลมกล่อม ใช้ง่ายพร้อมปรุง"
     },
     price: 75.00,
-    image: "/lovable-uploads/32fae10c-7bf8-4f64-9775-b82c9e989939.png",
+    image: "https://i.postimg.cc/QtKc51d0/pad-thai.png",
     category: "stir-fry-sauces",
     ingredients: {
       en: ["Tamarind", "Palm sugar", "Fish sauce", "Garlic", "Chili"],
