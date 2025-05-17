@@ -5,8 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from "@/lib/utils";
 
-const Footer = () => {
+interface FooterProps {
+  className?: string;
+}
+
+const Footer = ({ className }: FooterProps) => {
   const { language } = useLanguage();
   
   const translations = {
@@ -59,10 +64,10 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-[#520F7A] text-white border-t border-thai-purple relative">
+    <footer className={cn("bg-[#520F7A] text-white border-t border-thai-purple relative", className)}>
       <div className="absolute inset-0 opacity-80 mix-blend-overlay pattern-wavy pattern-thai-gold pattern-bg-transparent pattern-size-4 pattern-opacity-20 pointer-events-none"></div>
       
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="container mx-auto px-4 py-6 relative z-10">
       
         {/* Newsletter */}
         <div className="max-w-2xl mx-auto mb-6">
