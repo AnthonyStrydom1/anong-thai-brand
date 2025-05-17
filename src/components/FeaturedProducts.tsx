@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { products } from '@/data/products';
 import { useLanguage } from '@/contexts/LanguageContext';
 import CategoryFilter from './product/CategoryFilter';
-import ProductBanner from './product/ProductBanner';
 import ProductCard from './ProductCard';
 import ViewAllButton from './product/ViewAllButton';
 import { motion } from 'framer-motion';
@@ -52,10 +51,6 @@ const FeaturedProducts = () => {
     { id: 'dipping-sauces', name: { en: t.dippingSauces, th: t.dippingSauces } }
   ];
 
-  const bannerDescription = language === 'en'
-    ? "Quality ingredients, authentic flavors, made with passion. Elevate your cooking with our premium Thai products."
-    : "วัตถุดิบคุณภาพ รสชาติแท้ ผลิตด้วยใจ ยกระดับการทำอาหารด้วยผลิตภัณฑ์ไทยระดับพรีเมียม";
-
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -84,18 +79,6 @@ const FeaturedProducts = () => {
           <h2 className="text-4xl font-semibold mb-3 text-gray-800 font-display">{t.title}</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">{t.subtitle}</p>
           <div className="w-24 h-1 bg-thai-purple mx-auto mt-5"></div>
-        </motion.div>
-        
-        {/* Banner with background */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <ProductBanner 
-            title={t.exploreProducts} 
-            description={bannerDescription} 
-          />
         </motion.div>
         
         {/* Category Filter */}
