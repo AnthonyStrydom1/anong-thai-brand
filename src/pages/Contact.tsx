@@ -202,7 +202,7 @@ const Contact = () => {
                   <p className="font-medium text-gray-700 mb-2">{t.info.social}</p>
                   <div className="flex space-x-3">
                     <a 
-                      href="https://instagram.com/anongthai" 
+                      href="https://www.instagram.com/anong_thai/" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-gray-600 hover:text-thai-purple"
