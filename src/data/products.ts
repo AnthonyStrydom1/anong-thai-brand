@@ -55,32 +55,6 @@ export const products: Product[] = [
     }
   },
   {
-    id: "sweet-chili-sauce",
-    name: {
-      en: "Thai Sweet Chili Dipping Sauce",
-      th: "น้ำจิ้มไก่"
-    },
-    description: {
-      en: "Our Thai Sweet Chili Dipping Sauce offers the perfect balance of sweetness with just the right amount of heat. Made with fresh red chilies, garlic, and a hint of vinegar, it's the ideal companion for spring rolls, fried appetizers and grilled meats.",
-      th: "น้ำจิ้มไก่ของเราให้ความสมดุลที่ลงตัวระหว่างความหวานกับความเผ็ดในปริมาณที่พอเหมาะ ทำจากพริกสดแดง กระเทียม และกลิ่นน้ำส้มสายชู เป็นเพื่อนที่เหมาะสำหรับปอเปี๊ยะทอด อาหารทานเล่นทอด และเนื้อย่าง"
-    },
-    shortDescription: {
-      en: "A perfect dip for fried appetizers and grilled meats",
-      th: "น้ำจิ้มไก่หวานเผ็ดเล็กน้อย เหมาะสำหรับของทอดและซีฟู้ด"
-    },
-    price: 75.00,
-    image: "/placeholder.svg",
-    category: "dipping-sauces",
-    ingredients: {
-      en: ["Red chili", "Garlic", "Sugar", "Vinegar", "Salt"],
-      th: ["พริกแดง", "กระเทียม", "น้ำตาล", "น้ำส้มสายชู", "เกลือ"]
-    },
-    useIn: {
-      en: ["Thai Chicken Wings", "Fried Tofu"],
-      th: ["ปีกไก่ทอดไทย", "เต้าหู้ทอด"]
-    }
-  },
-  {
     id: "panang-curry-paste",
     name: {
       en: "Panang Curry Paste",
