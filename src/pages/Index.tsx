@@ -5,7 +5,6 @@ import Footer from "@/components/Footer";
 import HeroBanner from "@/components/HeroBanner";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import AboutPreview from "@/components/AboutPreview";
-import MenuPreview from "@/components/MenuPreview";
 import ContactInfo from "@/components/ContactInfo";
 import RestaurantBanner from "@/components/RestaurantBanner";
 
@@ -21,7 +20,6 @@ const Index = () => {
         <div className="px-4 md:px-0">
           <FeaturedProducts />
           <RestaurantBanner />
-          <MenuPreview />
           <AboutPreview />
           <ContactInfo />
         </div>

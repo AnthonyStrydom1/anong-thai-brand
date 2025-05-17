@@ -34,8 +34,8 @@ const RestaurantBanner = () => {
         }}
       ></div>
       
-      {/* Dark red overlay */}
-      <div className="absolute inset-0 bg-[#800000] opacity-80"></div>
+      {/* Purple overlay (changed from red) */}
+      <div className="absolute inset-0 bg-[#520F7A] opacity-80"></div>
       
       {/* Content */}
       <div className="relative container mx-auto px-4 py-16 text-center">
@@ -48,7 +48,7 @@ const RestaurantBanner = () => {
         </p>
         <Link to="/menu">
           <Button 
-            className="bg-white text-[#800000] hover:bg-white/90 hover:text-[#800000] text-lg px-8 py-6 h-auto"
+            className="bg-white text-[#520F7A] hover:bg-white/90 hover:text-[#520F7A] text-lg px-8 py-6 h-auto"
             size="lg"
           >
             {t.button}
