@@ -85,10 +85,8 @@ const MenuCarousel = () => {
           align: "center",
         }}
         className="mx-auto max-w-3xl"
-        onSelect={(api) => {
-          if (api) {
-            setCurrentPage(api.selectedScrollSnap());
-          }
+        onSelect={(index) => {
+          setCurrentPage(index);
         }}
       >
         <CarouselContent>
