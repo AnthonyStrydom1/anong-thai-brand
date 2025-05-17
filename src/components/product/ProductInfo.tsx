@@ -74,6 +74,7 @@ export const ProductInfo = ({ product, language, translations }: ProductInfoProp
       <Button
         onClick={handleAddToCart}
         size="lg"
+        className="hover:bg-thai-purple-dark hover:bg-opacity-90"
       >
         <ShoppingCart className="mr-2 h-5 w-5" />
         {translations.addToCart}

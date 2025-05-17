@@ -38,19 +38,25 @@ const CartDropdown = () => {
     setIsOpen(!isOpen);
   };
 
+  // Common style for consistent white box highlighting
+  const buttonStyle = "text-white hover:bg-white hover:bg-opacity-20 transition-colors";
+
   return (
     <div className="relative">
-      <button 
-        className="flex items-center text-gray-700 hover:text-thai-purple transition relative"
+      <Button 
+        variant="ghost" 
+        size="icon"
+        className={buttonStyle}
         onClick={toggleDropdown}
+        aria-label={t.cart}
       >
-        <ShoppingCart className="h-6 w-6 text-white" />
+        <ShoppingCart className="h-6 w-6" />
         {itemCount > 0 && (
           <span className="absolute -top-2 -right-2 bg-thai-purple text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
             {itemCount}
           </span>
         )}
-      </button>
+      </Button>
 
       {isOpen && (
         <>
@@ -114,7 +120,6 @@ const CartDropdown = () => {
                     </Button>
                     <Button 
                       asChild
-                      variant="default"
                       className="w-full"
                     >
                       <Link to="/checkout">{t.checkout}</Link>

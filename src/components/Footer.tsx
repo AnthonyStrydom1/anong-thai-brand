@@ -62,15 +62,14 @@ const Footer = () => {
     <footer className="bg-[#520F7A] text-white border-t border-thai-purple relative">
       <div className="absolute inset-0 opacity-80 mix-blend-overlay pattern-wavy pattern-thai-gold pattern-bg-transparent pattern-size-4 pattern-opacity-20 pointer-events-none"></div>
       
-      <div className="container mx-auto px-4 py-12 relative z-10">
+      <div className="container mx-auto px-4 py-8 relative z-10">
       
-
         {/* Newsletter */}
-        <div className="max-w-2xl mx-auto mb-12">
-          <h3 className="text-xl font-semibold text-center text-thai-gold mb-2">
+        <div className="max-w-2xl mx-auto mb-6">
+          <h3 className="text-lg font-semibold text-center text-thai-gold mb-2">
             {t.subscribe}
           </h3>
-          <p className="text-gray-200 text-center mb-4">
+          <p className="text-gray-200 text-center text-sm mb-3">
             {t.subscribeDesc}
           </p>
           <form className="flex gap-2" onSubmit={handleSubscribe}>
@@ -87,34 +86,34 @@ const Footer = () => {
         </div>
 
         {/* Footer links */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          <div className="space-y-3">
-            <h4 className="font-semibold text-lg text-thai-gold">{t.shop}</h4>
-            <ul className="space-y-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
+          <div className="space-y-2">
+            <h4 className="font-semibold text-thai-gold">{t.shop}</h4>
+            <ul className="space-y-1">
               <li><Link to="/shop?category=curry-pastes" className="text-gray-200 hover:text-thai-gold transition">{t.curryPastes}</Link></li>
               <li><Link to="/shop?category=stir-fry-sauces" className="text-gray-200 hover:text-thai-gold transition">{t.stirFrySauces}</Link></li>
               <li><Link to="/shop?category=dipping-sauces" className="text-gray-200 hover:text-thai-gold transition">{t.dippingSauces}</Link></li>
             </ul>
           </div>
-          <div className="space-y-3">
-            <h4 className="font-semibold text-lg text-thai-gold">Anong Thai</h4>
-            <ul className="space-y-2">
+          <div className="space-y-2">
+            <h4 className="font-semibold text-thai-gold">Anong Thai</h4>
+            <ul className="space-y-1">
               <li><Link to="/recipes" className="text-gray-200 hover:text-thai-gold transition">{t.recipes}</Link></li>
               <li><Link to="/about" className="text-gray-200 hover:text-thai-gold transition">{t.about}</Link></li>
               <li><Link to="/contact" className="text-gray-200 hover:text-thai-gold transition">{t.contact}</Link></li>
             </ul>
           </div>
-          <div className="space-y-3">
-            <h4 className="font-semibold text-lg text-thai-gold">Support</h4>
-            <ul className="space-y-2">
+          <div className="space-y-2">
+            <h4 className="font-semibold text-thai-gold">Support</h4>
+            <ul className="space-y-1">
               <li><Link to="/shipping" className="text-gray-200 hover:text-thai-gold transition">{t.shipping}</Link></li>
               <li><Link to="/returns" className="text-gray-200 hover:text-thai-gold transition">{t.returns}</Link></li>
               <li><Link to="/privacy" className="text-gray-200 hover:text-thai-gold transition">{t.privacy}</Link></li>
               <li><Link to="/terms" className="text-gray-200 hover:text-thai-gold transition">{t.terms}</Link></li>
             </ul>
           </div>
-          <div className="space-y-3">
-            <h4 className="font-semibold text-lg text-thai-gold">Anong Thai Brand</h4>
+          <div className="space-y-2">
+            <h4 className="font-semibold text-thai-gold">Anong Thai Brand</h4>
             <div className="flex space-x-3">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-thai-gold hover:text-thai-gold/80 transition">
                 <Instagram className="h-5 w-5" />
@@ -129,10 +128,9 @@ const Footer = () => {
           </div>
         </div>
 
-
         {/* Copyright */}
-        <div className="border-t border-white/20 pt-8">
-          <p className="text-gray-300 text-center text-sm">
+        <div className="border-t border-white/20 pt-4">
+          <p className="text-gray-300 text-center text-xs">
             {t.rights}
           </p>
         </div>
