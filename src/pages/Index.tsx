@@ -15,8 +15,10 @@ const Index = () => {
       
       <main className="flex-grow">
         <HeroBanner />
-        <FeaturedProducts />
-        <AboutPreview />
+        <div className="px-4 md:px-0">
+          <FeaturedProducts />
+          <AboutPreview />
+        </div>
       </main>
       
       <Footer />

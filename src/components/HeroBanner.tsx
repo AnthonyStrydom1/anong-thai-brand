@@ -27,13 +27,12 @@ const HeroBanner = () => {
   const t = translations[language];
 
   return (
-    <div className={`relative w-full ${isMobile ? 'h-[100vh]' : 'h-[80vh] max-h-[600px]'} overflow-hidden`}>
+    <div className="relative w-full h-[500px] overflow-hidden">
       {/* Hero image */}
       <div 
-        className="absolute inset-0 bg-cover"
+        className="absolute inset-0 bg-cover bg-center"
         style={{ 
           backgroundImage: "url('https://i.postimg.cc/VsMVPbWq/buddah-1.png')",
-          backgroundPosition: isMobile ? 'center top' : 'center'
         }}
       >
         {/* Gradient overlay */}
@@ -42,12 +41,12 @@ const HeroBanner = () => {
       
       {/* Content */}
       <div className="absolute inset-0 flex items-center">
-        <div className={`container mx-auto px-6 ${isMobile ? 'pt-16 pb-24' : ''}`}>
+        <div className="container mx-auto px-6">
           <div className="max-w-2xl text-white">
-            <h1 className={`font-display ${isMobile ? 'text-3xl' : 'text-4xl md:text-5xl lg:text-6xl'} font-bold mb-4 leading-tight`}>
+            <h1 className={`font-display text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 leading-tight`}>
               {t.tagline}
             </h1>
-            <p className={`font-sarabun ${isMobile ? 'text-lg' : 'text-xl md:text-2xl'} mb-6 text-white/90`}>
+            <p className={`font-sarabun text-base md:text-xl lg:text-2xl mb-6 text-white/90`}>
               {t.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
