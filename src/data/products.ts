@@ -173,7 +173,7 @@ export const products: Product[] = [
       th: "พริกแกงรสซับซ้อน มีกลิ่นเครื่องเทศอบอุ่นและถั่ว"
     },
     price: 140.00,
-    image: "/lovable-uploads/a01451b7-72ac-44ff-a930-f0584773ec38.png",
+    image: "https://i.postimg.cc/GhHqK8Sw/Massaman-curry.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Dried chili", "Shallots", "Garlic", "Galangal", "Lemongrass", "Fresh ginger", "Peanuts", "Cornstarch", "Coriander seeds", "Cumin", "Cinnamon", "Rice bran oil", "Cloves", "Shrimp paste", "Lime peel"],
