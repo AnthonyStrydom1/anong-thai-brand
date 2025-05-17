@@ -8,10 +8,10 @@ const Shop = () => {
   const { language } = useLanguage();
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       <Header />
       
-      <main className="flex-grow px-4 md:px-0">
+      <main className="flex-grow px-4 md:px-0 bg-white">
         <ProductGrid />
       </main>
       

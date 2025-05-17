@@ -42,32 +42,32 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <div className="thai-card group">
+    <div className="group rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 bg-white h-full flex flex-col">
       <Link to={`/product/${id}`} className="block overflow-hidden">
-        <div className="h-64 overflow-hidden flex items-center justify-center">
+        <div className="h-64 overflow-hidden">
           <img 
             src={image} 
             alt={name[language]}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         </div>
       </Link>
-      <div className="p-4">
+      <div className="p-5 flex flex-col flex-grow">
         <Link to={`/product/${id}`}>
-          <h3 className="text-lg font-semibold text-gray-800 mb-1 hover:text-thai-purple transition">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2 hover:text-thai-purple transition-colors">
             {name[language]}
           </h3>
         </Link>
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-grow">
           {shortDescription[language]}
         </p>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mt-auto pt-3 border-t border-gray-100">
           <span className="text-lg font-semibold text-thai-purple">
             R{price.toFixed(2)}
           </span>
           <Button 
             size="sm" 
-            className="bg-thai-purple hover:bg-thai-purple-dark"
+            className="bg-thai-purple hover:bg-thai-purple-dark transition-colors"
             onClick={handleAddToCart}
           >
             <ShoppingCart className="h-4 w-4 mr-1" />
