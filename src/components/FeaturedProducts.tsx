@@ -62,38 +62,6 @@ const FeaturedProducts = () => {
     { id: 'dipping-sauces', name: { en: t.dippingSauces, th: t.dippingSauces } }
   ];
 
-  // Generate the mockup based on product category
-  const renderProductMockup = (product: any) => {
-    const isJar = product.category === 'curry-pastes' || product.category === 'dipping-sauces';
-    
-    return (
-      <div className="h-48 overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
-        <div className={`relative ${isJar ? 'w-32 h-40' : 'w-24 h-40'} mx-auto`}>
-          {/* Mockup container */}
-          <div className={`${isJar ? 'rounded-3xl' : 'rounded-lg'} overflow-hidden bg-transparent h-full w-full flex items-center justify-center`}>
-            {/* Glass jar/bottle effect */}
-            <div className={`absolute inset-0 ${isJar ? 'rounded-3xl' : 'rounded-lg'} bg-black bg-opacity-5 backdrop-blur-sm`}></div>
-            
-            {/* Product reflection/highlight */}
-            <div className={`absolute inset-y-0 left-0 w-1/4 ${isJar ? 'rounded-l-3xl' : 'rounded-l-lg'} bg-white bg-opacity-10`}></div>
-            
-            {/* Product label */}
-            <div className={`absolute inset-0 flex items-center justify-center ${isJar ? 'px-2' : 'px-1'}`}>
-              <img 
-                src={product.image} 
-                alt={product.name[language]} 
-                className="max-h-[85%] max-w-[85%] object-contain z-10"
-              />
-            </div>
-            
-            {/* Jar/bottle lid */}
-            <div className={`absolute -top-1 left-1/2 transform -translate-x-1/2 ${isJar ? 'w-20 h-3' : 'w-10 h-4'} rounded-t-lg bg-black`}></div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-[#FCFAFF] to-[#F5EBFF]">
       <div className="container mx-auto">
@@ -147,7 +115,13 @@ const FeaturedProducts = () => {
                 <CarouselItem key={product.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                   <div className="thai-card group">
                     <Link to={`/product/${product.id}`} className="block overflow-hidden">
-                      {renderProductMockup(product)}
+                      <div className="h-48 overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
+                        <img 
+                          src={product.image} 
+                          alt={product.name[language]} 
+                          className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
                     </Link>
                     <div className="p-4">
                       <Link to={`/product/${product.id}`}>
