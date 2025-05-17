@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 const Menu = () => {
   const { language } = useLanguage();
@@ -95,23 +96,24 @@ const Menu = () => {
   ];
   
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white subtle-pattern">
       <Header />
       
-      <main className="flex-grow py-8">
+      <main className="flex-grow py-12">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-[#520F7A]">{t.title}</h1>
-            <p className="text-gray-600 mt-2 max-w-2xl mx-auto">{t.description}</p>
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold text-[#520F7A] mb-3 elegant-heading font-display">{t.title}</h1>
+            <div className="w-24 h-0.5 bg-thai-gold mx-auto mb-4"></div>
+            <p className="text-gray-600 mt-2 max-w-2xl mx-auto text-lg">{t.description}</p>
           </div>
           
           <Tabs defaultValue="starters" className="max-w-5xl mx-auto">
-            <TabsList className="flex flex-wrap justify-center mb-6">
+            <TabsList className="flex flex-wrap justify-center mb-10 bg-[#f8f4ff] p-1.5 rounded-xl">
               {menuCategories.map((category) => (
                 <TabsTrigger 
                   key={category.id} 
                   value={category.id}
-                  className="data-[state=active]:bg-thai-gold data-[state=active]:text-white"
+                  className="px-5 py-2.5 data-[state=active]:bg-[#520F7A] data-[state=active]:text-white rounded-lg transition-all"
                 >
                   {category.label}
                 </TabsTrigger>
@@ -120,7 +122,7 @@ const Menu = () => {
             
             {menuCategories.map((category) => (
               <TabsContent key={category.id} value={category.id} className="mt-4">
-                <Card>
+                <Card className="border-0 shadow-xl overflow-hidden rounded-xl">
                   <CardContent className="p-0">
                     <img 
                       src={category.image} 
