@@ -54,7 +54,6 @@ const HeroBanner = () => {
               <Button 
                 asChild
                 size={isMobile ? "default" : "lg"}
-                className="bg-thai-purple hover:bg-thai-purple-dark text-white"
               >
                 <Link to="/shop">
                   {t.cta}
@@ -63,9 +62,9 @@ const HeroBanner = () => {
               </Button>
               <Button 
                 asChild
-                variant="outline" 
+                variant="ghost" 
                 size={isMobile ? "default" : "lg"}
-                className="bg-transparent text-white border-white hover:bg-white/10"
+                className="text-white border border-white"
               >
                 <Link to="/recipes">
                   {t.secondaryCta}

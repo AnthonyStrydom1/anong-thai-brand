@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -5,12 +6,13 @@ import { useCart } from "@/contexts/CartContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Trash2, Plus, Minus, ChevronRight } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, ChevronRight, CreditCard } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 const CartPage = () => {
   const { language } = useLanguage();
   const { items, total, updateQuantity, removeItem, clearCart } = useCart();
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
   
   const translations = {
     en: {
@@ -24,12 +26,15 @@ const CartPage = () => {
       actions: "Actions",
       clearCart: "Clear Cart",
       checkout: "Proceed to Checkout",
+      payWithCard: "Pay with Credit Card",
+      payWithPayfast: "Pay with PayFast",
       cartTotal: "Cart Total",
       shipping: "Shipping",
       freeShipping: "Free Shipping",
       total: "Total",
       removed: "Product removed from cart",
-      cleared: "Cart cleared"
+      cleared: "Cart cleared",
+      processingPayment: "Processing payment..."
     },
     th: {
       cartTitle: "ตะกร้าสินค้า",
@@ -42,12 +47,15 @@ const CartPage = () => {
       actions: "การกระทำ",
       clearCart: "ล้างตะกร้า",
       checkout: "ดำเนินการชำระเงิน",
+      payWithCard: "ชำระด้วยบัตรเครดิต",
+      payWithPayfast: "ชำระด้วย PayFast",
       cartTotal: "ยอดรวมในตะกร้า",
       shipping: "ค่าจัดส่ง",
       freeShipping: "จัดส่งฟรี",
       total: "ยอดรวมทั้งหมด",
       removed: "ลบสินค้าออกจากตะกร้าแล้ว",
-      cleared: "ล้างตะกร้าแล้ว"
+      cleared: "ล้างตะกร้าแล้ว",
+      processingPayment: "กำลังดำเนินการชำระเงิน..."
     }
   };
 
@@ -66,6 +74,22 @@ const CartPage = () => {
     toast({
       title: t.cleared,
     });
+  };
+
+  const handleCheckout = (paymentMethod: string) => {
+    setPaymentProcessing(true);
+    
+    // Simulate payment processing
+    setTimeout(() => {
+      setPaymentProcessing(false);
+      toast({
+        title: `${t.processingPayment}`,
+        description: `Payment method: ${paymentMethod}`,
+      });
+      
+      // Here you would typically redirect to a payment gateway or process payment
+      // For now, we'll just show a success toast
+    }, 1500);
   };
 
   return (
@@ -92,7 +116,6 @@ const CartPage = () => {
             <h2 className="text-2xl font-semibold mb-4 text-gray-700">{t.emptyCart}</h2>
             <Button 
               asChild
-              className="bg-thai-purple hover:bg-thai-purple-dark"
             >
               <Link to="/shop">{t.continueShopping}</Link>
             </Button>
@@ -214,8 +237,22 @@ const CartPage = () => {
                     <span>${total.toFixed(2)}</span>
                   </div>
                   
-                  <Button className="w-full bg-thai-purple hover:bg-thai-purple-dark">
-                    {t.checkout}
+                  <Button 
+                    className="w-full"
+                    onClick={() => handleCheckout('credit-card')}
+                    disabled={paymentProcessing}
+                  >
+                    <CreditCard className="mr-2 h-5 w-5" />
+                    {t.payWithCard}
+                  </Button>
+                  
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => handleCheckout('payfast')}
+                    disabled={paymentProcessing}
+                  >
+                    {t.payWithPayfast}
                   </Button>
                   
                   <div className="text-center mt-4">

@@ -37,7 +37,6 @@ const CartDropdown = () => {
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
-   const buttonStyle = "text-white hover:bg-white hover:bg-opacity-20 transition-colors";
 
   return (
     <div className="relative">
@@ -114,10 +113,11 @@ const CartDropdown = () => {
                       <Link to="/cart">{t.viewCart}</Link>
                     </Button>
                     <Button 
+                      asChild
                       variant="default"
-                      className="w-full bg-thai-purple hover:bg-thai-purple-dark"
+                      className="w-full"
                     >
-                      {t.checkout}
+                      <Link to="/checkout">{t.checkout}</Link>
                     </Button>
                   </div>
                 </div>
