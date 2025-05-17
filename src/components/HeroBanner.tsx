@@ -32,7 +32,7 @@ const HeroBanner = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
-          backgroundImage: "url('https://i.postimg.cc/zf31CSRm/Buddah.png')",
+          backgroundImage: "url('https://i.postimg.cc/XYLCG39H/buddah-2.png')",
         }}
       >
         {/* Gradient overlay - changed from left to right, to right to left */}
