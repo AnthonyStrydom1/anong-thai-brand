@@ -1,26 +1,15 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { products } from '@/data/products';
-import ProductCard from './ProductCard';
-import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, ArrowRight as ArrowRightIcon, ShoppingCart } from "lucide-react";
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCart } from "@/contexts/CartContext";
-import { toast } from "@/components/ui/use-toast";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import CategoryFilter from './product/CategoryFilter';
+import ProductBanner from './product/ProductBanner';
+import FeaturedProductCarousel from './product/FeaturedProductCarousel';
+import ViewAllButton from './product/ViewAllButton';
 
 const FeaturedProducts = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const { language } = useLanguage();
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const { addItem } = useCart();
   
   const translations = {
     en: {
@@ -62,6 +51,10 @@ const FeaturedProducts = () => {
     { id: 'dipping-sauces', name: { en: t.dippingSauces, th: t.dippingSauces } }
   ];
 
+  const bannerDescription = language === 'en'
+    ? "Quality ingredients, authentic flavors, made with passion. Elevate your cooking with our premium Thai products."
+    : "วัตถุดิบคุณภาพ รสชาติแท้ ผลิตด้วยใจ ยกระดับการทำอาหารด้วยผลิตภัณฑ์ไทยระดับพรีเมียม";
+
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-[#FCFAFF] to-[#F5EBFF]">
       <div className="container mx-auto">
@@ -71,137 +64,31 @@ const FeaturedProducts = () => {
         </div>
         
         {/* Banner with background */}
-        <div className="relative mb-14 rounded-xl overflow-hidden shadow-xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-[#520F7A] via-[#7A2BAA] to-[#9D4EDD] opacity-90"></div>
-          <div className="relative py-12 px-8 md:py-16 md:px-12 text-center text-white">
-            <h3 className="text-2xl md:text-3xl font-bold mb-4">{t.exploreProducts}</h3>
-            <p className="mb-6 max-w-2xl mx-auto">
-              {language === 'en'
-                ? "Quality ingredients, authentic flavors, made with passion. Elevate your cooking with our premium Thai products."
-                : "วัตถุดิบคุณภาพ รสชาติแท้ ผลิตด้วยใจ ยกระดับการทำอาหารด้วยผลิตภัณฑ์ไทยระดับพรีเมียม"}
-            </p>
-          </div>
-        </div>
+        <ProductBanner 
+          title={t.exploreProducts} 
+          description={bannerDescription} 
+        />
         
         {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {categories.map((category) => (
-            <Button
-              key={category.id}
-              variant={activeCategory === category.id ? "default" : "outline"}
-              onClick={() => setActiveCategory(category.id)}
-              className={
-                activeCategory === category.id
-                  ? "bg-thai-purple hover:bg-thai-purple-dark"
-                  : "border-thai-purple text-thai-purple hover:bg-thai-purple/10"
-              }
-            >
-              {category.name[language]}
-            </Button>
-          ))}
-        </div>
+        <CategoryFilter 
+          categories={categories} 
+          activeCategory={activeCategory}
+          language={language}
+          onCategoryChange={setActiveCategory}
+        />
         
         {/* Products Carousel */}
-        <div className="mb-10">
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {filteredProducts.map((product) => (
-                <CarouselItem key={product.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                  <div className="thai-card group">
-                    <Link to={`/product/${product.id}`} className="block overflow-hidden">
-                      <div className="h-64 overflow-hidden bg-black flex items-center justify-center p-2">
-                        {/* Jar mockup */}
-                        <div className="relative w-full h-full max-w-[200px] mx-auto">
-                          {/* Glass jar container */}
-                          <div className="absolute inset-0 bg-gradient-to-b from-gray-800/80 to-black rounded-lg"
-                            style={{
-                              clipPath: 'polygon(25% 0%, 75% 0%, 85% 5%, 85% 95%, 75% 100%, 25% 100%, 15% 95%, 15% 5%)'
-                            }}>
-                            {/* Glass reflections */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-black/0 via-white/10 to-black/0"></div>
-                            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/10 to-transparent" style={{ height: '20%' }}></div>
-                            <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-white/5 to-transparent" style={{ height: '30%' }}></div>
-                          </div>
-                          
-                          {/* Product label positioned in the center of the jar */}
-                          <div className="absolute inset-0 flex items-center justify-center p-4">
-                            <div className="relative w-[70%] h-[70%] overflow-hidden rounded">
-                              <img 
-                                src={product.image} 
-                                alt={product.name[language]} 
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Jar lid */}
-                          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[50%] h-[8%] bg-gradient-to-b from-gray-600 to-gray-800 rounded-t-md"></div>
-                          
-                          {/* Realistic jar reflections */}
-                          <div className="absolute top-[15%] right-[15%] w-[3%] h-[70%] bg-white opacity-30 rounded-full"></div>
-                          <div className="absolute top-[25%] left-[20%] w-[2%] h-[50%] bg-white opacity-20 rounded-full"></div>
-                        </div>
-                      </div>
-                    </Link>
-                    <div className="p-4">
-                      <Link to={`/product/${product.id}`}>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-1 hover:text-thai-purple transition">
-                          {product.name[language]}
-                        </h3>
-                      </Link>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {product.shortDescription[language]}
-                      </p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold text-thai-purple">
-                          ${product.price.toFixed(2)}
-                        </span>
-                        <Button 
-                          size="sm" 
-                          className="bg-thai-purple hover:bg-thai-purple-dark"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            addItem(product, 1);
-                            toast({
-                              title: t.addedToCart,
-                              description: `${product.name[language]} x 1`,
-                            });
-                          }}
-                        >
-                          <ShoppingCart className="h-4 w-4 mr-1" />
-                          {t.addToCart}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="border-thai-purple text-thai-purple hover:bg-thai-purple/10" />
-            <CarouselNext className="border-thai-purple text-thai-purple hover:bg-thai-purple/10" />
-          </Carousel>
-        </div>
+        <FeaturedProductCarousel 
+          products={filteredProducts}
+          language={language}
+          translations={{
+            addToCart: t.addToCart,
+            addedToCart: t.addedToCart
+          }}
+        />
         
         {/* View All Button */}
-        <div className="text-center">
-          <Button 
-            asChild
-            variant="outline" 
-            className="border-thai-purple text-thai-purple hover:bg-thai-purple/10"
-          >
-            <Link to="/shop">
-              {t.viewAll}
-              <ArrowRightIcon className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
+        <ViewAllButton text={t.viewAll} />
       </div>
     </section>
   );
