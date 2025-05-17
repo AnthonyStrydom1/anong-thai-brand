@@ -1,3 +1,4 @@
+
 import { Product } from "@/types";
 
 export const products: Product[] = [
@@ -16,7 +17,7 @@ export const products: Product[] = [
       th: "พริกแกงเผ็ดสูตรต้นตำรับจากอนงค์ เหมาะสำหรับแกงไทยแท้"
     },
     price: 120.00,
-image: "https://i.postimg.cc/CxkK0ZsW/Red-Curry.png",
+    image: "https://i.postimg.cc/CxkK0ZsW/Red-Curry.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Dried red chili", "Garlic", "Lemongrass", "Galangal", "Shallots", "Kaffir lime zest", "Shrimp paste", "Salt"],
@@ -77,32 +78,6 @@ image: "https://i.postimg.cc/CxkK0ZsW/Red-Curry.png",
     useIn: {
       en: ["Thai Chicken Wings", "Fried Tofu"],
       th: ["ปีกไก่ทอดไทย", "เต้าหู้ทอด"]
-    }
-  },
-  {
-    id: "red-curry-paste-authentic",
-    name: {
-      en: "Red Curry Paste",
-      th: "พริกแกงเผ็ด"
-    },
-    description: {
-      en: "Traditional Red Curry Paste made with a perfect blend of dried red chili, galangal, lemongrass, garlic, shallots, kaffir lime peel, krachai, coriander root, and shrimp paste.",
-      th: "พริกแกงเผ็ดแบบดั้งเดิมทำจากส่วนผสมที่ลงตัวของพริกแห้ง ข่า ตะไคร้ กระเทียม หอมแดง ผิวมะกรูด กระชาย รากผักชี และกระปิ"
-    },
-    shortDescription: {
-      en: "Authentic Thai red curry paste with traditional ingredients",
-      th: "พริกแกงเผ็ดไทยแท้ทำจากวัตถุดิบดั้งเดิม"
-    },
-    price: 125.00,
-    image: "https://i.postimg.cc/CxkK0ZsW/Red-Curry.png",
-    category: "curry-pastes",
-    ingredients: {
-      en: ["Dried chili", "Galangal", "Lemongrass", "Garlic", "Shallots", "Kaffir lime peel", "Krachai", "Coriander root", "Shrimp paste", "Salt"],
-      th: ["พริกแห้ง", "ข่า", "ตะไคร้", "กระเทียม", "หอมแดง", "ผิวมะกรูด", "กระชาย", "รากผักชี", "กระปิ", "เกลือ"]
-    },
-    useIn: {
-      en: ["Red Curry", "Stir-fried dishes"],
-      th: ["แกงเผ็ด", "อาหารผัด"]
     }
   },
   {
