@@ -29,7 +29,7 @@ const RestaurantBanner = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
-          backgroundImage: "url('/lovable-uploads/686aefa1-f156-42a0-aa07-67b1e5426918.png')",
+         
           filter: "brightness(0.7)"
         }}
       ></div>
