@@ -85,8 +85,13 @@ const MenuCarousel = () => {
           align: "center",
         }}
         className="mx-auto max-w-3xl"
-        onSelect={(index) => {
-          setCurrentPage(index);
+        onSelect={(api) => {
+          // The onSelect callback from Carousel provides the api object
+          // We need to explicitly handle it as an api object or index
+          // Use type assertion to resolve the TypeScript error
+          if (typeof api === 'number') {
+            setCurrentPage(api);
+          }
         }}
       >
         <CarouselContent>
