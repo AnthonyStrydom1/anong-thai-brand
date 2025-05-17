@@ -95,47 +95,84 @@ const Menu = () => {
     },
   ];
   
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1,
+        when: "beforeChildren" 
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
+  };
+  
   return (
     <div className="min-h-screen flex flex-col bg-white subtle-pattern">
       <Header />
       
-      <main className="flex-grow py-12">
+      <motion.main 
+        className="flex-grow py-16"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-[#520F7A] mb-3 elegant-heading font-display">{t.title}</h1>
-            <div className="w-24 h-0.5 bg-thai-gold mx-auto mb-4"></div>
-            <p className="text-gray-600 mt-2 max-w-2xl mx-auto text-lg">{t.description}</p>
-          </div>
+          <motion.div 
+            className="text-center mb-16"
+            variants={itemVariants}
+          >
+            <h1 className="text-5xl font-bold text-[#520F7A] mb-5 elegant-heading font-display">{t.title}</h1>
+            <div className="w-24 h-0.5 bg-thai-gold mx-auto mb-5"></div>
+            <p className="text-gray-600 mt-4 max-w-2xl mx-auto text-lg">{t.description}</p>
+          </motion.div>
           
           <Tabs defaultValue="starters" className="max-w-5xl mx-auto">
-            <TabsList className="flex flex-wrap justify-center mb-10 bg-[#f8f4ff] p-1.5 rounded-xl">
-              {menuCategories.map((category) => (
-                <TabsTrigger 
-                  key={category.id} 
-                  value={category.id}
-                  className="px-5 py-2.5 data-[state=active]:bg-[#520F7A] data-[state=active]:text-white rounded-lg transition-all"
-                >
-                  {category.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <motion.div variants={itemVariants}>
+              <TabsList className="flex flex-wrap justify-center mb-12 bg-[#f8f4ff] p-2.5 rounded-xl shadow-inner">
+                {menuCategories.map((category) => (
+                  <TabsTrigger 
+                    key={category.id} 
+                    value={category.id}
+                    className="px-5 py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#520F7A] data-[state=active]:to-[#6a1f97] data-[state=active]:text-white rounded-lg transition-all data-[state=active]:shadow-md"
+                  >
+                    {category.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </motion.div>
             
             {menuCategories.map((category) => (
-              <TabsContent key={category.id} value={category.id} className="mt-4">
-                <Card className="border-0 shadow-xl overflow-hidden rounded-xl">
-                  <CardContent className="p-0">
-                    <img 
-                      src={category.image} 
-                      alt={category.label}
-                      className="w-full h-auto object-contain rounded-md"
-                    />
-                  </CardContent>
-                </Card>
+              <TabsContent key={category.id} value={category.id} className="mt-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Card className="border-0 shadow-2xl overflow-hidden rounded-xl">
+                    <CardContent className="p-0">
+                      <img 
+                        src={category.image} 
+                        alt={category.label}
+                        className="w-full h-auto object-contain rounded-md"
+                      />
+                    </CardContent>
+                  </Card>
+                </motion.div>
               </TabsContent>
             ))}
           </Tabs>
         </div>
-      </main>
+      </motion.main>
       
       <Footer />
     </div>
