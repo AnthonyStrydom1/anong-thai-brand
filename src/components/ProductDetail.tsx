@@ -37,7 +37,7 @@ const ProductDetail = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Product Image */}
-        <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg overflow-hidden shadow-md flex items-center justify-center p-6">
+        <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg overflow-hidden shadow-md flex items-center justify-center p-8">
           <img 
             src={product.image} 
             alt={product.name[language]} 

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { products } from '@/data/products';
 import ProductCard from './ProductCard';
@@ -115,7 +115,7 @@ const FeaturedProducts = () => {
                 <CarouselItem key={product.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                   <div className="thai-card group">
                     <Link to={`/product/${product.id}`} className="block overflow-hidden">
-                      <div className="h-48 overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800">
+                      <div className="h-48 overflow-hidden bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
                         <img 
                           src={product.image} 
                           alt={product.name[language]} 
