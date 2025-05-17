@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, X } from "lucide-react";
 import { useLanguage } from '@/contexts/LanguageContext';
+import { motion } from 'framer-motion';
 
 const ProductGrid = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -97,24 +98,50 @@ const ProductGrid = () => {
     setSearchTerm('');
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1 
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+
   console.log("Available products:", products);
   console.log("Filtered products:", filteredProducts);
 
   return (
-    <section className="py-12 px-4">
+    <section className="py-16 px-4 bg-gradient-to-b from-white to-[#F5EBFF] subtle-pattern">
       <div className="container mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-semibold mb-2 text-gray-800 font-display">{t.title}</h2>
-        </div>
+        <motion.div 
+          className="text-center mb-10"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-4xl font-semibold mb-2 text-gray-800 font-display">{t.title}</h2>
+          <div className="w-24 h-1 bg-thai-purple mx-auto mt-4 mb-6"></div>
+        </motion.div>
         
         {/* Search and Filter */}
-        <div className="mb-8 flex flex-col md:flex-row gap-4">
+        <motion.div 
+          className="mb-12 flex flex-col md:flex-row gap-4 bg-white p-6 rounded-xl shadow-sm"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
               type="text"
               placeholder={t.search}
-              className="pl-10"
+              className="pl-10 border-gray-200 focus:border-thai-purple premium-input"
               value={searchTerm}
               onChange={handleSearch}
             />
@@ -146,20 +173,24 @@ const ProductGrid = () => {
               </Button>
             ))}
           </div>
-        </div>
+        </motion.div>
         
         {/* Products Grid */}
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-              />
+              <motion.div key={product.id} variants={itemVariants}>
+                <ProductCard product={product} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         ) : (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-16 text-gray-500 bg-white rounded-lg shadow-sm">
             {t.noProducts}
           </div>
         )}

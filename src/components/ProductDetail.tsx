@@ -9,6 +9,7 @@ import { RelatedRecipes } from './product/RelatedRecipes';
 import { ProductBreadcrumb } from './product/ProductBreadcrumb';
 import { ProductNotFound } from './product/ProductNotFound';
 import { useProductTranslations } from './product/useProductTranslations';
+import { motion } from 'framer-motion';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +31,15 @@ const ProductDetail = () => {
   
   const t = useProductTranslations(language);
 
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Breadcrumb */}
@@ -37,16 +47,26 @@ const ProductDetail = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Product Image */}
-        <div className="rounded-lg overflow-hidden shadow-md flex items-center justify-center">
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          className="rounded-xl overflow-hidden shadow-lg bg-gradient-to-b from-white to-gray-50 p-8 flex items-center justify-center"
+        >
           <img 
             src={product.image}
             alt={product.name[language]}
-            className="w-full h-full object-cover"
+            className="w-4/5 h-4/5 object-contain"
           />
-        </div>
+        </motion.div>
         
         {/* Product Info */}
-        <div>
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          transition={{ delay: 0.2 }}
+        >
           <ProductInfo 
             product={product} 
             language={language} 
@@ -67,19 +87,26 @@ const ProductDetail = () => {
               howToUse: t.howToUse
             }} 
           />
-        </div>
+        </motion.div>
       </div>
       
       {/* Related Recipes */}
-      <RelatedRecipes 
-        recipes={relatedRecipes} 
-        language={language} 
-        translations={{
-          relatedRecipes: t.relatedRecipes,
-          viewRecipe: t.viewRecipe,
-          noRecipes: t.noRecipes
-        }} 
-      />
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        transition={{ delay: 0.4 }}
+      >
+        <RelatedRecipes 
+          recipes={relatedRecipes} 
+          language={language} 
+          translations={{
+            relatedRecipes: t.relatedRecipes,
+            viewRecipe: t.viewRecipe,
+            noRecipes: t.noRecipes
+          }} 
+        />
+      </motion.div>
     </div>
   );
 };
