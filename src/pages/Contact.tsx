@@ -177,10 +177,10 @@ const Contact = () => {
                   <div>
                     <p className="font-medium text-gray-700">{t.info.email}</p>
                     <a 
-                      href="mailto:anonggroup@outlook.com" 
+                      href="mailto:info@anongthai.com" 
                       className="text-gray-600 hover:text-thai-purple"
                     >
-                      anonggroup@outlook.com
+                      info@anongthai.com
                     </a>
                   </div>
                 </div>
@@ -190,10 +190,10 @@ const Contact = () => {
                   <div>
                     <p className="font-medium text-gray-700">{t.info.phone}</p>
                     <a 
-                      href="tel:0765059941" 
+                      href="tel:+12345678900" 
                       className="text-gray-600 hover:text-thai-purple"
                     >
-                      0765059941
+                      +1 (234) 567-8900
                     </a>
                   </div>
                 </div>
@@ -202,7 +202,7 @@ const Contact = () => {
                   <p className="font-medium text-gray-700 mb-2">{t.info.social}</p>
                   <div className="flex space-x-3">
                     <a 
-                      href="https://www.instagram.com/anong_thai/" 
+                      href="https://instagram.com/anongthai" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-gray-600 hover:text-thai-purple"
@@ -210,7 +210,7 @@ const Contact = () => {
                       <Instagram className="h-6 w-6" />
                     </a>
                     <a 
-                      href="https://www.facebook.com/AnongThaiFood" 
+                      href="https://facebook.com/anongthai" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-gray-600 hover:text-thai-purple"

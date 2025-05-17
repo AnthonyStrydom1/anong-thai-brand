@@ -14,7 +14,11 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
   
+  console.log("Product ID from params:", id);
+  console.log("Available products:", products);
+  
   const product = products.find(p => p.id === id);
+  console.log("Found product:", product);
   
   if (!product) {
     return <ProductNotFound language={language} />;
@@ -27,22 +31,22 @@ const ProductDetail = () => {
   const t = useProductTranslations(language);
 
   return (
-    <div className="container mx-auto px-4 py-12 bg-white">
+    <div className="container mx-auto px-4 py-12">
       {/* Breadcrumb */}
       <ProductBreadcrumb productName={product.name[language]} language={language} />
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Product Image */}
-        <div className="rounded-lg overflow-hidden shadow-md flex items-center justify-center bg-white">
+        <div className="rounded-lg overflow-hidden shadow-md flex items-center justify-center">
           <img 
             src={product.image}
             alt={product.name[language]}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         </div>
         
         {/* Product Info */}
-        <div className="bg-white">
+        <div>
           <ProductInfo 
             product={product} 
             language={language} 

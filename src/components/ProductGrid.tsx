@@ -19,7 +19,6 @@ const ProductGrid = () => {
   const translations = {
     en: {
       title: "Our Products",
-      subtitle: "Traditional Thai flavors, crafted with care",
       search: "Search products...",
       all: "All Products",
       curryPastes: "Curry Pastes",
@@ -31,7 +30,6 @@ const ProductGrid = () => {
     },
     th: {
       title: "สินค้าของเรา",
-      subtitle: "รสชาติไทยแท้ ปรุงอย่างพิถีพิถัน",
       search: "ค้นหาสินค้า...",
       all: "สินค้าทั้งหมด",
       curryPastes: "พริกแกง",
@@ -99,22 +97,24 @@ const ProductGrid = () => {
     setSearchTerm('');
   };
 
+  console.log("Available products:", products);
+  console.log("Filtered products:", filteredProducts);
+
   return (
-    <section className="py-16 px-4 bg-white">
+    <section className="py-12 px-4">
       <div className="container mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-semibold mb-3 text-gray-800 font-display">{t.title}</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">{t.subtitle}</p>
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-semibold mb-2 text-gray-800 font-display">{t.title}</h2>
         </div>
         
         {/* Search and Filter */}
-        <div className="mb-12 flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
+        <div className="mb-8 flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
               type="text"
               placeholder={t.search}
-              className="pl-10 border-gray-300 focus:border-thai-purple focus:ring focus:ring-thai-purple/20 transition-all"
+              className="pl-10"
               value={searchTerm}
               onChange={handleSearch}
             />
@@ -130,7 +130,7 @@ const ProductGrid = () => {
             )}
           </div>
           
-          <div className="flex-shrink-0 flex flex-wrap gap-2 md:flex-nowrap justify-center md:justify-start">
+          <div className="flex-shrink-0 flex flex-wrap gap-2 md:flex-nowrap justify-start">
             {categories.map((category) => (
               <Button
                 key={category.id}
@@ -138,8 +138,8 @@ const ProductGrid = () => {
                 onClick={() => handleCategoryChange(category.id)}
                 className={
                   activeCategory === category.id
-                    ? "bg-thai-purple hover:bg-thai-purple-dark transition-colors"
-                    : "border-thai-purple text-thai-purple hover:bg-thai-purple/10 transition-colors"
+                    ? "bg-thai-purple hover:bg-thai-purple-dark"
+                    : "border-thai-purple text-thai-purple hover:bg-thai-purple/10"
                 }
               >
                 {category.name[language]}
@@ -150,7 +150,7 @@ const ProductGrid = () => {
         
         {/* Products Grid */}
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
               <ProductCard
                 key={product.id}
@@ -159,7 +159,7 @@ const ProductGrid = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 text-gray-500">
+          <div className="text-center py-12 text-gray-500">
             {t.noProducts}
           </div>
         )}
