@@ -121,7 +121,7 @@ export const products: Product[] = [
       th: "พริกเผารสเผ็ดเปรี้ยว เหมาะสำหรับต้มยำ"
     },
     price: 115.00,
-    image: "/lovable-uploads/8a099c49-8e41-43fa-a5d8-ed0313d6dd61.png",
+    image: "https://i.postimg.cc/0jc5yH13/tom-yum.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Roasted Dry Chili", "Shallots", "Garlic", "Coconut Sugar", "Fish Sauce", "Shrimp Paste", "Oyster Sauce", "Dark Soy Sauce"],
