@@ -121,7 +121,7 @@ export const products: Product[] = [
       th: "พริกแกงเขียวหวานกลิ่นหอมสดชื่นจากสมุนไพร"
     },
     price: 130.00,
-    image: "/lovable-uploads/d07a2b67-49c8-4be2-9bbf-a43f28006e38.png",
+    image: "https://i.postimg.cc/SxY1S2W7/Green-curry.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Fresh green chili", "Shallots", "Garlic", "Galangal", "Lemongrass", "Shrimp paste", "Soybean paste", "Coriander seeds", "Salt", "Sweet dark soy sauce"],
