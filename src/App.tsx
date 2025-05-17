@@ -22,6 +22,7 @@ import Profile from "./pages/Profile";
 import Account from "./pages/Account";
 import Orders from "./pages/Orders";
 import Settings from "./pages/Settings";
+import Menu from "./pages/Menu";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/account" element={<Account />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/menu" element={<Menu />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
