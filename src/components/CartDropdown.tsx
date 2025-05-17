@@ -39,12 +39,12 @@ const CartDropdown = () => {
   };
 
   // Common style for consistent white box highlighting
-  const buttonStyle = "text-white hover:bg-white hover:bg-opacity-20 transition-colors";
+  const buttonStyle = "bg-thai-purple text-white hover:bg-thai-purple-dark hover:bg-opacity-90";
 
   return (
     <div className="relative">
       <Button 
-        variant="ghost" 
+        variant="default" 
         size="icon"
         className={buttonStyle}
         onClick={toggleDropdown}
@@ -121,6 +121,7 @@ const CartDropdown = () => {
                     <Button 
                       asChild
                       className="w-full"
+                      onClick={() => setIsOpen(false)}
                     >
                       <Link to="/checkout">{t.checkout}</Link>
                     </Button>

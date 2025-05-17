@@ -28,7 +28,7 @@ const NotFound = () => {
           </Button>
         </div>
       </main>
-      <Footer />
+      <Footer className="py-6" />
     </div>
   );
 };
