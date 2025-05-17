@@ -63,7 +63,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </p>
         <div className="flex justify-between items-center">
           <span className="text-lg font-semibold text-thai-purple">
-            ${price.toFixed(2)}
+            R{price.toFixed(2)}
           </span>
           <Button 
             size="sm" 

@@ -37,7 +37,7 @@ export const ProductInfo = ({ product, language, translations }: ProductInfoProp
         {product.name[language]}
       </h1>
       <p className="text-2xl font-semibold text-thai-purple mb-6">
-        ${product.price.toFixed(2)}
+        R{product.price.toFixed(2)}
       </p>
       
       <p className="text-gray-700 mb-6">

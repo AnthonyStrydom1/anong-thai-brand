@@ -4,7 +4,7 @@ import { products } from '@/data/products';
 import { useLanguage } from '@/contexts/LanguageContext';
 import CategoryFilter from './product/CategoryFilter';
 import ProductBanner from './product/ProductBanner';
-import FeaturedProductCarousel from './product/FeaturedProductCarousel';
+import ProductCard from './ProductCard';
 import ViewAllButton from './product/ViewAllButton';
 
 const FeaturedProducts = () => {
@@ -77,15 +77,12 @@ const FeaturedProducts = () => {
           onCategoryChange={setActiveCategory}
         />
         
-        {/* Products Carousel */}
-        <FeaturedProductCarousel 
-          products={filteredProducts}
-          language={language}
-          translations={{
-            addToCart: t.addToCart,
-            addedToCart: t.addedToCart
-          }}
-        />
+        {/* Products Grid - Replacing Carousel */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+          {filteredProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
         
         {/* View All Button */}
         <ViewAllButton text={t.viewAll} />
