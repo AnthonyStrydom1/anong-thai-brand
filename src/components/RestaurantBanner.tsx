@@ -10,7 +10,7 @@ const RestaurantBanner = () => {
   
   const translations = {
     en: {
-      title: "Try Our Restaurant",
+      title: "Our Restaurant",
       subtitle: "Authentic Thai cuisine made with fresh ingredients and traditional recipes",
       button: "View Our Restaurant",
     },
