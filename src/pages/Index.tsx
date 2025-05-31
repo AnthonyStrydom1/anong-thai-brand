@@ -5,7 +5,6 @@ import Footer from "@/components/Footer";
 import HeroBanner from "@/components/HeroBanner";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import BrandStory from "@/components/BrandStory";
-import ContactInfo from "@/components/ContactInfo";
 import RestaurantBanner from "@/components/RestaurantBanner";
 import { motion } from "framer-motion";
 
@@ -61,15 +60,6 @@ const Index = () => {
             variants={sectionVariants}
           >
             <RestaurantBanner />
-          </motion.div>
-          
-          <motion.div
-            initial="offscreen"
-            whileInView="onscreen"
-            viewport={{ once: true, amount: 0.1 }}
-            variants={sectionVariants}
-          >
-            <ContactInfo />
           </motion.div>
         </div>
       </main>
