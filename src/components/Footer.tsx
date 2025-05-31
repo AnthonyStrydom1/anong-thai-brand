@@ -17,7 +17,7 @@ const Footer = ({ className }: FooterProps) => {
   // Debug logging to see if Footer is rendering
   useEffect(() => {
     console.log('Footer component mounted');
-    console.log('Footer using green-banner-bg class with CSS lotus pattern');
+    console.log('Footer using green-banner-bg class with uploaded lotus image');
   }, []);
   
   const translations = {
@@ -81,7 +81,7 @@ const Footer = ({ className }: FooterProps) => {
     <footer className={cn("green-banner-bg text-anong-cream relative overflow-hidden", className)}>
       {/* Debug indicator */}
       <div className="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 text-xs rounded z-50">
-        Footer with CSS Lotus
+        Footer with Uploaded Lotus
       </div>
       
       {/* Elegant top border */}
