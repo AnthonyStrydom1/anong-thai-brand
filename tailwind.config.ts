@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -53,12 +52,12 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Premium ANONG Brand Colors inspired by jar labels
+				// Updated ANONG Brand Colors with darker cream/beige tones
 				"anong": {
 					"dark-green": "#1a3d2e",
 					"forest": "#2d5a3d", 
-					"cream": "#f7f3e9",
-					"warm-cream": "#f2ede3",
+					"cream": "#e8e0d0", // Darker cream
+					"warm-cream": "#ded4c4", // Darker warm cream
 					"charcoal": "#2c2c2c",
 					"deep-black": "#1a1a1a",
 					"curry-red": "#8b2635",
@@ -75,7 +74,7 @@ export default {
 					dark: "#0f2d1f"
 				},
 				"thai-gold": "#d4a574",
-				"thai-ivory": "#f7f3e9"
+				"thai-ivory": "#e8e0d0" // Darker ivory to match new cream
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -132,7 +131,7 @@ export default {
 			patterns: {
 				'wavy': {
 					'bg-size': '20px 20px',
-					'bg-image': `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10c2.5 0 5-2.5 5-5s2.5-5 5-5 5 2.5 5 5 2.5 5 5 5 5-2.5 5-5 2.5-5 5-5 5 2.5 5 5-2.5 5-5 5-5-2.5-5-5-2.5-5-5-5-5 2.5-5 5-2.5 5-5 5-5-2.5-5-5 2.5-5 5-5z' fill='%23d4a574' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+					'bg-image': `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10c2.5 0 5-2.5 5-5s2.5-5 5-5 5 2.5 5 5 2.5 5 5 5 5-2.5 5-5 2.5-5 5-5 5 2.5 5 5-2.5 5-5 5-5-2.5-5-5 2.5-5 5-5 5 2.5 5 5-2.5 5-5 5-5-2.5-5-5 2.5-5 5-5z' fill='%23d4a574' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
 				},
 			},
 		}

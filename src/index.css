@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
@@ -6,32 +7,32 @@
 
 @layer base {
   :root {
-    --background: 45 25% 97%;
+    --background: 35 20% 91%; /* Darker background */
     --foreground: 120 15% 12%;
 
-    --card: 45 25% 99%;
+    --card: 35 20% 93%; /* Darker card */
     --card-foreground: 120 15% 12%;
 
-    --popover: 45 25% 99%;
+    --popover: 35 20% 93%; /* Darker popover */
     --popover-foreground: 120 15% 12%;
 
     --primary: 142 45% 18%;
-    --primary-foreground: 45 25% 97%;
+    --primary-foreground: 35 20% 91%;
 
-    --secondary: 40 20% 88%;
+    --secondary: 30 15% 82%; /* Darker secondary */
     --secondary-foreground: 120 15% 12%;
 
-    --muted: 40 20% 94%;
+    --muted: 30 15% 88%; /* Darker muted */
     --muted-foreground: 120 8% 42%;
 
-    --accent: 40 30% 90%;
+    --accent: 30 20% 84%; /* Darker accent */
     --accent-foreground: 120 15% 12%;
 
     --destructive: 355 70% 42%;
-    --destructive-foreground: 45 25% 97%;
+    --destructive-foreground: 35 20% 91%;
 
-    --border: 40 20% 90%;
-    --input: 40 20% 90%;
+    --border: 30 15% 84%; /* Darker border */
+    --input: 30 15% 84%; /* Darker input */
     --ring: 142 45% 18%;
 
     --radius: 0.875rem;
@@ -94,7 +95,7 @@
   /* Enhanced luxury card styling with premium shadows and gold accents */
   .luxury-card {
     @apply bg-gradient-to-br from-white via-anong-warm-cream to-anong-cream rounded-3xl md:rounded-3xl relative overflow-hidden backdrop-blur-sm;
-    background: linear-gradient(135deg, #ffffff 0%, rgba(242, 237, 227, 0.12) 50%, rgba(247, 243, 233, 0.2) 100%);
+    background: linear-gradient(135deg, #ffffff 0%, rgba(222, 212, 196, 0.12) 50%, rgba(232, 224, 208, 0.2) 100%);
     border-radius: 1.5rem;
     box-shadow: 
       0 4px 24px rgba(26, 61, 46, 0.04),
@@ -219,7 +220,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background-color: rgba(242, 237, 227, 0.5);
+  background-color: rgba(222, 212, 196, 0.5);
   border-radius: 4px;
 }
 
