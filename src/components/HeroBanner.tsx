@@ -12,16 +12,18 @@ const HeroBanner = () => {
   
   const translations = {
     en: {
-      tagline: "Authentic Thai Cuisine",
-      subtitle: "Premium Thai curry pastes & sauces using traditional recipes",
-      cta: "Shop Now",
-      secondaryCta: "Explore Recipes"
+      tagline: "PREMIUM",
+      subtitle: "ROOTED IN TRADITION. CRAFTED WITH GRACE.",
+      description: "Authentic Thai curry pastes that elevate your culinary journey with premium ingredients and time-honored recipes.",
+      cta: "Explore Collection",
+      secondaryCta: "View Recipes"
     },
     th: {
-      tagline: "รสชาติไทยแท้ ที่สร้างสรรค์โดยอนงค์",
-      subtitle: "พริกแกงและซอสไทยระดับพรีเมียมใช้สูตรดั้งเดิม",
-      cta: "ซื้อเลย",
-      secondaryCta: "ค้นหาสูตรอาหาร"
+      tagline: "พรีเมียม",
+      subtitle: "รากฐานจากประเพณี สร้างสรรค์ด้วยความประณีต",
+      description: "พริกแกงไทยแท้ที่ยกระดับการทำอาหารของคุณด้วยวัตถุดิบคุณภาพและสูตรดั้งเดิม",
+      cta: "สำรวจคอลเลกชัน",
+      secondaryCta: "ดูสูตรอาหาร"
     }
   };
 
@@ -29,79 +31,116 @@ const HeroBanner = () => {
 
   // Animation variants
   const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 30 },
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.8, ease: "easeOut" }
+      transition: { duration: 1, ease: "easeOut" }
+    }
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.3,
+        delayChildren: 0.2
+      }
     }
   };
 
   return (
-    <div className="relative w-full h-[600px] overflow-hidden">
-      {/* Hero image with parallax effect */}
+    <div className="relative w-full h-[700px] overflow-hidden watercolor-bg">
+      {/* Premium background with subtle botanical elements */}
       <motion.div 
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0"
         style={{ 
           backgroundImage: "url('https://i.postimg.cc/Hx3gCZMh/buddah-fin.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "brightness(0.4) contrast(1.1)"
         }}
         initial={{ scale: 1.05 }}
         animate={{ scale: 1 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
+        transition={{ duration: 2, ease: "easeOut" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-[#3b0b5a]/70 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-l from-anong-deep-black/90 via-anong-dark-green/80 to-anong-charcoal/70"></div>
+        {/* Botanical pattern overlay */}
+        <div className="absolute inset-0 bg-botanical-pattern opacity-10"></div>
       </motion.div>
       
-      {/* Content with animated entrance */}
+      {/* Content with premium typography */}
       <div className="absolute inset-0 flex items-center justify-end">
         <div className="container mx-auto px-6">
-          <div className="ml-auto max-w-2xl text-white">
-            <motion.h1 
-              className={`font-display text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight drop-shadow-md`}
-              initial="hidden"
-              animate="visible"
+          <motion.div 
+            className="ml-auto max-w-3xl text-white"
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+          >
+            {/* Premium tagline */}
+            <motion.div 
+              className="mb-4"
               variants={fadeIn}
             >
-              {t.tagline}
-            </motion.h1>
-            <motion.p 
-              className={`font-sarabun text-base md:text-xl lg:text-2xl mb-8 text-white/90 leading-relaxed`}
-              initial="hidden"
-              animate="visible"
+              <span className="font-elegant text-anong-gold text-lg md:text-xl tracking-[0.3em] uppercase">
+                {t.tagline}
+              </span>
+              <div className="w-16 h-px bg-anong-gold mt-2"></div>
+            </motion.div>
+
+            {/* Main heading with premium serif typography */}
+            <motion.h1 
+              className="font-display text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-8 leading-tight drop-shadow-lg tracking-tight text-anong-cream"
               variants={fadeIn}
-              transition={{ delay: 0.2 }}
+            >
+              ANONG
+            </motion.h1>
+            
+            {/* Elegant subtitle */}
+            <motion.p 
+              className="font-elegant text-lg md:text-2xl lg:text-3xl mb-6 text-anong-gold leading-relaxed tracking-wide"
+              variants={fadeIn}
             >
               {t.subtitle}
             </motion.p>
-            <motion.div 
-              className="flex flex-col sm:flex-row gap-4"
-              initial="hidden"
-              animate="visible"
+            
+            {/* Description with premium body font */}
+            <motion.p 
+              className="font-serif text-base md:text-lg lg:text-xl mb-10 text-anong-cream/90 leading-relaxed max-w-2xl"
               variants={fadeIn}
-              transition={{ delay: 0.4 }}
+            >
+              {t.description}
+            </motion.p>
+            
+            {/* Premium CTA buttons */}
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-6"
+              variants={fadeIn}
             >
               <Button 
                 asChild
                 size={isMobile ? "default" : "xl"}
-                className="shadow-lg hover:shadow-purple-500/20 transition-all duration-500"
+                className="btn-gold shadow-xl hover:shadow-2xl text-lg px-12 py-6 h-auto"
               >
-                <Link to="/shop">
+                <Link to="/shop" className="flex items-center">
                   {t.cta}
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-3 h-5 w-5" />
                 </Link>
               </Button>
               <Button 
                 asChild
                 variant="ghost" 
                 size={isMobile ? "default" : "xl"}
-                className="text-white border border-white/30 hover:border-white backdrop-blur-sm"
+                className="text-anong-cream border-2 border-anong-cream/40 hover:border-anong-gold hover:bg-anong-gold/10 backdrop-blur-sm text-lg px-12 py-6 h-auto font-medium"
               >
                 <Link to="/recipes">
                   {t.secondaryCta}
                 </Link>
               </Button>
             </motion.div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

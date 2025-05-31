@@ -13,25 +13,27 @@ const FeaturedProducts = () => {
   
   const translations = {
     en: {
-      title: "Featured Products",
-      subtitle: "Discover Anong's premium Thai sauces and curry pastes",
+      title: "Premium Collection",
+      subtitle: "Discover handcrafted Thai curry pastes rooted in tradition",
+      tagline: "FEATURED PRODUCTS",
       all: "All",
       curryPastes: "Curry Pastes",
       stirFrySauces: "Stir-Fry Sauces",
       dippingSauces: "Dipping Sauces",
-      viewAll: "View All Products",
+      viewAll: "View Full Collection",
       exploreProducts: "Explore Our Best Sellers",
       addToCart: "Add to Cart",
       addedToCart: "Added to cart!"
     },
     th: {
-      title: "สินค้าแนะนำ",
-      subtitle: "ค้นพบซอสและพริกแกงไทยระดับพรีเมียมของอนงค์",
+      title: "คอลเลกชันพรีเมียม",
+      subtitle: "ค้นพบพริกแกงไทยที่สร้างสรรค์ด้วยมือ รากฐานจากประเพณี",
+      tagline: "สินค้าแนะนำ",
       all: "ทั้งหมด",
       curryPastes: "พริกแกง",
       stirFrySauces: "ซอสผัด",
       dippingSauces: "น้ำจิ้ม",
-      viewAll: "ดูสินค้าทั้งหมด",
+      viewAll: "ดูคอลเลกชันทั้งหมด",
       exploreProducts: "สำรวจสินค้าขายดีของเรา",
       addToCart: "เพิ่มลงตะกร้า",
       addedToCart: "เพิ่มลงตะกร้าแล้ว!"
@@ -68,17 +70,40 @@ const FeaturedProducts = () => {
   };
 
   return (
-    <section className="py-16 px-4 bg-gradient-to-b from-[#FCFAFF] to-[#F5EBFF] thai-lotus-bg">
-      <div className="container mx-auto">
+    <section className="section-premium bg-anong-cream watercolor-bg">
+      <div className="container mx-auto relative z-10">
         <motion.div 
-          className="text-center mb-12"
+          className="text-center mb-16"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.8 }}
         >
-          <h2 className="text-4xl font-semibold mb-3 text-gray-800 font-display">{t.title}</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">{t.subtitle}</p>
-          <div className="w-24 h-1 bg-thai-purple mx-auto mt-5"></div>
+          {/* Premium tagline */}
+          <motion.div 
+            className="mb-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <span className="font-elegant text-anong-gold text-sm md:text-base tracking-[0.3em] uppercase">
+              {t.tagline}
+            </span>
+            <div className="w-16 h-px bg-anong-gold mx-auto mt-2"></div>
+          </motion.div>
+
+          <h2 className="heading-premium text-4xl md:text-5xl lg:text-6xl mb-6 text-anong-deep-black">
+            {t.title}
+          </h2>
+          <p className="text-luxury text-lg md:text-xl max-w-3xl mx-auto text-anong-charcoal/80">
+            {t.subtitle}
+          </p>
+          
+          {/* Botanical divider */}
+          <div className="flex items-center justify-center mt-8 mb-4">
+            <div className="w-8 h-px bg-anong-gold"></div>
+            <div className="mx-4 botanical-accent w-6 h-6"></div>
+            <div className="w-8 h-px bg-anong-gold"></div>
+          </div>
         </motion.div>
         
         {/* Category Filter */}
@@ -86,7 +111,7 @@ const FeaturedProducts = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="my-10"
+          className="my-12"
         >
           <CategoryFilter 
             categories={categories} 
@@ -98,14 +123,14 @@ const FeaturedProducts = () => {
         
         {/* Products Grid */}
         <motion.div 
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
         >
           {filteredProducts.map((product) => (
-            <motion.div key={product.id} variants={itemVariants}>
+            <motion.div key={product.id} variants={itemVariants} className="hover-lift">
               <ProductCard product={product} />
             </motion.div>
           ))}
@@ -117,6 +142,7 @@ const FeaturedProducts = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.6 }}
+          className="text-center"
         >
           <ViewAllButton text={t.viewAll} />
         </motion.div>

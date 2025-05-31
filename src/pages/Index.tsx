@@ -15,7 +15,7 @@ const Index = () => {
   // Animation variants for sections
   const sectionVariants = {
     offscreen: {
-      y: 50,
+      y: 60,
       opacity: 0
     },
     onscreen: {
@@ -23,26 +23,25 @@ const Index = () => {
       opacity: 1,
       transition: {
         type: "spring",
-        bounce: 0.2,
-        duration: 0.8
+        bounce: 0.15,
+        duration: 1.2
       }
     }
   };
   
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-anong-cream">
       <Header />
       
-      <main className="flex-grow subtle-pattern">
+      <main className="flex-grow">
         <HeroBanner />
         
-        <div className="container mx-auto px-4 md:px-0">
+        <div className="relative">
           <motion.div
             initial="offscreen"
             whileInView="onscreen"
             viewport={{ once: true, amount: 0.1 }}
             variants={sectionVariants}
-            className="pt-12"
           >
             <FeaturedProducts />
           </motion.div>
