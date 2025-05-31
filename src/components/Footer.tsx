@@ -29,9 +29,9 @@ const Footer = ({ className }: FooterProps) => {
       about: "Our Heritage",
       contact: "Connect With Us",
       visitUs: "Visit ANONG Restaurant",
-      address: "123 Authentic Thai Street, Bangkok 10110",
+      address: "20 Hettie Street, Cyrildene, Johannesburg",
       hours: "Daily: 11:00 AM - 10:00 PM",
-      phone: "+66 2 123 4567",
+      phone: "076 505 9941",
       shipping: "Shipping & Delivery",
       returns: "Returns & Exchanges",
       privacy: "Privacy Policy",
@@ -55,9 +55,9 @@ const Footer = ({ className }: FooterProps) => {
       about: "มรดกของเรา",
       contact: "ติดต่อเรา",
       visitUs: "เยี่ยมชมร้านอาหารอนงค์",
-      address: "123 ถนนอาหารไทยแท้ กรุงเทพฯ 10110",
+      address: "20 เฮตตี้ สตรีท ไซริลดีน โจฮันเนสเบิร์ก",
       hours: "ทุกวัน: 11:00 - 22:00 น.",
-      phone: "+66 2 123 4567",
+      phone: "076 505 9941",
       shipping: "การจัดส่งและการขนส่ง",
       returns: "การคืนสินค้าและการแลกเปลี่ยน",
       privacy: "นโยบายความเป็นส่วนตัว",
@@ -135,23 +135,23 @@ const Footer = ({ className }: FooterProps) => {
           <div className="w-24 md:w-32 h-px bg-anong-gold/60"></div>
         </div>
 
-        {/* Premium Footer Links */}
+        {/* Premium Footer Links with Restaurant Integration */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 mb-16 text-sm">
           <div className="space-y-5">
             <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base md:text-lg">{t.shop}</h4>
             <ul className="space-y-3">
-              <li><Link to="/shop?category=curry-pastes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.curryPastes}</Link></li>
-              <li><Link to="/shop?category=stir-fry-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.stirFrySauces}</Link></li>
-              <li><Link to="/shop?category=dipping-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.dippingSauces}</Link></li>
+              <li><Link to="/shop?category=curry-pastes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.curryPastes}</Link></li>
+              <li><Link to="/shop?category=stir-fry-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.stirFrySauces}</Link></li>
+              <li><Link to="/shop?category=dipping-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.dippingSauces}</Link></li>
             </ul>
           </div>
           
           <div className="space-y-5">
             <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base md:text-lg">ANONG</h4>
             <ul className="space-y-3">
-              <li><Link to="/recipes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.recipes}</Link></li>
-              <li><Link to="/about" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.about}</Link></li>
-              <li><Link to="/contact" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.contact}</Link></li>
+              <li><Link to="/recipes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.recipes}</Link></li>
+              <li><Link to="/about" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.about}</Link></li>
+              <li><Link to="/contact" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.contact}</Link></li>
             </ul>
           </div>
           
@@ -178,23 +178,23 @@ const Footer = ({ className }: FooterProps) => {
             <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base md:text-lg">Connect</h4>
             <div className="flex space-x-4 mb-6">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" 
-                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-400 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
+                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-300 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
                 <Instagram className="h-5 w-5" />
               </a>
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
-                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-400 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
+                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-300 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
                 <Facebook className="h-5 w-5" />
               </a>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" 
-                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-400 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
+                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-300 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
                 <Twitter className="h-5 w-5" />
               </a>
             </div>
             <ul className="space-y-3">
-              <li><Link to="/shipping" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif text-sm hover:translate-x-1 transform inline-block">{t.shipping}</Link></li>
-              <li><Link to="/returns" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif text-sm hover:translate-x-1 transform inline-block">{t.returns}</Link></li>
-              <li><Link to="/privacy" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif text-sm hover:translate-x-1 transform inline-block">{t.privacy}</Link></li>
-              <li><Link to="/terms" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif text-sm hover:translate-x-1 transform inline-block">{t.terms}</Link></li>
+              <li><Link to="/shipping" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.shipping}</Link></li>
+              <li><Link to="/returns" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.returns}</Link></li>
+              <li><Link to="/privacy" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.privacy}</Link></li>
+              <li><Link to="/terms" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.terms}</Link></li>
             </ul>
           </div>
         </div>

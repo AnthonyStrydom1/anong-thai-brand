@@ -46,19 +46,19 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
   if (isSimplified) {
     return (
       <motion.div 
-        whileHover={{ y: -4 }}
-        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+        whileHover={{ y: -3 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
         className="group relative"
       >
-        <div className="bg-white rounded-3xl shadow-[0_4px_25px_rgba(26,61,46,0.06)] hover:shadow-[0_8px_40px_rgba(26,61,46,0.12)] border border-anong-warm-cream/30 overflow-hidden transition-all duration-600">
+        <div className="bg-white rounded-2xl md:rounded-3xl shadow-[0_3px_20px_rgba(26,61,46,0.04)] hover:shadow-[0_6px_35px_rgba(26,61,46,0.08)] border border-anong-warm-cream/25 overflow-hidden transition-all duration-500">
           <Link to={`/product/${id}`} className="block">
-            <div className="aspect-square bg-gradient-to-br from-anong-cream via-anong-warm-cream/20 to-anong-cream relative overflow-hidden">
+            <div className="aspect-square bg-gradient-to-br from-anong-cream via-anong-warm-cream/15 to-anong-cream relative overflow-hidden">
               {/* Refined botanical background */}
-              <div className="absolute inset-0 bg-botanical-pattern opacity-[0.01]"></div>
+              <div className="absolute inset-0 bg-botanical-pattern opacity-[0.008]"></div>
               
               <motion.img 
-                whileHover={{ scale: 1.03 }}
-                transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
                 src={image} 
                 alt={name[language]}
                 className="w-4/5 h-4/5 object-contain absolute inset-0 m-auto drop-shadow-md"
@@ -66,13 +66,13 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
               />
               
               {/* Subtle premium overlay on hover */}
-              <div className="absolute inset-0 bg-gradient-to-t from-anong-gold/[0.015] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-600"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-anong-gold/[0.01] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>
           </Link>
           
           <div className="p-6 md:p-8">
             <Link to={`/product/${id}`}>
-              <h3 className="font-elegant text-xl md:text-2xl mb-3 text-anong-deep-black group-hover:text-anong-dark-green transition-colors duration-500 leading-tight font-medium">
+              <h3 className="font-elegant text-xl md:text-2xl mb-3 text-anong-deep-black group-hover:text-anong-dark-green transition-colors duration-400 leading-tight font-medium">
                 {name[language]}
               </h3>
             </Link>
@@ -87,7 +87,7 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
               </span>
               <Button 
                 size="sm" 
-                className="bg-anong-dark-green hover:bg-anong-gold hover:text-anong-deep-black text-anong-cream text-sm md:text-base px-6 md:px-8 py-3 md:py-4 h-auto font-medium tracking-wide transition-all duration-500 rounded-xl group-hover:shadow-lg min-h-[48px]"
+                className="bg-anong-dark-green hover:bg-anong-gold hover:text-anong-deep-black text-anong-cream text-sm md:text-base px-6 md:px-8 py-3 md:py-4 h-auto font-medium tracking-wide transition-all duration-400 rounded-xl group-hover:shadow-lg min-h-[48px]"
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="h-4 w-4 mr-2 md:mr-3" />
@@ -103,11 +103,11 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
 
   return (
     <motion.div 
-      whileHover={{ y: -5 }}
-      transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
       className="group relative"
     >
-      <div className="luxury-card group overflow-hidden relative bg-white shadow-[0_8px_35px_rgba(26,61,46,0.08)] hover:shadow-[0_12px_60px_rgba(26,61,46,0.12)] border border-anong-warm-cream/30 rounded-3xl transition-all duration-700">
+      <div className="luxury-card group overflow-hidden relative bg-white shadow-[0_6px_30px_rgba(26,61,46,0.06)] hover:shadow-[0_10px_50px_rgba(26,61,46,0.1)] border border-anong-warm-cream/25 rounded-2xl md:rounded-3xl transition-all duration-600">
         {/* Premium badge */}
         <div className="absolute top-6 md:top-8 left-6 md:left-8 z-10">
           <span className="bg-anong-gold text-anong-deep-black px-4 md:px-5 py-2 text-xs font-medium tracking-wider uppercase rounded-full shadow-lg font-elegant">
@@ -116,25 +116,25 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
         </div>
 
         <Link to={`/product/${id}`} className="block overflow-hidden">
-          <div className="h-72 md:h-96 overflow-hidden flex items-center justify-center bg-gradient-to-br from-anong-cream via-anong-warm-cream/15 to-anong-cream relative">
+          <div className="h-72 md:h-96 overflow-hidden flex items-center justify-center bg-gradient-to-br from-anong-cream via-anong-warm-cream/12 to-anong-cream relative">
             {/* Refined botanical background */}
-            <div className="absolute inset-0 bg-botanical-pattern opacity-[0.015]"></div>
+            <div className="absolute inset-0 bg-botanical-pattern opacity-[0.01]"></div>
             <motion.img 
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+              whileHover={{ scale: 1.025 }}
+              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
               src={image} 
               alt={name[language]}
               className="w-4/5 h-4/5 object-contain relative z-10 drop-shadow-xl"
               loading="lazy"
             />
             {/* Premium hover overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-anong-gold/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-anong-gold/[0.015] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-600"></div>
           </div>
         </Link>
         
         <div className="p-8 md:p-10 relative z-10 bg-white">
           <Link to={`/product/${id}`}>
-            <h3 className="heading-elegant text-2xl md:text-3xl mb-4 md:mb-5 text-anong-deep-black group-hover:text-anong-dark-green transition-colors duration-600 leading-tight font-light">
+            <h3 className="heading-elegant text-2xl md:text-3xl mb-4 md:mb-5 text-anong-deep-black group-hover:text-anong-dark-green transition-colors duration-500 leading-tight font-light">
               {name[language]}
             </h3>
           </Link>
@@ -155,7 +155,7 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
             </span>
             <Button 
               size="sm" 
-              className="bg-anong-dark-green hover:bg-anong-gold hover:text-anong-deep-black text-anong-cream text-base px-8 md:px-10 py-4 md:py-5 h-auto font-medium tracking-wide transition-all duration-600 rounded-xl min-h-[52px]"
+              className="bg-anong-dark-green hover:bg-anong-gold hover:text-anong-deep-black text-anong-cream text-base px-8 md:px-10 py-4 md:py-5 h-auto font-medium tracking-wide transition-all duration-500 rounded-xl min-h-[52px]"
               onClick={handleAddToCart}
             >
               <ShoppingCart className="h-5 w-5 mr-3" />

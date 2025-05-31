@@ -47,8 +47,8 @@
   body {
     @apply bg-anong-cream text-anong-deep-black font-body leading-relaxed;
     background-image: 
-      radial-gradient(circle at 15% 25%, rgba(212, 165, 116, 0.006) 0%, transparent 60%),
-      radial-gradient(circle at 85% 75%, rgba(26, 61, 46, 0.004) 0%, transparent 60%);
+      radial-gradient(circle at 15% 25%, rgba(212, 165, 116, 0.004) 0%, transparent 60%),
+      radial-gradient(circle at 85% 75%, rgba(26, 61, 46, 0.003) 0%, transparent 60%);
     font-feature-settings: 'kern' 1, 'liga' 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -106,26 +106,26 @@
   
   /* Elevated luxury card styling with premium shadows */
   .luxury-card {
-    @apply bg-gradient-to-br from-white via-anong-warm-cream/20 to-anong-cream/30 rounded-2xl md:rounded-3xl relative overflow-hidden backdrop-blur-sm;
+    @apply bg-gradient-to-br from-white via-anong-warm-cream/15 to-anong-cream/25 rounded-2xl md:rounded-3xl relative overflow-hidden backdrop-blur-sm;
     box-shadow: 
-      0 4px 20px rgba(26, 61, 46, 0.04),
-      0 8px 40px rgba(26, 61, 46, 0.06),
-      0 16px 60px rgba(26, 61, 46, 0.02);
-    border: 1px solid rgba(212, 165, 116, 0.08);
+      0 3px 18px rgba(26, 61, 46, 0.03),
+      0 6px 35px rgba(26, 61, 46, 0.04),
+      0 12px 50px rgba(26, 61, 46, 0.015);
+    border: 1px solid rgba(212, 165, 116, 0.06);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .luxury-card:hover {
     transform: translateY(-2px);
     box-shadow: 
-      0 8px 30px rgba(26, 61, 46, 0.06),
-      0 16px 50px rgba(26, 61, 46, 0.08),
-      0 24px 80px rgba(26, 61, 46, 0.04);
+      0 6px 25px rgba(26, 61, 46, 0.05),
+      0 12px 45px rgba(26, 61, 46, 0.06),
+      0 20px 70px rgba(26, 61, 46, 0.03);
   }
   
   .luxury-card::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-[0.006] pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-[0.004] pointer-events-none;
   }
   
   /* Premium button collection with refined interactions */
@@ -201,7 +201,7 @@
   
   /* Sophisticated botanical decorative elements */
   .botanical-accent {
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 2C20 2 16 12 12 20C16 28 20 38 20 38C20 38 24 28 28 20C24 12 20 2 20 2Z' fill='%23d4a574' fill-opacity='0.4'/%3E%3Cpath d='M2 20C2 20 12 16 20 12C28 16 38 20 38 20C38 20 28 24 20 28C12 24 2 20 2 20Z' fill='%23d4a574' fill-opacity='0.4'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 2C20 2 16 12 12 20C16 28 20 38 20 38C20 38 24 28 28 20C24 12 20 2 20 2Z' fill='%23d4a574' fill-opacity='0.35'/%3E%3Cpath d='M2 20C2 20 12 16 20 12C28 16 38 20 38 20C38 20 28 24 20 28C12 24 2 20 2 20Z' fill='%23d4a574' fill-opacity='0.35'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -210,9 +210,9 @@
   /* Refined watercolor texture with artistic subtlety */
   .watercolor-bg {
     background-image: 
-      radial-gradient(circle at 20% 80%, rgba(212, 165, 116, 0.008) 0%, transparent 60%),
-      radial-gradient(circle at 80% 20%, rgba(45, 90, 61, 0.006) 0%, transparent 60%),
-      radial-gradient(circle at 40% 40%, rgba(157, 181, 161, 0.004) 0%, transparent 60%);
+      radial-gradient(circle at 20% 80%, rgba(212, 165, 116, 0.006) 0%, transparent 60%),
+      radial-gradient(circle at 80% 20%, rgba(45, 90, 61, 0.004) 0%, transparent 60%),
+      radial-gradient(circle at 40% 40%, rgba(157, 181, 161, 0.003) 0%, transparent 60%);
   }
   
   /* Enhanced green banner with lotus pattern */
@@ -231,7 +231,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(26, 61, 46, 0.02) 0%, rgba(45, 90, 61, 0.02) 100%);
+    background: linear-gradient(135deg, rgba(26, 61, 46, 0.015) 0%, rgba(45, 90, 61, 0.015) 100%);
     pointer-events: none;
     z-index: 1;
   }
@@ -248,7 +248,7 @@
   
   .section-premium::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-[0.008] pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-[0.006] pointer-events-none;
   }
   
   /* Sophisticated hover effects with premium easing */
@@ -258,8 +258,8 @@
   
   .hover-lift:hover {
     box-shadow: 
-      0 8px 25px rgba(26, 61, 46, 0.08),
-      0 16px 50px rgba(26, 61, 46, 0.06);
+      0 6px 20px rgba(26, 61, 46, 0.06),
+      0 12px 40px rgba(26, 61, 46, 0.04);
   }
   
   /* Premium dividers with artistic flair */
