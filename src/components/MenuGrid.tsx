@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -80,18 +79,18 @@ const MenuGrid = ({ categories }: MenuGridProps) => {
 
       {/* Modal Dialog for Menu View */}
       <Dialog open={!!selectedCategory} onOpenChange={() => setSelectedCategory(null)}>
-        <DialogContent className="max-w-7xl w-[95vw] max-h-[95vh] overflow-hidden p-0 bg-white">
-          <DialogHeader className="p-4 pb-2 border-b">
+        <DialogContent className="max-w-4xl w-[90vw] max-h-[90vh] p-0 bg-white flex flex-col">
+          <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
             <DialogTitle className="font-elegant text-xl text-anong-deep-black">
               {selectedCategory?.label}
             </DialogTitle>
           </DialogHeader>
-          <div className="w-full overflow-auto">
+          <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
             {selectedCategory && (
               <img 
                 src={selectedCategory.image} 
                 alt={selectedCategory.label}
-                className="w-full h-auto block"
+                className="max-w-full max-h-full object-contain"
               />
             )}
           </div>
