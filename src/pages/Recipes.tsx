@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { recipes } from "@/data/recipes";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 
@@ -73,38 +73,38 @@ const Recipes = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-anong-cream">
       <Header />
       
-      <main className="flex-grow bg-gradient-to-b from-[#FCFAFF] to-[#F5EBFF] thai-lotus-bg py-12">
+      <main className="flex-grow watercolor-bg py-16">
         <div className="container mx-auto px-4">
           <motion.div 
-            className="text-center mb-12"
+            className="text-center mb-16"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-3xl font-semibold mb-2 text-gray-800 font-display">{t.title}</h1>
-            <p className="text-gray-600">{t.subtitle}</p>
-            <div className="w-24 h-1 bg-thai-purple mx-auto mt-5"></div>
+            <h1 className="heading-premium text-4xl lg:text-5xl mb-4 text-anong-dark-green">{t.title}</h1>
+            <p className="text-luxury text-lg text-anong-charcoal/80 max-w-2xl mx-auto">{t.subtitle}</p>
+            <div className="divider-premium w-24 mx-auto mt-8"></div>
           </motion.div>
           
           {/* Filter Categories */}
           <motion.div 
-            className="mb-10"
+            className="mb-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h2 className="text-xl font-medium mb-4">{t.categories}</h2>
-            <div className="flex flex-wrap gap-2">
+            <h2 className="heading-elegant text-xl mb-6 text-anong-dark-green">{t.categories}</h2>
+            <div className="flex flex-wrap gap-3">
               {categories.map((category) => (
                 <Button 
                   key={category.id}
                   variant={activeCategory === category.id ? "default" : "outline"}
                   className={activeCategory === category.id 
-                    ? "bg-thai-purple hover:bg-thai-purple-dark" 
-                    : "border-thai-purple text-thai-purple hover:bg-thai-purple/10"
+                    ? "btn-premium" 
+                    : "btn-outline-premium"
                   }
                   onClick={() => handleCategoryChange(category.id)}
                 >
@@ -123,34 +123,34 @@ const Recipes = () => {
           >
             {filteredRecipes.map(recipe => (
               <motion.div key={recipe.id} variants={itemVariants}>
-                <Card className="premium-card group overflow-hidden">
+                <Card className="luxury-card group overflow-hidden hover-lift">
                   <Link to={`/recipe/${recipe.id}`} className="block overflow-hidden">
-                    <div className="h-64 overflow-hidden flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+                    <div className="h-64 overflow-hidden flex items-center justify-center bg-gradient-to-b from-anong-cream to-anong-warm-cream">
                       <motion.img 
                         whileHover={{ scale: 1.05 }}
                         transition={{ duration: 0.4 }}
                         src={recipe.image} 
                         alt={recipe.name[language]}
-                        className="w-full h-full object-contain p-4"
+                        className="w-full h-full object-contain p-6"
                       />
                     </div>
                   </Link>
-                  <div className="p-5">
+                  <div className="p-6 relative z-10">
                     <Link to={`/recipe/${recipe.id}`}>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-1.5 hover:text-thai-purple transition group-hover:text-thai-purple">
+                      <h3 className="heading-elegant text-lg font-medium text-anong-dark-green mb-2 hover:text-anong-gold transition-colors group-hover:text-anong-gold">
                         {recipe.name[language]}
                       </h3>
                     </Link>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                    <p className="text-luxury text-sm text-anong-charcoal/70 mb-6 line-clamp-2">
                       {recipe.description[language]}
                     </p>
                     <div className="flex justify-between items-center">
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-anong-charcoal/60 font-serif">
                         <span>{recipe.time} min</span> • <span>{recipe.servings} {language === 'en' ? 'servings' : 'ที่'}</span>
                       </div>
                       <Button 
                         size="sm" 
-                        className="bg-white border border-thai-purple text-thai-purple hover:bg-thai-purple hover:text-white transition-colors"
+                        className="bg-anong-cream border border-anong-dark-green text-anong-dark-green hover:bg-anong-dark-green hover:text-anong-cream transition-all duration-300 font-serif"
                         asChild
                       >
                         <Link to={`/recipe/${recipe.id}`} className="flex items-center">
