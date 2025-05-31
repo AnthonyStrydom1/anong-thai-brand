@@ -47,8 +47,9 @@
   body {
     @apply bg-anong-cream text-anong-deep-black font-body leading-relaxed;
     background-image: 
-      radial-gradient(circle at 15% 25%, rgba(212, 165, 116, 0.004) 0%, transparent 60%),
-      radial-gradient(circle at 85% 75%, rgba(26, 61, 46, 0.003) 0%, transparent 60%);
+      radial-gradient(circle at 20% 30%, rgba(212, 165, 116, 0.006) 0%, transparent 65%),
+      radial-gradient(circle at 80% 70%, rgba(26, 61, 46, 0.004) 0%, transparent 65%),
+      radial-gradient(circle at 40% 80%, rgba(157, 181, 161, 0.003) 0%, transparent 60%);
     font-feature-settings: 'kern' 1, 'liga' 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -57,20 +58,20 @@
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight text-anong-deep-black font-light;
-    line-height: 1.2;
+    line-height: 1.15;
     margin-bottom: 0.5em;
   }
   
   h1 {
-    @apply text-4xl md:text-5xl lg:text-6xl;
+    @apply text-4xl md:text-6xl lg:text-7xl;
   }
   
   h2 {
-    @apply text-3xl md:text-4xl lg:text-5xl;
+    @apply text-3xl md:text-5xl lg:text-6xl;
   }
   
   h3 {
-    @apply text-2xl md:text-3xl lg:text-4xl;
+    @apply text-2xl md:text-4xl lg:text-5xl;
   }
 
   p {
@@ -91,107 +92,48 @@
 }
 
 @layer components {
-  /* Premium gradient backgrounds with enhanced sophistication */
-  .premium-gradient {
-    @apply bg-gradient-to-br from-anong-cream via-anong-warm-cream to-anong-cream/95;
-  }
-  
-  .dark-premium-gradient {
-    @apply bg-gradient-to-br from-anong-dark-green via-anong-forest to-anong-dark-green;
-  }
-  
-  .gold-premium-gradient {
-    @apply bg-gradient-to-br from-anong-gold via-anong-warm-gold to-anong-gold/90;
-  }
-  
-  /* Elevated luxury card styling with premium shadows */
+  /* Enhanced luxury card styling with premium shadows and gold accents */
   .luxury-card {
-    @apply bg-gradient-to-br from-white via-anong-warm-cream/15 to-anong-cream/25 rounded-2xl md:rounded-3xl relative overflow-hidden backdrop-blur-sm;
+    @apply bg-gradient-to-br from-white via-anong-warm-cream/12 to-anong-cream/20 rounded-3xl md:rounded-4xl relative overflow-hidden backdrop-blur-sm;
     box-shadow: 
-      0 3px 18px rgba(26, 61, 46, 0.03),
-      0 6px 35px rgba(26, 61, 46, 0.04),
-      0 12px 50px rgba(26, 61, 46, 0.015);
-    border: 1px solid rgba(212, 165, 116, 0.06);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      0 4px 24px rgba(26, 61, 46, 0.04),
+      0 8px 40px rgba(26, 61, 46, 0.05),
+      0 16px 64px rgba(212, 165, 116, 0.02);
+    border: 1px solid rgba(212, 165, 116, 0.08);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .luxury-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
     box-shadow: 
-      0 6px 25px rgba(26, 61, 46, 0.05),
-      0 12px 45px rgba(26, 61, 46, 0.06),
-      0 20px 70px rgba(26, 61, 46, 0.03);
+      0 8px 32px rgba(26, 61, 46, 0.06),
+      0 16px 56px rgba(26, 61, 46, 0.07),
+      0 24px 80px rgba(212, 165, 116, 0.04);
   }
   
   .luxury-card::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-[0.004] pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-[0.006] pointer-events-none;
   }
   
-  /* Premium button collection with refined interactions */
-  .btn-premium {
-    @apply bg-anong-dark-green hover:bg-anong-forest text-anong-cream font-medium px-8 md:px-10 py-4 md:py-5 rounded-xl md:rounded-2xl transition-all duration-300 tracking-wide text-sm md:text-base;
-    box-shadow: 
-      0 2px 10px rgba(26, 61, 46, 0.15),
-      0 4px 20px rgba(26, 61, 46, 0.1);
-    border: 1px solid rgba(45, 90, 61, 0.15);
-    font-feature-settings: 'kern' 1;
-    letter-spacing: 0.02em;
-  }
-  
-  .btn-premium:hover {
-    transform: translateY(-1px);
-    box-shadow: 
-      0 4px 15px rgba(26, 61, 46, 0.2),
-      0 8px 30px rgba(26, 61, 46, 0.15);
-  }
-  
-  .btn-gold {
-    @apply bg-anong-gold hover:bg-anong-warm-gold text-anong-deep-black font-medium px-8 md:px-10 py-4 md:py-5 rounded-xl md:rounded-2xl transition-all duration-300 tracking-wide text-sm md:text-base;
-    box-shadow: 
-      0 2px 10px rgba(212, 165, 116, 0.2),
-      0 4px 20px rgba(212, 165, 116, 0.1);
-    font-feature-settings: 'kern' 1;
-    letter-spacing: 0.02em;
-  }
-  
-  .btn-gold:hover {
-    transform: translateY(-1px);
-    box-shadow: 
-      0 4px 15px rgba(212, 165, 116, 0.25),
-      0 8px 30px rgba(212, 165, 116, 0.15);
-  }
-  
-  .btn-outline-premium {
-    @apply border-2 border-anong-dark-green text-anong-dark-green hover:bg-anong-dark-green hover:text-anong-cream font-medium px-8 md:px-10 py-4 md:py-5 rounded-xl md:rounded-2xl transition-all duration-500 tracking-wide text-sm md:text-base backdrop-blur-sm;
-    background: rgba(255, 255, 255, 0.7);
-    font-feature-settings: 'kern' 1;
-    letter-spacing: 0.02em;
-  }
-  
-  .btn-outline-premium:hover {
-    transform: translateY(-1px);
-    box-shadow: 
-      0 4px 15px rgba(26, 61, 46, 0.15),
-      0 8px 30px rgba(26, 61, 46, 0.1);
-  }
-  
-  /* Enhanced typography with premium font stacks */
+  /* Enhanced typography with premium font stacks and better hierarchy */
   .heading-premium {
     @apply font-display font-light text-anong-deep-black tracking-tight;
     font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     text-rendering: optimizeLegibility;
+    line-height: 1.1;
   }
   
   .heading-elegant {
     @apply font-elegant font-light text-anong-deep-black tracking-wide;
     font-feature-settings: 'kern' 1, 'liga' 1, 'swsh' 1;
+    line-height: 1.15;
   }
   
   .text-luxury {
-    @apply font-serif text-anong-charcoal leading-8 font-normal;
+    @apply font-serif text-anong-charcoal leading-8 font-light;
     font-feature-settings: 'kern' 1, 'liga' 1, 'onum' 1;
-    line-height: 1.75;
+    line-height: 1.8;
   }
   
   .text-refined {
@@ -199,178 +141,79 @@
     font-feature-settings: 'kern' 1, 'liga' 1;
   }
   
-  /* Sophisticated botanical decorative elements */
+  /* Enhanced botanical decorative elements with gold accents */
   .botanical-accent {
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 2C20 2 16 12 12 20C16 28 20 38 20 38C20 38 24 28 28 20C24 12 20 2 20 2Z' fill='%23d4a574' fill-opacity='0.35'/%3E%3Cpath d='M2 20C2 20 12 16 20 12C28 16 38 20 38 20C38 20 28 24 20 28C12 24 2 20 2 20Z' fill='%23d4a574' fill-opacity='0.35'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 2C20 2 16 12 12 20C16 28 20 38 20 38C20 38 24 28 28 20C24 12 20 2 20 2Z' fill='%23d4a574' fill-opacity='0.45'/%3E%3Cpath d='M2 20C2 20 12 16 20 12C28 16 38 20 38 20C38 20 28 24 20 28C12 24 2 20 2 20Z' fill='%23d4a574' fill-opacity='0.45'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
+    filter: drop-shadow(0 1px 2px rgba(212, 165, 116, 0.1));
   }
   
-  /* Refined watercolor texture with artistic subtlety */
-  .watercolor-bg {
-    background-image: 
-      radial-gradient(circle at 20% 80%, rgba(212, 165, 116, 0.006) 0%, transparent 60%),
-      radial-gradient(circle at 80% 20%, rgba(45, 90, 61, 0.004) 0%, transparent 60%),
-      radial-gradient(circle at 40% 40%, rgba(157, 181, 161, 0.003) 0%, transparent 60%);
-  }
-  
-  /* Enhanced green banner with lotus pattern */
-  .green-banner-bg {
-    background-color: #1a3d2e;
-    background-image: 
-      linear-gradient(135deg, rgba(26, 61, 46, 0.8) 0%, rgba(45, 90, 61, 0.8) 100%),
-      url('/lovable-uploads/ff43b41f-aefb-46b4-8aa3-0ffc5cb06fbf.png');
-    background-size: auto, contain;
-    background-position: center, center;
-    background-repeat: no-repeat, no-repeat;
-    position: relative;
-  }
-  
-  .green-banner-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(26, 61, 46, 0.015) 0%, rgba(45, 90, 61, 0.015) 100%);
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  .green-banner-bg > * {
-    position: relative;
-    z-index: 2;
-  }
-
-  /* Premium section styling with enhanced spacing */
-  .section-premium {
-    @apply py-20 md:py-28 lg:py-32 px-6 md:px-8 relative overflow-hidden;
-  }
-  
-  .section-premium::before {
-    content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-[0.006] pointer-events-none;
-  }
-  
-  /* Sophisticated hover effects with premium easing */
+  /* Enhanced hover effects with premium easing and gold touches */
   .hover-lift {
-    @apply transition-all duration-500 ease-out hover:transform hover:-translate-y-1 md:hover:-translate-y-2;
+    @apply transition-all duration-600 ease-out hover:transform hover:-translate-y-2 md:hover:-translate-y-3;
   }
   
   .hover-lift:hover {
     box-shadow: 
-      0 6px 20px rgba(26, 61, 46, 0.06),
-      0 12px 40px rgba(26, 61, 46, 0.04);
+      0 8px 28px rgba(26, 61, 46, 0.08),
+      0 16px 48px rgba(26, 61, 46, 0.06),
+      0 24px 80px rgba(212, 165, 116, 0.04);
   }
   
-  /* Premium dividers with artistic flair */
-  .divider-premium {
-    @apply h-px bg-gradient-to-r from-transparent via-anong-gold/60 to-transparent relative;
-  }
-  
-  .divider-premium::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 8px;
-    height: 8px;
-    background: radial-gradient(circle, rgba(212, 165, 116, 0.8) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  
-  /* Refined form elements with premium styling */
+  /* Premium form elements with enhanced styling */
   .input-premium {
-    @apply bg-white/80 rounded-xl md:rounded-2xl px-5 md:px-6 py-4 md:py-5 font-serif text-sm md:text-base backdrop-blur-sm transition-all duration-300;
-    border: 1.5px solid rgba(157, 181, 161, 0.15);
+    @apply bg-white/90 rounded-2xl md:rounded-3xl px-6 md:px-8 py-5 md:py-6 font-serif text-base md:text-lg backdrop-blur-sm transition-all duration-400;
+    border: 1.5px solid rgba(157, 181, 161, 0.2);
     box-shadow: 
-      0 2px 8px rgba(26, 61, 46, 0.04),
-      inset 0 1px 3px rgba(255, 255, 255, 0.8);
+      0 3px 12px rgba(26, 61, 46, 0.05),
+      inset 0 1px 4px rgba(255, 255, 255, 0.9);
   }
   
   .input-premium:focus {
     @apply border-anong-dark-green outline-none;
     box-shadow: 
-      0 0 0 3px rgba(26, 61, 46, 0.08),
-      0 4px 12px rgba(26, 61, 46, 0.06);
-  }
-  
-  /* Premium navigation with sophisticated backdrop */
-  .nav-premium {
-    background-color: rgba(26, 61, 46, 0.98);
-    @apply backdrop-blur-xl;
-    box-shadow: 
-      0 1px 6px rgba(26, 61, 46, 0.1),
-      0 4px 20px rgba(26, 61, 46, 0.05);
-    border-bottom: 1px solid rgba(212, 165, 116, 0.12);
-  }
-  
-  /* Product card enhancements */
-  .product-card {
-    @apply luxury-card hover-lift p-6 md:p-8;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .product-image {
-    @apply rounded-xl md:rounded-2xl overflow-hidden mb-6;
-    box-shadow: 
-      0 4px 12px rgba(26, 61, 46, 0.08),
-      0 8px 24px rgba(26, 61, 46, 0.04);
-  }
-  
-  /* Trust signals styling */
-  .trust-badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full bg-anong-gold/10 text-anong-dark-green text-xs font-medium tracking-wide;
-    border: 1px solid rgba(212, 165, 116, 0.2);
-  }
-  
-  /* Premium content spacing */
-  .content-spacing > * + * {
-    @apply mt-6 md:mt-8;
-  }
-  
-  .content-spacing-lg > * + * {
-    @apply mt-8 md:mt-12 lg:mt-16;
+      0 0 0 4px rgba(26, 61, 46, 0.1),
+      0 6px 16px rgba(26, 61, 46, 0.08);
   }
 }
 
-/* Enhanced scrollbar with luxury aesthetics */
+/* Enhanced scrollbar with luxury aesthetics and gold touches */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: rgba(242, 237, 227, 0.4);
-  border-radius: 3px;
+  background-color: rgba(242, 237, 227, 0.5);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(212, 165, 116, 0.6) 0%, rgba(212, 165, 116, 0.4) 100%);
-  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(212, 165, 116, 0.7) 0%, rgba(212, 165, 116, 0.5) 100%);
+  border-radius: 4px;
   transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(212, 165, 116, 0.8) 0%, rgba(212, 165, 116, 0.6) 100%);
+  background: linear-gradient(180deg, rgba(212, 165, 116, 0.9) 0%, rgba(212, 165, 116, 0.7) 100%);
 }
 
-/* Mobile optimizations with premium touch targets */
+/* Enhanced mobile optimizations with touch-friendly interactions */
 @media (max-width: 768px) {
-  .btn-premium,
-  .btn-gold,
-  .btn-outline-premium {
-    @apply min-h-[52px] text-sm px-6 py-4;
-  }
-  
   .luxury-card {
-    @apply rounded-xl p-4;
+    @apply rounded-2xl p-6;
     box-shadow: 
-      0 2px 12px rgba(26, 61, 46, 0.04),
-      0 4px 24px rgba(26, 61, 46, 0.03);
+      0 3px 16px rgba(26, 61, 46, 0.05),
+      0 6px 28px rgba(26, 61, 46, 0.04);
   }
   
-  .section-premium {
-    @apply py-16 px-4;
+  .heading-premium {
+    line-height: 1.05;
+  }
+  
+  .text-luxury {
+    line-height: 1.7;
   }
   
   /* Performance optimizations for mobile */
@@ -383,36 +226,38 @@
   }
 }
 
-/* Image optimization with premium loading effects */
+/* Enhanced image optimization with premium loading effects */
 img {
-  @apply transition-all duration-500 ease-out;
+  @apply transition-all duration-600 ease-out;
 }
 
 img[loading="lazy"] {
   opacity: 0;
-  animation: premiumFadeIn 0.6s ease-out forwards;
+  animation: premiumFadeIn 0.8s ease-out forwards;
 }
 
 @keyframes premiumFadeIn {
   0% {
     opacity: 0;
     transform: scale(1.02);
+    filter: blur(2px);
   }
   100% {
     opacity: 1;
     transform: scale(1);
+    filter: blur(0);
   }
 }
 
-/* Premium selection styling */
+/* Enhanced selection styling with gold accents */
 ::selection {
-  background-color: rgba(212, 165, 116, 0.2);
+  background-color: rgba(212, 165, 116, 0.25);
   color: rgba(26, 61, 46, 1);
 }
 
-/* Focus visible improvements for accessibility */
+/* Enhanced focus visible improvements for accessibility */
 :focus-visible {
-  outline: 2px solid rgba(212, 165, 116, 0.6);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: 3px solid rgba(212, 165, 116, 0.7);
+  outline-offset: 3px;
+  border-radius: 6px;
 }

@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,20 +10,20 @@ import { motion } from "framer-motion";
 const Index = () => {
   const { language } = useLanguage();
   
-  // Premium animation variants with sophisticated timing
+  // Enhanced animation variants with more sophisticated timing
   const sectionVariants = {
     offscreen: {
-      y: 30,
+      y: 40,
       opacity: 0
     },
     onscreen: {
       y: 0,
       opacity: 1,
       transition: {
-        duration: 1.2,
+        duration: 1.4,
         ease: [0.25, 0.1, 0.25, 1],
         type: "spring",
-        damping: 20
+        damping: 25
       }
     }
   };
@@ -36,13 +35,12 @@ const Index = () => {
       <main className="flex-grow">
         <HeroBanner />
         
-        <div className="relative content-spacing-lg">
+        <div className="relative">
           <motion.div
             initial="offscreen"
             whileInView="onscreen"
             viewport={{ once: true, amount: 0.1 }}
             variants={sectionVariants}
-            className="section-premium"
           >
             <FeaturedProducts />
           </motion.div>
@@ -52,7 +50,7 @@ const Index = () => {
             whileInView="onscreen"
             viewport={{ once: true, amount: 0.1 }}
             variants={sectionVariants}
-            className="section-premium"
+            className="my-16 md:my-24"
           >
             <BrandStory />
           </motion.div>
