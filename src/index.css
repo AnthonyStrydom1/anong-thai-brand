@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
@@ -137,12 +138,12 @@
   
   /* Green banner background with subtle botanical pattern */
   .green-banner-bg {
-    background-color: var(--anong-dark-green);
-    background-image: 
-      url('/lovable-uploads/c5e5ac91-9703-4e18-ab93-404f42c8d2c3.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background: linear-gradient(135deg, #1a3d2e 0%, #2d5a3d 100%),
+                url('/lovable-uploads/c5e5ac91-9703-4e18-ab93-404f42c8d2c3.png');
+    background-size: auto, contain;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    background-blend-mode: overlay;
     position: relative;
   }
   
@@ -150,7 +151,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(26, 61, 46, 0.90) 0%, rgba(45, 90, 61, 0.90) 100%);
+    background: linear-gradient(135deg, rgba(26, 61, 46, 0.20) 0%, rgba(45, 90, 61, 0.20) 100%);
     pointer-events: none;
     z-index: 1;
   }

@@ -117,11 +117,11 @@ const Menu = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col bg-white subtle-pattern">
+    <div className="min-h-screen flex flex-col bg-anong-cream">
       <Header />
       
       <motion.main 
-        className="flex-grow py-16"
+        className="flex-grow section-premium"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -131,19 +131,22 @@ const Menu = () => {
             className="text-center mb-16"
             variants={itemVariants}
           >
-            <h1 className="text-5xl font-bold text-[#520F7A] mb-5 elegant-heading font-display">{t.title}</h1>
-            <div className="w-24 h-0.5 bg-thai-gold mx-auto mb-5"></div>
-            <p className="text-gray-600 mt-4 max-w-2xl mx-auto text-lg">{t.description}</p>
+            <span className="font-elegant text-anong-gold text-sm tracking-[0.25em] uppercase mb-4 block">
+              Authentic Thai Cuisine
+            </span>
+            <h1 className="heading-premium text-4xl md:text-5xl lg:text-6xl text-anong-deep-black mb-6">{t.title}</h1>
+            <div className="w-24 h-px bg-anong-gold mx-auto mb-6"></div>
+            <p className="text-luxury text-anong-charcoal max-w-2xl mx-auto text-lg leading-relaxed">{t.description}</p>
           </motion.div>
           
           <Tabs defaultValue="starters" className="max-w-5xl mx-auto">
             <motion.div variants={itemVariants}>
-              <TabsList className="flex flex-wrap justify-center mb-12 bg-[#f8f4ff] p-2.5 rounded-xl shadow-inner">
+              <TabsList className="flex flex-wrap justify-center mb-12 bg-anong-cream/50 p-2.5 rounded-xl shadow-inner border border-anong-gold/20">
                 {menuCategories.map((category) => (
                   <TabsTrigger 
                     key={category.id} 
                     value={category.id}
-                    className="px-5 py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#520F7A] data-[state=active]:to-[#6a1f97] data-[state=active]:text-white rounded-lg transition-all data-[state=active]:shadow-md"
+                    className="px-5 py-2.5 data-[state=active]:bg-anong-dark-green data-[state=active]:text-anong-cream rounded-lg transition-all data-[state=active]:shadow-md font-serif"
                   >
                     {category.label}
                   </TabsTrigger>
@@ -158,12 +161,12 @@ const Menu = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <Card className="border-0 shadow-2xl overflow-hidden rounded-xl">
+                  <Card className="luxury-card border-0 shadow-2xl overflow-hidden">
                     <CardContent className="p-0">
                       <img 
                         src={category.image} 
                         alt={category.label}
-                        className="w-full h-auto object-contain rounded-md"
+                        className="w-full h-auto object-contain"
                       />
                     </CardContent>
                   </Card>
