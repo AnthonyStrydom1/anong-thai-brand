@@ -11,27 +11,29 @@ const RestaurantBanner = () => {
   
   const translations = {
     en: {
-      title: "Anong Thai Restaurant",
-      subtitle: "Authentic Thai cuisine made with fresh ingredients and traditional recipes",
-      button: "View Our Restaurant",
+      tagline: "EXPERIENCE AUTHENTIC",
+      title: "ANONG Thai Restaurant",
+      subtitle: "Traditional Thai cuisine crafted with fresh ingredients and time-honored recipes",
+      button: "View Restaurant Details",
     },
     th: {
-      title: "ลองร้านอาหารของเรา",
-      subtitle: "อาหารไทยแท้ๆ ทำจากวัตถุดิบสดและสูตรดั้งเดิม",
-      button: "ดูร้านอาหารของเรา",
+      tagline: "สัมผัสความแท้จริง",
+      title: "ร้านอาหารไทยอนงค์",
+      subtitle: "อาหารไทยดั้งเดิม สร้างสรรค์ด้วยวัตถุดิบสดใหม่และสูตรโบราณ",
+      button: "ดูรายละเอียดร้านอาหาร",
     }
   };
   
   const t = translations[language];
   
-  // Animation variants
+  // Soft animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
       transition: { 
-        duration: 0.6,
-        staggerChildren: 0.2 
+        duration: 0.8,
+        staggerChildren: 0.3 
       }
     }
   };
@@ -41,91 +43,74 @@ const RestaurantBanner = () => {
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.5 }
+      transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }
     }
   };
   
   return (
-    <section className="relative overflow-hidden my-16 rounded-xl shadow-2xl luxury-card">
-      {/* Premium background with botanical overlay */}
-      <div className="absolute inset-0 dark-premium-gradient">
-        {/* Botanical pattern overlay */}
-        <div className="absolute inset-0 bg-botanical-pattern opacity-20"></div>
-        {/* Watercolor texture */}
-        <div className="absolute inset-0 watercolor-bg"></div>
+    <section className="relative overflow-hidden my-20 rounded-2xl shadow-2xl luxury-card mx-4 md:mx-0">
+      {/* Refined background with deep green gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-anong-dark-green via-anong-forest to-anong-dark-green">
+        {/* Enhanced botanical pattern overlay */}
+        <div className="absolute inset-0 bg-botanical-pattern opacity-15"></div>
+        {/* Subtle watercolor texture */}
+        <div className="absolute inset-0 watercolor-bg opacity-20"></div>
       </div>
       
-      {/* Enhanced gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-anong-dark-green/95 via-anong-forest/90 to-anong-dark-green/95"></div>
-      
       {/* Elegant decorative border */}
-      <div className="absolute inset-0 border border-anong-gold/30 rounded-xl"></div>
+      <div className="absolute inset-0 border border-anong-gold/20 rounded-2xl"></div>
       
-      {/* Content with premium typography */}
+      {/* Refined content with premium typography */}
       <motion.div 
-        className="relative container mx-auto px-6 py-24 text-center"
+        className="relative container mx-auto px-8 py-20 text-center"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
         variants={containerVariants}
       >
-        {/* Premium accent */}
+        {/* Elegant tagline */}
         <motion.div 
           className="mb-6"
           variants={itemVariants}
         >
-          <span className="font-elegant text-anong-gold text-sm md:text-base tracking-[0.2em] uppercase">
-            Experience Authentic
+          <span className="font-elegant text-anong-gold text-sm md:text-base tracking-[0.3em] uppercase font-light">
+            {t.tagline}
           </span>
-          <div className="w-20 h-px bg-anong-gold mx-auto mt-2"></div>
+          <div className="w-16 h-px bg-anong-gold mx-auto mt-3"></div>
         </motion.div>
 
         <motion.h2 
-          className="heading-premium text-4xl md:text-5xl lg:text-6xl text-anong-cream mb-6 leading-tight"
+          className="heading-premium text-3xl md:text-4xl lg:text-5xl text-anong-cream mb-8 leading-tight font-light"
           variants={itemVariants}
         >
           {t.title}
         </motion.h2>
         
         <motion.p 
-          className="text-luxury text-lg md:text-xl text-anong-cream/90 max-w-2xl mx-auto mb-8 leading-relaxed"
+          className="text-luxury text-base md:text-lg text-anong-cream/90 max-w-2xl mx-auto mb-10 leading-relaxed font-light"
           variants={itemVariants}
         >
           {t.subtitle}
         </motion.p>
         
-        {/* Botanical divider */}
-        <motion.div 
-          className="flex items-center justify-center mb-8"
-          variants={itemVariants}
-        >
-          <div className="w-12 h-px bg-anong-gold/60"></div>
-          <div className="mx-4 botanical-accent w-4 h-4 opacity-80"></div>
-          <div className="w-12 h-px bg-anong-gold/60"></div>
+        {/* Refined contact information */}
+        <motion.div className="space-y-2 mb-10" variants={itemVariants}>
+          <p className="text-anong-cream/85 font-serif text-sm">
+            20 Hettie Street, Cyrildene, Johannesburg, 2198
+          </p>
+          <p className="text-anong-cream/85 font-serif text-sm">
+            Anong: 076 505 9941 | Howard: 074 240 6712 | Justin: 072 102 0284
+          </p>
         </motion.div>
-        
-        <motion.p 
-          className="text-anong-cream/80 mb-3 font-serif text-lg"
-          variants={itemVariants}
-        >
-          20 Hettie Street, Cyrildene, Johannesburg, 2198
-        </motion.p>
-        
-        <motion.p 
-          className="text-anong-cream/80 mb-10 font-serif"
-          variants={itemVariants}
-        >
-          Anong: 076 505 9941 | Howard: 074 240 6712 | Justin: 072 102 0284
-        </motion.p>
         
         <motion.div variants={itemVariants}>
           <Link to="/menu">
             <Button 
-              className="btn-gold text-lg px-12 py-6 h-auto shadow-2xl hover:shadow-3xl border border-anong-gold/20"
+              className="btn-gold text-base px-10 py-5 h-auto shadow-xl hover:shadow-2xl border border-anong-gold/20 font-medium tracking-wide"
               size="lg"
             >
               {t.button}
-              <ArrowRight className="ml-3 h-5 w-5" />
+              <ArrowRight className="ml-3 h-4 w-4" />
             </Button>
           </Link>
         </motion.div>

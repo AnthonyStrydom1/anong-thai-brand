@@ -13,48 +13,37 @@ const FeaturedProducts = () => {
   const translations = {
     en: {
       tagline: "SIGNATURE COLLECTION",
-      title: "Handcrafted Excellence",
-      subtitle: "Our flagship curry pastes, perfected through generations of culinary mastery",
-      viewCollection: "View Full Collection",
-      discoverMore: "Discover the complete range of authentic Thai flavors"
+      title: "Our Flagship Selection",
+      subtitle: "Handcrafted curry pastes that define authentic Thai cuisine",
+      viewCollection: "View Full Collection"
     },
     th: {
       tagline: "คอลเลกชันเซ็กเนเจอร์",
-      title: "ความเป็นเลิศจากฝีมือ",
-      subtitle: "พริกแกงเรือธงของเรา ที่ผ่านการปรับปรุงมาหลายชั่วอายุคน",
-      viewCollection: "ดูคอลเลกชันทั้งหมด",
-      discoverMore: "ค้นพบรสชาติไทยแท้ครบครัน"
+      title: "เซเลคชันเรือธง",
+      subtitle: "พริกแกงที่สร้างสรรค์ด้วยมือ กำหนดมาตรฐานอาหารไทยแท้",
+      viewCollection: "ดูคอลเลกชันทั้งหมด"
     }
   };
 
   const t = translations[language];
 
-  // Select only flagship products (first 4 premium products)
-  const flagshipProducts = products.slice(0, 4);
+  // Select only 3 flagship products for refined showcase
+  const flagshipProducts = products.slice(0, 3);
   
-  // Refined animation variants
+  // Soft, elegant animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
       transition: { 
-        staggerChildren: 0.15,
-        delayChildren: 0.2
+        staggerChildren: 0.2,
+        delayChildren: 0.3
       }
     }
   };
   
   const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }
-    }
-  };
-
-  const headerVariants = {
-    hidden: { opacity: 0, y: -30 },
+    hidden: { opacity: 0, y: 40 },
     visible: { 
       opacity: 1, 
       y: 0,
@@ -62,46 +51,51 @@ const FeaturedProducts = () => {
     }
   };
 
+  const headerVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }
+    }
+  };
+
   return (
-    <section className="section-premium bg-anong-cream watercolor-bg py-32">
-      <div className="container mx-auto relative z-10 max-w-7xl">
+    <section className="section-premium bg-anong-cream watercolor-bg py-28 relative overflow-hidden">
+      {/* Subtle background elements */}
+      <div className="absolute inset-0 bg-botanical-pattern opacity-8"></div>
+      
+      <div className="container mx-auto relative z-10 max-w-6xl">
         <motion.div 
           className="text-center mb-20"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-80px" }}
           variants={headerVariants}
         >
-          {/* Premium tagline */}
-          <div className="mb-6">
+          {/* Refined tagline */}
+          <div className="mb-8">
             <span className="font-elegant text-anong-gold text-sm md:text-base tracking-[0.4em] uppercase font-light">
               {t.tagline}
             </span>
-            <div className="w-24 h-px bg-anong-gold mx-auto mt-3"></div>
+            <div className="w-20 h-px bg-anong-gold mx-auto mt-4"></div>
           </div>
 
-          <h2 className="heading-premium text-4xl md:text-6xl lg:text-7xl mb-8 text-anong-deep-black font-light tracking-tight">
+          <h2 className="heading-premium text-4xl md:text-5xl lg:text-6xl mb-8 text-anong-deep-black font-light tracking-tight">
             {t.title}
           </h2>
-          <p className="text-luxury text-xl md:text-2xl max-w-4xl mx-auto text-anong-charcoal/75 font-light leading-relaxed">
+          <p className="text-luxury text-lg md:text-xl max-w-3xl mx-auto text-anong-charcoal/75 font-light leading-relaxed">
             {t.subtitle}
           </p>
-          
-          {/* Elegant botanical divider */}
-          <div className="flex items-center justify-center mt-12">
-            <div className="w-16 h-px bg-anong-gold/60"></div>
-            <div className="mx-6 botanical-accent w-8 h-8 opacity-60"></div>
-            <div className="w-16 h-px bg-anong-gold/60"></div>
-          </div>
         </motion.div>
         
-        {/* Flagship Products Grid - Premium 2x2 layout */}
+        {/* Flagship Products Grid - Clean 3-column layout */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 mb-20 max-w-6xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 mb-20"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: true, margin: "-40px" }}
         >
           {flagshipProducts.map((product) => (
             <motion.div key={product.id} variants={itemVariants} className="hover-lift">
@@ -110,25 +104,35 @@ const FeaturedProducts = () => {
           ))}
         </motion.div>
         
+        {/* Elegant botanical divider */}
+        <motion.div 
+          className="flex items-center justify-center mb-12"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, delay: 0.5 }}
+        >
+          <div className="w-20 h-px bg-anong-gold/50"></div>
+          <div className="mx-8 botanical-accent w-6 h-6 opacity-60"></div>
+          <div className="w-20 h-px bg-anong-gold/50"></div>
+        </motion.div>
+        
         {/* Refined CTA Section */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ duration: 1, delay: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
           className="text-center"
         >
-          <p className="text-luxury text-lg md:text-xl text-anong-charcoal/70 mb-10 max-w-2xl mx-auto">
-            {t.discoverMore}
-          </p>
           <Button 
             asChild
             size="lg"
-            className="btn-outline-premium text-lg px-12 py-6 h-auto font-medium tracking-wide hover:bg-anong-dark-green hover:text-anong-cream transition-all duration-500"
+            className="btn-outline-premium text-base px-10 py-5 h-auto font-medium tracking-wide hover:bg-anong-dark-green hover:text-anong-cream transition-all duration-500"
           >
             <Link to="/shop" className="flex items-center">
               {t.viewCollection}
-              <ArrowRight className="ml-3 h-5 w-5" />
+              <ArrowRight className="ml-3 h-4 w-4" />
             </Link>
           </Button>
         </motion.div>

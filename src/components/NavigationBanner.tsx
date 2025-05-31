@@ -65,39 +65,41 @@ const NavigationBanner = () => {
     return false;
   };
 
-  // Common button style for consistent white box highlighting
-  const buttonStyle = "text-white hover:bg-white hover:bg-opacity-20 transition-colors";
-
   return (
-    <div className="bg-[#520F7A] sticky top-0 z-40">
+    <div className="bg-anong-dark-green nav-premium sticky top-0 z-40 border-b border-anong-gold/20">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center py-3">
+        <div className="flex justify-between items-center py-4">
           {/* Logo and Navigation */}
           <div className="flex items-center">
-            <Link to="/" className="mr-4 lg:mr-8">
-              <h1 className="text-xl lg:text-2xl font-bold text-white">
-                Anong Thai
+            <Link to="/" className="mr-8 lg:mr-12">
+              <h1 className="text-xl lg:text-2xl font-display font-light text-anong-cream tracking-wide">
+                ANONG
               </h1>
             </Link>
             
-            <nav className="hidden md:flex space-x-4">
+            <nav className="hidden md:flex space-x-8">
               {navItems.map((item) => (
-                <NavItem 
+                <Link
                   key={item.path}
-                  path={item.path}
-                  label={item.label}
-                  isActive={isActive(item.path)}
-                />
+                  to={item.path}
+                  className={`font-serif text-sm tracking-wide transition-colors duration-300 ${
+                    isActive(item.path)
+                      ? 'text-anong-gold border-b border-anong-gold pb-1'
+                      : 'text-anong-cream/80 hover:text-anong-gold'
+                  }`}
+                >
+                  {item.label}
+                </Link>
               ))}
             </nav>
           </div>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <Button 
               variant="ghost" 
               onClick={toggleLanguage}
-              className={buttonStyle + " font-bold"}
+              className="text-anong-cream/70 hover:text-anong-gold hover:bg-anong-cream/5 text-xs font-medium tracking-wider px-3 py-2 h-auto"
             >
               {language === 'en' ? 'TH' : 'EN'}
             </Button>
@@ -108,9 +110,9 @@ const NavigationBanner = () => {
                 size="icon"
                 onClick={toggleSearch}
                 aria-label={t.search}
-                className={buttonStyle}
+                className="text-anong-cream/70 hover:text-anong-gold hover:bg-anong-cream/5"
               >
-                <Search className="h-5 w-5" />
+                <Search className="h-4 w-4" />
               </Button>
               
               <UserMenu 
@@ -126,10 +128,10 @@ const NavigationBanner = () => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className={buttonStyle + " md:hidden"} 
+              className="text-anong-cream/70 hover:text-anong-gold hover:bg-anong-cream/5 md:hidden" 
               onClick={toggleMenu}
             >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </Button>
           </div>
         </div>

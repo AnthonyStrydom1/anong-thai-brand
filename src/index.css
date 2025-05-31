@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
@@ -46,8 +47,8 @@
   body {
     @apply bg-anong-cream text-anong-charcoal font-body;
     background-image: 
-      radial-gradient(circle at 25% 25%, rgba(212, 165, 116, 0.03) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(26, 61, 46, 0.03) 0%, transparent 50%);
+      radial-gradient(circle at 20% 20%, rgba(212, 165, 116, 0.02) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(26, 61, 46, 0.02) 0%, transparent 50%);
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -83,25 +84,25 @@
   
   /* Refined luxury card styling */
   .luxury-card {
-    @apply bg-gradient-to-br from-white to-anong-warm-cream/30 rounded-2xl shadow-[0_12px_50px_rgba(26,61,46,0.08)] border border-anong-gold/15 relative overflow-hidden backdrop-blur-sm;
+    @apply bg-gradient-to-br from-white to-anong-warm-cream/20 rounded-2xl shadow-[0_8px_40px_rgba(26,61,46,0.06)] border border-anong-gold/10 relative overflow-hidden backdrop-blur-sm;
   }
   
   .luxury-card::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-5 pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-3 pointer-events-none;
   }
   
   /* Enhanced premium button styles */
   .btn-premium {
-    @apply bg-anong-dark-green hover:bg-anong-forest text-anong-cream font-medium px-10 py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl border border-anong-forest/20 tracking-wide;
+    @apply bg-anong-dark-green hover:bg-anong-forest text-anong-cream font-medium px-8 py-4 rounded-xl transition-all duration-500 shadow-lg hover:shadow-xl border border-anong-forest/20 tracking-wide;
   }
   
   .btn-gold {
-    @apply bg-anong-gold hover:bg-anong-warm-gold text-anong-deep-black font-medium px-10 py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl tracking-wide;
+    @apply bg-anong-gold hover:bg-anong-warm-gold text-anong-deep-black font-medium px-8 py-4 rounded-xl transition-all duration-500 shadow-lg hover:shadow-xl tracking-wide;
   }
   
   .btn-outline-premium {
-    @apply border-2 border-anong-dark-green text-anong-dark-green hover:bg-anong-dark-green hover:text-anong-cream font-medium px-10 py-4 rounded-xl transition-all duration-500 tracking-wide;
+    @apply border border-anong-dark-green text-anong-dark-green hover:bg-anong-dark-green hover:text-anong-cream font-medium px-8 py-4 rounded-xl transition-all duration-700 tracking-wide;
   }
   
   /* Refined typography */
@@ -119,7 +120,7 @@
   
   /* Enhanced botanical decorative elements */
   .botanical-accent {
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0C20 0 15 10 10 20C15 30 20 40 20 40C20 40 25 30 30 20C25 10 20 0 20 0Z' fill='%23d4a574' fill-opacity='0.3'/%3E%3Cpath d='M0 20C0 20 10 15 20 10C30 15 40 20 40 20C40 20 30 25 20 30C10 25 0 20 0 20Z' fill='%23d4a574' fill-opacity='0.3'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0C20 0 15 10 10 20C15 30 20 40 20 40C20 40 25 30 30 20C25 10 20 0 20 0Z' fill='%23d4a574' fill-opacity='0.4'/%3E%3Cpath d='M0 20C0 20 10 15 20 10C30 15 40 20 40 20C40 20 30 25 20 30C10 25 0 20 0 20Z' fill='%23d4a574' fill-opacity='0.4'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -128,55 +129,55 @@
   /* Enhanced watercolor texture effect */
   .watercolor-bg {
     background-image: 
-      radial-gradient(circle at 25% 75%, rgba(212, 165, 116, 0.06) 0%, transparent 50%),
-      radial-gradient(circle at 75% 25%, rgba(45, 90, 61, 0.04) 0%, transparent 50%),
-      radial-gradient(circle at 50% 50%, rgba(157, 181, 161, 0.03) 0%, transparent 50%);
+      radial-gradient(circle at 20% 80%, rgba(212, 165, 116, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(45, 90, 61, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(157, 181, 161, 0.02) 0%, transparent 50%);
   }
   
   /* Refined section styling with more breathing room */
   .section-premium {
-    @apply py-24 md:py-32 lg:py-40 px-4 relative overflow-hidden;
+    @apply py-20 md:py-28 lg:py-32 px-4 relative overflow-hidden;
   }
   
   .section-premium::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-10 pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-5 pointer-events-none;
   }
   
   /* Enhanced hover effects with slower, more elegant transitions */
   .hover-lift {
-    @apply transition-all duration-500 hover:transform hover:-translate-y-2 hover:shadow-2xl;
+    @apply transition-all duration-700 hover:transform hover:-translate-y-1 hover:shadow-xl;
   }
   
   /* Premium dividers */
   .divider-premium {
-    @apply h-px bg-gradient-to-r from-transparent via-anong-gold/60 to-transparent;
+    @apply h-px bg-gradient-to-r from-transparent via-anong-gold/50 to-transparent;
   }
   
   /* Refined form elements */
   .input-premium {
-    @apply border-anong-sage/20 focus:border-anong-dark-green focus:ring-anong-dark-green/10 bg-anong-cream/30 rounded-xl px-6 py-4 font-serif;
+    @apply border-anong-sage/20 focus:border-anong-dark-green focus:ring-anong-dark-green/10 bg-anong-cream/30 rounded-xl px-5 py-4 font-serif;
   }
   
   /* Enhanced navigation with more premium feel */
   .nav-premium {
-    @apply bg-white/98 backdrop-blur-xl border-b border-anong-warm-cream/30 shadow-sm;
+    @apply bg-anong-dark-green/98 backdrop-blur-xl border-b border-anong-gold/20 shadow-sm;
   }
 }
 
 /* Enhanced scrollbar with luxury styling */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-anong-warm-cream/50;
+  @apply bg-anong-warm-cream/40;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-anong-gold/60 rounded-full;
+  @apply bg-anong-gold/50 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-anong-gold;
+  @apply bg-anong-gold/70;
 }
