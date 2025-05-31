@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroBanner from "@/components/HeroBanner";
 import FeaturedProducts from "@/components/FeaturedProducts";
-import AboutPreview from "@/components/AboutPreview";
+import BrandStory from "@/components/BrandStory";
 import ContactInfo from "@/components/ContactInfo";
 import RestaurantBanner from "@/components/RestaurantBanner";
 import { motion } from "framer-motion";
@@ -12,19 +12,18 @@ import { motion } from "framer-motion";
 const Index = () => {
   const { language } = useLanguage();
   
-  // Animation variants for sections
+  // Refined animation variants for smoother, more luxurious transitions
   const sectionVariants = {
     offscreen: {
-      y: 60,
+      y: 40,
       opacity: 0
     },
     onscreen: {
       y: 0,
       opacity: 1,
       transition: {
-        type: "spring",
-        bounce: 0.15,
-        duration: 1.2
+        duration: 1,
+        ease: [0.25, 0.1, 0.25, 1]
       }
     }
   };
@@ -52,7 +51,7 @@ const Index = () => {
             viewport={{ once: true, amount: 0.1 }}
             variants={sectionVariants}
           >
-            <AboutPreview />
+            <BrandStory />
           </motion.div>
           
           <motion.div

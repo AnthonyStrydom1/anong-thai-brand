@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
@@ -69,7 +68,7 @@
 }
 
 @layer components {
-  /* Premium gradient backgrounds */
+  /* Enhanced premium gradient backgrounds */
   .premium-gradient {
     @apply bg-premium-gradient;
   }
@@ -82,120 +81,102 @@
     @apply bg-gold-gradient;
   }
   
-  /* Enhanced card styling with premium feel */
-  .premium-card {
-    @apply bg-white rounded-xl shadow-[0_8px_30px_rgba(26,61,46,0.08)] hover:shadow-[0_12px_40px_rgba(26,61,46,0.12)] transition-all duration-300 border border-anong-warm-cream backdrop-blur-sm;
-  }
-  
+  /* Refined luxury card styling */
   .luxury-card {
-    @apply bg-gradient-to-br from-anong-cream to-anong-warm-cream rounded-xl shadow-[0_20px_50px_rgba(26,61,46,0.1)] border border-anong-gold/20 relative overflow-hidden;
+    @apply bg-gradient-to-br from-white to-anong-warm-cream/30 rounded-2xl shadow-[0_12px_50px_rgba(26,61,46,0.08)] border border-anong-gold/15 relative overflow-hidden backdrop-blur-sm;
   }
   
   .luxury-card::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-30;
+    @apply absolute inset-0 bg-botanical-pattern opacity-5 pointer-events-none;
   }
   
-  /* Premium button styles */
+  /* Enhanced premium button styles */
   .btn-premium {
-    @apply bg-anong-dark-green hover:bg-anong-forest text-anong-cream font-medium px-8 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl border border-anong-forest/20;
+    @apply bg-anong-dark-green hover:bg-anong-forest text-anong-cream font-medium px-10 py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl border border-anong-forest/20 tracking-wide;
   }
   
   .btn-gold {
-    @apply bg-anong-gold hover:bg-anong-warm-gold text-anong-deep-black font-medium px-8 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl;
+    @apply bg-anong-gold hover:bg-anong-warm-gold text-anong-deep-black font-medium px-10 py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl tracking-wide;
   }
   
   .btn-outline-premium {
-    @apply border-2 border-anong-dark-green text-anong-dark-green hover:bg-anong-dark-green hover:text-anong-cream font-medium px-8 py-3 rounded-lg transition-all duration-300;
+    @apply border-2 border-anong-dark-green text-anong-dark-green hover:bg-anong-dark-green hover:text-anong-cream font-medium px-10 py-4 rounded-xl transition-all duration-500 tracking-wide;
   }
   
-  /* Enhanced typography */
+  /* Refined typography */
   .heading-premium {
-    @apply font-display font-semibold text-anong-deep-black tracking-tight;
+    @apply font-display font-light text-anong-deep-black tracking-tight;
   }
   
   .heading-elegant {
-    @apply font-elegant font-medium text-anong-deep-black tracking-wide;
+    @apply font-elegant font-light text-anong-deep-black tracking-wide;
   }
   
   .text-luxury {
-    @apply font-serif text-anong-charcoal leading-relaxed;
+    @apply font-serif text-anong-charcoal leading-relaxed font-light;
   }
   
-  /* Botanical decorative elements */
+  /* Enhanced botanical decorative elements */
   .botanical-accent {
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0C20 0 15 10 10 20C15 30 20 40 20 40C20 40 25 30 30 20C25 10 20 0 20 0Z' fill='%23d4a574' fill-opacity='0.1'/%3E%3Cpath d='M0 20C0 20 10 15 20 10C30 15 40 20 40 20C40 20 30 25 20 30C10 25 0 20 0 20Z' fill='%23d4a574' fill-opacity='0.1'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0C20 0 15 10 10 20C15 30 20 40 20 40C20 40 25 30 30 20C25 10 20 0 20 0Z' fill='%23d4a574' fill-opacity='0.3'/%3E%3Cpath d='M0 20C0 20 10 15 20 10C30 15 40 20 40 20C40 20 30 25 20 30C10 25 0 20 0 20Z' fill='%23d4a574' fill-opacity='0.3'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
   }
   
-  /* Watercolor texture effect */
+  /* Enhanced watercolor texture effect */
   .watercolor-bg {
     background-image: 
-      radial-gradient(circle at 20% 80%, rgba(212, 165, 116, 0.1) 0%, transparent 40%),
-      radial-gradient(circle at 80% 20%, rgba(45, 90, 61, 0.08) 0%, transparent 40%),
-      radial-gradient(circle at 40% 40%, rgba(157, 181, 161, 0.06) 0%, transparent 40%);
+      radial-gradient(circle at 25% 75%, rgba(212, 165, 116, 0.06) 0%, transparent 50%),
+      radial-gradient(circle at 75% 25%, rgba(45, 90, 61, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(157, 181, 161, 0.03) 0%, transparent 50%);
   }
   
-  /* Premium section styling */
+  /* Refined section styling with more breathing room */
   .section-premium {
-    @apply py-20 px-4 relative overflow-hidden;
+    @apply py-24 md:py-32 lg:py-40 px-4 relative overflow-hidden;
   }
   
   .section-premium::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-20 pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-10 pointer-events-none;
   }
   
-  /* Enhanced hover effects */
+  /* Enhanced hover effects with slower, more elegant transitions */
   .hover-lift {
-    @apply transition-all duration-300 hover:transform hover:-translate-y-2 hover:shadow-xl;
+    @apply transition-all duration-500 hover:transform hover:-translate-y-2 hover:shadow-2xl;
   }
   
   /* Premium dividers */
   .divider-premium {
-    @apply h-px bg-gradient-to-r from-transparent via-anong-gold to-transparent;
+    @apply h-px bg-gradient-to-r from-transparent via-anong-gold/60 to-transparent;
   }
   
-  .divider-botanical {
-    @apply h-1 bg-anong-gold relative;
-  }
-  
-  .divider-botanical::before {
-    content: '';
-    @apply absolute inset-0 botanical-accent;
-  }
-  
-  /* Luxury text effects */
-  .text-gradient-gold {
-    @apply bg-gradient-to-r from-anong-gold to-anong-warm-gold bg-clip-text text-transparent;
-  }
-  
-  /* Premium navigation */
-  .nav-premium {
-    @apply bg-white/95 backdrop-blur-lg border-b border-anong-warm-cream/50 shadow-sm;
-  }
-  
-  /* Enhanced form elements */
+  /* Refined form elements */
   .input-premium {
-    @apply border-anong-sage/30 focus:border-anong-dark-green focus:ring-anong-dark-green/20 bg-anong-cream/50 rounded-lg;
+    @apply border-anong-sage/20 focus:border-anong-dark-green focus:ring-anong-dark-green/10 bg-anong-cream/30 rounded-xl px-6 py-4 font-serif;
+  }
+  
+  /* Enhanced navigation with more premium feel */
+  .nav-premium {
+    @apply bg-white/98 backdrop-blur-xl border-b border-anong-warm-cream/30 shadow-sm;
   }
 }
 
-/* Custom scrollbar for premium feel */
+/* Enhanced scrollbar with luxury styling */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-anong-warm-cream;
+  @apply bg-anong-warm-cream/50;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-anong-sage rounded-full;
+  @apply bg-anong-gold/60 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-anong-dark-green;
+  @apply bg-anong-gold;
 }
