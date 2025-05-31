@@ -81,22 +81,22 @@ const ProductGrid = () => {
   console.log("Filtered products:", filteredProducts);
 
   return (
-    <section className="py-16 px-4 watercolor-bg">
-      <div className="container mx-auto">
+    <section className="py-20 md:py-28 px-4 md:px-6">
+      <div className="container mx-auto max-w-7xl">
         <motion.div 
-          className="text-center mb-16"
+          className="text-center mb-16 md:mb-20"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="heading-premium text-4xl lg:text-5xl mb-4 text-anong-dark-green">{t.title}</h1>
-          <p className="text-luxury text-lg text-anong-charcoal/80 max-w-2xl mx-auto">{t.subtitle}</p>
-          <div className="divider-premium w-24 mx-auto mt-8"></div>
+          <h1 className="heading-premium text-4xl md:text-5xl lg:text-6xl mb-6 text-anong-dark-green">{t.title}</h1>
+          <p className="text-luxury text-lg md:text-xl text-anong-charcoal/80 max-w-3xl mx-auto leading-relaxed">{t.subtitle}</p>
+          <div className="w-24 h-px bg-gradient-to-r from-transparent via-anong-gold to-transparent mx-auto mt-8"></div>
         </motion.div>
         
         {/* Search and Filter */}
         <motion.div 
-          className="mb-12 flex flex-col md:flex-row gap-4 luxury-card p-6"
+          className="mb-16 md:mb-20 flex flex-col md:flex-row gap-6 luxury-card p-8 md:p-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}

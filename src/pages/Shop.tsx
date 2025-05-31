@@ -11,7 +11,7 @@ const Shop = () => {
     <div className="min-h-screen flex flex-col bg-anong-cream">
       <Header />
       
-      <main className="flex-grow px-4 md:px-0 watercolor-bg">
+      <main className="flex-grow">
         <ProductGrid />
       </main>
       

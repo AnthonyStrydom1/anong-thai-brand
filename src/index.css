@@ -184,6 +184,37 @@
       0 0 0 4px rgba(26, 61, 46, 0.1),
       0 6px 16px rgba(26, 61, 46, 0.08);
   }
+
+  /* Green banner background with lotus pattern */
+  .green-banner-bg {
+    @apply bg-gradient-to-br from-anong-dark-green via-anong-forest to-anong-dark-green relative;
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(157, 181, 161, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(212, 165, 116, 0.06) 0%, transparent 50%);
+  }
+
+  .green-banner-bg::before {
+    content: '';
+    @apply absolute inset-0 opacity-[0.03] pointer-events-none;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 10C25 15 20 20 15 30C20 40 25 45 30 50C35 45 40 40 45 30C40 20 35 15 30 10Z' fill='%23d4a574' fill-opacity='0.4'/%3E%3Cpath d='M10 30C15 25 20 20 30 15C40 20 45 25 50 30C45 35 40 40 30 45C20 40 15 35 10 30Z' fill='%239db5a1' fill-opacity='0.3'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 120px 120px;
+  }
+
+  /* Gold button styling */
+  .btn-gold {
+    @apply bg-gradient-to-r from-anong-gold to-anong-warm-gold hover:from-anong-warm-gold hover:to-anong-gold text-anong-deep-black font-medium tracking-wide transition-all duration-300 shadow-lg hover:shadow-xl border border-anong-gold/20;
+  }
+
+  /* Trust badge styling */
+  .trust-badge {
+    @apply px-4 py-2 rounded-full text-sm font-medium tracking-wide border backdrop-blur-sm transition-all duration-300 hover:scale-105;
+  }
+
+  /* Content spacing utility */
+  .content-spacing {
+    @apply space-y-6 md:space-y-8;
+  }
 }
 
 /* Enhanced scrollbar with luxury aesthetics and gold touches */
