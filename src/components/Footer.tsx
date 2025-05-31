@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Twitter, MapPin, Clock, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -135,6 +134,8 @@ const Footer = ({ className }: FooterProps) => {
           <div className="w-24 md:w-32 h-px bg-anong-gold/60"></div>
         </div>
 
+        
+        
         {/* Premium Footer Links with Restaurant Integration */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 mb-16 text-sm">
           <div className="space-y-5">
