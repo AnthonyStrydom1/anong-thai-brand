@@ -140,9 +140,9 @@
     background-color: var(--anong-dark-green);
     background-image: 
       url('/lovable-uploads/c5e5ac91-9703-4e18-ab93-404f42c8d2c3.png');
-    background-size: 400px 400px;
+    background-size: cover;
     background-position: center;
-    background-repeat: repeat;
+    background-repeat: no-repeat;
     position: relative;
   }
   
@@ -150,7 +150,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(26, 61, 46, 0.85) 0%, rgba(45, 90, 61, 0.85) 100%);
+    background: linear-gradient(135deg, rgba(26, 61, 46, 0.90) 0%, rgba(45, 90, 61, 0.90) 100%);
     pointer-events: none;
     z-index: 1;
   }
