@@ -45,59 +45,74 @@ const RestaurantBanner = () => {
     }
   };
   
-  // Pattern background for elegant overlay
-  const patternBg = `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 30c5.5 0 10-4.5 10-10s-4.5-10-10-10-10 4.5-10 10 4.5 10 10 10zm0-2c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm0 4c5.5 0 10 4.5 10 10s-4.5 10-10 10-10-4.5-10-10 4.5-10 10-10zm0 2c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm-20-20c5.5 0 10 4.5 10 10s-4.5 10-10 10-10-4.5-10-10 4.5-10 10-10zm0-2c-6.6 0-12 5.4-12 12s5.4 12 12 12 12-5.4 12-12-5.4-12-12-12zm40 40c-5.5 0-10-4.5-10-10s4.5-10 10-10 10 4.5 10 10-4.5 10-10 10zm0 2c6.6 0 12-5.4 12-12s-5.4-12-12-12-12 5.4-12 12 5.4 12 12 12z' fill='%23D4AF37' fill-opacity='1' fill-rule='evenodd'%3E%3C/path%3E%3C/svg%3E")`;
-  
   return (
-    <section className="relative overflow-hidden my-16 rounded-xl shadow-2xl">
-      {/* Background with gradient overlay */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ 
-          filter: "brightness(0.6)"
-        }}
-      >
-        {/* Elegant pattern overlay */}
-        <div 
-          className="absolute inset-0 opacity-10" 
-          style={{ backgroundImage: patternBg }}
-        />
+    <section className="relative overflow-hidden my-16 rounded-xl shadow-2xl luxury-card">
+      {/* Premium background with botanical overlay */}
+      <div className="absolute inset-0 dark-premium-gradient">
+        {/* Botanical pattern overlay */}
+        <div className="absolute inset-0 bg-botanical-pattern opacity-20"></div>
+        {/* Watercolor texture */}
+        <div className="absolute inset-0 watercolor-bg"></div>
       </div>
       
-      {/* Purple overlay with enhanced opacity and gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#3b0b5a] via-[#520F7A] to-[#6a1f97] opacity-90"></div>
+      {/* Enhanced gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-anong-dark-green/95 via-anong-forest/90 to-anong-dark-green/95"></div>
       
-      {/* Content with improved typography and spacing */}
+      {/* Elegant decorative border */}
+      <div className="absolute inset-0 border border-anong-gold/30 rounded-xl"></div>
+      
+      {/* Content with premium typography */}
       <motion.div 
-        className="relative container mx-auto px-4 py-24 text-center"
+        className="relative container mx-auto px-6 py-24 text-center"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
         variants={containerVariants}
       >
+        {/* Premium accent */}
+        <motion.div 
+          className="mb-6"
+          variants={itemVariants}
+        >
+          <span className="font-elegant text-anong-gold text-sm md:text-base tracking-[0.2em] uppercase">
+            Experience Authentic
+          </span>
+          <div className="w-20 h-px bg-anong-gold mx-auto mt-2"></div>
+        </motion.div>
+
         <motion.h2 
-          className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 font-display tracking-tight leading-tight"
+          className="heading-premium text-4xl md:text-5xl lg:text-6xl text-anong-cream mb-6 leading-tight"
           variants={itemVariants}
         >
           {t.title}
         </motion.h2>
         
         <motion.p 
-          className="text-xl text-white/90 max-w-2xl mx-auto mb-8 font-light leading-relaxed"
+          className="text-luxury text-lg md:text-xl text-anong-cream/90 max-w-2xl mx-auto mb-8 leading-relaxed"
           variants={itemVariants}
         >
           {t.subtitle}
         </motion.p>
         
+        {/* Botanical divider */}
+        <motion.div 
+          className="flex items-center justify-center mb-8"
+          variants={itemVariants}
+        >
+          <div className="w-12 h-px bg-anong-gold/60"></div>
+          <div className="mx-4 botanical-accent w-4 h-4 opacity-80"></div>
+          <div className="w-12 h-px bg-anong-gold/60"></div>
+        </motion.div>
+        
         <motion.p 
-          className="text-white/80 mb-3 font-light text-lg"
+          className="text-anong-cream/80 mb-3 font-serif text-lg"
           variants={itemVariants}
         >
           20 Hettie Street, Cyrildene, Johannesburg, 2198
         </motion.p>
         
         <motion.p 
-          className="text-white/80 mb-10 font-light"
+          className="text-anong-cream/80 mb-10 font-serif"
           variants={itemVariants}
         >
           Anong: 076 505 9941 | Howard: 074 240 6712 | Justin: 072 102 0284
@@ -106,11 +121,11 @@ const RestaurantBanner = () => {
         <motion.div variants={itemVariants}>
           <Link to="/menu">
             <Button 
-              className="bg-white text-[#520F7A] hover:bg-white/90 hover:text-[#520F7A] text-lg px-10 py-7 h-auto rounded-md transition-all duration-300 shadow-xl hover:shadow-2xl border border-white/20"
+              className="btn-gold text-lg px-12 py-6 h-auto shadow-2xl hover:shadow-3xl border border-anong-gold/20"
               size="lg"
             >
               {t.button}
-              <ArrowRight className="ml-2" />
+              <ArrowRight className="ml-3 h-5 w-5" />
             </Button>
           </Link>
         </motion.div>

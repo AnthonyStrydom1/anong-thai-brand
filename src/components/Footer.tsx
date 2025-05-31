@@ -64,69 +64,95 @@ const Footer = ({ className }: FooterProps) => {
   };
 
   return (
-    <footer className={cn("bg-[#520F7A] text-white border-t border-thai-purple relative", className)}>
-      <div className="absolute inset-0 opacity-80 mix-blend-overlay pattern-wavy pattern-thai-gold pattern-bg-transparent pattern-size-4 pattern-opacity-20 pointer-events-none"></div>
+    <footer className={cn("bg-anong-dark-green text-anong-cream border-t border-anong-forest relative overflow-hidden", className)}>
+      {/* Premium background elements */}
+      <div className="absolute inset-0 bg-botanical-pattern opacity-10 pointer-events-none"></div>
+      <div className="absolute inset-0 watercolor-bg pointer-events-none"></div>
       
-      <div className="container mx-auto px-4 py-6 relative z-10">
+      {/* Elegant top border */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-anong-gold to-transparent"></div>
       
-        {/* Newsletter */}
-        <div className="max-w-2xl mx-auto mb-6">
-          <h3 className="text-lg font-semibold text-center text-thai-gold mb-2">
+      <div className="container mx-auto px-4 py-8 relative z-10">
+      
+        {/* Newsletter Section */}
+        <div className="max-w-2xl mx-auto mb-8 text-center">
+          <div className="mb-4">
+            <span className="font-elegant text-anong-gold text-sm tracking-[0.2em] uppercase">
+              Stay Connected
+            </span>
+            <div className="w-16 h-px bg-anong-gold mx-auto mt-2"></div>
+          </div>
+          
+          <h3 className="heading-elegant text-xl md:text-2xl text-anong-gold mb-3">
             {t.subscribe}
           </h3>
-          <p className="text-gray-200 text-center text-sm mb-3">
+          <p className="text-luxury text-anong-cream/80 text-sm mb-6 leading-relaxed">
             {t.subscribeDesc}
           </p>
-          <form className="flex gap-2" onSubmit={handleSubscribe}>
+          
+          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleSubscribe}>
             <Input 
               type="email" 
               placeholder={t.email} 
-              className="flex-1 bg-white/10 border-thai-gold/50 text-white placeholder:text-gray-300" 
+              className="input-premium flex-1 bg-anong-cream/10 border-anong-gold/30 text-anong-cream placeholder:text-anong-cream/60 focus:border-anong-gold" 
               required 
             />
-            <Button type="submit" className="bg-thai-gold hover:bg-thai-gold/80 text-[#520F7A]">
+            <Button type="submit" className="btn-gold whitespace-nowrap">
               {t.submit}
             </Button>
           </form>
         </div>
 
-        {/* Footer links */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
-          <div className="space-y-2">
-            <h4 className="font-semibold text-thai-gold">{t.shop}</h4>
-            <ul className="space-y-1">
-              <li><Link to="/shop?category=curry-pastes" className="text-gray-200 hover:text-thai-gold transition">{t.curryPastes}</Link></li>
-              <li><Link to="/shop?category=stir-fry-sauces" className="text-gray-200 hover:text-thai-gold transition">{t.stirFrySauces}</Link></li>
-              <li><Link to="/shop?category=dipping-sauces" className="text-gray-200 hover:text-thai-gold transition">{t.dippingSauces}</Link></li>
+        {/* Botanical divider */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="w-20 h-px bg-anong-gold/40"></div>
+          <div className="mx-6 botanical-accent w-5 h-5 opacity-60"></div>
+          <div className="w-20 h-px bg-anong-gold/40"></div>
+        </div>
+
+        {/* Footer Links */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 text-sm">
+          <div className="space-y-3">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide">{t.shop}</h4>
+            <ul className="space-y-2">
+              <li><Link to="/shop?category=curry-pastes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.curryPastes}</Link></li>
+              <li><Link to="/shop?category=stir-fry-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.stirFrySauces}</Link></li>
+              <li><Link to="/shop?category=dipping-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.dippingSauces}</Link></li>
             </ul>
           </div>
-          <div className="space-y-2">
-            <h4 className="font-semibold text-thai-gold">Anong Thai</h4>
-            <ul className="space-y-1">
-              <li><Link to="/recipes" className="text-gray-200 hover:text-thai-gold transition">{t.recipes}</Link></li>
-              <li><Link to="/about" className="text-gray-200 hover:text-thai-gold transition">{t.about}</Link></li>
-              <li><Link to="/contact" className="text-gray-200 hover:text-thai-gold transition">{t.contact}</Link></li>
+          
+          <div className="space-y-3">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide">Anong Thai</h4>
+            <ul className="space-y-2">
+              <li><Link to="/recipes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.recipes}</Link></li>
+              <li><Link to="/about" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.about}</Link></li>
+              <li><Link to="/contact" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.contact}</Link></li>
             </ul>
           </div>
-          <div className="space-y-2">
-            <h4 className="font-semibold text-thai-gold">Support</h4>
-            <ul className="space-y-1">
-              <li><Link to="/shipping" className="text-gray-200 hover:text-thai-gold transition">{t.shipping}</Link></li>
-              <li><Link to="/returns" className="text-gray-200 hover:text-thai-gold transition">{t.returns}</Link></li>
-              <li><Link to="/privacy" className="text-gray-200 hover:text-thai-gold transition">{t.privacy}</Link></li>
-              <li><Link to="/terms" className="text-gray-200 hover:text-thai-gold transition">{t.terms}</Link></li>
+          
+          <div className="space-y-3">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide">Support</h4>
+            <ul className="space-y-2">
+              <li><Link to="/shipping" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.shipping}</Link></li>
+              <li><Link to="/returns" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.returns}</Link></li>
+              <li><Link to="/privacy" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.privacy}</Link></li>
+              <li><Link to="/terms" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.terms}</Link></li>
             </ul>
           </div>
-          <div className="space-y-2">
-            <h4 className="font-semibold text-thai-gold">Anong Thai Brand</h4>
-            <div className="flex space-x-3">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-thai-gold hover:text-thai-gold/80 transition">
+          
+          <div className="space-y-3">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide">Connect</h4>
+            <div className="flex space-x-4">
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" 
+                 className="text-anong-gold hover:text-anong-warm-gold transition-colors duration-300 hover:scale-110 transform">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-thai-gold hover:text-thai-gold/80 transition">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
+                 className="text-anong-gold hover:text-anong-warm-gold transition-colors duration-300 hover:scale-110 transform">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-thai-gold hover:text-thai-gold/80 transition">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" 
+                 className="text-anong-gold hover:text-anong-warm-gold transition-colors duration-300 hover:scale-110 transform">
                 <Twitter className="h-5 w-5" />
               </a>
             </div>
@@ -134,8 +160,8 @@ const Footer = ({ className }: FooterProps) => {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-white/20 pt-4">
-          <p className="text-gray-300 text-center text-xs">
+        <div className="border-t border-anong-gold/20 pt-6">
+          <p className="text-anong-cream/70 text-center text-xs font-serif tracking-wide">
             {t.rights}
           </p>
         </div>
