@@ -84,7 +84,8 @@
   
   /* Refined luxury card styling with improved mobile optimization */
   .luxury-card {
-    @apply bg-gradient-to-br from-white to-anong-warm-cream/15 rounded-xl md:rounded-2xl shadow-[0_4px_30px_rgba(26,61,46,0.04)] md:shadow-[0_6px_40px_rgba(26,61,46,0.06)] border border-anong-gold/8 relative overflow-hidden backdrop-blur-sm;
+    @apply bg-gradient-to-br from-white to-anong-warm-cream/15 rounded-xl md:rounded-2xl shadow-[0_4px_30px_rgba(26,61,46,0.04)] md:shadow-[0_6px_40px_rgba(26,61,46,0.06)] relative overflow-hidden backdrop-blur-sm;
+    border: 1px solid rgba(212, 165, 116, 0.08);
   }
   
   .luxury-card::before {
@@ -94,7 +95,8 @@
   
   /* Enhanced premium button styles with better mobile touch targets */
   .btn-premium {
-    @apply bg-anong-dark-green hover:bg-anong-forest text-anong-cream font-medium px-6 md:px-8 py-3 md:py-4 rounded-lg md:rounded-xl transition-all duration-400 shadow-md hover:shadow-lg border border-anong-forest/20 tracking-wide text-sm md:text-base;
+    @apply bg-anong-dark-green hover:bg-anong-forest text-anong-cream font-medium px-6 md:px-8 py-3 md:py-4 rounded-lg md:rounded-xl transition-all duration-400 shadow-md hover:shadow-lg tracking-wide text-sm md:text-base;
+    border: 1px solid rgba(45, 90, 61, 0.2);
   }
   
   .btn-gold {
@@ -151,18 +153,26 @@
   
   /* Premium dividers */
   .divider-premium {
-    @apply h-px bg-gradient-to-r from-transparent via-anong-gold/40 to-transparent;
+    @apply h-px bg-gradient-to-r from-transparent to-transparent;
+    background-image: linear-gradient(to right, transparent, rgba(212, 165, 116, 0.4), transparent);
   }
   
   /* Refined form elements with better mobile styling */
   .input-premium {
-    @apply border-anong-sage/20 focus:border-anong-dark-green focus:ring-anong-dark-green/10 bg-anong-cream/30 rounded-lg md:rounded-xl px-4 md:px-5 py-3 md:py-4 font-serif text-sm md:text-base;
+    @apply bg-anong-cream/30 rounded-lg md:rounded-xl px-4 md:px-5 py-3 md:py-4 font-serif text-sm md:text-base;
+    border: 1px solid rgba(157, 181, 161, 0.2);
+  }
+  
+  .input-premium:focus {
+    @apply border-anong-dark-green;
+    box-shadow: 0 0 0 3px rgba(26, 61, 46, 0.1);
   }
   
   /* Enhanced navigation with more premium feel */
   .nav-premium {
     background-color: rgba(26, 61, 46, 0.98);
-    @apply backdrop-blur-xl border-b border-anong-gold/15 shadow-sm;
+    @apply backdrop-blur-xl shadow-sm;
+    border-bottom: 1px solid rgba(212, 165, 116, 0.15);
   }
 }
 
@@ -172,15 +182,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-anong-warm-cream/30;
+  background-color: rgba(242, 237, 227, 0.3);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-anong-gold/40 rounded-full;
+  background-color: rgba(212, 165, 116, 0.4);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-anong-gold/60;
+  background-color: rgba(212, 165, 116, 0.6);
 }
 
 /* Improved mobile touch targets */
@@ -192,6 +203,6 @@
   }
   
   .luxury-card {
-    @apply shadow-[0_2px_20px_rgba(26,61,46,0.04)];
+    box-shadow: 0 2px 20px rgba(26, 61, 46, 0.04);
   }
 }
