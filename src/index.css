@@ -135,14 +135,13 @@
       radial-gradient(circle at 40% 40%, rgba(157, 181, 161, 0.006) 0%, transparent 50%);
   }
   
-  /* Green banner background with subtle botanical pattern */
+  /* Green banner background with lotus pattern - enhanced visibility */
   .green-banner-bg {
-    background: linear-gradient(135deg, #1a3d2e 0%, #2d5a3d 100%),
+    background: linear-gradient(135deg, rgba(26, 61, 46, 0.95) 0%, rgba(45, 90, 61, 0.95) 100%),
                 url('/lovable-uploads/eb3ae1c5-1b14-41cc-baa7-12cab2d04d56.png');
-    background-size: auto, contain;
+    background-size: auto, 200px 200px;
     background-position: center, center;
-    background-repeat: no-repeat, no-repeat;
-    background-blend-mode: normal;
+    background-repeat: no-repeat, repeat;
     position: relative;
   }
   
@@ -150,7 +149,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(26, 61, 46, 0.10) 0%, rgba(45, 90, 61, 0.10) 100%);
+    background: linear-gradient(135deg, rgba(26, 61, 46, 0.05) 0%, rgba(45, 90, 61, 0.05) 100%);
     pointer-events: none;
     z-index: 1;
   }

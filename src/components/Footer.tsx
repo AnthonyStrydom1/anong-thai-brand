@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from "@/lib/utils";
+import { useEffect } from 'react';
 
 interface FooterProps {
   className?: string;
@@ -12,6 +13,12 @@ interface FooterProps {
 
 const Footer = ({ className }: FooterProps) => {
   const { language } = useLanguage();
+  
+  // Debug logging to see if Footer is rendering
+  useEffect(() => {
+    console.log('Footer component mounted');
+    console.log('Footer using green-banner-bg class with lotus image');
+  }, []);
   
   const translations = {
     en: {
