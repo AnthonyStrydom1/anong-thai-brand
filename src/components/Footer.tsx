@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Twitter, MapPin, Clock, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -72,11 +71,7 @@ const Footer = ({ className }: FooterProps) => {
   };
 
   return (
-    <footer className={cn("bg-anong-dark-green text-anong-cream relative overflow-hidden", className)}>
-      {/* Refined botanical background */}
-      <div className="absolute inset-0 bg-botanical-pattern opacity-[0.02] pointer-events-none"></div>
-      <div className="absolute inset-0 watercolor-bg pointer-events-none"></div>
-      
+    <footer className={cn("green-banner-bg text-anong-cream relative overflow-hidden", className)}>
       {/* Elegant top border */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-anong-gold/70 to-transparent"></div>
       

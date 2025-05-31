@@ -136,6 +136,22 @@
       radial-gradient(circle at 40% 40%, rgba(157, 181, 161, 0.006) 0%, transparent 50%);
   }
   
+  /* Green banner background with subtle botanical pattern */
+  .green-banner-bg {
+    background-image: 
+      url('/lovable-uploads/c5e5ac91-9703-4e18-ab93-404f42c8d2c3.png'),
+      linear-gradient(135deg, var(--anong-dark-green) 0%, var(--anong-forest) 100%);
+    background-size: cover, cover;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    background-blend-mode: overlay;
+  }
+  
+  .green-banner-bg::before {
+    content: '';
+    @apply absolute inset-0 bg-anong-dark-green/60 pointer-events-none;
+  }
+  
   /* Optimized section styling with consistent spacing */
   .section-premium {
     @apply py-16 md:py-20 lg:py-24 px-4 relative overflow-hidden;
