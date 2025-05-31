@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
@@ -160,7 +159,7 @@
   
   /* Enhanced hover effects with premium easing and gold touches */
   .hover-lift {
-    @apply transition-all duration-600 ease-out hover:transform hover:-translate-y-2 md:hover:-translate-y-3;
+    @apply transition-all duration-500 ease-out hover:transform hover:-translate-y-2 md:hover:-translate-y-3;
   }
   
   .hover-lift:hover {
@@ -172,7 +171,7 @@
   
   /* Premium form elements with enhanced styling */
   .input-premium {
-    @apply bg-white/90 rounded-2xl md:rounded-3xl px-6 md:px-8 py-5 md:py-6 font-serif text-base md:text-lg backdrop-blur-sm transition-all duration-400;
+    @apply bg-white/90 rounded-2xl md:rounded-3xl px-6 md:px-8 py-5 md:py-6 font-serif text-base md:text-lg backdrop-blur-sm transition-all duration-300;
     border: 1.5px solid rgba(157, 181, 161, 0.2);
     box-shadow: 
       0 3px 12px rgba(26, 61, 46, 0.05),
@@ -236,7 +235,7 @@
 
 /* Enhanced image optimization with premium loading effects */
 img {
-  @apply transition-all duration-600 ease-out;
+  @apply transition-all duration-500 ease-out;
 }
 
 img[loading="lazy"] {
