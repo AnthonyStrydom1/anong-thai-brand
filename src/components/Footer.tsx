@@ -14,16 +14,10 @@ interface FooterProps {
 const Footer = ({ className }: FooterProps) => {
   const { language } = useLanguage();
   
-  // Debug logging to see if Footer is rendering and image loading
+  // Debug logging to see if Footer is rendering
   useEffect(() => {
     console.log('Footer component mounted');
-    console.log('Footer using green-banner-bg class with lotus image');
-    
-    // Check if the image can be loaded
-    const img = new Image();
-    img.onload = () => console.log('Lotus image loaded successfully');
-    img.onerror = () => console.log('Failed to load lotus image');
-    img.src = '/lovable-uploads/eb3ae1c5-1b14-41cc-baa7-12cab2d04d56.png';
+    console.log('Footer using green-banner-bg class with CSS lotus pattern');
   }, []);
   
   const translations = {
@@ -87,7 +81,7 @@ const Footer = ({ className }: FooterProps) => {
     <footer className={cn("green-banner-bg text-anong-cream relative overflow-hidden", className)}>
       {/* Debug indicator */}
       <div className="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 text-xs rounded z-50">
-        Footer with Lotus BG
+        Footer with CSS Lotus
       </div>
       
       {/* Elegant top border */}
