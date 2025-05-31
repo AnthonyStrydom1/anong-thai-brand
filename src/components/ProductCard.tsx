@@ -48,7 +48,7 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
       <motion.div 
         whileHover={{ y: -6 }}
         transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-        className="group relative"
+        className="group relative h-full"
       >
         <div className="bg-white rounded-3xl overflow-hidden relative transition-all duration-500 border border-anong-gold/15 h-full flex flex-col">
           {/* Enhanced shadow system with gold undertones */}
@@ -88,13 +88,13 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
               {t.weight}
             </p>
             
-            <div className="flex justify-between items-center mt-auto">
-              <span className="text-2xl md:text-3xl font-display font-light text-anong-dark-green">
+            <div className="mt-auto space-y-4">
+              <span className="block text-2xl md:text-3xl font-display font-light text-anong-dark-green">
                 R{price.toFixed(2)}
               </span>
               <Button 
                 size="sm" 
-                className="bg-anong-dark-green hover:bg-anong-gold hover:text-anong-deep-black text-anong-cream text-sm px-6 py-3 h-auto font-medium tracking-wide transition-all duration-500 rounded-xl shadow-lg hover:shadow-xl border border-anong-dark-green/10 group-hover:scale-105 whitespace-nowrap"
+                className="w-full bg-anong-dark-green hover:bg-anong-gold hover:text-anong-deep-black text-anong-cream text-sm px-6 py-3 h-auto font-medium tracking-wide transition-all duration-500 rounded-xl shadow-lg hover:shadow-xl border border-anong-dark-green/10 group-hover:scale-105"
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
@@ -112,7 +112,7 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
     <motion.div 
       whileHover={{ y: -8 }}
       transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-      className="group relative"
+      className="group relative h-full"
     >
       <div className="bg-white overflow-hidden relative rounded-3xl transition-all duration-700 border border-anong-gold/20 h-full flex flex-col">
         {/* Enhanced shadow system with layered depth */}
@@ -169,13 +169,13 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
             <div className="flex-1 h-px bg-anong-gold/40"></div>
           </div>
           
-          <div className="flex justify-between items-center mt-auto">
-            <span className="text-2xl md:text-3xl font-display font-light text-anong-dark-green">
+          <div className="mt-auto space-y-4">
+            <span className="block text-2xl md:text-3xl font-display font-light text-anong-dark-green">
               R{price.toFixed(2)}
             </span>
             <Button 
               size="sm" 
-              className="bg-gradient-to-r from-anong-dark-green to-anong-forest hover:from-anong-gold hover:to-anong-warm-gold hover:text-anong-deep-black text-anong-cream text-sm md:text-base px-6 md:px-8 py-3 md:py-4 h-auto font-medium tracking-wide transition-all duration-500 rounded-xl shadow-xl hover:shadow-2xl border border-anong-dark-green/15 group-hover:scale-105 whitespace-nowrap"
+              className="w-full bg-gradient-to-r from-anong-dark-green to-anong-forest hover:from-anong-gold hover:to-anong-warm-gold hover:text-anong-deep-black text-anong-cream text-sm md:text-base px-6 md:px-8 py-3 md:py-4 h-auto font-medium tracking-wide transition-all duration-500 rounded-xl shadow-xl hover:shadow-2xl border border-anong-dark-green/15 group-hover:scale-105"
               onClick={handleAddToCart}
             >
               <ShoppingCart className="h-4 w-4 mr-2 md:mr-3" />
