@@ -185,15 +185,10 @@
       0 6px 16px rgba(26, 61, 46, 0.08);
   }
 
-  /* Green banner background with single lotus pattern covering entire footer */
+  /* Green banner background without lotus pattern */
   .green-banner-bg {
     @apply bg-gradient-to-br from-anong-dark-green via-anong-forest to-anong-dark-green relative;
     background-color: #1a3d2e !important;
-    background-image: 
-      url('/lovable-uploads/59819f8f-9e66-4215-b4a3-2488f65a2ea1.png');
-    background-repeat: no-repeat;
-    background-size: 150% 150%;
-    background-position: center center;
   }
 
   .green-banner-bg::before {
