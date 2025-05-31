@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from "@/lib/utils";
-import { useEffect } from 'react';
 
 interface FooterProps {
   className?: string;
@@ -15,56 +14,58 @@ interface FooterProps {
 const Footer = ({ className }: FooterProps) => {
   const { language } = useLanguage();
   
-  // Debug logging to see if Footer is rendering
-  useEffect(() => {
-    console.log('Footer component mounted');
-    console.log('Footer using green-banner-bg class with uploaded lotus image');
-  }, []);
-  
   const translations = {
     en: {
-      subscribe: "Subscribe to our newsletter",
-      subscribeDesc: "Get the latest updates on new products and recipes",
-      email: "Your email",
+      newsletter: "Stay Connected",
+      subscribe: "Join Our Culinary Journey",
+      subscribeDesc: "Receive exclusive recipes, cooking tips, and first access to new authentic Thai products crafted with traditional methods.",
+      email: "Enter your email address",
       submit: "Subscribe",
-      shop: "Shop",
-      curryPastes: "Curry Pastes",
-      stirFrySauces: "Stir-Fry Sauces",
-      dippingSauces: "Dipping Sauces",
-      recipes: "Recipes",
-      about: "About Anong",
-      contact: "Contact Us",
+      shop: "Our Products",
+      curryPastes: "Premium Curry Pastes",
+      stirFrySauces: "Artisan Stir-Fry Sauces",
+      dippingSauces: "Traditional Dipping Sauces",
+      recipes: "Recipe Collection",
+      about: "Our Heritage",
+      contact: "Connect With Us",
       visitUs: "Visit ANONG Restaurant",
       address: "123 Authentic Thai Street, Bangkok 10110",
       hours: "Daily: 11:00 AM - 10:00 PM",
       phone: "+66 2 123 4567",
-      shipping: "Shipping Policy",
-      returns: "Returns & Refunds",
+      shipping: "Shipping & Delivery",
+      returns: "Returns & Exchanges",
       privacy: "Privacy Policy",
       terms: "Terms of Service",
-      rights: "© 2025 ANONG Thai Brand. All rights reserved."
+      rights: "© 2025 ANONG Thai Brand. Crafted with tradition, delivered with love.",
+      quality: "Premium Quality",
+      authentic: "Family Recipes",
+      crafted: "Handcrafted"
     },
     th: {
-      subscribe: "สมัครรับจดหมายข่าว",
-      subscribeDesc: "รับข่าวสารล่าสุดเกี่ยวกับผลิตภัณฑ์และสูตรอาหารใหม่",
-      email: "อีเมลของคุณ",
-      submit: "ติดตาม",
-      shop: "ซื้อสินค้า",
-      curryPastes: "พริกแกง",
-      stirFrySauces: "ซอสผัด",
-      dippingSauces: "น้ำจิ้ม",
-      recipes: "สูตรอาหาร",
-      about: "เกี่ยวกับอนงค์",
+      newsletter: "ติดตามข่าวสาร",
+      subscribe: "ร่วมเดินทางอาหารกับเรา",
+      subscribeDesc: "รับสูตรอาหารพิเศษ เทคนิคการทำอาหาร และสิทธิพิเศษในผลิตภัณฑ์ไทยแท้ที่สร้างด้วยวิธีดั้งเดิม",
+      email: "กรอกที่อยู่อีเมลของคุณ",
+      submit: "สมัครสมาชิก",
+      shop: "ผลิตภัณฑ์ของเรา",
+      curryPastes: "พริกแกงพรีเมียม",
+      stirFrySauces: "ซอสผัดช่างฝีมือ",
+      dippingSauces: "น้ำจิ้มดั้งเดิม",
+      recipes: "คลังสูตรอาหาร",
+      about: "มรดกของเรา",
       contact: "ติดต่อเรา",
-      visitUs: "มาเยี่ยมชมร้านอาหารอนงค์",
+      visitUs: "เยี่ยมชมร้านอาหารอนงค์",
       address: "123 ถนนอาหารไทยแท้ กรุงเทพฯ 10110",
       hours: "ทุกวัน: 11:00 - 22:00 น.",
       phone: "+66 2 123 4567",
-      shipping: "นโยบายการจัดส่ง",
-      returns: "การคืนสินค้าและเงิน",
+      shipping: "การจัดส่งและการขนส่ง",
+      returns: "การคืนสินค้าและการแลกเปลี่ยน",
       privacy: "นโยบายความเป็นส่วนตัว",
       terms: "เงื่อนไขการใช้บริการ",
-      rights: "© 2025 แบรนด์อาหารไทยอนงค์ สงวนลิขสิทธิ์ทั้งหมด"
+      rights: "© 2025 แบรนด์อาหารไทยอนงค์ สร้างด้วยประเพณี ส่งมอบด้วยความรัก",
+      quality: "คุณภาพพรีเมียม",
+      authentic: "สูตรครอบครัว",
+      crafted: "งานฝีมือ"
     }
   };
 
@@ -73,126 +74,139 @@ const Footer = ({ className }: FooterProps) => {
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
-      title: language === 'en' ? "Thank you for subscribing!" : "ขอบคุณสำหรับการติดตาม!",
-      description: language === 'en' ? "You'll receive our next newsletter." : "คุณจะได้รับจดหมายข่าวฉบับต่อไปของเรา",
+      title: language === 'en' ? "Welcome to our culinary family!" : "ยินดีต้อนรับสู่ครอบครัวอาหารของเรา!",
+      description: language === 'en' ? "You'll receive our latest recipes and product updates." : "คุณจะได้รับสูตรอาหารและข่าวสารผลิตภัณฑ์ล่าสุด",
     });
   };
 
   return (
     <footer className={cn("green-banner-bg text-anong-cream relative overflow-hidden", className)}>
-      {/* Elegant top border */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-anong-gold/70 to-transparent"></div>
+      {/* Premium top border with gradient */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-anong-gold/80 to-transparent"></div>
       
-      <div className="container mx-auto px-4 py-12 relative z-10">
+      <div className="container mx-auto px-6 md:px-8 py-16 md:py-20 relative z-10">
       
-        {/* Newsletter Section */}
-        <div className="max-w-2xl mx-auto mb-12 text-center">
-          <div className="mb-6">
-            <span className="font-elegant text-anong-gold text-sm tracking-[0.25em] uppercase">
-              Stay Connected
+        {/* Premium Newsletter Section */}
+        <div className="max-w-3xl mx-auto mb-16 md:mb-20 text-center content-spacing">
+          <div className="mb-8">
+            <span className="font-elegant text-anong-gold text-sm md:text-base tracking-[0.25em] uppercase font-light">
+              {t.newsletter}
             </span>
-            <div className="w-24 h-px bg-anong-gold mx-auto mt-3"></div>
+            <div className="w-20 h-px bg-anong-gold mx-auto mt-4"></div>
           </div>
           
-          <h3 className="heading-elegant text-2xl md:text-3xl text-anong-gold mb-4">
+          <h3 className="heading-elegant text-2xl md:text-3xl lg:text-4xl text-anong-gold mb-6 leading-tight">
             {t.subscribe}
           </h3>
-          <p className="text-luxury text-anong-cream/80 text-sm md:text-base mb-8 leading-relaxed">
+          <p className="text-luxury text-sm md:text-base text-anong-cream/85 mb-10 leading-relaxed max-w-2xl mx-auto">
             {t.subscribeDesc}
           </p>
           
-          <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto" onSubmit={handleSubscribe}>
+          <form className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto" onSubmit={handleSubscribe}>
             <Input 
               type="email" 
               placeholder={t.email} 
-              className="input-premium flex-1 bg-anong-cream/10 border-anong-gold/30 text-anong-cream placeholder:text-anong-cream/60 focus:border-anong-gold" 
+              className="input-premium flex-1 bg-anong-cream/15 border-anong-gold/30 text-anong-cream placeholder:text-anong-cream/60 focus:border-anong-gold backdrop-blur-sm" 
               required 
             />
-            <Button type="submit" className="btn-gold whitespace-nowrap px-8 py-3">
+            <Button type="submit" className="btn-gold whitespace-nowrap px-8 py-4">
               {t.submit}
             </Button>
           </form>
+          
+          {/* Trust badges */}
+          <div className="flex flex-wrap justify-center gap-4 mt-8">
+            <div className="trust-badge bg-anong-cream/10 text-anong-cream border-anong-cream/20">
+              {t.quality}
+            </div>
+            <div className="trust-badge bg-anong-cream/10 text-anong-cream border-anong-cream/20">
+              {t.authentic}
+            </div>
+            <div className="trust-badge bg-anong-cream/10 text-anong-cream border-anong-cream/20">
+              {t.crafted}
+            </div>
+          </div>
         </div>
 
-        {/* Premium botanical divider */}
-        <div className="flex items-center justify-center mb-12">
-          <div className="w-32 h-px bg-anong-gold/60"></div>
-          <div className="mx-10 botanical-accent w-8 h-8 opacity-80"></div>
-          <div className="w-32 h-px bg-anong-gold/60"></div>
+        {/* Elegant botanical divider */}
+        <div className="flex items-center justify-center mb-16">
+          <div className="w-24 md:w-32 h-px bg-anong-gold/60"></div>
+          <div className="mx-8 md:mx-12 botanical-accent w-8 h-8 opacity-90"></div>
+          <div className="w-24 md:w-32 h-px bg-anong-gold/60"></div>
         </div>
 
-        {/* Footer Links with Visit Us Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 text-sm">
-          <div className="space-y-4">
-            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base">{t.shop}</h4>
-            <ul className="space-y-2">
-              <li><Link to="/shop?category=curry-pastes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.curryPastes}</Link></li>
-              <li><Link to="/shop?category=stir-fry-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.stirFrySauces}</Link></li>
-              <li><Link to="/shop?category=dipping-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.dippingSauces}</Link></li>
+        {/* Premium Footer Links */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 mb-16 text-sm">
+          <div className="space-y-5">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base md:text-lg">{t.shop}</h4>
+            <ul className="space-y-3">
+              <li><Link to="/shop?category=curry-pastes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.curryPastes}</Link></li>
+              <li><Link to="/shop?category=stir-fry-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.stirFrySauces}</Link></li>
+              <li><Link to="/shop?category=dipping-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.dippingSauces}</Link></li>
             </ul>
           </div>
           
-          <div className="space-y-4">
-            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base">ANONG</h4>
-            <ul className="space-y-2">
-              <li><Link to="/recipes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.recipes}</Link></li>
-              <li><Link to="/about" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.about}</Link></li>
-              <li><Link to="/contact" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.contact}</Link></li>
+          <div className="space-y-5">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base md:text-lg">ANONG</h4>
+            <ul className="space-y-3">
+              <li><Link to="/recipes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.recipes}</Link></li>
+              <li><Link to="/about" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.about}</Link></li>
+              <li><Link to="/contact" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif hover:translate-x-1 transform inline-block">{t.contact}</Link></li>
             </ul>
           </div>
           
-          {/* Visit ANONG Restaurant Section */}
-          <div className="space-y-4">
-            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base">{t.visitUs}</h4>
-            <div className="space-y-3 text-anong-cream/80">
-              <div className="flex items-start space-x-3">
-                <MapPin className="h-4 w-4 text-anong-gold mt-0.5 flex-shrink-0" />
+          {/* Enhanced Visit Restaurant Section */}
+          <div className="space-y-5">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base md:text-lg">{t.visitUs}</h4>
+            <div className="space-y-4 text-anong-cream/80">
+              <div className="flex items-start space-x-3 group">
+                <MapPin className="h-4 w-4 text-anong-gold mt-1 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                 <span className="font-serif text-sm leading-relaxed">{t.address}</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <Clock className="h-4 w-4 text-anong-gold flex-shrink-0" />
+              <div className="flex items-center space-x-3 group">
+                <Clock className="h-4 w-4 text-anong-gold flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                 <span className="font-serif text-sm">{t.hours}</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="h-4 w-4 text-anong-gold flex-shrink-0" />
+              <div className="flex items-center space-x-3 group">
+                <Phone className="h-4 w-4 text-anong-gold flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                 <span className="font-serif text-sm">{t.phone}</span>
               </div>
             </div>
           </div>
           
-          <div className="space-y-4">
-            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base">Connect</h4>
+          <div className="space-y-5">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base md:text-lg">Connect</h4>
             <div className="flex space-x-4 mb-6">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" 
-                 className="text-anong-gold hover:text-anong-warm-gold transition-colors duration-300 hover:scale-110 transform">
+                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-400 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
                 <Instagram className="h-5 w-5" />
               </a>
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
-                 className="text-anong-gold hover:text-anong-warm-gold transition-colors duration-300 hover:scale-110 transform">
+                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-400 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
                 <Facebook className="h-5 w-5" />
               </a>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" 
-                 className="text-anong-gold hover:text-anong-warm-gold transition-colors duration-300 hover:scale-110 transform">
+                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-400 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
                 <Twitter className="h-5 w-5" />
               </a>
             </div>
-            <ul className="space-y-2">
-              <li><Link to="/shipping" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm">{t.shipping}</Link></li>
-              <li><Link to="/returns" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm">{t.returns}</Link></li>
-              <li><Link to="/privacy" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm">{t.privacy}</Link></li>
-              <li><Link to="/terms" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm">{t.terms}</Link></li>
+            <ul className="space-y-3">
+              <li><Link to="/shipping" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif text-sm hover:translate-x-1 transform inline-block">{t.shipping}</Link></li>
+              <li><Link to="/returns" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif text-sm hover:translate-x-1 transform inline-block">{t.returns}</Link></li>
+              <li><Link to="/privacy" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif text-sm hover:translate-x-1 transform inline-block">{t.privacy}</Link></li>
+              <li><Link to="/terms" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-400 font-serif text-sm hover:translate-x-1 transform inline-block">{t.terms}</Link></li>
             </ul>
           </div>
         </div>
 
-        {/* Copyright with botanical accent */}
-        <div className="border-t border-anong-gold/25 pt-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-20 h-px bg-anong-gold/40"></div>
-            <div className="mx-6 botanical-accent w-5 h-5 opacity-60"></div>
-            <div className="w-20 h-px bg-anong-gold/40"></div>
+        {/* Premium Copyright Section */}
+        <div className="border-t border-anong-gold/20 pt-8">
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-16 md:w-24 h-px bg-anong-gold/40"></div>
+            <div className="mx-6 md:mx-8 botanical-accent w-5 h-5 opacity-70"></div>
+            <div className="w-16 md:w-24 h-px bg-anong-gold/40"></div>
           </div>
-          <p className="text-anong-cream/70 text-center text-sm font-serif tracking-wide">
+          <p className="text-anong-cream/70 text-center text-sm md:text-base font-serif tracking-wide leading-relaxed max-w-2xl mx-auto">
             {t.rights}
           </p>
         </div>

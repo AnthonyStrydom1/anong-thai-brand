@@ -11,18 +11,20 @@ import { motion } from "framer-motion";
 const Index = () => {
   const { language } = useLanguage();
   
-  // Refined animation variants for smoother, more luxurious transitions
+  // Premium animation variants with sophisticated timing
   const sectionVariants = {
     offscreen: {
-      y: 20,
+      y: 30,
       opacity: 0
     },
     onscreen: {
       y: 0,
       opacity: 1,
       transition: {
-        duration: 0.9,
-        ease: [0.25, 0.1, 0.25, 1]
+        duration: 1.2,
+        ease: [0.25, 0.1, 0.25, 1],
+        type: "spring",
+        damping: 20
       }
     }
   };
@@ -34,12 +36,13 @@ const Index = () => {
       <main className="flex-grow">
         <HeroBanner />
         
-        <div className="relative">
+        <div className="relative content-spacing-lg">
           <motion.div
             initial="offscreen"
             whileInView="onscreen"
             viewport={{ once: true, amount: 0.1 }}
             variants={sectionVariants}
+            className="section-premium"
           >
             <FeaturedProducts />
           </motion.div>
@@ -49,6 +52,7 @@ const Index = () => {
             whileInView="onscreen"
             viewport={{ once: true, amount: 0.1 }}
             variants={sectionVariants}
+            className="section-premium"
           >
             <BrandStory />
           </motion.div>
