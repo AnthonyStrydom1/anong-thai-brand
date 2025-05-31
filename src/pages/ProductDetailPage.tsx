@@ -10,10 +10,10 @@ const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-anong-cream">
       <Header />
       
-      <main className="flex-grow">
+      <main className="flex-grow watercolor-bg">
         <ProductDetail />
       </main>
       

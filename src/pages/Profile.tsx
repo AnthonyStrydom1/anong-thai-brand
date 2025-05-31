@@ -41,41 +41,41 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-anong-cream">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6 text-thai-purple">{t.title}</h1>
+      <main className="flex-1 container mx-auto px-4 py-12 watercolor-bg">
+        <h1 className="heading-premium text-3xl mb-8 text-anong-dark-green">{t.title}</h1>
         
-        <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">{t.welcome}</h2>
-          <p className="text-gray-600 mb-6">{t.profileInfo}</p>
+        <div className="luxury-card p-8 mb-8">
+          <h2 className="heading-elegant text-xl mb-6 text-anong-dark-green">{t.welcome}</h2>
+          <p className="text-luxury mb-8 text-anong-charcoal/80">{t.profileInfo}</p>
           
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700">{t.name}</label>
-                <p className="mt-1 p-2 border border-gray-300 rounded-md bg-gray-50">
+                <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.name}</label>
+                <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
                   {profileData.name}
                 </p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700">{t.email}</label>
-                <p className="mt-1 p-2 border border-gray-300 rounded-md bg-gray-50">
+                <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.email}</label>
+                <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
                   {profileData.email}
                 </p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700">{t.phone}</label>
-                <p className="mt-1 p-2 border border-gray-300 rounded-md bg-gray-50">
+                <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.phone}</label>
+                <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
                   {profileData.phone || t.placeholder}
                 </p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700">{t.address}</label>
-                <p className="mt-1 p-2 border border-gray-300 rounded-md bg-gray-50">
+                <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.address}</label>
+                <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
                   {profileData.address || t.placeholder}
                 </p>
               </div>
