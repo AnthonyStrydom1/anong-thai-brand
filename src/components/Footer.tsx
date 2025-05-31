@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Twitter, MapPin, Clock, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -79,29 +80,24 @@ const Footer = ({ className }: FooterProps) => {
 
   return (
     <footer className={cn("green-banner-bg text-anong-cream relative overflow-hidden", className)}>
-      {/* Debug indicator */}
-      <div className="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 text-xs rounded z-50">
-        Footer with Uploaded Lotus
-      </div>
-      
       {/* Elegant top border */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-anong-gold/70 to-transparent"></div>
       
-      <div className="container mx-auto px-4 py-16 relative z-10">
+      <div className="container mx-auto px-4 py-12 relative z-10">
       
         {/* Newsletter Section */}
-        <div className="max-w-2xl mx-auto mb-16 text-center">
-          <div className="mb-8">
+        <div className="max-w-2xl mx-auto mb-12 text-center">
+          <div className="mb-6">
             <span className="font-elegant text-anong-gold text-sm tracking-[0.25em] uppercase">
               Stay Connected
             </span>
-            <div className="w-24 h-px bg-anong-gold mx-auto mt-4"></div>
+            <div className="w-24 h-px bg-anong-gold mx-auto mt-3"></div>
           </div>
           
-          <h3 className="heading-elegant text-3xl md:text-4xl text-anong-gold mb-6">
+          <h3 className="heading-elegant text-2xl md:text-3xl text-anong-gold mb-4">
             {t.subscribe}
           </h3>
-          <p className="text-luxury text-anong-cream/80 text-base md:text-lg mb-10 leading-relaxed">
+          <p className="text-luxury text-anong-cream/80 text-sm md:text-base mb-8 leading-relaxed">
             {t.subscribeDesc}
           </p>
           
@@ -119,26 +115,26 @@ const Footer = ({ className }: FooterProps) => {
         </div>
 
         {/* Premium botanical divider */}
-        <div className="flex items-center justify-center mb-16">
+        <div className="flex items-center justify-center mb-12">
           <div className="w-32 h-px bg-anong-gold/60"></div>
           <div className="mx-10 botanical-accent w-8 h-8 opacity-80"></div>
           <div className="w-32 h-px bg-anong-gold/60"></div>
         </div>
 
         {/* Footer Links with Visit Us Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16 text-sm">
-          <div className="space-y-5">
-            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-lg">{t.shop}</h4>
-            <ul className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 text-sm">
+          <div className="space-y-4">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base">{t.shop}</h4>
+            <ul className="space-y-2">
               <li><Link to="/shop?category=curry-pastes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.curryPastes}</Link></li>
               <li><Link to="/shop?category=stir-fry-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.stirFrySauces}</Link></li>
               <li><Link to="/shop?category=dipping-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.dippingSauces}</Link></li>
             </ul>
           </div>
           
-          <div className="space-y-5">
-            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-lg">ANONG</h4>
-            <ul className="space-y-3">
+          <div className="space-y-4">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base">ANONG</h4>
+            <ul className="space-y-2">
               <li><Link to="/recipes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.recipes}</Link></li>
               <li><Link to="/about" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.about}</Link></li>
               <li><Link to="/contact" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif">{t.contact}</Link></li>
@@ -146,41 +142,41 @@ const Footer = ({ className }: FooterProps) => {
           </div>
           
           {/* Visit ANONG Restaurant Section */}
-          <div className="space-y-5">
-            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-lg">{t.visitUs}</h4>
-            <div className="space-y-4 text-anong-cream/80">
+          <div className="space-y-4">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base">{t.visitUs}</h4>
+            <div className="space-y-3 text-anong-cream/80">
               <div className="flex items-start space-x-3">
-                <MapPin className="h-5 w-5 text-anong-gold mt-0.5 flex-shrink-0" />
+                <MapPin className="h-4 w-4 text-anong-gold mt-0.5 flex-shrink-0" />
                 <span className="font-serif text-sm leading-relaxed">{t.address}</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Clock className="h-5 w-5 text-anong-gold flex-shrink-0" />
+                <Clock className="h-4 w-4 text-anong-gold flex-shrink-0" />
                 <span className="font-serif text-sm">{t.hours}</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Phone className="h-5 w-5 text-anong-gold flex-shrink-0" />
+                <Phone className="h-4 w-4 text-anong-gold flex-shrink-0" />
                 <span className="font-serif text-sm">{t.phone}</span>
               </div>
             </div>
           </div>
           
-          <div className="space-y-5">
-            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-lg">Connect</h4>
-            <div className="flex space-x-5 mb-8">
+          <div className="space-y-4">
+            <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base">Connect</h4>
+            <div className="flex space-x-4 mb-6">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" 
                  className="text-anong-gold hover:text-anong-warm-gold transition-colors duration-300 hover:scale-110 transform">
-                <Instagram className="h-6 w-6" />
+                <Instagram className="h-5 w-5" />
               </a>
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
                  className="text-anong-gold hover:text-anong-warm-gold transition-colors duration-300 hover:scale-110 transform">
-                <Facebook className="h-6 w-6" />
+                <Facebook className="h-5 w-5" />
               </a>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" 
                  className="text-anong-gold hover:text-anong-warm-gold transition-colors duration-300 hover:scale-110 transform">
-                <Twitter className="h-6 w-6" />
+                <Twitter className="h-5 w-5" />
               </a>
             </div>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               <li><Link to="/shipping" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm">{t.shipping}</Link></li>
               <li><Link to="/returns" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm">{t.returns}</Link></li>
               <li><Link to="/privacy" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm">{t.privacy}</Link></li>
@@ -190,8 +186,8 @@ const Footer = ({ className }: FooterProps) => {
         </div>
 
         {/* Copyright with botanical accent */}
-        <div className="border-t border-anong-gold/25 pt-10">
-          <div className="flex items-center justify-center mb-6">
+        <div className="border-t border-anong-gold/25 pt-8">
+          <div className="flex items-center justify-center mb-4">
             <div className="w-20 h-px bg-anong-gold/40"></div>
             <div className="mx-6 botanical-accent w-5 h-5 opacity-60"></div>
             <div className="w-20 h-px bg-anong-gold/40"></div>
