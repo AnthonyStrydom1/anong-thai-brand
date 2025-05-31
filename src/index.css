@@ -94,7 +94,8 @@
 @layer components {
   /* Enhanced luxury card styling with premium shadows and gold accents */
   .luxury-card {
-    @apply bg-gradient-to-br from-white via-anong-warm-cream/12 to-anong-cream/20 rounded-3xl md:rounded-4xl relative overflow-hidden backdrop-blur-sm;
+    @apply bg-gradient-to-br from-white via-anong-warm-cream to-anong-cream rounded-3xl md:rounded-4xl relative overflow-hidden backdrop-blur-sm;
+    background: linear-gradient(135deg, #ffffff 0%, rgba(242, 237, 227, 0.12) 50%, rgba(247, 243, 233, 0.2) 100%);
     box-shadow: 
       0 4px 24px rgba(26, 61, 46, 0.04),
       0 8px 40px rgba(26, 61, 46, 0.05),
