@@ -89,7 +89,7 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
             </p>
             
             <div className="mt-auto space-y-4">
-              <span className="block text-2xl md:text-3xl font-display font-light text-anong-dark-green">
+              <span className="block text-2xl md:text-3xl font-display font-light text-anong-dark-green text-center">
                 R{price.toFixed(2)}
               </span>
               <Button 
@@ -170,7 +170,7 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
           </div>
           
           <div className="mt-auto space-y-4">
-            <span className="block text-2xl md:text-3xl font-display font-light text-anong-dark-green">
+            <span className="block text-2xl md:text-3xl font-display font-light text-anong-dark-green text-center">
               R{price.toFixed(2)}
             </span>
             <Button 
