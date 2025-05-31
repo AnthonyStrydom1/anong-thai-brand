@@ -185,7 +185,7 @@
       0 6px 16px rgba(26, 61, 46, 0.08);
   }
 
-  /* Green banner background with single lotus pattern */
+  /* Green banner background with single lotus pattern covering entire footer */
   .green-banner-bg {
     @apply bg-gradient-to-br from-anong-dark-green via-anong-forest to-anong-dark-green relative;
     background-color: #1a3d2e !important;
@@ -194,18 +194,14 @@
       radial-gradient(circle at 75% 75%, rgba(212, 165, 116, 0.12) 0%, transparent 50%),
       url('/lovable-uploads/59819f8f-9e66-4215-b4a3-2488f65a2ea1.png');
     background-repeat: no-repeat, no-repeat, no-repeat;
-    background-size: auto, auto, 400px;
-    background-position: 25% 25%, 75% 75%, center;
+    background-size: auto, auto, 100% 100%;
+    background-position: 25% 25%, 75% 75%, center center;
   }
 
   .green-banner-bg::before {
     content: '';
     @apply absolute inset-0 pointer-events-none;
-    background-image: url('/lovable-uploads/59819f8f-9e66-4215-b4a3-2488f65a2ea1.png');
-    background-repeat: no-repeat;
-    background-size: 300px;
-    background-position: center;
-    opacity: 0.1;
+    background: none;
   }
 
   /* Gold button styling */
