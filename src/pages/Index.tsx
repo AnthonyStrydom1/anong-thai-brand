@@ -15,14 +15,14 @@ const Index = () => {
   // Refined animation variants for smoother, more luxurious transitions
   const sectionVariants = {
     offscreen: {
-      y: 40,
+      y: 25,
       opacity: 0
     },
     onscreen: {
       y: 0,
       opacity: 1,
       transition: {
-        duration: 1,
+        duration: 0.8,
         ease: [0.25, 0.1, 0.25, 1]
       }
     }
@@ -39,7 +39,7 @@ const Index = () => {
           <motion.div
             initial="offscreen"
             whileInView="onscreen"
-            viewport={{ once: true, amount: 0.1 }}
+            viewport={{ once: true, amount: 0.08 }}
             variants={sectionVariants}
           >
             <FeaturedProducts />
@@ -48,7 +48,7 @@ const Index = () => {
           <motion.div
             initial="offscreen"
             whileInView="onscreen"
-            viewport={{ once: true, amount: 0.1 }}
+            viewport={{ once: true, amount: 0.08 }}
             variants={sectionVariants}
           >
             <BrandStory />
@@ -57,7 +57,7 @@ const Index = () => {
           <motion.div
             initial="offscreen"
             whileInView="onscreen"
-            viewport={{ once: true, amount: 0.1 }}
+            viewport={{ once: true, amount: 0.08 }}
             variants={sectionVariants}
           >
             <RestaurantBanner />
@@ -66,7 +66,7 @@ const Index = () => {
           <motion.div
             initial="offscreen"
             whileInView="onscreen"
-            viewport={{ once: true, amount: 0.1 }}
+            viewport={{ once: true, amount: 0.08 }}
             variants={sectionVariants}
           >
             <ContactInfo />
