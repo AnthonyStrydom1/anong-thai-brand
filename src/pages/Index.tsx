@@ -6,7 +6,6 @@ import HeroBanner from "@/components/HeroBanner";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import BrandStory from "@/components/BrandStory";
 import ContactInfo from "@/components/ContactInfo";
-import RestaurantBanner from "@/components/RestaurantBanner";
 import { motion } from "framer-motion";
 
 const Index = () => {
@@ -15,14 +14,14 @@ const Index = () => {
   // Refined animation variants for smoother, more luxurious transitions
   const sectionVariants = {
     offscreen: {
-      y: 25,
+      y: 20,
       opacity: 0
     },
     onscreen: {
       y: 0,
       opacity: 1,
       transition: {
-        duration: 0.8,
+        duration: 0.9,
         ease: [0.25, 0.1, 0.25, 1]
       }
     }
@@ -39,7 +38,7 @@ const Index = () => {
           <motion.div
             initial="offscreen"
             whileInView="onscreen"
-            viewport={{ once: true, amount: 0.08 }}
+            viewport={{ once: true, amount: 0.1 }}
             variants={sectionVariants}
           >
             <FeaturedProducts />
@@ -48,7 +47,7 @@ const Index = () => {
           <motion.div
             initial="offscreen"
             whileInView="onscreen"
-            viewport={{ once: true, amount: 0.08 }}
+            viewport={{ once: true, amount: 0.1 }}
             variants={sectionVariants}
           >
             <BrandStory />
@@ -57,16 +56,7 @@ const Index = () => {
           <motion.div
             initial="offscreen"
             whileInView="onscreen"
-            viewport={{ once: true, amount: 0.08 }}
-            variants={sectionVariants}
-          >
-            <RestaurantBanner />
-          </motion.div>
-          
-          <motion.div
-            initial="offscreen"
-            whileInView="onscreen"
-            viewport={{ once: true, amount: 0.08 }}
+            viewport={{ once: true, amount: 0.1 }}
             variants={sectionVariants}
           >
             <ContactInfo />

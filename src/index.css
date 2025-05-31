@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
@@ -83,13 +84,13 @@
   
   /* Refined luxury card styling with improved mobile optimization */
   .luxury-card {
-    @apply bg-gradient-to-br from-white to-anong-warm-cream/15 rounded-xl md:rounded-2xl shadow-[0_4px_30px_rgba(26,61,46,0.04)] md:shadow-[0_6px_40px_rgba(26,61,46,0.06)] relative overflow-hidden backdrop-blur-sm;
-    border: 1px solid rgba(212, 165, 116, 0.08);
+    @apply bg-gradient-to-br from-white to-anong-warm-cream/10 rounded-2xl md:rounded-3xl shadow-[0_6px_35px_rgba(26,61,46,0.06)] md:shadow-[0_8px_45px_rgba(26,61,46,0.08)] relative overflow-hidden backdrop-blur-sm;
+    border: 1px solid rgba(212, 165, 116, 0.06);
   }
   
   .luxury-card::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-[0.01] pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-[0.008] pointer-events-none;
   }
   
   /* Enhanced premium button styles with better mobile touch targets */
@@ -121,7 +122,7 @@
   
   /* Enhanced botanical decorative elements with refined opacity */
   .botanical-accent {
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0C20 0 15 10 10 20C15 30 20 40 20 40C20 40 25 30 30 20C25 10 20 0 20 0Z' fill='%23d4a574' fill-opacity='0.4'/%3E%3Cpath d='M0 20C0 20 10 15 20 10C30 15 40 20 40 20C40 20 30 25 20 30C10 25 0 20 0 20Z' fill='%23d4a574' fill-opacity='0.4'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0C20 0 15 10 10 20C15 30 20 40 20 40C20 40 25 30 30 20C25 10 20 0 20 0Z' fill='%23d4a574' fill-opacity='0.35'/%3E%3Cpath d='M0 20C0 20 10 15 20 10C30 15 40 20 40 20C40 20 30 25 20 30C10 25 0 20 0 20Z' fill='%23d4a574' fill-opacity='0.35'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -130,9 +131,9 @@
   /* Refined watercolor texture effect with minimal opacity */
   .watercolor-bg {
     background-image: 
-      radial-gradient(circle at 20% 80%, rgba(212, 165, 116, 0.015) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(45, 90, 61, 0.01) 0%, transparent 50%),
-      radial-gradient(circle at 40% 40%, rgba(157, 181, 161, 0.008) 0%, transparent 50%);
+      radial-gradient(circle at 20% 80%, rgba(212, 165, 116, 0.012) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(45, 90, 61, 0.008) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(157, 181, 161, 0.006) 0%, transparent 50%);
   }
   
   /* Optimized section styling with consistent spacing */
@@ -142,7 +143,7 @@
   
   .section-premium::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-[0.02] pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-[0.015] pointer-events-none;
   }
   
   /* Enhanced hover effects with smoother, refined transitions */
@@ -193,15 +194,40 @@
   background-color: rgba(212, 165, 116, 0.6);
 }
 
-/* Improved mobile touch targets */
+/* Improved mobile touch targets and performance */
 @media (max-width: 768px) {
   .btn-premium,
   .btn-gold,
   .btn-outline-premium {
-    @apply min-h-[44px] text-sm;
+    @apply min-h-[48px] text-sm;
   }
   
   .luxury-card {
-    box-shadow: 0 2px 20px rgba(26, 61, 46, 0.04);
+    box-shadow: 0 3px 25px rgba(26, 61, 46, 0.06);
+  }
+  
+  /* Reduce motion on mobile for better performance */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Image optimization for faster loading */
+img {
+  @apply transition-transform duration-500 ease-out;
+}
+
+img[loading="lazy"] {
+  opacity: 0;
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
   }
 }
