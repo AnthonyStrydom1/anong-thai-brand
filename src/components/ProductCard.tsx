@@ -46,50 +46,50 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
   if (isSimplified) {
     return (
       <motion.div 
-        whileHover={{ y: -1 }}
-        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+        whileHover={{ y: -2 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
         className="group relative"
       >
-        <div className="bg-white rounded-xl shadow-[0_2px_15px_rgba(26,61,46,0.06)] hover:shadow-[0_4px_25px_rgba(26,61,46,0.10)] border border-anong-gold/8 overflow-hidden transition-all duration-400">
+        <div className="bg-white rounded-2xl shadow-[0_3px_20px_rgba(26,61,46,0.08)] hover:shadow-[0_6px_30px_rgba(26,61,46,0.12)] border border-anong-warm-cream/40 overflow-hidden transition-all duration-500">
           <Link to={`/product/${id}`} className="block">
-            <div className="aspect-square bg-gradient-to-br from-anong-cream to-anong-warm-cream/20 relative overflow-hidden">
-              {/* Subtle botanical background */}
-              <div className="absolute inset-0 bg-botanical-pattern opacity-4"></div>
+            <div className="aspect-square bg-gradient-to-br from-anong-cream via-anong-warm-cream/30 to-anong-cream relative overflow-hidden">
+              {/* Refined botanical background */}
+              <div className="absolute inset-0 bg-botanical-pattern opacity-[0.015]"></div>
               
               <motion.img 
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
                 src={image} 
                 alt={name[language]}
-                className="w-3/4 h-3/4 object-contain absolute inset-0 m-auto drop-shadow-sm"
+                className="w-4/5 h-4/5 object-contain absolute inset-0 m-auto drop-shadow-sm"
               />
               
-              {/* Subtle gold accent on hover */}
-              <div className="absolute inset-0 bg-gradient-to-t from-anong-gold/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+              {/* Subtle premium overlay on hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-anong-gold/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>
           </Link>
           
-          <div className="p-4 md:p-5">
+          <div className="p-5 md:p-6">
             <Link to={`/product/${id}`}>
-              <h3 className="font-elegant text-base md:text-lg mb-2 text-anong-deep-black group-hover:text-anong-dark-green transition-colors duration-300 leading-tight font-medium">
+              <h3 className="font-elegant text-lg md:text-xl mb-2 text-anong-deep-black group-hover:text-anong-dark-green transition-colors duration-400 leading-tight font-medium">
                 {name[language]}
               </h3>
             </Link>
             
-            <p className="text-xs text-anong-charcoal/60 mb-3 md:mb-4 font-light">
+            <p className="text-xs md:text-sm text-anong-charcoal/60 mb-4 font-light">
               {t.weight}
             </p>
             
             <div className="flex justify-between items-center">
-              <span className="text-lg font-display font-medium text-anong-gold">
+              <span className="text-xl md:text-2xl font-display font-light text-anong-dark-green">
                 R{price.toFixed(2)}
               </span>
               <Button 
                 size="sm" 
-                className="bg-anong-dark-green hover:bg-anong-gold hover:text-anong-deep-black text-anong-cream text-xs px-3 md:px-4 py-2 h-auto font-medium tracking-wide transition-all duration-300 rounded-lg group-hover:shadow-sm"
+                className="bg-anong-dark-green hover:bg-anong-gold hover:text-anong-deep-black text-anong-cream text-xs md:text-sm px-4 md:px-5 py-2.5 md:py-3 h-auto font-medium tracking-wide transition-all duration-400 rounded-lg group-hover:shadow-md min-h-[44px]"
                 onClick={handleAddToCart}
               >
-                <ShoppingCart className="h-3 w-3 mr-1 md:mr-1.5" />
+                <ShoppingCart className="h-3.5 w-3.5 mr-1.5 md:mr-2" />
                 <span className="hidden sm:inline">{t.addToCart}</span>
                 <span className="sm:hidden">Add</span>
               </Button>
@@ -102,61 +102,61 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
 
   return (
     <motion.div 
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
       className="group relative"
     >
-      <div className="luxury-card group overflow-hidden relative bg-white shadow-[0_4px_25px_rgba(26,61,46,0.04)] hover:shadow-[0_8px_40px_rgba(26,61,46,0.08)] border border-anong-warm-cream/30 rounded-2xl transition-all duration-500">
+      <div className="luxury-card group overflow-hidden relative bg-white shadow-[0_6px_30px_rgba(26,61,46,0.06)] hover:shadow-[0_10px_50px_rgba(26,61,46,0.10)] border border-anong-warm-cream/40 rounded-2xl transition-all duration-600">
         {/* Premium badge */}
-        <div className="absolute top-4 md:top-5 left-4 md:left-5 z-10">
-          <span className="bg-anong-gold text-anong-deep-black px-2 md:px-3 py-1 text-xs font-medium tracking-wider uppercase rounded-full shadow-md font-elegant">
+        <div className="absolute top-5 md:top-6 left-5 md:left-6 z-10">
+          <span className="bg-anong-gold text-anong-deep-black px-3 md:px-4 py-1.5 text-xs font-medium tracking-wider uppercase rounded-full shadow-lg font-elegant">
             Premium
           </span>
         </div>
 
         <Link to={`/product/${id}`} className="block overflow-hidden">
-          <div className="h-60 md:h-72 overflow-hidden flex items-center justify-center bg-gradient-to-br from-anong-cream to-anong-warm-cream relative">
-            {/* Subtle botanical background */}
-            <div className="absolute inset-0 bg-botanical-pattern opacity-6"></div>
+          <div className="h-64 md:h-80 overflow-hidden flex items-center justify-center bg-gradient-to-br from-anong-cream via-anong-warm-cream/20 to-anong-cream relative">
+            {/* Refined botanical background */}
+            <div className="absolute inset-0 bg-botanical-pattern opacity-[0.02]"></div>
             <motion.img 
-              whileHover={{ scale: 1.01 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
               src={image} 
               alt={name[language]}
               className="w-4/5 h-4/5 object-contain relative z-10 drop-shadow-lg"
             />
-            {/* Subtle gold accent on hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-anong-gold/2 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            {/* Premium hover overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-anong-gold/[0.015] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-600"></div>
           </div>
         </Link>
         
-        <div className="p-5 md:p-6 relative z-10 bg-white">
+        <div className="p-6 md:p-8 relative z-10 bg-white">
           <Link to={`/product/${id}`}>
-            <h3 className="heading-elegant text-lg md:text-xl mb-2 md:mb-3 text-anong-deep-black group-hover:text-anong-dark-green transition-colors duration-400 leading-tight font-light">
+            <h3 className="heading-elegant text-xl md:text-2xl mb-3 md:mb-4 text-anong-deep-black group-hover:text-anong-dark-green transition-colors duration-500 leading-tight font-light">
               {name[language]}
             </h3>
           </Link>
-          <p className="text-luxury text-sm mb-4 md:mb-6 line-clamp-2 text-anong-charcoal/70 leading-relaxed font-light">
+          <p className="text-luxury text-sm md:text-base mb-6 md:mb-8 line-clamp-2 text-anong-charcoal/70 leading-relaxed font-light">
             {shortDescription[language]}
           </p>
           
-          {/* Refined botanical divider */}
-          <div className="flex items-center mb-4 md:mb-6">
-            <div className="w-6 md:w-8 h-px bg-anong-gold/30"></div>
-            <div className="mx-2 botanical-accent w-2.5 md:w-3 h-2.5 md:h-3 opacity-40"></div>
-            <div className="flex-1 h-px bg-anong-gold/30"></div>
+          {/* Elegant botanical divider */}
+          <div className="flex items-center mb-6 md:mb-8">
+            <div className="w-8 md:w-10 h-px bg-anong-gold/40"></div>
+            <div className="mx-3 botanical-accent w-3 md:w-4 h-3 md:h-4 opacity-50"></div>
+            <div className="flex-1 h-px bg-anong-gold/40"></div>
           </div>
           
           <div className="flex justify-between items-center">
-            <span className="text-lg md:text-xl font-display font-light text-anong-dark-green">
+            <span className="text-xl md:text-2xl font-display font-light text-anong-dark-green">
               R{price.toFixed(2)}
             </span>
             <Button 
               size="sm" 
-              className="bg-anong-dark-green hover:bg-anong-gold hover:text-anong-deep-black text-anong-cream text-xs px-4 md:px-5 py-2 h-auto font-medium tracking-wide transition-all duration-400 rounded-lg"
+              className="bg-anong-dark-green hover:bg-anong-gold hover:text-anong-deep-black text-anong-cream text-sm px-5 md:px-6 py-3 md:py-3.5 h-auto font-medium tracking-wide transition-all duration-500 rounded-lg min-h-[44px]"
               onClick={handleAddToCart}
             >
-              <ShoppingCart className="h-3 w-3 mr-1.5 md:mr-2" />
+              <ShoppingCart className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">{t.addToCart}</span>
               <span className="sm:hidden">Add</span>
             </Button>

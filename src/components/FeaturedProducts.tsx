@@ -27,32 +27,22 @@ const FeaturedProducts = () => {
 
   const t = translations[language];
 
-  // Select flagship products for structured showcase
-  const flagshipProducts = products.slice(0, 6);
+  // Select only 4 curated flagship products for exclusivity
+  const flagshipProducts = products.slice(0, 4);
   
-  // Refined animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
       transition: { 
-        staggerChildren: 0.08,
-        delayChildren: 0.15
+        staggerChildren: 0.1,
+        delayChildren: 0.2
       }
     }
   };
   
   const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }
-    }
-  };
-
-  const headerVariants = {
-    hidden: { opacity: 0, y: -15 },
+    hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 
       y: 0,
@@ -60,42 +50,52 @@ const FeaturedProducts = () => {
     }
   };
 
+  const headerVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }
+    }
+  };
+
   return (
-    <section className="bg-anong-cream py-16 md:py-20 lg:py-24 relative overflow-hidden">
-      {/* Subtle background texture */}
-      <div className="absolute inset-0 bg-botanical-pattern opacity-3"></div>
+    <section className="bg-anong-cream py-20 md:py-24 lg:py-28 relative overflow-hidden">
+      {/* Refined botanical background texture */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute inset-0 bg-botanical-pattern"></div>
+      </div>
       
-      <div className="container mx-auto relative z-10 max-w-6xl px-4">
+      <div className="container mx-auto relative z-10 max-w-7xl px-4">
         <motion.div 
-          className="text-center mb-12 md:mb-16"
+          className="text-center mb-16 md:mb-20"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, margin: "-50px" }}
           variants={headerVariants}
         >
-          {/* Premium tagline */}
-          <div className="mb-4 md:mb-6">
-            <span className="font-elegant text-anong-gold text-xs md:text-sm tracking-[0.3em] uppercase font-light">
+          <div className="mb-6 md:mb-8">
+            <span className="font-elegant text-anong-gold text-xs md:text-sm tracking-[0.25em] uppercase font-light">
               {t.tagline}
             </span>
-            <div className="w-12 md:w-16 h-px bg-anong-gold mx-auto mt-2 md:mt-3"></div>
+            <div className="w-20 md:w-24 h-px bg-anong-gold mx-auto mt-3 md:mt-4"></div>
           </div>
 
-          <h2 className="heading-premium text-2xl md:text-3xl lg:text-4xl mb-4 md:mb-6 text-anong-deep-black font-light tracking-tight">
+          <h2 className="heading-premium text-3xl md:text-4xl lg:text-5xl mb-6 md:mb-8 text-anong-deep-black font-light tracking-tight">
             {t.title}
           </h2>
-          <p className="text-luxury text-sm md:text-base lg:text-lg max-w-xl mx-auto text-anong-charcoal/70 font-light leading-relaxed">
+          <p className="text-luxury text-base md:text-lg lg:text-xl max-w-2xl mx-auto text-anong-charcoal/70 font-light leading-relaxed">
             {t.subtitle}
           </p>
         </motion.div>
         
-        {/* Optimized Product Grid */}
+        {/* Curated Product Grid - Blue Elephant inspired layout */}
         <motion.div 
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10 mb-12 md:mb-16"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 lg:gap-12 mb-16 md:mb-20"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-15px" }}
+          viewport={{ once: true, margin: "-30px" }}
         >
           {flagshipProducts.map((product) => (
             <motion.div key={product.id} variants={itemVariants}>
@@ -104,22 +104,35 @@ const FeaturedProducts = () => {
           ))}
         </motion.div>
         
-        {/* Refined CTA Section */}
+        {/* Elegant botanical divider */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+          className="flex items-center justify-center mb-12 md:mb-16"
+        >
+          <div className="w-24 md:w-32 h-px bg-anong-gold/40"></div>
+          <div className="mx-8 md:mx-10 botanical-accent w-6 md:w-8 h-6 md:h-8 opacity-60"></div>
+          <div className="w-24 md:w-32 h-px bg-anong-gold/40"></div>
+        </motion.div>
+        
+        {/* Premium CTA Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ duration: 0.7, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
           className="text-center"
         >
           <Button 
             asChild
             size="lg"
-            className="btn-outline-premium text-sm px-6 md:px-8 py-3 md:py-4 h-auto font-medium tracking-wide hover:bg-anong-dark-green hover:text-anong-cream transition-all duration-500"
+            className="btn-outline-premium text-sm md:text-base px-8 md:px-10 py-4 md:py-5 h-auto font-medium tracking-wide hover:bg-anong-dark-green hover:text-anong-cream transition-all duration-500 shadow-sm hover:shadow-md"
           >
             <Link to="/shop" className="flex items-center">
               {t.viewCollection}
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ml-3 h-4 w-4 md:h-5 md:w-5" />
             </Link>
           </Button>
         </motion.div>

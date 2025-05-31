@@ -46,8 +46,8 @@
   body {
     @apply bg-anong-cream text-anong-charcoal font-body;
     background-image: 
-      radial-gradient(circle at 20% 20%, rgba(212, 165, 116, 0.015) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(26, 61, 46, 0.015) 0%, transparent 50%);
+      radial-gradient(circle at 20% 20%, rgba(212, 165, 116, 0.008) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(26, 61, 46, 0.008) 0%, transparent 50%);
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -89,7 +89,7 @@
   
   .luxury-card::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-20 pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-[0.01] pointer-events-none;
   }
   
   /* Enhanced premium button styles with better mobile touch targets */
@@ -119,20 +119,20 @@
     @apply font-serif text-anong-charcoal leading-relaxed font-light;
   }
   
-  /* Enhanced botanical decorative elements */
+  /* Enhanced botanical decorative elements with refined opacity */
   .botanical-accent {
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0C20 0 15 10 10 20C15 30 20 40 20 40C20 40 25 30 30 20C25 10 20 0 20 0Z' fill='%23d4a574' fill-opacity='0.3'/%3E%3Cpath d='M0 20C0 20 10 15 20 10C30 15 40 20 40 20C40 20 30 25 20 30C10 25 0 20 0 20Z' fill='%23d4a574' fill-opacity='0.3'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0C20 0 15 10 10 20C15 30 20 40 20 40C20 40 25 30 30 20C25 10 20 0 20 0Z' fill='%23d4a574' fill-opacity='0.4'/%3E%3Cpath d='M0 20C0 20 10 15 20 10C30 15 40 20 40 20C40 20 30 25 20 30C10 25 0 20 0 20Z' fill='%23d4a574' fill-opacity='0.4'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
   }
   
-  /* Enhanced watercolor texture effect with reduced opacity */
+  /* Refined watercolor texture effect with minimal opacity */
   .watercolor-bg {
     background-image: 
-      radial-gradient(circle at 20% 80%, rgba(212, 165, 116, 0.02) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(45, 90, 61, 0.015) 0%, transparent 50%),
-      radial-gradient(circle at 40% 40%, rgba(157, 181, 161, 0.01) 0%, transparent 50%);
+      radial-gradient(circle at 20% 80%, rgba(212, 165, 116, 0.015) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(45, 90, 61, 0.01) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(157, 181, 161, 0.008) 0%, transparent 50%);
   }
   
   /* Optimized section styling with consistent spacing */
@@ -142,7 +142,7 @@
   
   .section-premium::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-30 pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-[0.02] pointer-events-none;
   }
   
   /* Enhanced hover effects with smoother, refined transitions */
