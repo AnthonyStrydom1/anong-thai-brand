@@ -19,7 +19,8 @@ const ProductGrid = () => {
   
   const translations = {
     en: {
-      title: "Our Products",
+      title: "Our Premium Products",
+      subtitle: "Discover authentic Thai flavors crafted with traditional recipes",
       search: "Search products...",
       all: "All Products",
       curryPastes: "Curry Pastes",
@@ -30,7 +31,8 @@ const ProductGrid = () => {
       clearSearch: "Clear"
     },
     th: {
-      title: "สินค้าของเรา",
+      title: "สินค้าพรีเมียมของเรา",
+      subtitle: "ค้นพบรสชาติไทยแท้ที่สร้างด้วยสูตรดั้งเดิม",
       search: "ค้นหาสินค้า...",
       all: "สินค้าทั้งหมด",
       curryPastes: "พริกแกง",
@@ -117,31 +119,32 @@ const ProductGrid = () => {
   console.log("Filtered products:", filteredProducts);
 
   return (
-    <section className="py-16 px-4 bg-gradient-to-b from-white to-[#F5EBFF] subtle-pattern">
+    <section className="py-16 px-4 watercolor-bg">
       <div className="container mx-auto">
         <motion.div 
-          className="text-center mb-10"
+          className="text-center mb-16"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-4xl font-semibold mb-2 text-gray-800 font-display">{t.title}</h2>
-          <div className="w-24 h-1 bg-thai-purple mx-auto mt-4 mb-6"></div>
+          <h1 className="heading-premium text-4xl lg:text-5xl mb-4 text-anong-dark-green">{t.title}</h1>
+          <p className="text-luxury text-lg text-anong-charcoal/80 max-w-2xl mx-auto">{t.subtitle}</p>
+          <div className="divider-premium w-24 mx-auto mt-8"></div>
         </motion.div>
         
         {/* Search and Filter */}
         <motion.div 
-          className="mb-12 flex flex-col md:flex-row gap-4 bg-white p-6 rounded-xl shadow-sm"
+          className="mb-12 flex flex-col md:flex-row gap-4 luxury-card p-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-anong-charcoal/40" />
             <Input
               type="text"
               placeholder={t.search}
-              className="pl-10 border-gray-200 focus:border-thai-purple premium-input"
+              className="pl-10 input-premium"
               value={searchTerm}
               onChange={handleSearch}
             />
@@ -165,8 +168,8 @@ const ProductGrid = () => {
                 onClick={() => handleCategoryChange(category.id)}
                 className={
                   activeCategory === category.id
-                    ? "bg-thai-purple hover:bg-thai-purple-dark"
-                    : "border-thai-purple text-thai-purple hover:bg-thai-purple/10"
+                    ? "btn-premium"
+                    : "btn-outline-premium"
                 }
               >
                 {category.name[language]}
@@ -190,8 +193,8 @@ const ProductGrid = () => {
             ))}
           </motion.div>
         ) : (
-          <div className="text-center py-16 text-gray-500 bg-white rounded-lg shadow-sm">
-            {t.noProducts}
+          <div className="text-center py-16 text-anong-charcoal/60 luxury-card">
+            <p className="text-luxury text-lg">{t.noProducts}</p>
           </div>
         )}
       </div>
