@@ -161,7 +161,8 @@
   
   /* Enhanced navigation with more premium feel */
   .nav-premium {
-    @apply bg-anong-dark-green/98 backdrop-blur-xl border-b border-anong-gold/20 shadow-sm;
+    background-color: rgba(26, 61, 46, 0.98);
+    @apply backdrop-blur-xl border-b border-anong-gold/20 shadow-sm;
   }
 }
 
