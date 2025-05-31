@@ -194,7 +194,7 @@
       radial-gradient(circle at 75% 75%, rgba(212, 165, 116, 0.12) 0%, transparent 50%),
       url('/lovable-uploads/59819f8f-9e66-4215-b4a3-2488f65a2ea1.png');
     background-repeat: no-repeat, no-repeat, no-repeat;
-    background-size: auto, auto, 100% 100%;
+    background-size: auto, auto, cover;
     background-position: 25% 25%, 75% 75%, center center;
   }
 
