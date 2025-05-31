@@ -48,7 +48,7 @@ const MenuGrid = ({ categories }: MenuGridProps) => {
                 
                 {/* Overlay with category name */}
                 <div className="absolute inset-0 bg-gradient-to-t from-anong-deep-black/60 via-transparent to-transparent flex items-end">
-                  <div className="p-3 md:p-4 w-full">
+                  <div className="p-2 md:p-3 w-full">
                     <h3 className="font-elegant text-white text-sm md:text-base font-medium text-center">
                       {category.label}
                     </h3>
@@ -80,13 +80,13 @@ const MenuGrid = ({ categories }: MenuGridProps) => {
 
       {/* Modal Dialog for Menu View */}
       <Dialog open={!!selectedCategory} onOpenChange={() => setSelectedCategory(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+          <DialogHeader className="p-6 pb-0">
             <DialogTitle className="font-elegant text-2xl text-anong-deep-black">
               {selectedCategory?.label}
             </DialogTitle>
           </DialogHeader>
-          <div className="w-full h-[70vh] overflow-auto">
+          <div className="w-full h-[70vh] overflow-auto p-0">
             {selectedCategory && (
               <img 
                 src={selectedCategory.image} 
