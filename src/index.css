@@ -89,7 +89,7 @@
   
   .luxury-card::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-3 pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-30 pointer-events-none;
   }
   
   /* Enhanced premium button styles */
@@ -141,7 +141,7 @@
   
   .section-premium::before {
     content: '';
-    @apply absolute inset-0 bg-botanical-pattern opacity-5 pointer-events-none;
+    @apply absolute inset-0 bg-botanical-pattern opacity-50 pointer-events-none;
   }
   
   /* Enhanced hover effects with slower, more elegant transitions */
