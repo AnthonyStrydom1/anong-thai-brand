@@ -79,18 +79,18 @@ const MenuGrid = ({ categories }: MenuGridProps) => {
 
       {/* Modal Dialog for Menu View */}
       <Dialog open={!!selectedCategory} onOpenChange={() => setSelectedCategory(null)}>
-        <DialogContent className="max-w-5xl max-h-[95vh] overflow-hidden p-0">
+        <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden p-0 bg-white">
           <DialogHeader className="p-4 pb-2">
             <DialogTitle className="font-elegant text-xl text-anong-deep-black">
               {selectedCategory?.label}
             </DialogTitle>
           </DialogHeader>
-          <div className="w-full h-[85vh] overflow-auto">
+          <div className="w-full flex justify-center items-center bg-white p-4">
             {selectedCategory && (
               <img 
                 src={selectedCategory.image} 
                 alt={selectedCategory.label}
-                className="w-full h-full object-cover"
+                className="max-w-full max-h-[80vh] object-contain"
               />
             )}
           </div>
