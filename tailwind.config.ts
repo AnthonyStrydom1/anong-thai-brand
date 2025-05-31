@@ -53,10 +53,10 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Premium ANONG Brand Colors updated with burgundy
+				// Premium ANONG Brand Colors inspired by jar labels
 				"anong": {
-					"dark-green": "#7a1f2e",
-					"forest": "#912838", 
+					"dark-green": "#1a3d2e",
+					"forest": "#2d5a3d", 
 					"cream": "#f7f3e9",
 					"warm-cream": "#f2ede3",
 					"charcoal": "#2c2c2c",
@@ -68,11 +68,11 @@ export default {
 					"sage": "#9db5a1",
 					"earth": "#8d7b68"
 				},
-				// Updated thai brand colors to match ANONG aesthetic with burgundy
+				// Updated thai brand colors to match ANONG aesthetic
 				"thai-purple": {
-					light: "#912838",
-					DEFAULT: "#7a1f2e",
-					dark: "#5f1722"
+					light: "#2d5a3d",
+					DEFAULT: "#1a3d2e",
+					dark: "#0f2d1f"
 				},
 				"thai-gold": "#d4a574",
 				"thai-ivory": "#f7f3e9"
