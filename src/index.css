@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
@@ -138,20 +137,29 @@
   
   /* Green banner background with subtle botanical pattern */
   .green-banner-bg {
+    background-color: var(--anong-dark-green);
     background-image: 
-      url('/lovable-uploads/c5e5ac91-9703-4e18-ab93-404f42c8d2c3.png'),
-      linear-gradient(135deg, var(--anong-dark-green) 0%, var(--anong-forest) 100%);
-    background-size: cover, cover;
-    background-position: center, center;
-    background-repeat: no-repeat, no-repeat;
-    background-blend-mode: overlay;
+      url('/lovable-uploads/c5e5ac91-9703-4e18-ab93-404f42c8d2c3.png');
+    background-size: 400px 400px;
+    background-position: center;
+    background-repeat: repeat;
+    position: relative;
   }
   
   .green-banner-bg::before {
     content: '';
-    @apply absolute inset-0 bg-anong-dark-green/60 pointer-events-none;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(26, 61, 46, 0.85) 0%, rgba(45, 90, 61, 0.85) 100%);
+    pointer-events: none;
+    z-index: 1;
   }
   
+  .green-banner-bg > * {
+    position: relative;
+    z-index: 2;
+  }
+
   /* Optimized section styling with consistent spacing */
   .section-premium {
     @apply py-16 md:py-20 lg:py-24 px-4 relative overflow-hidden;
