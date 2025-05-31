@@ -50,7 +50,7 @@ const HeroBanner = () => {
       <motion.div 
         className="absolute inset-0"
         style={{ 
-          backgroundImage: "url('https://i.postimg.cc/Hx3gCZMh/buddah-fin.png')",
+          backgroundImage: "url('/lovable-uploads/a2767b76-0cad-45a5-b45f-d43c70c2d81c.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           filter: "brightness(0.4) contrast(1.1) saturate(0.9)"
