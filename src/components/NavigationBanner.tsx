@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Menu, Search, X } from "lucide-react";
 import CartDropdown from './CartDropdown';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import NavItem from './navigation/NavItem';
 import SearchOverlay from './navigation/SearchOverlay';
 import MobileMenu from './navigation/MobileMenu';
@@ -54,8 +54,8 @@ const NavigationBanner = () => {
   const navItems = [
     { path: '/', label: t.home },
     { path: '/shop', label: t.shop },
+    { path: '/about', label: language === 'en' ? 'About Anong' : 'เกี่ยวกับอนงค์' },
     { path: '/recipes', label: t.recipes },
-    { path: '/about', label: t.about },
     { path: '/contact', label: t.contact },
   ];
 
@@ -66,13 +66,20 @@ const NavigationBanner = () => {
   };
 
   return (
-    <div className="bg-anong-dark-green nav-premium sticky top-0 z-40 border-b border-anong-gold/20">
+    <div className="bg-anong-black nav-premium sticky top-0 z-40 border-b border-anong-gold/20">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           {/* Logo and Navigation */}
           <div className="flex items-center">
-            <Link to="/" className="mr-8 lg:mr-12">
-              <h1 className="text-xl lg:text-2xl font-display font-light text-anong-cream tracking-wide">
+            <Link to="/" className="mr-8 lg:mr-12 flex items-center">
+              <div className="w-8 h-8 mr-3">
+                <img 
+                  src="/lovable-uploads/f440215b-ebf7-4c9f-9cf6-412d4018796e.png" 
+                  alt="ANONG Logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <h1 className="text-xl lg:text-2xl font-serif font-semibold text-anong-gold tracking-wide">
                 ANONG
               </h1>
             </Link>
@@ -82,10 +89,10 @@ const NavigationBanner = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`font-serif text-sm tracking-wide transition-colors duration-300 ${
+                  className={`font-sans text-sm tracking-wide transition-colors duration-300 ${
                     isActive(item.path)
                       ? 'text-anong-gold border-b border-anong-gold pb-1'
-                      : 'text-anong-cream/80 hover:text-anong-gold'
+                      : 'text-white/80 hover:text-anong-gold'
                   }`}
                 >
                   {item.label}
@@ -99,7 +106,7 @@ const NavigationBanner = () => {
             <Button 
               variant="ghost" 
               onClick={toggleLanguage}
-              className="text-anong-cream/70 hover:text-anong-gold hover:bg-anong-cream/5 text-xs font-medium tracking-wider px-3 py-2 h-auto"
+              className="text-white/70 hover:text-anong-gold hover:bg-white/5 text-xs font-medium tracking-wider px-3 py-2 h-auto"
             >
               {language === 'en' ? 'TH' : 'EN'}
             </Button>
@@ -110,7 +117,7 @@ const NavigationBanner = () => {
                 size="icon"
                 onClick={toggleSearch}
                 aria-label={t.search}
-                className="text-anong-cream/70 hover:text-anong-gold hover:bg-anong-cream/5"
+                className="text-white/70 hover:text-anong-gold hover:bg-white/5"
               >
                 <Search className="h-4 w-4" />
               </Button>
@@ -128,7 +135,7 @@ const NavigationBanner = () => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-anong-cream/70 hover:text-anong-gold hover:bg-anong-cream/5 md:hidden" 
+              className="text-white/70 hover:text-anong-gold hover:bg-white/5 md:hidden" 
               onClick={toggleMenu}
             >
               {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}

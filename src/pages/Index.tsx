@@ -1,3 +1,4 @@
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,7 +11,6 @@ import { motion } from "framer-motion";
 const Index = () => {
   const { language } = useLanguage();
   
-  // Enhanced animation variants with more sophisticated timing
   const sectionVariants = {
     offscreen: {
       y: 40,
@@ -29,7 +29,7 @@ const Index = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col bg-anong-cream">
+    <div className="min-h-screen flex flex-col bg-anong-ivory">
       <Header />
       
       <main className="flex-grow">

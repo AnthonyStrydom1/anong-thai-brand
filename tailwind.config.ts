@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,29 +53,34 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Updated ANONG Brand Colors with darker cream/beige tones
+				// New ANONG Brand Colors
 				"anong": {
-					"dark-green": "#1a3d2e",
+					"black": "#000000",
+					"gold": "#d4af37",
+					"ivory": "#f8f4ed",
+					"deep-green": "#2b3d2f",
+					"warm-yellow": "#e1b066",
+					// Legacy colors for compatibility
+					"dark-green": "#2b3d2f",
 					"forest": "#2d5a3d", 
-					"cream": "#e8e0d0", // Darker cream
-					"warm-cream": "#ded4c4", // Darker warm cream
+					"cream": "#f8f4ed",
+					"warm-cream": "#f8f4ed",
 					"charcoal": "#2c2c2c",
-					"deep-black": "#1a1a1a",
+					"deep-black": "#000000",
 					"curry-red": "#8b2635",
 					"spice-red": "#a53c48",
-					"gold": "#d4a574",
-					"warm-gold": "#e2b887",
+					"warm-gold": "#e1b066",
 					"sage": "#9db5a1",
 					"earth": "#8d7b68"
 				},
-				// Updated thai brand colors to match ANONG aesthetic
+				// Thai brand colors updated to match ANONG
 				"thai-purple": {
-					light: "#2d5a3d",
-					DEFAULT: "#1a3d2e",
-					dark: "#0f2d1f"
+					light: "#2b3d2f",
+					DEFAULT: "#000000",
+					dark: "#000000"
 				},
-				"thai-gold": "#d4a574",
-				"thai-ivory": "#e8e0d0" // Darker ivory to match new cream
+				"thai-gold": "#d4af37",
+				"thai-ivory": "#f8f4ed"
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -82,10 +88,10 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			fontFamily: {
-				// Premium serif fonts for headings
-				'display': ['Crimson Text', 'Libre Baskerville', 'serif'],
-				'elegant': ['Cormorant Garamond', 'serif'],
-				'serif': ['Lora', 'serif'],
+				// New ANONG typography
+				'serif': ['Playfair Display', 'serif'],
+				'display': ['Playfair Display', 'serif'],
+				'elegant': ['Playfair Display', 'serif'],
 				// Clean sans-serif for body text
 				'body': ['Inter', 'sans-serif'],
 				'sans': ['Inter', 'sans-serif'],
@@ -123,17 +129,11 @@ export default {
 				'float': 'float 6s ease-in-out infinite'
 			},
 			backgroundImage: {
-				'premium-gradient': 'linear-gradient(135deg, #f7f3e9 0%, #f2ede3 100%)',
-				'dark-gradient': 'linear-gradient(135deg, #1a3d2e 0%, #2d5a3d 100%)',
-				'gold-gradient': 'linear-gradient(135deg, #d4a574 0%, #e2b887 100%)',
-				'botanical-pattern': "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23d4a574\" fill-opacity=\"0.08\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"
-			},
-			patterns: {
-				'wavy': {
-					'bg-size': '20px 20px',
-					'bg-image': `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10c2.5 0 5-2.5 5-5s2.5-5 5-5 5 2.5 5 5 2.5 5 5 5 5-2.5 5-5 2.5-5 5-5 5 2.5 5 5-2.5 5-5 5-5-2.5-5-5 2.5-5 5-5 5 2.5 5 5-2.5 5-5 5-5-2.5-5-5 2.5-5 5-5z' fill='%23d4a574' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
-				},
-			},
+				'premium-gradient': 'linear-gradient(135deg, #f8f4ed 0%, #f0ead6 100%)',
+				'dark-gradient': 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
+				'gold-gradient': 'linear-gradient(135deg, #d4af37 0%, #e1b066 100%)',
+				'lotus-pattern': "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23d4af37\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M30 15c0 0-8 8-8 15s8 15 8 15 8-8 8-15-8-15-8-15z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"
+			}
 		}
 	},
 	plugins: [
