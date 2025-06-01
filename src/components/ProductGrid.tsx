@@ -81,7 +81,7 @@ const ProductGrid = () => {
   console.log("Filtered products:", filteredProducts);
 
   return (
-    <section className="py-20 md:py-28 px-4 md:px-6">
+    <section className="py-20 md:py-28 px-4 md:px-6 bg-anong-ivory">
       <div className="container mx-auto max-w-7xl">
         <motion.div 
           className="text-center mb-16 md:mb-20"
@@ -89,8 +89,8 @@ const ProductGrid = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="heading-premium text-4xl md:text-5xl lg:text-6xl mb-6 text-anong-dark-green">{t.title}</h1>
-          <p className="text-luxury text-lg md:text-xl text-anong-charcoal/80 max-w-3xl mx-auto leading-relaxed">{t.subtitle}</p>
+          <h1 className="heading-premium text-4xl md:text-5xl lg:text-6xl mb-6 text-anong-black">{t.title}</h1>
+          <p className="text-luxury text-lg md:text-xl text-anong-black/80 max-w-3xl mx-auto leading-relaxed">{t.subtitle}</p>
           <div className="w-24 h-px bg-gradient-to-r from-transparent via-anong-gold to-transparent mx-auto mt-8"></div>
         </motion.div>
         

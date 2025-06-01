@@ -79,7 +79,7 @@ const Footer = ({ className }: FooterProps) => {
   };
 
   return (
-    <footer className={cn("green-banner-bg text-anong-cream relative overflow-hidden", className)}>
+    <footer className={cn("dark-banner-bg text-anong-ivory relative overflow-hidden", className)}>
       {/* Premium top border with gradient */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-anong-gold/80 to-transparent"></div>
       
@@ -97,7 +97,7 @@ const Footer = ({ className }: FooterProps) => {
           <h3 className="heading-elegant text-2xl md:text-3xl lg:text-4xl text-anong-gold mb-6 leading-tight">
             {t.subscribe}
           </h3>
-          <p className="text-luxury text-sm md:text-base text-anong-cream/85 mb-10 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-luxury text-sm md:text-base text-anong-ivory/85 mb-10 leading-relaxed max-w-2xl mx-auto">
             {t.subscribeDesc}
           </p>
           
@@ -105,7 +105,7 @@ const Footer = ({ className }: FooterProps) => {
             <Input 
               type="email" 
               placeholder={t.email} 
-              className="input-premium flex-1 bg-anong-cream/15 border-anong-gold/30 text-anong-cream placeholder:text-anong-cream/60 focus:border-anong-gold backdrop-blur-sm" 
+              className="input-premium flex-1 bg-anong-ivory/15 border-anong-gold/30 text-anong-ivory placeholder:text-anong-ivory/60 focus:border-anong-gold backdrop-blur-sm" 
               required 
             />
             <Button type="submit" className="btn-gold whitespace-nowrap px-8 py-4">
@@ -115,13 +115,13 @@ const Footer = ({ className }: FooterProps) => {
           
           {/* Trust badges */}
           <div className="flex flex-wrap justify-center gap-4 mt-8">
-            <div className="trust-badge bg-anong-cream/10 text-anong-cream border-anong-cream/20">
+            <div className="bg-anong-ivory/10 text-anong-ivory border border-anong-ivory/20 px-4 py-2 rounded-full text-sm font-medium tracking-wide backdrop-blur-sm">
               {t.quality}
             </div>
-            <div className="trust-badge bg-anong-cream/10 text-anong-cream border-anong-cream/20">
+            <div className="bg-anong-ivory/10 text-anong-ivory border border-anong-ivory/20 px-4 py-2 rounded-full text-sm font-medium tracking-wide backdrop-blur-sm">
               {t.authentic}
             </div>
-            <div className="trust-badge bg-anong-cream/10 text-anong-cream border-anong-cream/20">
+            <div className="bg-anong-ivory/10 text-anong-ivory border border-anong-ivory/20 px-4 py-2 rounded-full text-sm font-medium tracking-wide backdrop-blur-sm">
               {t.crafted}
             </div>
           </div>
@@ -130,7 +130,7 @@ const Footer = ({ className }: FooterProps) => {
         {/* Elegant botanical divider */}
         <div className="flex items-center justify-center mb-16">
           <div className="w-24 md:w-32 h-px bg-anong-gold/60"></div>
-          <div className="mx-8 md:mx-12 botanical-accent w-8 h-8 opacity-90"></div>
+          <div className="mx-8 md:mx-12 lotus-accent w-8 h-8 opacity-90"></div>
           <div className="w-24 md:w-32 h-px bg-anong-gold/60"></div>
         </div>
 
@@ -141,25 +141,25 @@ const Footer = ({ className }: FooterProps) => {
           <div className="space-y-5">
             <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base md:text-lg">{t.shop}</h4>
             <ul className="space-y-3">
-              <li><Link to="/shop?category=curry-pastes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.curryPastes}</Link></li>
-              <li><Link to="/shop?category=stir-fry-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.stirFrySauces}</Link></li>
-              <li><Link to="/shop?category=dipping-sauces" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.dippingSauces}</Link></li>
+              <li><Link to="/shop?category=curry-pastes" className="text-anong-ivory/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.curryPastes}</Link></li>
+              <li><Link to="/shop?category=stir-fry-sauces" className="text-anong-ivory/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.stirFrySauces}</Link></li>
+              <li><Link to="/shop?category=dipping-sauces" className="text-anong-ivory/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.dippingSauces}</Link></li>
             </ul>
           </div>
           
           <div className="space-y-5">
             <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base md:text-lg">ANONG</h4>
             <ul className="space-y-3">
-              <li><Link to="/recipes" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.recipes}</Link></li>
-              <li><Link to="/about" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.about}</Link></li>
-              <li><Link to="/contact" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.contact}</Link></li>
+              <li><Link to="/recipes" className="text-anong-ivory/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.recipes}</Link></li>
+              <li><Link to="/about" className="text-anong-ivory/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.about}</Link></li>
+              <li><Link to="/contact" className="text-anong-ivory/80 hover:text-anong-gold transition-colors duration-300 font-serif hover:translate-x-1 transform inline-block">{t.contact}</Link></li>
             </ul>
           </div>
           
           {/* Enhanced Visit Restaurant Section */}
           <div className="space-y-5">
             <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base md:text-lg">{t.visitUs}</h4>
-            <div className="space-y-4 text-anong-cream/80">
+            <div className="space-y-4 text-anong-ivory/80">
               <div className="flex items-start space-x-3 group">
                 <MapPin className="h-4 w-4 text-anong-gold mt-1 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                 <span className="font-serif text-sm leading-relaxed">{t.address}</span>
@@ -179,23 +179,23 @@ const Footer = ({ className }: FooterProps) => {
             <h4 className="heading-elegant text-anong-gold font-medium tracking-wide text-base md:text-lg">Connect</h4>
             <div className="flex space-x-4 mb-6">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" 
-                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-300 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
+                 className="text-anong-gold hover:text-anong-warm-yellow transition-all duration-300 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
                 <Instagram className="h-5 w-5" />
               </a>
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
-                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-300 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
+                 className="text-anong-gold hover:text-anong-warm-yellow transition-all duration-300 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
                 <Facebook className="h-5 w-5" />
               </a>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" 
-                 className="text-anong-gold hover:text-anong-warm-gold transition-all duration-300 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
+                 className="text-anong-gold hover:text-anong-warm-yellow transition-all duration-300 hover:scale-125 transform p-2 rounded-full hover:bg-anong-gold/10">
                 <Twitter className="h-5 w-5" />
               </a>
             </div>
             <ul className="space-y-3">
-              <li><Link to="/shipping" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.shipping}</Link></li>
-              <li><Link to="/returns" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.returns}</Link></li>
-              <li><Link to="/privacy" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.privacy}</Link></li>
-              <li><Link to="/terms" className="text-anong-cream/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.terms}</Link></li>
+              <li><Link to="/shipping" className="text-anong-ivory/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.shipping}</Link></li>
+              <li><Link to="/returns" className="text-anong-ivory/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.returns}</Link></li>
+              <li><Link to="/privacy" className="text-anong-ivory/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.privacy}</Link></li>
+              <li><Link to="/terms" className="text-anong-ivory/80 hover:text-anong-gold transition-colors duration-300 font-serif text-sm hover:translate-x-1 transform inline-block">{t.terms}</Link></li>
             </ul>
           </div>
         </div>
@@ -204,10 +204,10 @@ const Footer = ({ className }: FooterProps) => {
         <div className="border-t border-anong-gold/20 pt-8">
           <div className="flex items-center justify-center mb-6">
             <div className="w-16 md:w-24 h-px bg-anong-gold/40"></div>
-            <div className="mx-6 md:mx-8 botanical-accent w-5 h-5 opacity-70"></div>
+            <div className="mx-6 md:mx-8 lotus-accent w-5 h-5 opacity-70"></div>
             <div className="w-16 md:w-24 h-px bg-anong-gold/40"></div>
           </div>
-          <p className="text-anong-cream/70 text-center text-sm md:text-base font-serif tracking-wide leading-relaxed max-w-2xl mx-auto">
+          <p className="text-anong-ivory/70 text-center text-sm md:text-base font-serif tracking-wide leading-relaxed max-w-2xl mx-auto">
             {t.rights}
           </p>
         </div>
