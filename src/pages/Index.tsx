@@ -7,9 +7,15 @@ import FeaturedProducts from "@/components/FeaturedProducts";
 import BrandStory from "@/components/BrandStory";
 import RestaurantBanner from "@/components/RestaurantBanner";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 
 const Index = () => {
   const { language } = useLanguage();
+  
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   const sectionVariants = {
     offscreen: {
@@ -35,7 +41,7 @@ const Index = () => {
       <main className="flex-grow">
         <HeroBanner />
         
-        <div className="relative">
+        <div className="relative thai-pattern-bg">
           <motion.div
             initial="offscreen"
             whileInView="onscreen"

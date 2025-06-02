@@ -53,31 +53,26 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// New ANONG Brand Colors
+				// ANONG Brand Colors - Premium Thai Aesthetic
 				"anong": {
-					"black": "#000000",
-					"gold": "#d4af37",
-					"ivory": "#f8f4ed",
-					"deep-green": "#2b3d2f",
-					"warm-yellow": "#e1b066",
-					// Legacy colors for compatibility
-					"dark-green": "#2b3d2f",
-					"forest": "#2d5a3d", 
-					"cream": "#f8f4ed",
-					"warm-cream": "#f8f4ed",
-					"charcoal": "#2c2c2c",
-					"deep-black": "#000000",
-					"curry-red": "#8b2635",
-					"spice-red": "#a53c48",
-					"warm-gold": "#e1b066",
-					"sage": "#9db5a1",
-					"earth": "#8d7b68"
+					// Core Brand Colors (based on CMYK values provided)
+					"black": "#1a1a1a",        // Deep Charcoal Black (CMYK: 60,50,50,100)
+					"gold": "#d4af37",         // Gold Accent (CMYK: 30,35,70,10)
+					"ivory": "#f8f4ed",        // Thai Ivory (CMYK: 4,6,12,0)
+					"deep-green": "#2b3d2f",   // Herbal Green (CMYK: 64,39,85,33)
+					
+					// Supporting palette for depth and variation
+					"warm-yellow": "#e1b066",   // Lighter gold variation
+					"sage": "#9db5a1",          // Muted green for accents
+					"charcoal": "#2c2c2c",      // Rich charcoal for text
+					"cream": "#faf8f5",         // Softer ivory for backgrounds
 				},
-				// Thai brand colors updated to match ANONG
+				
+				// Legacy colors maintained for compatibility
 				"thai-purple": {
 					light: "#2b3d2f",
-					DEFAULT: "#000000",
-					dark: "#000000"
+					DEFAULT: "#1a1a1a",
+					dark: "#1a1a1a"
 				},
 				"thai-gold": "#d4af37",
 				"thai-ivory": "#f8f4ed"
@@ -88,14 +83,15 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			fontFamily: {
-				// New ANONG typography
-				'serif': ['Playfair Display', 'serif'],
-				'display': ['Playfair Display', 'serif'],
-				'elegant': ['Playfair Display', 'serif'],
-				// Clean sans-serif for body text
-				'body': ['Inter', 'sans-serif'],
-				'sans': ['Inter', 'sans-serif'],
+				// ANONG Brand Typography
+				'heading': ['Playfair Display', 'serif'],    // Elegant headings
+				'body': ['Lato', 'sans-serif'],              // Clean body text
+				'display': ['Playfair Display', 'serif'],    // Display text
+				
 				// Legacy fonts maintained for compatibility
+				'serif': ['Playfair Display', 'serif'],
+				'sans': ['Lato', 'sans-serif'],
+				'elegant': ['Playfair Display', 'serif'],
 				'thai': ['Sriracha', 'sans-serif'],
 				'sarabun': ['Sarabun', 'sans-serif']
 			},
@@ -109,8 +105,8 @@ export default {
 					to: { height: '0' }
 				},
 				'fade-in': {
-					'0%': { opacity: '0' },
-					'100%': { opacity: '1' }
+					'0%': { opacity: '0', transform: 'translateY(10px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
 				},
 				'slide-in': {
 					'0%': { transform: 'translateY(10px)', opacity: '0' },
@@ -119,6 +115,10 @@ export default {
 				'float': {
 					'0%, 100%': { transform: 'translateY(0px)' },
 					'50%': { transform: 'translateY(-10px)' }
+				},
+				'shimmer': {
+					'0%': { transform: 'translateX(-100%)' },
+					'100%': { transform: 'translateX(100%)' }
 				}
 			},
 			animation: {
@@ -126,13 +126,14 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-in-out',
 				'slide-in': 'slide-in 0.4s ease-out',
-				'float': 'float 6s ease-in-out infinite'
+				'float': 'float 6s ease-in-out infinite',
+				'shimmer': 'shimmer 2s infinite'
 			},
 			backgroundImage: {
-				'premium-gradient': 'linear-gradient(135deg, #f8f4ed 0%, #f0ead6 100%)',
-				'dark-gradient': 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
-				'gold-gradient': 'linear-gradient(135deg, #d4af37 0%, #e1b066 100%)',
-				'lotus-pattern': "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23d4af37\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M30 15c0 0-8 8-8 15s8 15 8 15 8-8 8-15-8-15-8-15z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"
+				'anong-gradient': 'linear-gradient(135deg, #f8f4ed 0%, #faf8f5 100%)',
+				'anong-dark': 'linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%)',
+				'anong-gold': 'linear-gradient(135deg, #d4af37 0%, #e1b066 100%)',
+				'thai-pattern': "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23d4af37\" fill-opacity=\"0.03\"%3E%3Cpath d=\"M30 15c0 0-8 8-8 15s8 15 8 15 8-8 8-15-8-15-8-15z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"
 			}
 		}
 	},

@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Lato:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -36,10 +36,10 @@
   }
 
   body {
-    @apply bg-anong-ivory text-anong-black font-sans leading-relaxed;
+    @apply bg-anong-ivory text-anong-black font-body leading-relaxed;
     background-image: 
-      radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.03) 0%, transparent 65%),
-      radial-gradient(circle at 80% 70%, rgba(43, 61, 47, 0.02) 0%, transparent 65%);
+      radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.02) 0%, transparent 65%),
+      radial-gradient(circle at 80% 70%, rgba(43, 61, 47, 0.015) 0%, transparent 65%);
     font-feature-settings: 'kern' 1, 'liga' 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -47,7 +47,7 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif tracking-tight text-anong-black;
+    @apply font-heading tracking-tight text-anong-black;
     line-height: 1.15;
     margin-bottom: 0.5em;
   }
@@ -65,26 +65,14 @@
   }
 
   p {
-    @apply font-sans leading-7 mb-4 text-anong-black/80;
-  }
-
-  .text-premium {
-    @apply text-anong-black;
-  }
-
-  .text-accent {
-    @apply text-anong-gold;
-  }
-
-  .bg-premium {
-    @apply bg-anong-ivory;
+    @apply font-body leading-7 mb-4 text-anong-black/80;
   }
 }
 
 @layer components {
-  .luxury-card {
+  .anong-card {
     @apply bg-white rounded-2xl md:rounded-3xl relative overflow-hidden backdrop-blur-sm border border-anong-gold/10;
-    background: linear-gradient(135deg, #ffffff 0%, rgba(248, 244, 237, 0.8) 100%);
+    background: linear-gradient(135deg, #ffffff 0%, rgba(248, 244, 237, 0.9) 100%);
     box-shadow: 
       0 4px 24px rgba(0, 0, 0, 0.04),
       0 8px 40px rgba(212, 175, 55, 0.08),
@@ -92,7 +80,7 @@
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  .luxury-card:hover {
+  .anong-card:hover {
     transform: translateY(-4px);
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.06),
@@ -100,36 +88,37 @@
       0 24px 80px rgba(0, 0, 0, 0.04);
   }
   
-  .luxury-card::before {
+  .anong-card::before {
     content: '';
-    @apply absolute inset-0 bg-lotus-pattern opacity-[0.03] pointer-events-none;
+    @apply absolute inset-0 opacity-[0.02] pointer-events-none;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d4af37' stroke-width='1' opacity='0.3'%3E%3Cpath d='M30 15c0 0-8 8-8 15s8 15 8 15 8-8 8-15-8-15-8-15z'/%3E%3Cpath d='M15 30c0 0 8-8 15-8s15 8 15 8-8 8-15 8-15-8-15-8z'/%3E%3Ccircle cx='30' cy='30' r='2' fill='%23d4af37'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 60px 60px;
   }
   
-  .heading-premium {
-    @apply font-serif font-semibold text-anong-black tracking-tight;
+  .anong-heading {
+    @apply font-heading font-semibold text-anong-black tracking-tight;
     font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
     text-rendering: optimizeLegibility;
     line-height: 1.1;
   }
   
-  .heading-elegant {
-    @apply font-serif font-medium text-anong-black tracking-wide;
+  .anong-subheading {
+    @apply font-heading font-medium text-anong-black tracking-wide;
     font-feature-settings: 'kern' 1, 'liga' 1, 'swsh' 1;
     line-height: 1.15;
   }
   
-  .text-luxury {
-    @apply font-sans text-anong-black/80 leading-8 font-normal;
-    font-feature-settings: 'kern' 1, 'liga' 1;
-    line-height: 1.7;
-  }
-  
-  .text-refined {
-    @apply font-sans text-anong-black/70 leading-7 font-light;
+  .anong-body {
+    @apply font-body text-anong-black/80 leading-7 font-normal;
     font-feature-settings: 'kern' 1, 'liga' 1;
   }
   
-  .lotus-accent {
+  .anong-body-light {
+    @apply font-body text-anong-black/70 leading-7 font-light;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+  }
+  
+  .thai-lotus-divider {
     background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 8c0 0-6 6-6 12s6 12 6 12 6-6 6-12-6-12-6-12z' fill='%23d4af37' fill-opacity='0.6'/%3E%3Cpath d='M8 20c0 0 6-6 12-6s12 6 12 6-6 6-12 6-12-6-12-6z' fill='%23d4af37' fill-opacity='0.6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
@@ -137,53 +126,47 @@
     filter: drop-shadow(0 1px 2px rgba(212, 175, 55, 0.2));
   }
   
-  .hover-lift {
+  .anong-hover-lift {
     @apply transition-all duration-500 ease-out hover:transform hover:-translate-y-2 md:hover:-translate-y-3;
   }
   
-  .hover-lift:hover {
+  .anong-hover-lift:hover {
     box-shadow: 
       0 8px 28px rgba(0, 0, 0, 0.08),
       0 16px 48px rgba(212, 175, 55, 0.12),
       0 24px 80px rgba(0, 0, 0, 0.04);
   }
   
-  .input-premium {
-    @apply bg-white/90 rounded-2xl md:rounded-3xl px-6 md:px-8 py-5 md:py-6 font-sans text-base md:text-lg backdrop-blur-sm transition-all duration-300;
+  .anong-input {
+    @apply bg-white/90 rounded-2xl md:rounded-3xl px-6 md:px-8 py-5 md:py-6 font-body text-base md:text-lg backdrop-blur-sm transition-all duration-300;
     border: 1.5px solid rgba(212, 175, 55, 0.2);
     box-shadow: 
       0 3px 12px rgba(0, 0, 0, 0.05),
       inset 0 1px 4px rgba(255, 255, 255, 0.9);
   }
   
-  .input-premium:focus {
+  .anong-input:focus {
     @apply border-anong-gold outline-none;
     box-shadow: 
       0 0 0 4px rgba(212, 175, 55, 0.1),
       0 6px 16px rgba(0, 0, 0, 0.08);
   }
 
-  .dark-banner-bg {
-    @apply bg-gradient-to-br from-anong-black via-gray-900 to-anong-black relative;
-    background-color: #000000 !important;
-  }
-
-  .dark-banner-bg::before {
-    content: '';
-    @apply absolute inset-0 pointer-events-none;
-    background: none;
-  }
-
-  .btn-gold {
+  .anong-btn-primary {
     @apply bg-gradient-to-r from-anong-gold to-anong-warm-yellow hover:from-anong-warm-yellow hover:to-anong-gold text-anong-black font-medium tracking-wide transition-all duration-300 shadow-lg hover:shadow-xl border border-anong-gold/20;
   }
 
-  .content-spacing {
-    @apply space-y-6 md:space-y-8;
+  .anong-btn-secondary {
+    @apply bg-anong-black hover:bg-anong-deep-green text-anong-ivory border border-anong-gold/30 hover:border-anong-gold transition-all duration-300;
   }
 
-  .section-premium {
+  .anong-section {
     @apply py-16 md:py-24 lg:py-32;
+  }
+
+  .thai-pattern-bg {
+    background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d4af37' stroke-width='0.5' opacity='0.1'%3E%3Cpath d='M40 20c0 0-10 10-10 20s10 20 10 20 10-10 10-20-10-20-10-20z'/%3E%3Cpath d='M20 40c0 0 10-10 20-10s20 10 20 10-10 10-20 10-20-10-20-10z'/%3E%3Ccircle cx='40' cy='40' r='3' fill='%23d4af37' opacity='0.2'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 80px 80px;
   }
 }
 

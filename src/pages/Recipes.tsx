@@ -1,12 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { recipes } from "@/data/recipes";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Clock, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 
@@ -14,24 +14,33 @@ const Recipes = () => {
   const { language } = useLanguage();
   const [activeCategory, setActiveCategory] = useState('all');
   
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   const translations = {
     en: {
-      title: "Thai Recipes",
-      subtitle: "Discover authentic Thai recipes using Anong's products",
+      title: "Thai Recipe Collection",
+      subtitle: "Authentic Thai recipes crafted with ANONG's premium products and time-honored techniques",
       categories: "Recipe Categories",
       viewRecipe: "View Recipe",
       all: "All Recipes",
       curry: "Curry Dishes",
-      stirFry: "Stir-Fry Dishes"
+      stirFry: "Stir-Fry Dishes",
+      traditional: "Traditional Thai",
+      craftedWith: "Crafted with tradition, perfected with time"
     },
     th: {
-      title: "สูตรอาหารไทย",
-      subtitle: "ค้นพบสูตรอาหารไทยแท้ๆโดยใช้ผลิตภัณฑ์ของอนงค์",
+      title: "คลังสูตรอาหารไทย",
+      subtitle: "สูตรอาหารไทยแท้ที่สร้างด้วยผลิตภัณฑ์พรีเมียมของอนงค์และเทคนิคที่สืบทอดมาแต่โบราณ",
       categories: "หมวดหมู่สูตรอาหาร",
       viewRecipe: "ดูสูตรอาหาร",
       all: "สูตรทั้งหมด",
       curry: "อาหารประเภทแกง",
-      stirFry: "อาหารประเภทผัด"
+      stirFry: "อาหารประเภทผัด",
+      traditional: "อาหารไทยดั้งเดิม",
+      craftedWith: "สร้างด้วยประเพณี สมบูรณ์แบบด้วยเวลา"
     }
   };
 
@@ -51,8 +60,16 @@ const Recipes = () => {
     ? recipes 
     : recipes.filter(recipe => recipe.category.includes(activeCategory));
   
-  // Animation variants
-  const containerVariants = {
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }
+    }
+  };
+  
+  const staggerContainer = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
@@ -73,88 +90,112 @@ const Recipes = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col bg-anong-cream">
+    <div className="min-h-screen flex flex-col bg-anong-ivory">
       <Header />
       
-      <main className="flex-grow watercolor-bg py-16">
-        <div className="container mx-auto px-4">
+      <main className="flex-grow anong-section thai-pattern-bg">
+        <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+          {/* Header Section */}
           <motion.div 
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            className="text-center mb-16 md:mb-20"
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
           >
-            <h1 className="heading-premium text-4xl lg:text-5xl mb-4 text-anong-dark-green">{t.title}</h1>
-            <p className="text-luxury text-lg text-anong-charcoal/80 max-w-2xl mx-auto">{t.subtitle}</p>
-            <div className="divider-premium w-24 mx-auto mt-8"></div>
+            <div className="w-16 h-16 mx-auto mb-6">
+              <img 
+                src="/lovable-uploads/f440215b-ebf7-4c9f-9cf6-412d4018796e.png" 
+                alt="ANONG Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <h1 className="anong-heading text-4xl md:text-5xl lg:text-6xl mb-6 text-anong-black">{t.title}</h1>
+            <p className="anong-body text-lg md:text-xl text-anong-black/80 max-w-3xl mx-auto leading-relaxed mb-8">{t.subtitle}</p>
+            
+            {/* Thai Lotus Divider */}
+            <div className="flex items-center justify-center">
+              <div className="w-24 h-px bg-gradient-to-r from-transparent via-anong-gold to-transparent"></div>
+              <div className="mx-8 thai-lotus-divider w-8 h-8"></div>
+              <div className="w-24 h-px bg-gradient-to-l from-transparent via-anong-gold to-transparent"></div>
+            </div>
+            
+            <p className="anong-body-light text-sm tracking-wide text-anong-gold mt-6 font-medium">
+              {t.craftedWith}
+            </p>
           </motion.div>
           
           {/* Filter Categories */}
           <motion.div 
-            className="mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-12 md:mb-16"
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            transition={{ delay: 0.2 }}
           >
-            <h2 className="heading-elegant text-xl mb-6 text-anong-dark-green">{t.categories}</h2>
-            <div className="flex flex-wrap gap-3">
-              {categories.map((category) => (
-                <Button 
-                  key={category.id}
-                  variant={activeCategory === category.id ? "default" : "outline"}
-                  className={activeCategory === category.id 
-                    ? "btn-premium" 
-                    : "btn-outline-premium"
-                  }
-                  onClick={() => handleCategoryChange(category.id)}
-                >
-                  {category.name}
-                </Button>
-              ))}
+            <div className="anong-card p-8 md:p-10">
+              <h2 className="anong-subheading text-xl mb-6 text-anong-black">{t.categories}</h2>
+              <div className="flex flex-wrap gap-3">
+                {categories.map((category) => (
+                  <Button 
+                    key={category.id}
+                    variant={activeCategory === category.id ? "default" : "outline"}
+                    className={activeCategory === category.id 
+                      ? "anong-btn-primary rounded-full" 
+                      : "border-anong-gold/30 text-anong-black hover:bg-anong-gold hover:text-anong-black rounded-full"
+                    }
+                    onClick={() => handleCategoryChange(category.id)}
+                  >
+                    {category.name}
+                  </Button>
+                ))}
+              </div>
             </div>
           </motion.div>
           
           {/* Recipe Grid */}
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-            variants={containerVariants}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
+            variants={staggerContainer}
             initial="hidden"
             animate="visible"
           >
             {filteredRecipes.map(recipe => (
               <motion.div key={recipe.id} variants={itemVariants}>
-                <Card className="luxury-card group overflow-hidden hover-lift">
-                  <Link to={`/recipe/${recipe.id}`} className="block overflow-hidden">
-                    <div className="h-64 overflow-hidden flex items-center justify-center bg-gradient-to-b from-anong-cream to-anong-warm-cream">
+                <Card className="anong-card anong-hover-lift overflow-hidden group">
+                  <Link to={`/recipe/${recipe.id}`} className="block">
+                    <div className="h-64 overflow-hidden flex items-center justify-center bg-gradient-to-b from-anong-cream to-anong-ivory">
                       <motion.img 
                         whileHover={{ scale: 1.05 }}
                         transition={{ duration: 0.4 }}
                         src={recipe.image} 
                         alt={recipe.name[language]}
-                        className="w-full h-full object-contain p-6"
+                        className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>
                   </Link>
                   <div className="p-6 relative z-10">
                     <Link to={`/recipe/${recipe.id}`}>
-                      <h3 className="heading-elegant text-lg font-medium text-anong-dark-green mb-2 hover:text-anong-gold transition-colors group-hover:text-anong-gold">
+                      <h3 className="anong-subheading text-lg font-medium text-anong-black mb-2 hover:text-anong-gold transition-colors group-hover:text-anong-gold">
                         {recipe.name[language]}
                       </h3>
                     </Link>
-                    <p className="text-luxury text-sm text-anong-charcoal/70 mb-6 line-clamp-2">
+                    <p className="anong-body-light text-sm text-anong-black/70 mb-6 line-clamp-2">
                       {recipe.description[language]}
                     </p>
                     <div className="flex justify-between items-center">
-                      <div className="text-sm text-anong-charcoal/60 font-serif">
-                        <span>{recipe.time} min</span> • <span>{recipe.servings} {language === 'en' ? 'servings' : 'ที่'}</span>
+                      <div className="flex items-center text-sm text-anong-black/60">
+                        <Clock className="h-4 w-4 mr-1 text-anong-gold" />
+                        <span className="mr-3">{recipe.time} min</span>
+                        <Users className="h-4 w-4 mr-1 text-anong-gold" />
+                        <span>{recipe.servings} {language === 'en' ? 'servings' : 'ที่'}</span>
                       </div>
                       <Button 
                         size="sm" 
-                        className="bg-anong-cream border border-anong-dark-green text-anong-dark-green hover:bg-anong-dark-green hover:text-anong-cream transition-all duration-300 font-serif"
+                        className="anong-btn-secondary text-xs px-4 py-2 rounded-full"
                         asChild
                       >
                         <Link to={`/recipe/${recipe.id}`} className="flex items-center">
-                          <ChevronRight className="h-4 w-4 mr-1" />
+                          <ChevronRight className="h-3 w-3 mr-1" />
                           {t.viewRecipe}
                         </Link>
                       </Button>

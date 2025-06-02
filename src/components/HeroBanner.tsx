@@ -12,16 +12,22 @@ const HeroBanner = () => {
     en: {
       tagline: "Rooted in Tradition",
       subtitle: "Crafted with Grace",
-      description: "Premium handcrafted curry pastes made from time-honored family recipes, bringing the authentic soul of Thailand to your kitchen.",
-      primaryCta: "Shop Now",
-      secondaryCta: "Explore Recipes"
+      description: "Premium handcrafted Thai curry pastes and sauces made from time-honored family recipes, bringing the authentic soul of Thailand to your kitchen.",
+      primaryCta: "Shop Collection",
+      secondaryCta: "Explore Recipes",
+      premiumQuality: "Premium Quality",
+      handcrafted: "Handcrafted",
+      authenticThai: "Authentic Thai"
     },
     th: {
       tagline: "หยั่งรากในประเพณี",
       subtitle: "สร้างสรรค์ด้วยความงดงาม",
-      description: "พริกแกงคุณภาพพรีเมียมที่ทำด้วยมือจากสูตรครอบครัวดั้งเดิม นำจิตวิญญาณไทยแท้มาสู่ครัวของคุณ",
-      primaryCta: "ซื้อเลย",
-      secondaryCta: "สำรวจสูตรอาหาร"
+      description: "พริกแกงและซอสไทยคุณภาพพรีเมียมที่ทำด้วยมือจากสูตรครอบครัวดั้งเดิม นำจิตวิญญาณไทยแท้มาสู่ครัวของคุณ",
+      primaryCta: "ซื้อคอลเลคชั่น",
+      secondaryCta: "สำรวจสูตรอาหาร",
+      premiumQuality: "คุณภาพพรีเมียม",
+      handcrafted: "งานฝีมือ",
+      authenticThai: "ไทยแท้"
     }
   };
 
@@ -54,7 +60,7 @@ const HeroBanner = () => {
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Hero background with new ANONG aesthetic */}
+      {/* Hero background with ANONG aesthetic */}
       <motion.div 
         className="absolute inset-0"
         style={{ 
@@ -62,18 +68,18 @@ const HeroBanner = () => {
           backgroundSize: "cover",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          filter: "brightness(0.7) contrast(1.1)"
+          filter: "brightness(0.65) contrast(1.15)"
         }}
         initial={{ scale: 1.03 }}
         animate={{ scale: 1 }}
         transition={{ duration: 5, ease: "easeOut" }}
       >
-        {/* Elegant overlay for premium feel */}
-        <div className="absolute inset-0 bg-gradient-to-br from-anong-black/60 via-anong-black/40 to-anong-black/50"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-anong-black/40 via-transparent to-transparent"></div>
+        {/* Premium overlay for sophisticated feel */}
+        <div className="absolute inset-0 bg-gradient-to-br from-anong-black/70 via-anong-black/50 to-anong-deep-green/60"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-anong-black/50 via-transparent to-transparent"></div>
       </motion.div>
       
-      {/* Premium content with ANONG branding */}
+      {/* Content with ANONG branding */}
       <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 md:px-8">
         <div className="container mx-auto text-center max-w-6xl">
           <motion.div 
@@ -94,6 +100,9 @@ const HeroBanner = () => {
                   className="w-full h-full object-contain drop-shadow-xl"
                 />
               </div>
+              <h1 className="anong-heading text-3xl md:text-4xl text-anong-gold tracking-[0.2em] font-medium mb-2">
+                ANONG
+              </h1>
             </motion.div>
 
             {/* Brand tagline with elegant typography */}
@@ -101,29 +110,29 @@ const HeroBanner = () => {
               className="mb-8 md:mb-14"
               variants={fadeInUp}
             >
-              <h1 className="heading-premium text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-anong-gold mb-4 md:mb-6 leading-[0.9] md:leading-[0.85] drop-shadow-lg px-2">
+              <h2 className="anong-heading text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-anong-ivory mb-4 md:mb-6 leading-[0.9] md:leading-[0.85] drop-shadow-lg px-2">
                 {t.tagline}
-              </h1>
-              <h2 className="heading-elegant text-lg sm:text-xl md:text-3xl lg:text-4xl text-white/95 font-light tracking-wide drop-shadow-md px-2">
-                {t.subtitle}
               </h2>
+              <h3 className="anong-subheading text-lg sm:text-xl md:text-3xl lg:text-4xl text-anong-gold/95 font-light tracking-wide drop-shadow-md px-2">
+                {t.subtitle}
+              </h3>
             </motion.div>
             
             {/* Description */}
             <motion.p 
-              className="text-luxury text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 max-w-4xl mx-auto mb-10 md:mb-18 leading-relaxed drop-shadow-sm font-light px-4"
+              className="anong-body text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 max-w-4xl mx-auto mb-10 md:mb-18 leading-relaxed drop-shadow-sm font-light px-4"
               variants={fadeInUp}
             >
               {t.description}
             </motion.p>
             
-            {/* Elegant lotus divider */}
+            {/* Elegant Thai lotus divider */}
             <motion.div 
               className="flex items-center justify-center mb-10 md:mb-18"
               variants={fadeInUp}
             >
               <div className="w-16 sm:w-24 md:w-40 h-px bg-gradient-to-r from-transparent via-anong-gold/70 to-anong-gold/40"></div>
-              <div className="mx-6 sm:mx-10 md:mx-14 lotus-accent w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 opacity-90 drop-shadow-sm"></div>
+              <div className="mx-6 sm:mx-10 md:mx-14 thai-lotus-divider w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 opacity-90 drop-shadow-sm"></div>
               <div className="w-16 sm:w-24 md:w-40 h-px bg-gradient-to-l from-transparent via-anong-gold/70 to-anong-gold/40"></div>
             </motion.div>
             
@@ -135,7 +144,7 @@ const HeroBanner = () => {
               <Button 
                 asChild
                 size="lg"
-                className="w-full sm:w-auto bg-anong-gold hover:bg-anong-warm-yellow text-anong-black shadow-2xl text-sm sm:text-base md:text-lg px-8 sm:px-12 md:px-16 py-4 sm:py-6 md:py-7 h-auto font-semibold tracking-wide relative overflow-hidden group border-2 border-anong-gold/20 min-h-[48px] sm:min-h-[56px]"
+                className="w-full sm:w-auto anong-btn-primary text-sm sm:text-base md:text-lg px-8 sm:px-12 md:px-16 py-4 sm:py-6 md:py-7 h-auto font-semibold tracking-wide relative overflow-hidden group min-h-[48px] sm:min-h-[56px] rounded-full"
               >
                 <Link to="/shop" className="flex items-center justify-center relative z-10 w-full">
                   <span className="mr-3 sm:mr-4">{t.primaryCta}</span>
@@ -146,7 +155,7 @@ const HeroBanner = () => {
                 asChild
                 variant="ghost" 
                 size="lg"
-                className="w-full sm:w-auto text-white border-2 border-white/60 hover:border-anong-gold hover:bg-anong-gold/20 backdrop-blur-lg text-sm sm:text-base md:text-lg px-8 sm:px-12 md:px-16 py-4 sm:py-6 md:py-7 h-auto font-medium tracking-wide transition-all duration-600 relative overflow-hidden group shadow-lg min-h-[48px] sm:min-h-[56px]"
+                className="w-full sm:w-auto text-white border-2 border-white/60 hover:border-anong-gold hover:bg-anong-gold/20 backdrop-blur-lg text-sm sm:text-base md:text-lg px-8 sm:px-12 md:px-16 py-4 sm:py-6 md:py-7 h-auto font-medium tracking-wide transition-all duration-600 relative overflow-hidden group shadow-lg min-h-[48px] sm:min-h-[56px] rounded-full"
               >
                 <Link to="/recipes" className="flex items-center justify-center relative z-10 w-full">
                   <span>{t.secondaryCta}</span>
@@ -154,20 +163,19 @@ const HeroBanner = () => {
               </Button>
             </motion.div>
             
-            {/* Trust signals */}
+            {/* Trust badges */}
             <motion.div 
               className="mt-12 sm:mt-16 md:mt-24 flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-6 lg:gap-8 px-4"
               variants={fadeInUp}
             >
-              <div className="bg-white/15 text-white border border-white/30 px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-medium tracking-wide backdrop-blur-sm shadow-lg">
-                <span>Premium Quality</span>
-              </div>
-              <div className="bg-white/15 text-white border border-white/30 px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-medium tracking-wide backdrop-blur-sm shadow-lg">
-                <span>Handcrafted</span>
-              </div>
-              <div className="bg-white/15 text-white border border-white/30 px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-medium tracking-wide backdrop-blur-sm shadow-lg">
-                <span>Authentic Thai</span>
-              </div>
+              {[t.premiumQuality, t.handcrafted, t.authenticThai].map((badge, index) => (
+                <div 
+                  key={badge}
+                  className="bg-white/15 text-white border border-white/30 px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-medium tracking-wide backdrop-blur-sm shadow-lg hover:bg-anong-gold/20 hover:border-anong-gold transition-all duration-300"
+                >
+                  <span>{badge}</span>
+                </div>
+              ))}
             </motion.div>
           </motion.div>
         </div>
