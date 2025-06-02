@@ -166,7 +166,7 @@ const About = () => {
                 ))}
               </ul>
             </div>
-          </div>
+          </motion.div>
         </div>
       </main>
       
