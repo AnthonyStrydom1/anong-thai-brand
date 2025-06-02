@@ -125,34 +125,34 @@ const Footer = ({ className }: FooterProps) => {
             </ul>
           </div>
           
-          {/* Visit Restaurant Section */}
+          {/* Visit Restaurant Section - Fixed text visibility */}
           <div className="space-y-4">
             <h4 className="anong-subheading text-anong-gold text-lg font-medium">
               {t.visitUs}
             </h4>
-            <div className="space-y-3 text-anong-ivory/80">
+            <div className="space-y-4">
               <div className="flex items-start space-x-3">
-                <MapPin className="h-4 w-4 text-anong-gold mt-1 flex-shrink-0" />
-                <span className="anong-body text-sm">{t.address}</span>
+                <MapPin className="h-5 w-5 text-anong-gold mt-0.5 flex-shrink-0" />
+                <span className="anong-body text-anong-ivory text-sm leading-relaxed">{t.address}</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <Clock className="h-4 w-4 text-anong-gold flex-shrink-0" />
-                <span className="anong-body text-sm">{t.hours}</span>
+              <div className="flex items-start space-x-3">
+                <Clock className="h-5 w-5 text-anong-gold mt-0.5 flex-shrink-0" />
+                <span className="anong-body text-anong-ivory text-sm leading-relaxed">{t.hours}</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="h-4 w-4 text-anong-gold flex-shrink-0" />
-                <span className="anong-body text-sm">{t.phone}</span>
+              <div className="flex items-start space-x-3">
+                <Phone className="h-5 w-5 text-anong-gold mt-0.5 flex-shrink-0" />
+                <span className="anong-body text-anong-ivory text-sm leading-relaxed">{t.phone}</span>
               </div>
             </div>
           </div>
           
-          {/* Newsletter & Connect Section - Simplified */}
+          {/* Newsletter & Connect Section */}
           <div className="space-y-4">
             <h4 className="anong-subheading text-anong-gold text-lg font-medium">
               {t.newsletter}
             </h4>
             
-            {/* Simple Newsletter Signup */}
+            {/* Newsletter Signup */}
             <form className="space-y-3" onSubmit={handleSubscribe}>
               <Input 
                 type="email" 
@@ -183,33 +183,34 @@ const Footer = ({ className }: FooterProps) => {
                 </a>
               ))}
             </div>
-            
-            {/* Legal Links */}
-            <ul className="space-y-2 pt-2">
-              {[
-                { to: "/shipping", text: t.shipping },
-                { to: "/returns", text: t.returns },
-                { to: "/privacy", text: t.privacy },
-                { to: "/terms", text: t.terms }
-              ].map((link) => (
-                <li key={link.to}>
-                  <Link 
-                    to={link.to} 
-                    className="anong-body text-xs text-anong-ivory/60 hover:text-anong-gold transition-colors duration-300"
-                  >
-                    {link.text}
-                  </Link>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
 
-        {/* Copyright Section */}
-        <div className="border-t border-anong-gold/20 pt-8 text-center">
-          <p className="anong-body text-anong-ivory/80 text-sm">
-            {t.rights}
-          </p>
+        {/* Legal Links - Simplified */}
+        <div className="border-t border-anong-gold/20 pt-8">
+          <div className="flex flex-wrap justify-center gap-6 mb-6">
+            {[
+              { to: "/shipping", text: t.shipping },
+              { to: "/returns", text: t.returns },
+              { to: "/privacy", text: t.privacy },
+              { to: "/terms", text: t.terms }
+            ].map((link) => (
+              <Link 
+                key={link.to}
+                to={link.to} 
+                className="anong-body text-sm text-anong-ivory/60 hover:text-anong-gold transition-colors duration-300"
+              >
+                {link.text}
+              </Link>
+            ))}
+          </div>
+          
+          {/* Copyright Section */}
+          <div className="text-center">
+            <p className="anong-body text-anong-ivory/80 text-sm">
+              {t.rights}
+            </p>
+          </div>
         </div>
       </div>
     </footer>

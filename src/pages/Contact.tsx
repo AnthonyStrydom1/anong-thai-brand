@@ -134,166 +134,164 @@ const Contact = () => {
             </div>
           </motion.div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 md:gap-16">
-            {/* Contact Form */}
-            <motion.div 
-              className="lg:col-span-2"
-              initial="hidden"
-              animate="visible"
-              variants={fadeInUp}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="anong-card p-8 md:p-12">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="name" className="block mb-3 text-sm font-medium text-anong-black anong-subheading">
-                        {t.form.name}
-                      </label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="anong-input"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block mb-3 text-sm font-medium text-anong-black anong-subheading">
-                        {t.form.email}
-                      </label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="anong-input"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
+          {/* Contact Form Section */}
+          <motion.div 
+            className="max-w-4xl mx-auto mb-20"
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="anong-card p-8 md:p-12">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="subject" className="block mb-3 text-sm font-medium text-anong-black anong-subheading">
-                      {t.form.subject}
+                    <label htmlFor="name" className="block mb-3 text-sm font-medium text-anong-black anong-subheading">
+                      {t.form.name}
                     </label>
                     <Input
-                      id="subject"
-                      name="subject"
-                      value={formData.subject}
+                      id="name"
+                      name="name"
+                      value={formData.name}
                       onChange={handleChange}
                       className="anong-input"
                       required
                     />
                   </div>
-                  
                   <div>
-                    <label htmlFor="message" className="block mb-3 text-sm font-medium text-anong-black anong-subheading">
-                      {t.form.message}
+                    <label htmlFor="email" className="block mb-3 text-sm font-medium text-anong-black anong-subheading">
+                      {t.form.email}
                     </label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      rows={6}
-                      value={formData.message}
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
                       onChange={handleChange}
-                      className="anong-input resize-none"
+                      className="anong-input"
                       required
                     />
                   </div>
-                  
+                </div>
+                
+                <div>
+                  <label htmlFor="subject" className="block mb-3 text-sm font-medium text-anong-black anong-subheading">
+                    {t.form.subject}
+                  </label>
+                  <Input
+                    id="subject"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    className="anong-input"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="message" className="block mb-3 text-sm font-medium text-anong-black anong-subheading">
+                    {t.form.message}
+                  </label>
+                  <Textarea
+                    id="message"
+                    name="message"
+                    rows={6}
+                    value={formData.message}
+                    onChange={handleChange}
+                    className="anong-input resize-none"
+                    required
+                  />
+                </div>
+                
+                <div className="text-center">
                   <Button 
                     type="submit" 
-                    className="anong-btn-primary w-full md:w-auto px-12 py-6 text-lg rounded-full"
+                    className="anong-btn-primary px-12 py-6 text-lg rounded-full"
                   >
                     {t.form.send}
                   </Button>
-                </form>
-              </div>
-            </motion.div>
-            
-            {/* Contact Info */}
-            <motion.div 
-              className="space-y-8"
-              initial="hidden"
-              animate="visible"
-              variants={fadeInUp}
-              transition={{ delay: 0.4 }}
-            >
-              <div className="anong-card p-8">
-                <h2 className="anong-subheading text-xl mb-8 text-anong-black">{t.info.title}</h2>
-                
-                <div className="space-y-6">
-                  <div className="flex items-start">
-                    <div className="w-12 h-12 bg-anong-gold/10 rounded-full flex items-center justify-center mr-4 mt-1">
-                      <Mail className="text-anong-gold h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="anong-subheading text-sm text-anong-black mb-1">{t.info.email}</p>
-                      <a 
-                        href="mailto:info@anongthai.com" 
-                        className="anong-body text-anong-black/80 hover:text-anong-gold transition-colors"
-                      >
-                        info@anongthai.com
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <div className="w-12 h-12 bg-anong-gold/10 rounded-full flex items-center justify-center mr-4 mt-1">
-                      <Phone className="text-anong-gold h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="anong-subheading text-sm text-anong-black mb-1">{t.info.phone}</p>
-                      <a 
-                        href="tel:+27765059941" 
-                        className="anong-body text-anong-black/80 hover:text-anong-gold transition-colors"
-                      >
-                        076 505 9941
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <div className="w-12 h-12 bg-anong-gold/10 rounded-full flex items-center justify-center mr-4 mt-1">
-                      <MapPin className="text-anong-gold h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="anong-subheading text-sm text-anong-black mb-1">{t.info.visit}</p>
-                      <p className="anong-body text-anong-black/80">
-                        20 Hettie Street<br/>
-                        Cyrildene, Johannesburg
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-6 border-t border-anong-gold/20">
-                    <p className="anong-subheading text-sm text-anong-black mb-4">{t.info.social}</p>
-                    <div className="flex space-x-4">
-                      <a 
-                        href="https://instagram.com/anongthai" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 bg-anong-gold/10 rounded-full flex items-center justify-center text-anong-gold hover:bg-anong-gold hover:text-white transition-all duration-300"
-                      >
-                        <Instagram className="h-5 w-5" />
-                      </a>
-                      <a 
-                        href="https://facebook.com/anongthai" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 bg-anong-gold/10 rounded-full flex items-center justify-center text-anong-gold hover:bg-anong-gold hover:text-white transition-all duration-300"
-                      >
-                        <Facebook className="h-5 w-5" />
-                      </a>
-                    </div>
-                  </div>
                 </div>
+              </form>
+            </div>
+          </motion.div>
+          
+          {/* Separate Contact Info Section */}
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            transition={{ delay: 0.4 }}
+          >
+            {/* Email */}
+            <div className="anong-card p-8 text-center">
+              <div className="w-16 h-16 bg-anong-gold/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Mail className="text-anong-gold h-8 w-8" />
               </div>
-            </motion.div>
-          </div>
+              <h3 className="anong-subheading text-xl mb-4 text-anong-black">{t.info.email}</h3>
+              <a 
+                href="mailto:info@anongthai.com" 
+                className="anong-body text-anong-black/80 hover:text-anong-gold transition-colors text-lg"
+              >
+                info@anongthai.com
+              </a>
+            </div>
+            
+            {/* Phone */}
+            <div className="anong-card p-8 text-center">
+              <div className="w-16 h-16 bg-anong-gold/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Phone className="text-anong-gold h-8 w-8" />
+              </div>
+              <h3 className="anong-subheading text-xl mb-4 text-anong-black">{t.info.phone}</h3>
+              <a 
+                href="tel:+27765059941" 
+                className="anong-body text-anong-black/80 hover:text-anong-gold transition-colors text-lg"
+              >
+                076 505 9941
+              </a>
+            </div>
+            
+            {/* Location */}
+            <div className="anong-card p-8 text-center">
+              <div className="w-16 h-16 bg-anong-gold/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <MapPin className="text-anong-gold h-8 w-8" />
+              </div>
+              <h3 className="anong-subheading text-xl mb-4 text-anong-black">{t.info.visit}</h3>
+              <p className="anong-body text-anong-black/80 text-lg">
+                20 Hettie Street<br/>
+                Cyrildene, Johannesburg
+              </p>
+            </div>
+          </motion.div>
+          
+          {/* Social Media Section */}
+          <motion.div 
+            className="text-center mt-16 mb-8"
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            transition={{ delay: 0.6 }}
+          >
+            <h3 className="anong-subheading text-2xl mb-8 text-anong-black">{t.info.social}</h3>
+            <div className="flex justify-center space-x-6">
+              <a 
+                href="https://instagram.com/anongthai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-14 h-14 bg-anong-gold/10 rounded-full flex items-center justify-center text-anong-gold hover:bg-anong-gold hover:text-white transition-all duration-300"
+              >
+                <Instagram className="h-7 w-7" />
+              </a>
+              <a 
+                href="https://facebook.com/anongthai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-14 h-14 bg-anong-gold/10 rounded-full flex items-center justify-center text-anong-gold hover:bg-anong-gold hover:text-white transition-all duration-300"
+              >
+                <Facebook className="h-7 w-7" />
+              </a>
+            </div>
+          </motion.div>
         </div>
       </main>
       
