@@ -52,13 +52,13 @@ const Recipes = () => {
     { id: 'stir-fry', name: t.stirFry }
   ];
   
-  const handleCategoryChange = (categoryId) => {
+  const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
   };
   
   const filteredRecipes = activeCategory === 'all' 
     ? recipes 
-    : recipes.filter(recipe => recipe.category.includes(activeCategory));
+    : recipes.filter(recipe => recipe.category && recipe.category.includes(activeCategory));
   
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
