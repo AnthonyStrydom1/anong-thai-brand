@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
@@ -162,7 +161,7 @@ const Recipes = () => {
             {filteredRecipes.map(recipe => (
               <motion.div key={recipe.id} variants={itemVariants}>
                 <Card className="anong-card anong-hover-lift overflow-hidden group">
-                  <Link to={`/recipe/${recipe.id}`} className="block">
+                  <Link to={`/recipes/${recipe.id}`} className="block">
                     <div className="h-64 overflow-hidden flex items-center justify-center bg-gradient-to-b from-anong-cream to-anong-ivory">
                       <motion.img 
                         whileHover={{ scale: 1.05 }}
@@ -174,7 +173,7 @@ const Recipes = () => {
                     </div>
                   </Link>
                   <div className="p-6 relative z-10">
-                    <Link to={`/recipe/${recipe.id}`}>
+                    <Link to={`/recipes/${recipe.id}`}>
                       <h3 className="anong-subheading text-lg font-medium text-anong-black mb-2 hover:text-anong-gold transition-colors group-hover:text-anong-gold">
                         {recipe.name[language]}
                       </h3>
@@ -194,7 +193,7 @@ const Recipes = () => {
                         className="anong-btn-secondary text-xs px-4 py-2 rounded-full"
                         asChild
                       >
-                        <Link to={`/recipe/${recipe.id}`} className="flex items-center">
+                        <Link to={`/recipes/${recipe.id}`} className="flex items-center">
                           <ChevronRight className="h-3 w-3 mr-1" />
                           {t.viewRecipe}
                         </Link>
