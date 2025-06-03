@@ -1,8 +1,10 @@
+
 import { Link } from "react-router-dom";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { toast } from "@/components/ui/use-toast";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from "framer-motion";
@@ -15,6 +17,7 @@ interface ProductCardProps {
 const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
   const { id, name, shortDescription, price, image } = product;
   const { addItem } = useCart();
+  const { formatPrice } = useCurrency();
   const { language } = useLanguage();
   
   const translations = {
@@ -89,7 +92,7 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
             
             <div className="mt-auto space-y-4">
               <span className="block text-2xl md:text-3xl font-display font-light text-anong-dark-green text-center">
-                R{price.toFixed(2)}
+                {formatPrice(price)}
               </span>
               <Button 
                 size="sm" 
@@ -170,7 +173,7 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
           
           <div className="mt-auto space-y-4">
             <span className="block text-2xl md:text-3xl font-display font-light text-anong-dark-green text-center">
-              R{price.toFixed(2)}
+              {formatPrice(price)}
             </span>
             <Button 
               size="sm" 

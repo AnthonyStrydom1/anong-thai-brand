@@ -4,6 +4,7 @@ import { ShoppingCart } from "lucide-react";
 import { Product } from "@/types";
 import { useState } from "react";
 import { useCart } from "@/contexts/CartContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { toast } from "@/components/ui/use-toast";
 
 interface ProductInfoProps {
@@ -19,6 +20,7 @@ interface ProductInfoProps {
 export const ProductInfo = ({ product, language, translations }: ProductInfoProps) => {
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
+  const { formatPrice } = useCurrency();
   
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
@@ -37,7 +39,7 @@ export const ProductInfo = ({ product, language, translations }: ProductInfoProp
         {product.name[language]}
       </h1>
       <p className="text-2xl font-semibold text-thai-purple mb-6">
-        R{product.price.toFixed(2)}
+        {formatPrice(product.price)}
       </p>
       
       <p className="text-gray-700 mb-6">

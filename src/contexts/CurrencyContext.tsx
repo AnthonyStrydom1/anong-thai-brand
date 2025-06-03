@@ -5,7 +5,7 @@ interface Currency {
   code: string;
   symbol: string;
   name: string;
-  rate: number; // Rate from ZAR
+  rate: number; // Rate from ZAR (how much 1 ZAR equals in this currency)
 }
 
 interface CurrencyContextType {
@@ -49,11 +49,22 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const convertPrice = (zarPrice: number): number => {
+    // If ZAR, return as-is
+    if (selectedCurrency.code === 'ZAR') {
+      return zarPrice;
+    }
+    // Convert from ZAR to target currency
     return zarPrice * selectedCurrency.rate;
   };
 
   const formatPrice = (zarPrice: number): string => {
     const convertedPrice = convertPrice(zarPrice);
+    
+    // Special formatting for JPY (no decimals)
+    if (selectedCurrency.code === 'JPY') {
+      return `${selectedCurrency.symbol}${Math.round(convertedPrice)}`;
+    }
+    
     return `${selectedCurrency.symbol}${convertedPrice.toFixed(2)}`;
   };
 
