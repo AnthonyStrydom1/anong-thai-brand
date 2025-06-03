@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { fetchExchangeRates } from '@/services/currencyService';
 
 interface Currency {
   code: string;
@@ -14,34 +15,72 @@ interface CurrencyContextType {
   setSelectedCurrency: (currency: Currency) => void;
   convertPrice: (zarPrice: number) => number;
   formatPrice: (zarPrice: number) => string;
+  isLoading: boolean;
+  lastUpdated: Date | null;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
-// Major currencies with current rates from ZAR (South African Rand)
-// Updated rates based on current exchange rates (June 2024)
-const CURRENCIES: Currency[] = [
-  { code: 'ZAR', symbol: 'R', name: 'South African Rand', rate: 1 },
-  { code: 'USD', symbol: '$', name: 'US Dollar', rate: 1/17.87 }, // 1 USD = 17.87 ZAR, so 1 ZAR = 1/17.87 USD
-  { code: 'EUR', symbol: '€', name: 'Euro', rate: 1/19.3 }, // Approximate current rate
-  { code: 'GBP', symbol: '£', name: 'British Pound', rate: 1/22.5 }, // Approximate current rate
-  { code: 'JPY', symbol: '¥', name: 'Japanese Yen', rate: 10.1 }, // Approximate current rate
-  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', rate: 1/11.9 }, // Approximate current rate
-  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', rate: 1/13.1 }, // Approximate current rate
-  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc', rate: 1/19.8 }, // Approximate current rate
+// Base currency configuration
+const CURRENCY_CONFIG = [
+  { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+  { code: 'USD', symbol: '$', name: 'US Dollar' },
+  { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'GBP', symbol: '£', name: 'British Pound' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
 ];
 
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(CURRENCIES[0]);
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
+  // Load exchange rates
   useEffect(() => {
-    const saved = localStorage.getItem('anong-currency');
-    if (saved) {
-      const currency = CURRENCIES.find(c => c.code === saved);
-      if (currency) {
-        setSelectedCurrency(currency);
+    const loadExchangeRates = async () => {
+      setIsLoading(true);
+      try {
+        const rates = await fetchExchangeRates('ZAR');
+        
+        const updatedCurrencies = CURRENCY_CONFIG.map(config => ({
+          ...config,
+          rate: config.code === 'ZAR' ? 1 : rates[config.code] || 1
+        }));
+        
+        setCurrencies(updatedCurrencies);
+        setLastUpdated(new Date());
+        
+        // Set default currency if none selected
+        if (!selectedCurrency) {
+          const saved = localStorage.getItem('anong-currency');
+          const defaultCurrency = saved 
+            ? updatedCurrencies.find(c => c.code === saved) || updatedCurrencies[0]
+            : updatedCurrencies[0];
+          setSelectedCurrency(defaultCurrency);
+        } else {
+          // Update the selected currency with new rate
+          const updatedSelected = updatedCurrencies.find(c => c.code === selectedCurrency.code);
+          if (updatedSelected) {
+            setSelectedCurrency(updatedSelected);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load exchange rates:', error);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    loadExchangeRates();
+    
+    // Update rates every 30 minutes
+    const interval = setInterval(loadExchangeRates, 30 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleSetCurrency = (currency: Currency) => {
@@ -50,15 +89,15 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const convertPrice = (zarPrice: number): number => {
-    // If ZAR, return as-is
-    if (selectedCurrency.code === 'ZAR') {
+    if (!selectedCurrency || selectedCurrency.code === 'ZAR') {
       return zarPrice;
     }
-    // Convert from ZAR to target currency
     return zarPrice * selectedCurrency.rate;
   };
 
   const formatPrice = (zarPrice: number): string => {
+    if (!selectedCurrency) return `R${zarPrice.toFixed(2)}`;
+    
     const convertedPrice = convertPrice(zarPrice);
     
     // Special formatting for JPY (no decimals)
@@ -69,13 +108,18 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return `${selectedCurrency.symbol}${convertedPrice.toFixed(2)}`;
   };
 
+  // Provide default values while loading
+  const defaultCurrency = { code: 'ZAR', symbol: 'R', name: 'South African Rand', rate: 1 };
+
   return (
     <CurrencyContext.Provider value={{
-      currencies: CURRENCIES,
-      selectedCurrency,
+      currencies,
+      selectedCurrency: selectedCurrency || defaultCurrency,
       setSelectedCurrency: handleSetCurrency,
       convertPrice,
-      formatPrice
+      formatPrice,
+      isLoading,
+      lastUpdated
     }}>
       {children}
     </CurrencyContext.Provider>
