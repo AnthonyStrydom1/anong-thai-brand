@@ -129,7 +129,7 @@ const FeaturedProducts = () => {
           <Button 
             asChild
             size="lg"
-            className="bg-gradient-to-r from-anong-dark-green to-anong-forest hover:from-anong-forest hover:to-anong-dark-green text-anong-cream text-lg md:text-xl px-16 md:px-20 py-6 md:py-7 h-auto font-medium tracking-wide transition-all duration-600 shadow-xl hover:shadow-2xl border-2 border-anong-dark-green/10 rounded-2xl group"
+            className="bg-anong-black hover:bg-anong-gold hover:text-anong-black text-anong-ivory text-lg md:text-xl px-16 md:px-20 py-6 md:py-7 h-auto font-medium tracking-wide transition-all duration-600 shadow-xl hover:shadow-2xl border-2 border-anong-black/10 rounded-2xl group"
           >
             <Link to="/shop" className="flex items-center">
               {t.viewCollection}

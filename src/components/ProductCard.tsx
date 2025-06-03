@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -94,7 +93,7 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
               </span>
               <Button 
                 size="sm" 
-                className="w-full bg-anong-dark-green hover:bg-anong-gold hover:text-anong-deep-black text-anong-cream text-sm px-6 py-3 h-auto font-medium tracking-wide transition-all duration-500 rounded-xl shadow-lg hover:shadow-xl border border-anong-dark-green/10 group-hover:scale-105"
+                className="w-full bg-anong-black hover:bg-anong-gold hover:text-anong-black text-anong-ivory text-sm px-6 py-3 h-auto font-medium tracking-wide transition-all duration-500 rounded-xl shadow-lg hover:shadow-xl border border-anong-black/10 group-hover:scale-105"
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
@@ -175,7 +174,7 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
             </span>
             <Button 
               size="sm" 
-              className="w-full bg-gradient-to-r from-anong-dark-green to-anong-forest hover:from-anong-gold hover:to-anong-warm-gold hover:text-anong-deep-black text-anong-cream text-sm md:text-base px-6 md:px-8 py-3 md:py-4 h-auto font-medium tracking-wide transition-all duration-500 rounded-xl shadow-xl hover:shadow-2xl border border-anong-dark-green/15 group-hover:scale-105"
+              className="w-full bg-anong-black hover:bg-anong-gold hover:text-anong-black text-anong-ivory text-sm md:text-base px-6 md:px-8 py-3 md:py-4 h-auto font-medium tracking-wide transition-all duration-500 rounded-xl shadow-xl hover:shadow-2xl border border-anong-black/15 group-hover:scale-105"
               onClick={handleAddToCart}
             >
               <ShoppingCart className="h-4 w-4 mr-2 md:mr-3" />

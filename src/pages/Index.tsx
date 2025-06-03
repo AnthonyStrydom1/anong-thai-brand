@@ -6,6 +6,7 @@ import HeroBanner from "@/components/HeroBanner";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import BrandStory from "@/components/BrandStory";
 import RestaurantBanner from "@/components/RestaurantBanner";
+import EventsBanner from "@/components/EventsBanner";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 
@@ -68,6 +69,15 @@ const Index = () => {
             variants={sectionVariants}
           >
             <RestaurantBanner />
+          </motion.div>
+
+          <motion.div
+            initial="offscreen"
+            whileInView="onscreen"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={sectionVariants}
+          >
+            <EventsBanner />
           </motion.div>
         </div>
       </main>
