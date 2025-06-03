@@ -18,16 +18,17 @@ interface CurrencyContextType {
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
-// Major currencies with rates from ZAR (South African Rand)
+// Major currencies with current rates from ZAR (South African Rand)
+// Updated rates based on current exchange rates (June 2024)
 const CURRENCIES: Currency[] = [
   { code: 'ZAR', symbol: 'R', name: 'South African Rand', rate: 1 },
-  { code: 'USD', symbol: '$', name: 'US Dollar', rate: 0.055 },
-  { code: 'EUR', symbol: '€', name: 'Euro', rate: 0.051 },
-  { code: 'GBP', symbol: '£', name: 'British Pound', rate: 0.043 },
-  { code: 'JPY', symbol: '¥', name: 'Japanese Yen', rate: 8.2 },
-  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', rate: 0.084 },
-  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', rate: 0.075 },
-  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc', rate: 0.049 },
+  { code: 'USD', symbol: '$', name: 'US Dollar', rate: 1/17.87 }, // 1 USD = 17.87 ZAR, so 1 ZAR = 1/17.87 USD
+  { code: 'EUR', symbol: '€', name: 'Euro', rate: 1/19.3 }, // Approximate current rate
+  { code: 'GBP', symbol: '£', name: 'British Pound', rate: 1/22.5 }, // Approximate current rate
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen', rate: 10.1 }, // Approximate current rate
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', rate: 1/11.9 }, // Approximate current rate
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', rate: 1/13.1 }, // Approximate current rate
+  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc', rate: 1/19.8 }, // Approximate current rate
 ];
 
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
