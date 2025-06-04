@@ -1,3 +1,4 @@
+
 import { Product } from "@/types";
 
 export const products: Product[] = [
@@ -120,7 +121,7 @@ export const products: Product[] = [
       th: "พริกเผารสเผ็ดเปรี้ยว เหมาะสำหรับต้มยำ"
     },
     price: 115.00,
-    image: "/lovable-uploads/4d92cec1-0a2a-49d3-9e01-110cd6860b27.png",
+    image: "/lovable-uploads/d9396e1e-dde7-48a0-966a-6263ccb57de3.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Roasted Dry Chili", "Shallots", "Garlic", "Coconut Sugar", "Fish Sauce", "Shrimp Paste", "Oyster Sauce", "Dark Soy Sauce"],
