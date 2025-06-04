@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Menu, Search, X } from "lucide-react";
 import CartDropdown from './CartDropdown';
+import CurrencySelector from './CurrencySelector';
 import { toast } from "@/hooks/use-toast";
 import NavItem from './navigation/NavItem';
 import SearchOverlay from './navigation/SearchOverlay';
@@ -103,6 +104,8 @@ const NavigationBanner = () => {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-3">
+            <CurrencySelector />
+            
             <Button 
               variant="ghost" 
               onClick={toggleLanguage}

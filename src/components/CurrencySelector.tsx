@@ -36,7 +36,6 @@ const CurrencySelector = () => {
 
   return (
     <div className="flex items-center space-x-2">
-      <span className="text-sm text-anong-charcoal/70 font-medium">{t.currency}:</span>
       <div className="relative">
         <Select 
           value={selectedCurrency.code} 
@@ -46,7 +45,7 @@ const CurrencySelector = () => {
           }}
           disabled={isLoading}
         >
-          <SelectTrigger className="w-24 h-8 text-xs border-anong-gold/30 focus:border-anong-gold">
+          <SelectTrigger className="w-20 h-8 text-xs border-anong-gold/30 focus:border-anong-gold bg-transparent text-white/80 hover:text-anong-gold">
             {isLoading ? (
               <Loader2 className="h-3 w-3 animate-spin" />
             ) : (
@@ -61,12 +60,6 @@ const CurrencySelector = () => {
             ))}
           </SelectContent>
         </Select>
-        
-        {lastUpdated && !isLoading && (
-          <div className="absolute -bottom-4 left-0 text-xs text-anong-charcoal/50">
-            {formatLastUpdated(lastUpdated)}
-          </div>
-        )}
       </div>
     </div>
   );

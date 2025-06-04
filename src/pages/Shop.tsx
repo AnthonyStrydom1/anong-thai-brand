@@ -4,7 +4,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
-import CurrencySelector from "@/components/CurrencySelector";
 
 const Shop = () => {
   const { language } = useLanguage();
@@ -19,13 +18,6 @@ const Shop = () => {
       <Header />
       
       <main className="flex-grow">
-        {/* Currency selector header */}
-        <div className="bg-anong-cream border-b border-anong-gold/10 py-4">
-          <div className="container mx-auto px-6 md:px-8 flex justify-end">
-            <CurrencySelector />
-          </div>
-        </div>
-        
         <ProductGrid />
       </main>
       
