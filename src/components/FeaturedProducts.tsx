@@ -21,7 +21,7 @@ const FeaturedProducts = () => {
       tagline: "คอลเลกชันเซ็กเนเจอร์",
       title: "เซเลคชันเรือธง",
       subtitle: "พริกแกงที่สร้างสรรค์ด้วยมือ กำหนดมาตรฐานอาหารไทยแท้",
-      viewCollection: "ดูคอลเลกชันทั้งหมด"
+      viewCollection: "ดูคอลเลคชันทั้งหมด"
     }
   };
 
@@ -90,9 +90,9 @@ const FeaturedProducts = () => {
           </p>
         </motion.div>
         
-        {/* Enhanced Product Grid with premium spacing */}
+        {/* Enhanced Product Grid with mobile 2x2 layout */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-20 lg:gap-24 mb-24 md:mb-28"
+          className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16 lg:gap-24 mb-24 md:mb-28"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"

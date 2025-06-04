@@ -7,6 +7,7 @@ import FeaturedProducts from "@/components/FeaturedProducts";
 import BrandStory from "@/components/BrandStory";
 import RestaurantBanner from "@/components/RestaurantBanner";
 import EventsBanner from "@/components/EventsBanner";
+import CurrencySelector from "@/components/CurrencySelector";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 
@@ -38,6 +39,13 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-anong-ivory">
       <Header />
+      
+      {/* Currency selector header */}
+      <div className="bg-anong-cream border-b border-anong-gold/10 py-4">
+        <div className="container mx-auto px-6 md:px-8 flex justify-end">
+          <CurrencySelector />
+        </div>
+      </div>
       
       <main className="flex-grow">
         <HeroBanner />
