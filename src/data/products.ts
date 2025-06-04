@@ -1,4 +1,3 @@
-
 import { Product } from "@/types";
 
 export const products: Product[] = [
@@ -17,7 +16,7 @@ export const products: Product[] = [
       th: "พริกแกงเผ็ดสูตรต้นตำรับจากอนงค์ เหมาะสำหรับแกงไทยแท้"
     },
     price: 120.00,
-    image: "https://i.postimg.cc/g0XpP20f/Untitled-1.png",
+    image: "/lovable-uploads/59d60aec-006e-402a-b7fe-08e8f466618c.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Dried red chili", "Garlic", "Lemongrass", "Galangal", "Shallots", "Kaffir lime zest", "Shrimp paste", "Salt"],
@@ -69,7 +68,7 @@ export const products: Product[] = [
       th: "พริกแกงแพนงรสชาติเข้มข้น มีความหอมของถั่ว และหวานนิดๆ"
     },
     price: 135.00,
-    image: "https://i.postimg.cc/CLqbdjQ1/Panang-curry.png",
+    image: "/lovable-uploads/fbfc8d89-fd2d-424e-b4da-d308f2b934aa.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Dried chili", "Galangal", "Lemongrass", "Kaffir lime peel", "Shallots", "Garlic", "Coriander seeds", "Krachai", "Peas", "Cumin", "Pepper", "Krapid"],
@@ -95,7 +94,7 @@ export const products: Product[] = [
       th: "พริกแกงเขียวหวานกลิ่นหอมสดชื่นจากสมุนไพร"
     },
     price: 130.00,
-    image: "https://i.postimg.cc/SxY1S2W7/Green-curry.png",
+    image: "/lovable-uploads/a9343c5d-3d1a-4926-bb18-4c2794610f89.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Fresh green chili", "Shallots", "Garlic", "Galangal", "Lemongrass", "Shrimp paste", "Soybean paste", "Coriander seeds", "Salt", "Sweet dark soy sauce"],
@@ -147,7 +146,7 @@ export const products: Product[] = [
       th: "พริกแกงรสซับซ้อน มีกลิ่นเครื่องเทศอบอุ่นและถั่ว"
     },
     price: 140.00,
-    image: "https://i.postimg.cc/GhHqK8Sw/Massaman-curry.png",
+    image: "/lovable-uploads/79ede76f-515f-435f-b671-7d1bbe124f12.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Dried chili", "Shallots", "Garlic", "Galangal", "Lemongrass", "Fresh ginger", "Peanuts", "Cornstarch", "Coriander seeds", "Cumin", "Cinnamon", "Rice bran oil", "Cloves", "Shrimp paste", "Lime peel"],
