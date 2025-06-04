@@ -120,13 +120,6 @@ const ProductCard = ({ product, isSimplified = false }: ProductCardProps) => {
         {/* Enhanced shadow system with layered depth */}
         <div className="absolute inset-0 rounded-2xl md:rounded-3xl shadow-[0_6_32px_rgba(26,61,46,0.08),0_12px_48px_rgba(212,165,116,0.05),0_24px_80px_rgba(26,61,46,0.03)] group-hover:shadow-[0_12px_48px_rgba(26,61,46,0.12),0_24px_80px_rgba(212,165,116,0.08),0_40px_120px_rgba(26,61,46,0.05)] transition-all duration-700"></div>
         
-        {/* Premium badge with gold accent */}
-        <div className="absolute top-3 sm:top-4 md:top-6 lg:top-8 left-3 sm:left-4 md:left-6 lg:left-8 z-20">
-          <span className="bg-gradient-to-r from-anong-gold to-anong-warm-gold text-anong-deep-black px-2 sm:px-3 md:px-4 lg:px-5 py-1 sm:py-1.5 md:py-2 text-xs font-medium tracking-wider uppercase rounded-full shadow-lg font-elegant border border-anong-gold/20">
-            Premium
-          </span>
-        </div>
-
         <Link to={`/product/${id}`} className="block overflow-hidden relative z-10">
           <div className="h-48 sm:h-56 md:h-64 lg:h-80 overflow-hidden flex items-center justify-center bg-gradient-to-br from-anong-cream via-anong-warm-cream/15 to-anong-cream relative">
             {/* Enhanced botanical background with gold tints */}

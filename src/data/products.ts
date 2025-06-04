@@ -42,7 +42,7 @@ export const products: Product[] = [
       th: "ซอสผัดไทย รสกลมกล่อม ใช้ง่ายพร้อมปรุง"
     },
     price: 75.00,
-    image: "https://i.postimg.cc/QtKc51d0/pad-thai.png",
+    image: "/lovable-uploads/a76ed6cd-be29-4a21-bf31-03e862c4826e.png",
     category: "stir-fry-sauces",
     ingredients: {
       en: ["Tamarind", "Palm sugar", "Fish sauce", "Garlic", "Chili"],
@@ -120,7 +120,7 @@ export const products: Product[] = [
       th: "พริกเผารสเผ็ดเปรี้ยว เหมาะสำหรับต้มยำ"
     },
     price: 115.00,
-    image: "https://i.postimg.cc/0jc5yH13/tom-yum.png",
+    image: "/lovable-uploads/4d92cec1-0a2a-49d3-9e01-110cd6860b27.png",
     category: "curry-pastes",
     ingredients: {
       en: ["Roasted Dry Chili", "Shallots", "Garlic", "Coconut Sugar", "Fish Sauce", "Shrimp Paste", "Oyster Sauce", "Dark Soy Sauce"],
@@ -172,7 +172,7 @@ export const products: Product[] = [
       th: "น้ำจิ้มรสหวานเปรี้ยว เหมาะสำหรับสุกี้"
     },
     price: 85.00,
-    image: "https://i.postimg.cc/2j2CvJg9/moo-kra-ta.png",
+    image: "/lovable-uploads/5f6f5412-7f80-441c-872c-3a89462dea0c.png",
     category: "dipping-sauces",
     ingredients: {
       en: ["Fresh chili", "Garlic", "Pickled garlic", "Coriander seeds", "Fermented bean curd", "Roasted sesame seeds", "Cane sugar", "Tamarind paste", "Chili sauce", "Light soy sauce", "Sesame oil", "Oyster sauce", "Tomato sauce", "Salt"],
