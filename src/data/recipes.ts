@@ -1,3 +1,4 @@
+
 import { Recipe } from "@/types";
 
 export const recipes: Recipe[] = [
@@ -13,7 +14,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 30,
-    image: "/lovable-uploads/photo-1618160702438-9b02ab6515c9",
+    image: "/placeholder.svg",
     ingredients: {
       en: [
         "2 tbsp Anong Red Curry Paste",
@@ -73,7 +74,7 @@ export const recipes: Recipe[] = [
     },
     servings: 2,
     time: 25,
-    image: "/lovable-uploads/photo-1493962853295-0fd70327578a",
+    image: "/placeholder.svg",
     ingredients: {
       en: [
         "120g rice noodles",
@@ -133,7 +134,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 35,
-    image: "/lovable-uploads/photo-1498936178812-4b2e558d2937",
+    image: "/placeholder.svg",
     ingredients: {
       en: [
         "3 tbsp Anong Panang Curry Paste",
@@ -195,7 +196,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 25,
-    image: "/lovable-uploads/photo-1535268647677-300dbf3d78d1",
+    image: "/placeholder.svg",
     ingredients: {
       en: [
         "3 tbsp Anong Green Curry Paste",
@@ -261,7 +262,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 20,
-    image: "/lovable-uploads/photo-1518877593221-1f28583780b4",
+    image: "/placeholder.svg",
     ingredients: {
       en: [
         "2 tbsp Anong Tom Yum Chili Paste",
@@ -325,7 +326,7 @@ export const recipes: Recipe[] = [
     },
     servings: 6,
     time: 50,
-    image: "/lovable-uploads/photo-1452960962994-acf4fd70b632",
+    image: "/placeholder.svg",
     ingredients: {
       en: [
         "3 tbsp Anong Massaman Curry Paste",
@@ -395,7 +396,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 30,
-    image: "/lovable-uploads/photo-1441057206919-63d19fac2369",
+    image: "/placeholder.svg",
     ingredients: {
       en: [
         "Anong Sukiyaki Sauce (for dipping)",
