@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
-import UserMenu from "@/components/navigation/UserMenu"; // adjusted import path
+import UserMenu from "@/components/navigation/UserMenu";
 
 // Pages
 import Index from "./pages/Index";
@@ -26,6 +26,9 @@ import Orders from "./pages/Orders";
 import Settings from "./pages/Settings";
 import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
+
+// Import your new CreateCustomerPage
+import CreateCustomerPage from "./pages/CreateCustomerPage";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +98,10 @@ function App() {
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/events" element={<Events />} />
+
+                  {/* NEW ROUTE for CreateCustomerPage */}
+                  <Route path="/create-customer" element={<CreateCustomerPage />} />
+
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
