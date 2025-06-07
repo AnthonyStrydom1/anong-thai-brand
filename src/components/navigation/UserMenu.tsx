@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -30,17 +29,26 @@ const UserMenu = ({
   onLogout,
   translations
 }: UserMenuProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   // Common style for consistent white box highlighting
   const buttonStyle = "text-white hover:bg-white hover:bg-opacity-20 transition-colors";
 
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsOpen(!isOpen);
+  };
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button 
           variant="ghost" 
           size="icon"
           className={buttonStyle}
           aria-label={isLoggedIn ? translations.profile : translations.login}
+          onClick={handleTriggerClick}
         >
           <User className="h-5 w-5" />
         </Button>
