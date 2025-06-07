@@ -1,4 +1,3 @@
-
 interface NavigationTranslations {
   home: string;
   shop: string;
@@ -17,6 +16,8 @@ interface NavigationTranslations {
   loginSuccess: string;
   welcomeBack: string;
   logoutSuccess: string;
+
+  [key: string]: string;  // <-- This line makes it compatible with string index signatures
 }
 
 export const navigationTranslations: Record<'en' | 'th', NavigationTranslations> = {
