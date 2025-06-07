@@ -1,20 +1,6 @@
-const updateCustomer = async () => {
-  const response = await fetch('/api/update-customer', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      id: 'customer-id-123',  // replace with actual customer id
-      name: 'Jane Doe',
-      email: 'jane@example.com',
-      phone: '1234567890',
-    }),
-  });
+import { createClient } from '@supabase/supabase-js';
 
-  const data = await response.json();
+const supabaseUrl = 'https://nyadgiutmweuyxqetfuh.supabase.co';  // your project URL
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55YWRnaXV0bXdldXl4cWV0ZnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkyOTA3MjQsImV4cCI6MjA2NDg2NjcyNH0.2A1-OfpJiAxIGWxa4PdBtnFNDwBuV3X38fB21AWo88A';  // your anon key
 
-  if (response.ok) {
-    alert(data.message);
-  } else {
-    console.error('Error:', data.message);
-  }
-};
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
