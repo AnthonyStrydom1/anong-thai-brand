@@ -21,7 +21,7 @@ import {
 
 interface UserMenuProps {
   isLoggedIn: boolean;
-  onLogin: () => void;
+  onLogin: (email?: string, password?: string) => void;
   onLogout: () => void;
   translations: {
     login: string;
@@ -65,9 +65,8 @@ const UserMenu = ({
     
     setIsLoading(true);
     try {
-      // Simulate login process - replace with your actual login logic
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      onLogin(); // Call the original onLogin function
+      // Call the parent's onLogin function with credentials
+      onLogin(email, password);
       setEmail('');
       setPassword('');
       setShowLoginModal(false);
