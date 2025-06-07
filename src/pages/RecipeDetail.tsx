@@ -67,8 +67,8 @@ const RecipeDetail = () => {
   const recipe = useMemo(() => recipes.find(r => r.id === id), [id]);
   
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 100);
-    return () => clearTimeout(timer);
+    // Faster loading for recipe details
+    setIsLoading(false);
   }, []);
   
   const relatedProducts = useMemo(() => {
@@ -163,7 +163,7 @@ const RecipeDetail = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
             <div className="lg:col-span-2 space-y-8 md:space-y-12">
-              {/* Recipe Image */}
+              {/* Recipe Image - Load eagerly since it's the main content */}
               <Card className="anong-card overflow-hidden">
                 <div className="h-64 md:h-80 bg-gradient-to-b from-anong-cream to-anong-ivory p-8 flex items-center justify-center">
                   <OptimizedLazyImage
@@ -172,6 +172,7 @@ const RecipeDetail = () => {
                     className="w-full h-full object-contain"
                     containerClassName="w-full h-full relative"
                     priority={true}
+                    eager={true}
                   />
                 </div>
               </Card>

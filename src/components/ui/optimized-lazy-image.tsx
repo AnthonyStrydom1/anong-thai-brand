@@ -7,6 +7,7 @@ interface OptimizedLazyImageProps {
   className?: string;
   containerClassName?: string;
   priority?: boolean;
+  eager?: boolean;
 }
 
 export const OptimizedLazyImage = memo(({ 
@@ -14,15 +15,16 @@ export const OptimizedLazyImage = memo(({
   alt, 
   className, 
   containerClassName,
-  priority = false 
+  priority = false,
+  eager = false
 }: OptimizedLazyImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(priority);
+  const [isInView, setIsInView] = useState(priority || eager);
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (priority) return;
+    if (priority || eager) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -33,7 +35,7 @@ export const OptimizedLazyImage = memo(({
       },
       { 
         threshold: 0.1,
-        rootMargin: '50px'
+        rootMargin: '100px' // Preload images 100px before they come into view
       }
     );
 
@@ -42,7 +44,17 @@ export const OptimizedLazyImage = memo(({
     }
 
     return () => observer.disconnect();
-  }, [priority]);
+  }, [priority, eager]);
+
+  // Preload critical images
+  useEffect(() => {
+    if (priority && src) {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => setIsLoaded(true);
+      img.onerror = () => setHasError(true);
+    }
+  }, [src, priority]);
 
   const handleLoad = () => {
     setIsLoaded(true);
@@ -60,18 +72,22 @@ export const OptimizedLazyImage = memo(({
           <img
             src={hasError ? "/placeholder.svg" : src}
             alt={alt}
-            className={`${className} transition-opacity duration-300 ${
+            className={`${className} transition-opacity duration-200 ${
               isLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={handleLoad}
             onError={handleError}
-            loading={priority ? "eager" : "lazy"}
+            loading={priority || eager ? "eager" : "lazy"}
             decoding="async"
+            fetchPriority={priority ? "high" : "auto"}
           />
           {!isLoaded && (
-            <div className={`${className} animate-pulse bg-gray-200 absolute inset-0`} />
+            <div className={`${className} bg-gray-100 absolute inset-0 animate-pulse`} />
           )}
         </>
+      )}
+      {!isInView && !priority && !eager && (
+        <div className={`${className} bg-gray-100 animate-pulse`} />
       )}
     </div>
   );

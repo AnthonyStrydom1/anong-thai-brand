@@ -24,6 +24,7 @@ const RecipeCard = memo(({ recipe, language, t }: {
           alt={recipe.name[language]}
           className="w-full h-full object-contain p-6 transition-transform duration-300 group-hover:scale-105"
           containerClassName="w-full h-full relative"
+          eager={false}
         />
       </div>
     </Link>
@@ -64,25 +65,13 @@ const Recipes = () => {
   const { language } = useLanguage();
   const [activeCategory, setActiveCategory] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
-  const [displayedRecipes, setDisplayedRecipes] = useState<any[]>([]);
-  const [loadingMore, setLoadingMore] = useState(false);
   
   useEffect(() => {
     window.scrollTo(0, 0);
-    // Faster initial load
+    // Very fast initial load
     const timer = setTimeout(() => {
       setIsLoading(false);
-      // Load first batch of recipes immediately
-      const firstBatch = recipes.slice(0, 6);
-      setDisplayedRecipes(firstBatch);
-      
-      // Load remaining recipes progressively
-      if (recipes.length > 6) {
-        setTimeout(() => {
-          setDisplayedRecipes(recipes);
-        }, 100);
-      }
-    }, 100);
+    }, 50);
     return () => clearTimeout(timer);
   }, []);
   
@@ -124,11 +113,10 @@ const Recipes = () => {
   }, []);
   
   const filteredRecipes = useMemo(() => {
-    const filtered = activeCategory === 'all' 
-      ? displayedRecipes 
-      : displayedRecipes.filter(recipe => recipe.category && recipe.category.includes(activeCategory));
-    return filtered;
-  }, [activeCategory, displayedRecipes]);
+    return activeCategory === 'all' 
+      ? recipes 
+      : recipes.filter(recipe => recipe.category && recipe.category.includes(activeCategory));
+  }, [activeCategory]);
   
   return (
     <div className="min-h-screen flex flex-col bg-anong-ivory">
@@ -144,6 +132,7 @@ const Recipes = () => {
                 alt="ANONG Logo"
                 className="w-full h-full object-contain"
                 loading="eager"
+                fetchPriority="high"
               />
             </div>
             <h1 className="anong-heading text-4xl md:text-5xl lg:text-6xl mb-6 text-anong-black">{t.title}</h1>

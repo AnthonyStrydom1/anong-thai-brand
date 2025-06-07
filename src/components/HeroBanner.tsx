@@ -4,9 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 const HeroBanner = () => {
   const { language } = useLanguage();
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  
+  // Preload hero image immediately
+  useEffect(() => {
+    const img = new Image();
+    img.src = '/lovable-uploads/214ef46d-cc98-40a7-9f35-00dff6eb2e36.png';
+    img.onload = () => setIsImageLoaded(true);
+  }, []);
   
   const translations = {
     en: {
@@ -34,15 +43,13 @@ const HeroBanner = () => {
   const t = translations[language];
 
   const fadeInUp = {
-    hidden: { opacity: 0, y: 40 },
+    hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 
       y: 0,
       transition: { 
-        duration: 1.6, 
-        ease: [0.25, 0.1, 0.25, 1],
-        type: "spring",
-        damping: 25
+        duration: 0.8, 
+        ease: [0.25, 0.1, 0.25, 1]
       }
     }
   };
@@ -52,34 +59,39 @@ const HeroBanner = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.6,
-        delayChildren: 0.5
+        staggerChildren: 0.3,
+        delayChildren: 0.2
       }
     }
   };
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Hero background with ANONG aesthetic */}
-      <motion.div 
-        className="absolute inset-0"
-        style={{ 
-          backgroundImage: "url('/lovable-uploads/214ef46d-cc98-40a7-9f35-00dff6eb2e36.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center center",
-          backgroundRepeat: "no-repeat",
-          filter: "brightness(0.65) contrast(1.15)"
-        }}
-        initial={{ scale: 1.03 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 5, ease: "easeOut" }}
-      >
-        {/* Premium overlay for sophisticated feel */}
-        <div className="absolute inset-0 bg-gradient-to-br from-anong-black/70 via-anong-black/50 to-anong-deep-green/60"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-anong-black/50 via-transparent to-transparent"></div>
-      </motion.div>
+      {/* Fast loading background with placeholder */}
+      <div className="absolute inset-0 bg-anong-black">
+        {/* Placeholder background while image loads */}
+        <div className="absolute inset-0 bg-gradient-to-br from-anong-black/90 via-anong-charcoal/80 to-anong-deep-green/70" />
+        
+        {/* Hero image with optimized loading */}
+        <div 
+          className={`absolute inset-0 transition-opacity duration-500 ${
+            isImageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ 
+            backgroundImage: isImageLoaded ? "url('/lovable-uploads/214ef46d-cc98-40a7-9f35-00dff6eb2e36.png')" : 'none',
+            backgroundSize: "cover",
+            backgroundPosition: "center center",
+            backgroundRepeat: "no-repeat",
+            filter: "brightness(0.65) contrast(1.15)"
+          }}
+        >
+          {/* Premium overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-anong-black/70 via-anong-black/50 to-anong-deep-green/60"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-anong-black/50 via-transparent to-transparent"></div>
+        </div>
+      </div>
       
-      {/* Content with ANONG branding */}
+      {/* Content */}
       <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 md:px-8">
         <div className="container mx-auto text-center max-w-6xl">
           <motion.div 
@@ -88,7 +100,7 @@ const HeroBanner = () => {
             animate="visible"
             variants={staggerContainer}
           >
-            {/* ANONG logo display */}
+            {/* ANONG logo display - load immediately */}
             <motion.div 
               className="mb-8 md:mb-12"
               variants={fadeInUp}
@@ -98,6 +110,8 @@ const HeroBanner = () => {
                   src="/lovable-uploads/f440215b-ebf7-4c9f-9cf6-412d4018796e.png" 
                   alt="ANONG Premium Logo"
                   className="w-full h-full object-contain drop-shadow-xl"
+                  loading="eager"
+                  fetchPriority="high"
                 />
               </div>
               <h1 className="anong-heading text-3xl md:text-4xl text-anong-gold tracking-[0.2em] font-medium mb-2">
@@ -105,7 +119,7 @@ const HeroBanner = () => {
               </h1>
             </motion.div>
 
-            {/* Brand tagline with elegant typography */}
+            {/* Brand tagline */}
             <motion.div 
               className="mb-8 md:mb-14"
               variants={fadeInUp}
@@ -136,7 +150,7 @@ const HeroBanner = () => {
               <div className="w-16 sm:w-24 md:w-40 h-px bg-gradient-to-l from-transparent via-anong-gold/70 to-anong-gold/40"></div>
             </motion.div>
             
-            {/* Premium CTA buttons */}
+            {/* CTA buttons */}
             <motion.div 
               className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10 justify-center items-center px-4"
               variants={fadeInUp}
