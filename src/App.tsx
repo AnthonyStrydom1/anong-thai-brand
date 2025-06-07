@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
-import UserMenu from "@/components/UserMenu"; // <- Add this
+import UserMenu from "@/components/navigation/UserMenu"; // <- Add this
 
 // Pages
 import Index from "./pages/Index";
