@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,14 +8,20 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight, Clock, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import { LazyImage } from "@/components/ui/lazy-image";
+import { RecipeSkeleton } from "@/components/ui/recipe-skeleton";
 
 const Recipes = () => {
   const { language } = useLanguage();
   const [activeCategory, setActiveCategory] = useState('all');
+  const [isLoading, setIsLoading] = useState(true);
   
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Simulate initial loading
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
   }, []);
   
   const translations = {
@@ -60,11 +66,11 @@ const Recipes = () => {
     : recipes.filter(recipe => recipe.category && recipe.category.includes(activeCategory));
   
   const fadeInUp = {
-    hidden: { opacity: 0, y: 40 },
+    hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }
+      transition: { duration: 0.4, ease: "easeOut" }
     }
   };
   
@@ -73,18 +79,18 @@ const Recipes = () => {
     visible: { 
       opacity: 1,
       transition: { 
-        duration: 0.5,
-        staggerChildren: 0.1 
+        duration: 0.3,
+        staggerChildren: 0.05
       }
     }
   };
   
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 10 },
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.4 }
+      transition: { duration: 0.3 }
     }
   };
   
@@ -129,7 +135,7 @@ const Recipes = () => {
             initial="hidden"
             animate="visible"
             variants={fadeInUp}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.1 }}
           >
             <div className="anong-card p-8 md:p-10">
               <h2 className="anong-subheading text-xl mb-6 text-anong-black">{t.categories}</h2>
@@ -152,58 +158,65 @@ const Recipes = () => {
           </motion.div>
           
           {/* Recipe Grid */}
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-          >
-            {filteredRecipes.map(recipe => (
-              <motion.div key={recipe.id} variants={itemVariants}>
-                <Card className="anong-card anong-hover-lift overflow-hidden group">
-                  <Link to={`/recipes/${recipe.id}`} className="block">
-                    <div className="h-64 overflow-hidden flex items-center justify-center bg-gradient-to-b from-anong-cream to-anong-ivory">
-                      <motion.img 
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.4 }}
-                        src={recipe.image} 
-                        alt={recipe.name[language]}
-                        className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  </Link>
-                  <div className="p-6 relative z-10">
-                    <Link to={`/recipes/${recipe.id}`}>
-                      <h3 className="anong-subheading text-lg font-medium text-anong-black mb-2 hover:text-anong-gold transition-colors group-hover:text-anong-gold">
-                        {recipe.name[language]}
-                      </h3>
-                    </Link>
-                    <p className="anong-body-light text-sm text-anong-black/70 mb-6 line-clamp-2">
-                      {recipe.description[language]}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center text-sm text-anong-black/60">
-                        <Clock className="h-4 w-4 mr-1 text-anong-gold" />
-                        <span className="mr-3">{recipe.time} min</span>
-                        <Users className="h-4 w-4 mr-1 text-anong-gold" />
-                        <span>{recipe.servings} {language === 'en' ? 'servings' : 'ที่'}</span>
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <RecipeSkeleton key={index} />
+              ))}
+            </div>
+          ) : (
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+            >
+              {filteredRecipes.map(recipe => (
+                <motion.div key={recipe.id} variants={itemVariants}>
+                  <Card className="anong-card anong-hover-lift overflow-hidden group">
+                    <Link to={`/recipes/${recipe.id}`} className="block">
+                      <div className="h-64 overflow-hidden flex items-center justify-center bg-gradient-to-b from-anong-cream to-anong-ivory">
+                        <LazyImage
+                          src={recipe.image}
+                          alt={recipe.name[language]}
+                          className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-500"
+                          containerClassName="w-full h-full"
+                        />
                       </div>
-                      <Button 
-                        size="sm" 
-                        className="anong-btn-secondary text-xs px-4 py-2 rounded-full"
-                        asChild
-                      >
-                        <Link to={`/recipes/${recipe.id}`} className="flex items-center">
-                          <ChevronRight className="h-3 w-3 mr-1" />
-                          {t.viewRecipe}
-                        </Link>
-                      </Button>
+                    </Link>
+                    <div className="p-6 relative z-10">
+                      <Link to={`/recipes/${recipe.id}`}>
+                        <h3 className="anong-subheading text-lg font-medium text-anong-black mb-2 hover:text-anong-gold transition-colors group-hover:text-anong-gold">
+                          {recipe.name[language]}
+                        </h3>
+                      </Link>
+                      <p className="anong-body-light text-sm text-anong-black/70 mb-6 line-clamp-2">
+                        {recipe.description[language]}
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center text-sm text-anong-black/60">
+                          <Clock className="h-4 w-4 mr-1 text-anong-gold" />
+                          <span className="mr-3">{recipe.time} min</span>
+                          <Users className="h-4 w-4 mr-1 text-anong-gold" />
+                          <span>{recipe.servings} {language === 'en' ? 'servings' : 'ที่'}</span>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="anong-btn-secondary text-xs px-4 py-2 rounded-full"
+                          asChild
+                        >
+                          <Link to={`/recipes/${recipe.id}`} className="flex items-center">
+                            <ChevronRight className="h-3 w-3 mr-1" />
+                            {t.viewRecipe}
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </div>
       </main>
       

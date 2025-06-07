@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
@@ -9,12 +8,21 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight, Clock, Users, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import { LazyImage } from "@/components/ui/lazy-image";
+import { useState, useEffect } from "react";
 
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
+  const [isLoading, setIsLoading] = useState(true);
   
   const recipe = recipes.find(r => r.id === id);
+  
+  useEffect(() => {
+    // Simulate loading time for better UX
+    const timer = setTimeout(() => setIsLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
   
   if (!recipe) {
     return (
@@ -66,11 +74,11 @@ const RecipeDetail = () => {
   const t = translations[language];
   
   const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 10 },
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }
+      transition: { duration: 0.3, ease: "easeOut" }
     }
   };
 
@@ -79,8 +87,8 @@ const RecipeDetail = () => {
     visible: { 
       opacity: 1,
       transition: { 
-        duration: 0.5,
-        staggerChildren: 0.1 
+        duration: 0.3,
+        staggerChildren: 0.05
       }
     }
   };
@@ -137,14 +145,15 @@ const RecipeDetail = () => {
                 initial="hidden"
                 animate="visible"
                 variants={fadeIn}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.1 }}
               >
                 <Card className="anong-card overflow-hidden">
                   <div className="h-64 md:h-80 bg-gradient-to-b from-anong-cream to-anong-ivory p-8 flex items-center justify-center">
-                    <img 
-                      src={recipe.image} 
+                    <LazyImage
+                      src={recipe.image}
                       alt={recipe.name[language]}
                       className="w-full h-full object-contain"
+                      containerClassName="w-full h-full"
                     />
                   </div>
                 </Card>
@@ -155,7 +164,7 @@ const RecipeDetail = () => {
                 initial="hidden"
                 animate="visible"
                 variants={fadeIn}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.2 }}
               >
                 <Card className="anong-card p-8 md:p-10">
                   <h2 className="anong-subheading text-2xl mb-8 text-anong-black">
@@ -191,7 +200,7 @@ const RecipeDetail = () => {
                   initial="hidden"
                   animate="visible"
                   variants={fadeIn}
-                  transition={{ delay: 0.5 }}
+                  transition={{ delay: 0.3 }}
                 >
                   <Card className="anong-card p-8 md:p-10">
                     <h2 className="anong-subheading text-2xl mb-8 text-anong-black">
@@ -202,17 +211,16 @@ const RecipeDetail = () => {
                         <motion.div 
                           key={product.id} 
                           className="anong-card anong-hover-lift overflow-hidden group"
-                          whileHover={{ y: -5 }}
-                          transition={{ duration: 0.3 }}
+                          whileHover={{ y: -2 }}
+                          transition={{ duration: 0.2 }}
                         >
                           <div className="flex h-24">
                             <div className="w-1/3 bg-gradient-to-b from-anong-cream to-anong-ivory flex items-center justify-center p-2">
-                              <motion.img 
-                                whileHover={{ scale: 1.05 }}
-                                transition={{ duration: 0.4 }}
-                                src={product.image} 
+                              <LazyImage
+                                src={product.image}
                                 alt={product.name[language]}
                                 className="w-full h-full object-contain"
+                                containerClassName="w-full h-full"
                               />
                             </div>
                             <div className="p-4 flex flex-col justify-between flex-grow">
@@ -244,7 +252,7 @@ const RecipeDetail = () => {
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.2 }}
             >
               <div className="sticky top-24">
                 <Card className="anong-card p-8">
