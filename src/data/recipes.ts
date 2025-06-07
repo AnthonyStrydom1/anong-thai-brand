@@ -14,7 +14,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 30,
-    image: "/placeholder.svg",
+    image: "https://i.postimg.cc/g0XpP20f/Untitled-1.png",
     ingredients: {
       en: [
         "2 tbsp Anong Red Curry Paste",
