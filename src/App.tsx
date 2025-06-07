@@ -3,11 +3,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
-import UserMenu from "@/components/navigation/UserMenu"; // adjusted import path
+import UserMenu from "@/components/navigation/UserMenu";
 
 // Pages
 import Index from "./pages/Index";
@@ -26,17 +26,29 @@ import Orders from "./pages/Orders";
 import Settings from "./pages/Settings";
 import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
+function PrivateRoute({ isLoggedIn, children }: { isLoggedIn: boolean; children: JSX.Element }) {
+  const location = useLocation();
+  if (!isLoggedIn) {
+    // Redirect to login with the current location so user can be redirected back after login
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+  return children;
+}
+
 function App() {
-  // Initialize login state from localStorage
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return localStorage.getItem("isLoggedIn") === "true";
   });
 
   const handleLogin = async (email?: string, password?: string) => {
-    // Here you can add your login API logic if you have
+    // Simulate authentication here — replace with your real login logic
+    if (!email || !password) throw new Error("Missing credentials");
+    
+    // Example: succeed always for demo purposes
     setIsLoggedIn(true);
     localStorage.setItem("isLoggedIn", "true");
   };
@@ -46,7 +58,6 @@ function App() {
     localStorage.removeItem("isLoggedIn");
   };
 
-  // Optional: listen to localStorage changes (e.g. if multi-tabs)
   useEffect(() => {
     const onStorageChange = () => {
       setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
@@ -90,10 +101,47 @@ function App() {
                   <Route path="/menu" element={<Menu />} />
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/account" element={<Account />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/settings" element={<Settings />} />
+
+                  {/* Public login page */}
+                  <Route
+                    path="/login"
+                    element={<Login onLogin={handleLogin} />}
+                  />
+
+                  {/* Protected routes */}
+                  <Route
+                    path="/account"
+                    element={
+                      <PrivateRoute isLoggedIn={isLoggedIn}>
+                        <Account />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <PrivateRoute isLoggedIn={isLoggedIn}>
+                        <Profile />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/orders"
+                    element={
+                      <PrivateRoute isLoggedIn={isLoggedIn}>
+                        <Orders />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <PrivateRoute isLoggedIn={isLoggedIn}>
+                        <Settings />
+                      </PrivateRoute>
+                    }
+                  />
+
                   <Route path="/events" element={<Events />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
