@@ -22,14 +22,14 @@ const RecipeCard = memo(({ recipe, language, t }: {
         <OptimizedLazyImage
           src={recipe.image}
           alt={recipe.name[language]}
-          className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-contain p-6 transition-transform duration-300 group-hover:scale-105"
           containerClassName="w-full h-full relative"
         />
       </div>
     </Link>
     <div className="p-6 relative z-10">
       <Link to={`/recipes/${recipe.id}`}>
-        <h3 className="anong-subheading text-lg font-medium text-anong-black mb-2 hover:text-anong-gold transition-colors group-hover:text-anong-gold">
+        <h3 className="anong-subheading text-lg font-medium text-anong-black mb-2 hover:text-anong-gold transition-colors">
           {recipe.name[language]}
         </h3>
       </Link>
@@ -64,10 +64,25 @@ const Recipes = () => {
   const { language } = useLanguage();
   const [activeCategory, setActiveCategory] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [displayedRecipes, setDisplayedRecipes] = useState<any[]>([]);
+  const [loadingMore, setLoadingMore] = useState(false);
   
   useEffect(() => {
     window.scrollTo(0, 0);
-    const timer = setTimeout(() => setIsLoading(false), 300);
+    // Faster initial load
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      // Load first batch of recipes immediately
+      const firstBatch = recipes.slice(0, 6);
+      setDisplayedRecipes(firstBatch);
+      
+      // Load remaining recipes progressively
+      if (recipes.length > 6) {
+        setTimeout(() => {
+          setDisplayedRecipes(recipes);
+        }, 100);
+      }
+    }, 100);
     return () => clearTimeout(timer);
   }, []);
   
@@ -108,12 +123,12 @@ const Recipes = () => {
     setActiveCategory(categoryId);
   }, []);
   
-  const filteredRecipes = useMemo(() => 
-    activeCategory === 'all' 
-      ? recipes 
-      : recipes.filter(recipe => recipe.category && recipe.category.includes(activeCategory)),
-    [activeCategory]
-  );
+  const filteredRecipes = useMemo(() => {
+    const filtered = activeCategory === 'all' 
+      ? displayedRecipes 
+      : displayedRecipes.filter(recipe => recipe.category && recipe.category.includes(activeCategory));
+    return filtered;
+  }, [activeCategory, displayedRecipes]);
   
   return (
     <div className="min-h-screen flex flex-col bg-anong-ivory">

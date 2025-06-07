@@ -15,35 +15,44 @@ const ProductCard = memo(({ product, language, t }: {
   product: any; 
   language: 'en' | 'th'; 
   t: any;
-}) => (
-  <div className="anong-card anong-hover-lift overflow-hidden group">
-    <div className="flex h-24">
-      <div className="w-1/3 bg-gradient-to-b from-anong-cream to-anong-ivory flex items-center justify-center p-2">
-        <OptimizedLazyImage
-          src={product.image}
-          alt={product.name[language]}
-          className="w-full h-full object-contain"
-          containerClassName="w-full h-full relative"
-        />
-      </div>
-      <div className="p-4 flex flex-col justify-between flex-grow">
-        <h3 className="anong-body font-medium text-anong-black group-hover:text-anong-gold transition-colors">
-          {product.name[language]}
-        </h3>
-        <Button 
-          asChild
-          size="sm"
-          className="anong-btn-secondary mt-2 text-xs px-3 py-2 h-auto"
-        >
-          <Link to={`/product/${product.id}`} className="flex items-center">
-            <ChevronRight className="h-3 w-3 mr-1" />
-            {t.viewProduct}
-          </Link>
-        </Button>
+}) => {
+  console.log('ProductCard rendering:', product.name[language]);
+  
+  return (
+    <div className="anong-card anong-hover-lift overflow-hidden group">
+      <div className="flex h-32">
+        <div className="w-1/3 bg-gradient-to-b from-anong-cream to-anong-ivory flex items-center justify-center p-3">
+          <OptimizedLazyImage
+            src={product.image}
+            alt={product.name[language]}
+            className="w-full h-full object-contain"
+            containerClassName="w-full h-full relative"
+          />
+        </div>
+        <div className="p-4 flex flex-col justify-between flex-grow">
+          <div>
+            <h3 className="anong-body font-medium text-anong-black group-hover:text-anong-gold transition-colors mb-2">
+              {product.name[language]}
+            </h3>
+            <p className="anong-body-light text-xs text-anong-black/60 line-clamp-2 mb-3">
+              {product.shortDescription[language]}
+            </p>
+          </div>
+          <Button 
+            asChild
+            size="sm"
+            className="anong-btn-secondary text-xs px-3 py-2 h-auto self-start"
+          >
+            <Link to={`/product/${product.id}`} className="flex items-center">
+              <ChevronRight className="h-3 w-3 mr-1" />
+              {t.viewProduct}
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
-  </div>
-));
+  );
+});
 
 ProductCard.displayName = 'ProductCard';
 
@@ -55,16 +64,20 @@ const RecipeDetail = () => {
   const recipe = useMemo(() => recipes.find(r => r.id === id), [id]);
   
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 200);
+    const timer = setTimeout(() => setIsLoading(false), 100);
     return () => clearTimeout(timer);
   }, []);
   
-  const relatedProducts = useMemo(() => 
-    recipe ? products.filter(product => 
+  const relatedProducts = useMemo(() => {
+    if (!recipe) return [];
+    
+    console.log('Recipe related products:', recipe.relatedProducts);
+    const matchedProducts = products.filter(product => 
       recipe.relatedProducts.includes(product.id)
-    ) : [],
-    [recipe]
-  );
+    );
+    console.log('Matched products:', matchedProducts.map(p => p.id));
+    return matchedProducts;
+  }, [recipe]);
   
   const translations = useMemo(() => ({
     en: {
