@@ -74,7 +74,7 @@ export const recipes: Recipe[] = [
     },
     servings: 2,
     time: 25,
-    image: "/placeholder.svg",
+    image: "https://i.postimg.cc/QtKc51d0/pad-thai.png",
     ingredients: {
       en: [
         "120g rice noodles",
@@ -134,7 +134,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 35,
-    image: "https://i.postimg.cc/QtKc51d0/pad-thai.png",
+    image: "https://i.postimg.cc/CLqbdjQ1/Panang-curry.png",
     ingredients: {
       en: [
         "3 tbsp Anong Panang Curry Paste",
