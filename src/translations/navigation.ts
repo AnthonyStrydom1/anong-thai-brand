@@ -1,4 +1,5 @@
-export interface NavigationTranslations {
+
+interface NavigationTranslations {
   home: string;
   shop: string;
   recipes: string;
