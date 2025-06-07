@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
@@ -6,49 +7,66 @@ import { recipes } from "@/data/recipes";
 import { products } from "@/data/products";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Clock, Users, ArrowLeft } from "lucide-react";
-import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { LazyImage } from "@/components/ui/lazy-image";
-import { useState, useEffect } from "react";
+import { OptimizedLazyImage } from "@/components/ui/optimized-lazy-image";
+import { useState, useEffect, memo, useMemo } from "react";
+
+const ProductCard = memo(({ product, language, t }: { 
+  product: any; 
+  language: 'en' | 'th'; 
+  t: any;
+}) => (
+  <div className="anong-card anong-hover-lift overflow-hidden group">
+    <div className="flex h-24">
+      <div className="w-1/3 bg-gradient-to-b from-anong-cream to-anong-ivory flex items-center justify-center p-2">
+        <OptimizedLazyImage
+          src={product.image}
+          alt={product.name[language]}
+          className="w-full h-full object-contain"
+          containerClassName="w-full h-full relative"
+        />
+      </div>
+      <div className="p-4 flex flex-col justify-between flex-grow">
+        <h3 className="anong-body font-medium text-anong-black group-hover:text-anong-gold transition-colors">
+          {product.name[language]}
+        </h3>
+        <Button 
+          asChild
+          size="sm"
+          className="anong-btn-secondary mt-2 text-xs px-3 py-2 h-auto"
+        >
+          <Link to={`/product/${product.id}`} className="flex items-center">
+            <ChevronRight className="h-3 w-3 mr-1" />
+            {t.viewProduct}
+          </Link>
+        </Button>
+      </div>
+    </div>
+  </div>
+));
+
+ProductCard.displayName = 'ProductCard';
 
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
   
-  const recipe = recipes.find(r => r.id === id);
+  const recipe = useMemo(() => recipes.find(r => r.id === id), [id]);
   
   useEffect(() => {
-    // Simulate loading time for better UX
-    const timer = setTimeout(() => setIsLoading(false), 300);
+    const timer = setTimeout(() => setIsLoading(false), 200);
     return () => clearTimeout(timer);
   }, []);
   
-  if (!recipe) {
-    return (
-      <div className="min-h-screen flex flex-col bg-anong-ivory">
-        <Header />
-        <main className="flex-grow anong-section">
-          <div className="container mx-auto px-4 py-12 text-center">
-            <h2 className="anong-heading text-2xl mb-4 text-anong-black">
-              {language === 'en' ? 'Recipe not found' : 'ไม่พบสูตรอาหาร'}
-            </h2>
-            <Link to="/recipes" className="anong-btn-primary">
-              {language === 'en' ? 'Browse all recipes' : 'ดูสูตรอาหารทั้งหมด'}
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-  
-  // Get related products
-  const relatedProducts = products.filter(product => 
-    recipe.relatedProducts.includes(product.id)
+  const relatedProducts = useMemo(() => 
+    recipe ? products.filter(product => 
+      recipe.relatedProducts.includes(product.id)
+    ) : [],
+    [recipe]
   );
   
-  const translations = {
+  const translations = useMemo(() => ({
     en: {
       ingredients: "Ingredients",
       instructions: "Instructions",
@@ -69,29 +87,28 @@ const RecipeDetail = () => {
       step: "ขั้นตอนที่",
       backToRecipes: "กลับสู่สูตรอาหาร"
     }
-  };
+  }), []);
   
   const t = translations[language];
   
-  const fadeIn = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.3, ease: "easeOut" }
-    }
-  };
-
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        duration: 0.3,
-        staggerChildren: 0.05
-      }
-    }
-  };
+  if (!recipe) {
+    return (
+      <div className="min-h-screen flex flex-col bg-anong-ivory">
+        <Header />
+        <main className="flex-grow anong-section">
+          <div className="container mx-auto px-4 py-12 text-center">
+            <h2 className="anong-heading text-2xl mb-4 text-anong-black">
+              {language === 'en' ? 'Recipe not found' : 'ไม่พบสูตรอาหาร'}
+            </h2>
+            <Link to="/recipes" className="anong-btn-primary">
+              {language === 'en' ? 'Browse all recipes' : 'ดูสูตรอาหารทั้งหมด'}
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-anong-ivory">
@@ -100,25 +117,15 @@ const RecipeDetail = () => {
       <main className="flex-grow anong-section thai-pattern-bg">
         <div className="container mx-auto px-4 md:px-6 max-w-7xl py-8 md:py-12">
           {/* Back Button */}
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={fadeIn}
-            className="mb-6"
-          >
+          <div className="mb-6">
             <Link to="/recipes" className="flex items-center text-anong-black hover:text-anong-gold transition-colors">
               <ArrowLeft className="h-4 w-4 mr-2" />
               <span className="anong-body text-sm">{t.backToRecipes}</span>
             </Link>
-          </motion.div>
+          </div>
           
           {/* Recipe Header */}
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={fadeIn}
-            className="text-center mb-12 md:mb-16"
-          >
+          <div className="text-center mb-12 md:mb-16">
             <h1 className="anong-heading text-3xl md:text-4xl lg:text-5xl mb-6 text-anong-black">
               {recipe.name[language]}
             </h1>
@@ -136,124 +143,64 @@ const RecipeDetail = () => {
                 <span className="anong-body">{recipe.servings} {t.servings}</span>
               </div>
             </div>
-          </motion.div>
+          </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
             <div className="lg:col-span-2 space-y-8 md:space-y-12">
               {/* Recipe Image */}
-              <motion.div 
-                initial="hidden"
-                animate="visible"
-                variants={fadeIn}
-                transition={{ delay: 0.1 }}
-              >
-                <Card className="anong-card overflow-hidden">
-                  <div className="h-64 md:h-80 bg-gradient-to-b from-anong-cream to-anong-ivory p-8 flex items-center justify-center">
-                    <LazyImage
-                      src={recipe.image}
-                      alt={recipe.name[language]}
-                      className="w-full h-full object-contain"
-                      containerClassName="w-full h-full"
-                    />
-                  </div>
-                </Card>
-              </motion.div>
+              <Card className="anong-card overflow-hidden">
+                <div className="h-64 md:h-80 bg-gradient-to-b from-anong-cream to-anong-ivory p-8 flex items-center justify-center">
+                  <OptimizedLazyImage
+                    src={recipe.image}
+                    alt={recipe.name[language]}
+                    className="w-full h-full object-contain"
+                    containerClassName="w-full h-full relative"
+                    priority={true}
+                  />
+                </div>
+              </Card>
               
               {/* Instructions */}
-              <motion.div 
-                initial="hidden"
-                animate="visible"
-                variants={fadeIn}
-                transition={{ delay: 0.2 }}
-              >
-                <Card className="anong-card p-8 md:p-10">
-                  <h2 className="anong-subheading text-2xl mb-8 text-anong-black">
-                    {t.instructions}
-                  </h2>
-                  <motion.div 
-                    className="space-y-6"
-                    variants={staggerContainer}
-                    initial="hidden"
-                    animate="visible"
-                  >
-                    {recipe.steps[language].map((step, index) => (
-                      <motion.div 
-                        key={index} 
-                        className="flex gap-4"
-                        variants={fadeIn}
-                      >
-                        <div className="flex-shrink-0">
-                          <div className="bg-anong-gold text-anong-black w-8 h-8 rounded-full flex items-center justify-center font-medium anong-body text-sm">
-                            {index + 1}
-                          </div>
+              <Card className="anong-card p-8 md:p-10">
+                <h2 className="anong-subheading text-2xl mb-8 text-anong-black">
+                  {t.instructions}
+                </h2>
+                <div className="space-y-6">
+                  {recipe.steps[language].map((step, index) => (
+                    <div key={index} className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="bg-anong-gold text-anong-black w-8 h-8 rounded-full flex items-center justify-center font-medium anong-body text-sm">
+                          {index + 1}
                         </div>
-                        <div className="anong-body text-anong-black/80 leading-relaxed">{step}</div>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </Card>
-              </motion.div>
+                      </div>
+                      <div className="anong-body text-anong-black/80 leading-relaxed">{step}</div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
               
               {/* Related Products */}
               {relatedProducts.length > 0 && (
-                <motion.div
-                  initial="hidden"
-                  animate="visible"
-                  variants={fadeIn}
-                  transition={{ delay: 0.3 }}
-                >
-                  <Card className="anong-card p-8 md:p-10">
-                    <h2 className="anong-subheading text-2xl mb-8 text-anong-black">
-                      {t.productsUsed}
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      {relatedProducts.map(product => (
-                        <motion.div 
-                          key={product.id} 
-                          className="anong-card anong-hover-lift overflow-hidden group"
-                          whileHover={{ y: -2 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <div className="flex h-24">
-                            <div className="w-1/3 bg-gradient-to-b from-anong-cream to-anong-ivory flex items-center justify-center p-2">
-                              <LazyImage
-                                src={product.image}
-                                alt={product.name[language]}
-                                className="w-full h-full object-contain"
-                                containerClassName="w-full h-full"
-                              />
-                            </div>
-                            <div className="p-4 flex flex-col justify-between flex-grow">
-                              <h3 className="anong-body font-medium text-anong-black group-hover:text-anong-gold transition-colors">
-                                {product.name[language]}
-                              </h3>
-                              <Button 
-                                asChild
-                                size="sm"
-                                className="anong-btn-secondary mt-2 text-xs px-3 py-2 h-auto"
-                              >
-                                <Link to={`/product/${product.id}`} className="flex items-center">
-                                  <ChevronRight className="h-3 w-3 mr-1" />
-                                  {t.viewProduct}
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </Card>
-                </motion.div>
+                <Card className="anong-card p-8 md:p-10">
+                  <h2 className="anong-subheading text-2xl mb-8 text-anong-black">
+                    {t.productsUsed}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {relatedProducts.map(product => (
+                      <ProductCard 
+                        key={product.id} 
+                        product={product} 
+                        language={language} 
+                        t={t} 
+                      />
+                    ))}
+                  </div>
+                </Card>
               )}
             </div>
             
             {/* Ingredients Sidebar */}
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={fadeIn}
-              transition={{ delay: 0.2 }}
-            >
+            <div>
               <div className="sticky top-24">
                 <Card className="anong-card p-8">
                   <h2 className="anong-subheading text-xl mb-6 text-anong-black">
@@ -268,7 +215,7 @@ const RecipeDetail = () => {
                   </ul>
                 </Card>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </main>
@@ -278,4 +225,4 @@ const RecipeDetail = () => {
   );
 };
 
-export default RecipeDetail;
+export default memo(RecipeDetail);
