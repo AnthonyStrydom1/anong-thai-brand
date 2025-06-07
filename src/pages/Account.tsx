@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Header from '@/components/Header';
@@ -6,14 +5,24 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
+import { User, Mail, Lock, Eye, EyeOff, UserPlus } from 'lucide-react';
 
 const Account = () => {
   const { language } = useLanguage();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLogin, setIsLogin] = useState(true); // Toggle between login and registration
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    fullName: ''
+  });
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
   
   const translations = {
     en: {
@@ -42,7 +51,17 @@ const Account = () => {
       loginInstructions: 'Please enter your credentials to login',
       loginToAccount: 'Login to Your Account',
       rememberMe: 'Remember me',
-      forgotPassword: 'Forgot Password?'
+      forgotPassword: 'Forgot Password?',
+      createAccount: 'Create Account',
+      signUp: 'Sign Up',
+      fullName: 'Full Name',
+      alreadyHaveAccount: 'Already have an account? Sign In',
+      dontHaveAccount: "Don't have an account? Create one",
+      welcomeBack: 'Welcome Back',
+      joinUs: 'Join Anong Thai',
+      registrationSuccess: 'Account created successfully! Please log in.',
+      signInToAccount: 'Sign in to your Anong Thai account',
+      joinAnongThai: 'Join Anong Thai today'
     },
     th: {
       title: 'บัญชีของฉัน',
@@ -70,33 +89,116 @@ const Account = () => {
       loginInstructions: 'โปรดป้อนข้อมูลประจำตัวของคุณเพื่อเข้าสู่ระบบ',
       loginToAccount: 'เข้าสู่ระบบบัญชีของคุณ',
       rememberMe: 'จดจำฉัน',
-      forgotPassword: 'ลืมรหัสผ่าน?'
+      forgotPassword: 'ลืมรหัสผ่าน?',
+      createAccount: 'สร้างบัญชี',
+      signUp: 'สมัครสมาชิก',
+      fullName: 'ชื่อเต็ม',
+      alreadyHaveAccount: 'มีบัญชีแล้ว? เข้าสู่ระบบ',
+      dontHaveAccount: 'ไม่มีบัญชี? สร้างบัญชีใหม่',
+      welcomeBack: 'ขอต้อนรับกลับ',
+      joinUs: 'เข้าร่วมกับอนงค์ไทย',
+      registrationSuccess: 'สร้างบัญชีสำเร็จ! กรุณาเข้าสู่ระบบ',
+      signInToAccount: 'เข้าสู่ระบบบัญชีอนงค์ไทยของคุณ',
+      joinAnongThai: 'เข้าร่วมกับอนงค์ไทยวันนี้'
     }
   };
 
   const t = translations[language];
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email && password) {
-      setIsLoggedIn(true);
-      toast({
-        title: t.loginSuccess,
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: "Please enter both email and password",
-        variant: "destructive",
-      });
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+    
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+    
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
+    
+    if (!isLogin) {
+      if (!formData.fullName) {
+        newErrors.fullName = 'Full name is required';
+      }
+      
+      if (!formData.confirmPassword) {
+        newErrors.confirmPassword = 'Confirm password is required';
+      } else if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'Passwords do not match';
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleLogin = () => {
+    if (validateForm()) {
+      if (isLogin) {
+        // Handle login logic
+        setIsLoggedIn(true);
+        toast({
+          title: t.loginSuccess,
+        });
+      } else {
+        // Handle registration logic
+        toast({
+          title: t.registrationSuccess,
+        });
+        // Switch to login mode after successful registration
+        setIsLogin(true);
+        setFormData({
+          email: formData.email, // Keep email for login
+          password: '',
+          confirmPassword: '',
+          fullName: ''
+        });
+      }
     }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setFormData({
+      email: '',
+      password: '',
+      confirmPassword: '',
+      fullName: ''
+    });
     toast({
       title: t.logoutSuccess,
     });
+  };
+
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    setFormData({
+      email: '',
+      password: '',
+      confirmPassword: '',
+      fullName: ''
+    });
+    setErrors({});
   };
 
   const handleChangePassword = () => {
@@ -252,61 +354,182 @@ const Account = () => {
                 </div>
               </>
             ) : (
-              <div className="bg-white shadow-md rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">{t.loginToAccount}</h2>
-                <p className="mb-4 text-gray-600">{t.loginInstructions}</p>
-                
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div>
-                    <label htmlFor="loginEmail" className="block text-sm font-medium text-gray-700">{t.email}</label>
-                    <Input 
-                      type="email" 
-                      id="loginEmail"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="mt-1"
-                      required
-                    />
+              <div className="bg-white shadow-md rounded-lg p-8">
+                {/* Header */}
+                <div className="text-center space-y-2 mb-6">
+                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-thai-purple to-purple-600 rounded-full flex items-center justify-center">
+                    <User className="w-8 h-8 text-white" />
                   </div>
-                  
-                  <div>
-                    <label htmlFor="loginPassword" className="block text-sm font-medium text-gray-700">{t.password}</label>
-                    <Input 
-                      type="password" 
-                      id="loginPassword"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="mt-1"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <input
-                        id="remember"
-                        name="remember"
-                        type="checkbox"
-                        className="h-4 w-4 text-thai-purple focus:ring-thai-purple border-gray-300 rounded"
-                      />
-                      <label htmlFor="remember" className="ml-2 block text-sm text-gray-900">
-                        {t.rememberMe}
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {isLogin ? t.welcomeBack : t.joinUs}
+                  </h2>
+                  <p className="text-gray-600">
+                    {isLogin ? t.signInToAccount : t.joinAnongThai}
+                  </p>
+                </div>
+
+                {/* Form */}
+                <div className="space-y-4">
+                  {/* Full Name (Registration only) */}
+                  {!isLogin && (
+                    <div className="space-y-1">
+                      <label className="block text-sm font-medium text-gray-700">
+                        {t.fullName}
                       </label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <Input
+                          type="text"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          className={`pl-10 ${errors.fullName ? 'border-red-500' : ''}`}
+                          placeholder="Enter your full name"
+                        />
+                      </div>
+                      {errors.fullName && (
+                        <p className="text-sm text-red-600">{errors.fullName}</p>
+                      )}
                     </div>
-                    <Button 
-                      variant="link" 
-                      type="button" 
-                      className="text-thai-purple p-0 h-auto"
-                      onClick={handleResetPassword}
-                    >
-                      {t.forgotPassword}
-                    </Button>
+                  )}
+
+                  {/* Email */}
+                  <div className="space-y-1">
+                    <label className="block text-sm font-medium text-gray-700">
+                      {t.email}
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                        placeholder="Enter your email"
+                      />
+                    </div>
+                    {errors.email && (
+                      <p className="text-sm text-red-600">{errors.email}</p>
+                    )}
+                  </div>
+
+                  {/* Password */}
+                  <div className="space-y-1">
+                    <label className="block text-sm font-medium text-gray-700">
+                      {t.password}
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className={`pl-10 pr-12 ${errors.password ? 'border-red-500' : ''}`}
+                        placeholder="Enter your password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p className="text-sm text-red-600">{errors.password}</p>
+                    )}
+                  </div>
+
+                  {/* Confirm Password (Registration only) */}
+                  {!isLogin && (
+                    <div className="space-y-1">
+                      <label className="block text-sm font-medium text-gray-700">
+                        {t.confirmPassword}
+                      </label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <Input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          className={`pl-10 pr-12 ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                          placeholder="Confirm your password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
+                      {errors.confirmPassword && (
+                        <p className="text-sm text-red-600">{errors.confirmPassword}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Remember Me & Forgot Password (Login only) */}
+                  {isLogin && (
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <input
+                          id="remember"
+                          name="remember"
+                          type="checkbox"
+                          className="h-4 w-4 text-thai-purple focus:ring-thai-purple border-gray-300 rounded"
+                        />
+                        <label htmlFor="remember" className="ml-2 block text-sm text-gray-900">
+                          {t.rememberMe}
+                        </label>
+                      </div>
+                      <Button 
+                        variant="link" 
+                        type="button" 
+                        className="text-thai-purple p-0 h-auto"
+                        onClick={handleResetPassword}
+                      >
+                        {t.forgotPassword}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <Button 
+                    type="button"
+                    onClick={handleLogin}
+                    className="bg-thai-purple hover:bg-thai-purple/90 w-full"
+                  >
+                    {isLogin ? t.login : t.createAccount}
+                  </Button>
+                </div>
+
+                {/* Toggle Mode */}
+                <div className="text-center space-y-4 mt-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300" />
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">or</span>
+                    </div>
                   </div>
                   
-                  <Button type="submit" className="bg-thai-purple hover:bg-thai-purple/90 w-full">
-                    {t.login}
+                  <Button
+                    type="button"
+                    onClick={toggleMode}
+                    variant="outline"
+                    className="w-full flex items-center justify-center space-x-2"
+                  >
+                    <UserPlus className="w-5 h-5 text-gray-500" />
+                    <span>
+                      {isLogin ? t.dontHaveAccount : t.alreadyHaveAccount}
+                    </span>
                   </Button>
-                </form>
+                </div>
               </div>
             )}
           </div>
