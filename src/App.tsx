@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
-import UserMenu from "@/components/navigation/UserMenu"; // adjusted import path
+import UserMenu from "@/components/UserMenu"; // <- Add this
 
 // Pages
 import Index from "./pages/Index";
@@ -30,30 +30,17 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 function App() {
-  // Initialize login state from localStorage
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem("isLoggedIn") === "true";
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLogin = async (email?: string, password?: string) => {
-    // Here you can add your login API logic if you have
+    // Optional: Add your login API logic here
     setIsLoggedIn(true);
-    localStorage.setItem("isLoggedIn", "true");
   };
 
   const handleLogout = () => {
+    // Optional: Clear auth tokens/session
     setIsLoggedIn(false);
-    localStorage.removeItem("isLoggedIn");
   };
-
-  // Optional: listen to localStorage changes (e.g. if multi-tabs)
-  useEffect(() => {
-    const onStorageChange = () => {
-      setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
-    };
-    window.addEventListener("storage", onStorageChange);
-    return () => window.removeEventListener("storage", onStorageChange);
-  }, []);
 
   const translations = {
     login: "Login",
