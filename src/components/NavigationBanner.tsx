@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -35,12 +34,23 @@ const NavigationBanner = () => {
     setSearchQuery('');
   };
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    toast({
-      title: t.loginSuccess,
-      description: t.welcomeBack,
-    });
+  // Updated handleLogin - this now handles actual login with credentials
+  const handleLogin = (email?: string, password?: string) => {
+    // If called with credentials (from login form)
+    if (email && password) {
+      // Here you would normally validate credentials with your backend
+      // For now, we'll simulate successful login
+      setIsLoggedIn(true);
+      toast({
+        title: t.loginSuccess,
+        description: t.welcomeBack,
+      });
+      return;
+    }
+    
+    // If called without credentials, it means we want to open the login form
+    // The UserMenu component will handle showing the login modal
+    // This function will be called again WITH credentials when the form is submitted
   };
 
   const handleLogout = () => {
