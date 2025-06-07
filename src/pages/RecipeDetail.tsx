@@ -19,9 +19,9 @@ const ProductCard = memo(({ product, language, t }: {
   console.log('ProductCard rendering:', product.name[language]);
   
   return (
-    <div className="anong-card anong-hover-lift overflow-hidden group">
-      <div className="flex h-32">
-        <div className="w-1/3 bg-gradient-to-b from-anong-cream to-anong-ivory flex items-center justify-center p-3">
+    <div className="bg-white rounded-lg border border-anong-gold/20 overflow-hidden group hover:shadow-lg transition-all duration-300">
+      <div className="flex">
+        <div className="w-32 h-32 bg-gradient-to-b from-anong-cream to-anong-ivory flex items-center justify-center p-4">
           <OptimizedLazyImage
             src={product.image}
             alt={product.name[language]}
@@ -29,25 +29,28 @@ const ProductCard = memo(({ product, language, t }: {
             containerClassName="w-full h-full relative"
           />
         </div>
-        <div className="p-4 flex flex-col justify-between flex-grow">
+        <div className="flex-1 p-4 flex flex-col justify-between">
           <div>
-            <h3 className="anong-body font-medium text-anong-black group-hover:text-anong-gold transition-colors mb-2">
+            <h3 className="anong-subheading text-lg font-medium text-anong-black group-hover:text-anong-gold transition-colors mb-2">
               {product.name[language]}
             </h3>
-            <p className="anong-body-light text-xs text-anong-black/60 line-clamp-2 mb-3">
+            <p className="anong-body-light text-sm text-anong-black/70 line-clamp-2 mb-3">
               {product.shortDescription[language]}
             </p>
           </div>
-          <Button 
-            asChild
-            size="sm"
-            className="anong-btn-secondary text-xs px-3 py-2 h-auto self-start"
-          >
-            <Link to={`/product/${product.id}`} className="flex items-center">
-              <ChevronRight className="h-3 w-3 mr-1" />
-              {t.viewProduct}
-            </Link>
-          </Button>
+          <div className="flex items-center justify-between">
+            <div className="w-16 h-px bg-anong-gold/60"></div>
+            <Button 
+              asChild
+              size="sm"
+              className="anong-btn-secondary text-xs px-4 py-2 h-auto rounded-full"
+            >
+              <Link to={`/product/${product.id}`} className="flex items-center">
+                {t.viewProduct}
+                <ChevronRight className="h-3 w-3 ml-1" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -198,7 +201,7 @@ const RecipeDetail = () => {
                   <h2 className="anong-subheading text-2xl mb-8 text-anong-black">
                     {t.productsUsed}
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-4">
                     {relatedProducts.map(product => (
                       <ProductCard 
                         key={product.id} 
