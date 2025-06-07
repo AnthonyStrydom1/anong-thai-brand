@@ -134,7 +134,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 35,
-    image: "/placeholder.svg",
+    image: "https://i.postimg.cc/QtKc51d0/pad-thai.png",
     ingredients: {
       en: [
         "3 tbsp Anong Panang Curry Paste",
@@ -196,7 +196,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 25,
-    image: "/placeholder.svg",
+    image: "https://i.postimg.cc/SxY1S2W7/Green-curry.png",
     ingredients: {
       en: [
         "3 tbsp Anong Green Curry Paste",
@@ -262,7 +262,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 20,
-    image: "/placeholder.svg",
+    image: "https://i.postimg.cc/0jc5yH13/tom-yum.png",
     ingredients: {
       en: [
         "2 tbsp Anong Tom Yum Chili Paste",
@@ -326,7 +326,7 @@ export const recipes: Recipe[] = [
     },
     servings: 6,
     time: 50,
-    image: "/placeholder.svg",
+    image: "https://i.postimg.cc/GhHqK8Sw/Massaman-curry.png",
     ingredients: {
       en: [
         "3 tbsp Anong Massaman Curry Paste",
@@ -396,7 +396,7 @@ export const recipes: Recipe[] = [
     },
     servings: 4,
     time: 30,
-    image: "/placeholder.svg",
+    image: "https://i.postimg.cc/2j2CvJg9/moo-kra-ta.png",
     ingredients: {
       en: [
         "Anong Sukiyaki Sauce (for dipping)",
