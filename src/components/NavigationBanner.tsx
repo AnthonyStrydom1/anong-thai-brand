@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,14 +13,19 @@ import MobileMenu from './navigation/MobileMenu';
 import UserMenu from './navigation/UserMenu';
 import { navigationTranslations } from '@/translations/navigation';
 
-const NavigationBanner = () => {
+interface NavigationBannerProps {
+  isLoggedIn: boolean;
+  onLogin: (email?: string, password?: string) => void;
+  onLogout: () => void;
+}
+
+const NavigationBanner = ({ isLoggedIn, onLogin, onLogout }: NavigationBannerProps) => {
   const location = useLocation();
   const { language, toggleLanguage } = useLanguage();
   const currentPath = location.pathname;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   
@@ -38,9 +44,7 @@ const NavigationBanner = () => {
   const handleLogin = (email?: string, password?: string) => {
     // If called with credentials (from login form)
     if (email && password) {
-      // Here you would normally validate credentials with your backend
-      // For now, we'll simulate successful login
-      setIsLoggedIn(true);
+      onLogin(email, password);
       toast({
         title: t.loginSuccess,
         description: t.welcomeBack,
@@ -54,7 +58,7 @@ const NavigationBanner = () => {
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
+    onLogout();
     toast({
       title: t.logoutSuccess,
     });

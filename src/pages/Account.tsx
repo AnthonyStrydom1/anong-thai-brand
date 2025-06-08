@@ -7,9 +7,14 @@ import { toast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
 import { User, Mail, Lock, Eye, EyeOff, UserPlus } from 'lucide-react';
 
-const Account = () => {
+interface AccountProps {
+  isLoggedIn: boolean;
+  onLogin: (email?: string, password?: string) => void;
+  onLogout: () => void;
+}
+
+const Account = ({ isLoggedIn, onLogin, onLogout }: AccountProps) => {
   const { language } = useLanguage();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLogin, setIsLogin] = useState(true); // Toggle between login and registration
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
@@ -155,8 +160,8 @@ const Account = () => {
   const handleLogin = () => {
     if (validateForm()) {
       if (isLogin) {
-        // Handle login logic
-        setIsLoggedIn(true);
+        // Handle login logic using the passed onLogin function
+        onLogin(formData.email, formData.password);
         toast({
           title: t.loginSuccess,
         });
@@ -178,7 +183,7 @@ const Account = () => {
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
+    onLogout();
     setFormData({
       email: '',
       password: '',
@@ -238,6 +243,7 @@ const Account = () => {
           {/* Account Information */}
           <div className="md:col-span-2 space-y-6">
             {isLoggedIn ? (
+              // ... keep existing code (logged in state JSX)
               <>
                 <div className="bg-white shadow-md rounded-lg p-6">
                   <h2 className="text-xl font-semibold mb-4">{t.accountInfo}</h2>
@@ -354,6 +360,7 @@ const Account = () => {
                 </div>
               </>
             ) : (
+              // ... keep existing code (login/registration form JSX)
               <div className="bg-white shadow-md rounded-lg p-8">
                 {/* Header */}
                 <div className="text-center space-y-2 mb-6">

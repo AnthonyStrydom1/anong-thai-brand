@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -7,7 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
-import UserMenu from "@/components/navigation/UserMenu";
+import NavigationBanner from "@/components/NavigationBanner";
 
 // Pages
 import Index from "./pages/Index";
@@ -26,8 +27,6 @@ import Orders from "./pages/Orders";
 import Settings from "./pages/Settings";
 import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
-
-// Import your new CreateCustomerPage
 import CreateCustomerPage from "./pages/CreateCustomerPage";
 
 const queryClient = new QueryClient();
@@ -58,15 +57,6 @@ function App() {
     return () => window.removeEventListener("storage", onStorageChange);
   }, []);
 
-  const translations = {
-    login: "Login",
-    profile: "My Profile",
-    logout: "Logout",
-    account: "My Account",
-    orders: "My Orders",
-    settings: "Settings",
-  };
-
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
@@ -76,11 +66,10 @@ function App() {
               <Toaster />
               <Sonner />
               <BrowserRouter>
-                <UserMenu
+                <NavigationBanner
                   isLoggedIn={isLoggedIn}
                   onLogin={handleLogin}
                   onLogout={handleLogout}
-                  translations={translations}
                 />
                 <Routes>
                   <Route path="/" element={<Index />} />
@@ -93,15 +82,21 @@ function App() {
                   <Route path="/menu" element={<Menu />} />
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/account" element={<Account />} />
+                  <Route 
+                    path="/account" 
+                    element={
+                      <Account 
+                        isLoggedIn={isLoggedIn}
+                        onLogin={handleLogin}
+                        onLogout={handleLogout}
+                      />
+                    } 
+                  />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/events" element={<Events />} />
-
-                  {/* NEW ROUTE for CreateCustomerPage */}
                   <Route path="/create-customer" element={<CreateCustomerPage />} />
-
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
