@@ -1,9 +1,7 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Trash2, Plus, Minus, ChevronRight, CreditCard } from "lucide-react";
@@ -94,8 +92,6 @@ const CartPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      
       <main className="flex-grow container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <div className="mb-6 flex items-center text-sm text-gray-500">
@@ -168,23 +164,17 @@ const CartPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center border border-gray-300 rounded-md w-24">
                             <button 
-                              onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                              className="px-3 py-1 border-r border-gray-300"
+                              onClick={() => updateQuantity(item.product.id, Math.max(0, item.quantity - 1))}
+                              className="p-1 hover:bg-gray-100 transition"
                             >
-                              <Minus className="h-3 w-3" />
+                              <Minus className="h-4 w-4" />
                             </button>
-                            <input
-                              type="number"
-                              min="1"
-                              value={item.quantity}
-                              onChange={(e) => updateQuantity(item.product.id, parseInt(e.target.value) || 1)}
-                              className="w-full text-center focus:outline-none text-sm py-1"
-                            />
+                            <span className="px-3 py-1 text-center flex-1">{item.quantity}</span>
                             <button 
                               onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                              className="px-3 py-1 border-l border-gray-300"
+                              className="p-1 hover:bg-gray-100 transition"
                             >
-                              <Plus className="h-3 w-3" />
+                              <Plus className="h-4 w-4" />
                             </button>
                           </div>
                         </td>
@@ -192,12 +182,14 @@ const CartPage = () => {
                           <div className="text-sm text-gray-900">${(item.product.price * item.quantity).toFixed(2)}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleRemoveItem(item.product.id, item.product.name[language])}
-                            className="text-red-600 hover:text-red-800"
+                            className="text-red-600 hover:text-red-900"
                           >
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -205,48 +197,53 @@ const CartPage = () => {
                 </table>
               </div>
               
-              <div className="mt-4 flex justify-end">
+              <div className="mt-6 flex justify-end">
                 <Button
                   variant="outline"
                   onClick={handleClearCart}
                   className="text-red-600 border-red-600 hover:bg-red-50"
                 >
+                  <Trash2 className="h-4 w-4 mr-2" />
                   {t.clearCart}
                 </Button>
               </div>
             </div>
             
-            {/* Order Summary */}
+            {/* Cart Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h2 className="text-lg font-semibold mb-4 text-gray-800">{t.cartTotal}</h2>
+              <div className="bg-gray-50 p-6 rounded-lg sticky top-24">
+                <h2 className="text-xl font-medium mb-4">{t.cartTotal}</h2>
                 
-                <div className="space-y-4">
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="text-gray-600">{t.subtotal}</span>
-                    <span className="font-medium">${total.toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="text-gray-600">{t.shipping}</span>
+                <div className="space-y-4 mb-6">
+                  <div className="flex justify-between pb-2 border-b border-gray-200">
+                    <span>{t.shipping}</span>
                     <span className="text-green-600">{t.freeShipping}</span>
                   </div>
-                  
-                  <div className="flex justify-between py-2 text-lg font-semibold">
+                  <div className="flex justify-between text-lg font-medium pt-2">
                     <span>{t.total}</span>
                     <span>${total.toFixed(2)}</span>
                   </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <Button 
+                    className="w-full"
+                    asChild
+                  >
+                    <Link to="/checkout">{t.checkout}</Link>
+                  </Button>
                   
                   <Button 
+                    variant="outline"
                     className="w-full"
                     onClick={() => handleCheckout('credit-card')}
                     disabled={paymentProcessing}
                   >
-                    <CreditCard className="mr-2 h-5 w-5" />
+                    <CreditCard className="mr-2 h-4 w-4" />
                     {t.payWithCard}
                   </Button>
                   
-                  <Button
+                  <Button 
                     variant="secondary"
                     className="w-full"
                     onClick={() => handleCheckout('payfast')}
@@ -254,15 +251,6 @@ const CartPage = () => {
                   >
                     {t.payWithPayfast}
                   </Button>
-                  
-                  <div className="text-center mt-4">
-                    <Link 
-                      to="/shop" 
-                      className="text-thai-purple hover:underline"
-                    >
-                      {t.continueShopping}
-                    </Link>
-                  </div>
                 </div>
               </div>
             </div>

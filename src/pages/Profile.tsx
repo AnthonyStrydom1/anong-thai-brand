@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 const Profile = () => {
@@ -42,7 +40,6 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-anong-cream">
-      <Header />
       <main className="flex-1 container mx-auto px-4 py-12 watercolor-bg">
         <h1 className="heading-premium text-3xl mb-8 text-anong-dark-green">{t.title}</h1>
         

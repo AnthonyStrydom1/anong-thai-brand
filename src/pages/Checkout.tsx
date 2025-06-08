@@ -1,9 +1,7 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, CreditCard } from "lucide-react";
@@ -105,7 +103,6 @@ const Checkout = () => {
   if (items.length === 0) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
         <main className="flex-grow container mx-auto px-4 py-8 text-center">
           <h1 className="text-2xl font-semibold mb-4">{t.checkout}</h1>
           <p className="mb-4">Your cart is empty</p>
@@ -120,8 +117,6 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      
       <main className="flex-grow container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <div className="mb-6 flex items-center text-sm text-gray-500">

@@ -1,7 +1,5 @@
-
 import { useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
 
@@ -15,8 +13,6 @@ const Shop = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-anong-ivory">
-      <Header />
-      
       <main className="flex-grow">
         <ProductGrid />
       </main>

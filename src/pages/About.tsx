@@ -1,7 +1,5 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect } from "react";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 
@@ -81,8 +79,6 @@ const About = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-anong-ivory">
-      <Header />
-      
       <main className="flex-grow anong-section thai-pattern-bg">
         <div className="container mx-auto px-4 md:px-6 max-w-7xl">
           {/* Header Section */}

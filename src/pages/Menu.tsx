@@ -1,6 +1,4 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MenuGrid from "@/components/MenuGrid";
 import { motion } from "framer-motion";
@@ -107,8 +105,6 @@ const Menu = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-anong-cream">
-      <Header />
-      
       <motion.main 
         className="flex-grow section-premium"
         initial="hidden"
