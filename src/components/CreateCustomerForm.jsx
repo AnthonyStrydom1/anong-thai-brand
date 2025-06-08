@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 
-const BACKEND_URL = 'https://anong-thai-brand.onrender.com'; // your deployed backend URL
+import React, { useState } from 'react';
+import { apiService } from '@/services/apiService';
 
 export default function CreateCustomerForm() {
   const [formData, setFormData] = useState({
@@ -10,6 +10,7 @@ export default function CreateCustomerForm() {
 
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleChange(e) {
     setFormData(prev => ({
@@ -22,24 +23,16 @@ export default function CreateCustomerForm() {
     e.preventDefault();
     setMessage('');
     setError('');
+    setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/create-customer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Failed to create customer');
-      } else {
-        setMessage('Customer created successfully!');
-        setFormData({ fullName: '', email: '' }); // reset form
-      }
+      const response = await apiService.createCustomer(formData);
+      setMessage('Customer created successfully!');
+      setFormData({ fullName: '', email: '' }); // reset form
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.message || 'Failed to create customer');
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -55,6 +48,7 @@ export default function CreateCustomerForm() {
             value={formData.fullName}
             onChange={handleChange}
             required
+            disabled={isSubmitting}
           />
         </label>
         <br /><br />
@@ -66,10 +60,13 @@ export default function CreateCustomerForm() {
             value={formData.email}
             onChange={handleChange}
             required
+            disabled={isSubmitting}
           />
         </label>
         <br /><br />
-        <button type="submit">Create</button>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Creating...' : 'Create'}
+        </button>
       </form>
       {message && <p style={{ color: 'green' }}>{message}</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}

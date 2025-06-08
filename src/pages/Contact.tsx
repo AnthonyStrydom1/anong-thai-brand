@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
@@ -9,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { Mail, Phone, Instagram, Facebook, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
+import { apiService } from "@/services/apiService";
 
 const Contact = () => {
   const { language } = useLanguage();
@@ -18,6 +18,7 @@ const Contact = () => {
     subject: "",
     message: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Scroll to top when component mounts
   useEffect(() => {
@@ -77,21 +78,34 @@ const Contact = () => {
     }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    setIsSubmitting(true);
     
-    toast({
-      title: t.success,
-      duration: 3000
-    });
-    
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      message: ""
-    });
+    try {
+      await apiService.submitContactForm(formData);
+      
+      toast({
+        title: t.success,
+        duration: 3000
+      });
+      
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: ""
+      });
+    } catch (error) {
+      console.error('Contact form submission error:', error);
+      toast({
+        title: t.error,
+        duration: 3000,
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   const fadeInUp = {
@@ -206,9 +220,10 @@ const Contact = () => {
                 <div className="text-center">
                   <Button 
                     type="submit" 
-                    className="anong-btn-primary px-12 py-6 text-lg rounded-full"
+                    disabled={isSubmitting}
+                    className="anong-btn-primary px-12 py-6 text-lg rounded-full disabled:opacity-50"
                   >
-                    {t.form.send}
+                    {isSubmitting ? "Sending..." : t.form.send}
                   </Button>
                 </div>
               </form>
