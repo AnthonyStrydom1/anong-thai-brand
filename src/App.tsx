@@ -32,10 +32,8 @@ import CreateCustomerPage from "./pages/CreateCustomerPage";
 const queryClient = new QueryClient();
 
 function App() {
-  // Initialize login state from localStorage
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem("isLoggedIn") === "true";
-  });
+  // Initialize login state as false - users need to actively log in
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLogin = async (email?: string, password?: string) => {
     // Here you can add your login API logic if you have
@@ -47,6 +45,14 @@ function App() {
     setIsLoggedIn(false);
     localStorage.removeItem("isLoggedIn");
   };
+
+  // Check login status on app load (but don't auto-login)
+  useEffect(() => {
+    const loginStatus = localStorage.getItem("isLoggedIn");
+    if (loginStatus === "true") {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   // Optional: listen to localStorage changes (e.g. if multi-tabs)
   useEffect(() => {
