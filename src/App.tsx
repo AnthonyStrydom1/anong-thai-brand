@@ -28,6 +28,7 @@ import Settings from "./pages/Settings";
 import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
 import CreateCustomerPage from "./pages/CreateCustomerPage";
+import AdminPage from "./pages/AdminPage";
 
 const queryClient = new QueryClient();
 
@@ -46,12 +47,9 @@ function App() {
     localStorage.removeItem("isLoggedIn");
   };
 
-  // Check login status on app load (but don't auto-login)
+  // Don't auto-login from localStorage on app load
   useEffect(() => {
-    const loginStatus = localStorage.getItem("isLoggedIn");
-    if (loginStatus === "true") {
-      setIsLoggedIn(true);
-    }
+    // Removed auto-login logic
   }, []);
 
   // Optional: listen to localStorage changes (e.g. if multi-tabs)
@@ -103,6 +101,7 @@ function App() {
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/events" element={<Events />} />
                   <Route path="/create-customer" element={<CreateCustomerPage />} />
+                  <Route path="/admin" element={<AdminPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
