@@ -33,29 +33,42 @@ import AdminPage from "./pages/AdminPage";
 const queryClient = new QueryClient();
 
 function App() {
-  // Initialize login state as false - users need to actively log in
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>('');
 
   const handleLogin = async (email?: string, password?: string) => {
-    // Here you can add your login API logic if you have
-    setIsLoggedIn(true);
-    localStorage.setItem("isLoggedIn", "true");
+    if (email && password) {
+      setIsLoggedIn(true);
+      setUserEmail(email);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userEmail", email);
+    }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setUserEmail('');
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userEmail");
   };
 
-  // Don't auto-login from localStorage on app load
+  // Check for existing session on app load
   useEffect(() => {
-    // Removed auto-login logic
+    const savedLoginState = localStorage.getItem("isLoggedIn");
+    const savedEmail = localStorage.getItem("userEmail");
+    if (savedLoginState === "true" && savedEmail) {
+      setIsLoggedIn(true);
+      setUserEmail(savedEmail);
+    }
   }, []);
 
-  // Optional: listen to localStorage changes (e.g. if multi-tabs)
+  // Listen to localStorage changes
   useEffect(() => {
     const onStorageChange = () => {
-      setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+      const loginState = localStorage.getItem("isLoggedIn") === "true";
+      const email = localStorage.getItem("userEmail") || '';
+      setIsLoggedIn(loginState);
+      setUserEmail(email);
     };
     window.addEventListener("storage", onStorageChange);
     return () => window.removeEventListener("storage", onStorageChange);
@@ -96,7 +109,15 @@ function App() {
                       />
                     } 
                   />
-                  <Route path="/profile" element={<Profile />} />
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <Profile 
+                        isLoggedIn={isLoggedIn}
+                        userEmail={userEmail}
+                      />
+                    } 
+                  />
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/events" element={<Events />} />

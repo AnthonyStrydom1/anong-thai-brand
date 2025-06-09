@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -45,9 +47,6 @@ const UserMenu = ({
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Common style for consistent white box highlighting
-  const buttonStyle = "text-white hover:bg-white hover:bg-opacity-20 transition-colors";
-
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -65,7 +64,6 @@ const UserMenu = ({
     
     setIsLoading(true);
     try {
-      // Call the parent's onLogin function with credentials
       onLogin(email, password);
       setEmail('');
       setPassword('');
@@ -83,6 +81,11 @@ const UserMenu = ({
     setShowLoginModal(false);
   };
 
+  const handleLogout = () => {
+    setIsDropdownOpen(false);
+    onLogout();
+  };
+
   return (
     <>
       <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
@@ -90,7 +93,7 @@ const UserMenu = ({
           <Button 
             variant="ghost" 
             size="icon"
-            className={buttonStyle}
+            className="text-white hover:bg-white hover:bg-opacity-20 transition-colors"
             aria-label={isLoggedIn ? translations.profile : translations.login}
             onClick={handleTriggerClick}
           >
@@ -125,21 +128,16 @@ const UserMenu = ({
                 </Link>
               </DropdownMenuItem>
               
-              <DropdownMenuItem onClick={onLogout} className="cursor-pointer">
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
                 {translations.logout}
               </DropdownMenuItem>
             </>
           ) : (
-            <>
-              <DropdownMenuItem onClick={handleLoginClick} className="cursor-pointer">
-                {translations.login}
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/account" className="w-full cursor-pointer">
-                  {translations.account}
-                </Link>
-              </DropdownMenuItem>
-            </>
+            <DropdownMenuItem onClick={handleLoginClick} className="cursor-pointer">
+              {translations.login}
+            </DropdownMenuItem>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -150,7 +148,7 @@ const UserMenu = ({
           <DialogHeader>
             <DialogTitle>Sign In</DialogTitle>
             <DialogDescription>
-              Enter your credentials to access your account.
+              Enter your credentials to access your account dashboard.
             </DialogDescription>
           </DialogHeader>
           

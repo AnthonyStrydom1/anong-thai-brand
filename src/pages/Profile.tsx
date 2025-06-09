@@ -1,8 +1,14 @@
+
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Footer from '@/components/Footer';
 
-const Profile = () => {
+interface ProfileProps {
+  isLoggedIn: boolean;
+  userEmail?: string;
+}
+
+const Profile = ({ isLoggedIn = true, userEmail = "user@example.com" }: ProfileProps) => {
   const { language } = useLanguage();
   
   const translations = {
@@ -14,7 +20,8 @@ const Profile = () => {
       email: 'Email',
       phone: 'Phone',
       address: 'Address',
-      placeholder: 'Not provided'
+      placeholder: 'Not provided',
+      loginRequired: 'Please log in to view your profile'
     },
     th: {
       title: 'โปรไฟล์ของฉัน',
@@ -24,19 +31,34 @@ const Profile = () => {
       email: 'อีเมล',
       phone: 'โทรศัพท์',
       address: 'ที่อยู่',
-      placeholder: 'ไม่ได้ให้ข้อมูล'
+      placeholder: 'ไม่ได้ให้ข้อมูล',
+      loginRequired: 'กรุณาเข้าสู่ระบบเพื่อดูโปรไฟล์ของคุณ'
     }
   };
 
   const t = translations[language];
 
-  // Mock profile data (would come from a real auth system)
+  // Use real user data instead of hardcoded
   const profileData = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
+    name: userEmail?.split('@')[0] || 'User', // Extract name from email
+    email: userEmail || '',
     phone: '',
     address: ''
   };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex flex-col bg-anong-cream">
+        <main className="flex-1 container mx-auto px-4 py-12 watercolor-bg">
+          <div className="luxury-card p-8 text-center">
+            <h1 className="heading-premium text-3xl mb-8 text-anong-dark-green">{t.title}</h1>
+            <p className="text-luxury text-anong-charcoal/80">{t.loginRequired}</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-anong-cream">
