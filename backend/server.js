@@ -36,11 +36,11 @@ app.get('/health', (req, res) => {
 })
 
 // Use route modules
-app.use('/products', productsRouter)
-app.use('/contact', contactRouter)
+app.use('/api/products', productsRouter)
+app.use('/api/contact', contactRouter)
 
 // Update existing customer by id
-app.post('/update-customer', async (req, res) => {
+app.post('/api/update-customer', async (req, res) => {
   try {
     const { id, ...updates } = req.body
     if (!id) {
@@ -71,7 +71,7 @@ app.post('/update-customer', async (req, res) => {
 })
 
 // Create new customer
-app.post('/create-customer', async (req, res) => {
+app.post('/api/create-customer', async (req, res) => {
   try {
     const data = req.body
     if (!data || Object.keys(data).length === 0) {
@@ -106,7 +106,7 @@ app.post('/create-customer', async (req, res) => {
 })
 
 // Get all customers
-app.get('/customers', async (req, res) => {
+app.get('/api/customers', async (req, res) => {
   try {
     const { limit = 50, offset = 0 } = req.query
     
@@ -133,7 +133,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' })
 })
 
-// 404 handler
+// 404 handler - this should be last
 app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' })
 })
