@@ -50,6 +50,7 @@ export interface SupabaseOrder {
   status: string | null;
   payment_status: string | null;
   total_amount: number;
+  subtotal: number;
   created_at: string;
 }
 
@@ -180,6 +181,16 @@ class SupabaseService {
       .from('orders')
       .select('*')
       .eq('customer_id', customerId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data as SupabaseOrder[];
+  }
+
+  async getAllOrders() {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
       .order('created_at', { ascending: false });
     
     if (error) throw error;

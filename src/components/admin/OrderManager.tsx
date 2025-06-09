@@ -17,8 +17,8 @@ const OrderManager = () => {
 
   const loadOrders = async () => {
     try {
-      // For now, we'll get all orders - in a real app you'd paginate
-      // Since we don't have a get all orders method, we'll need to create one
+      const data = await supabaseService.getAllOrders();
+      setOrders(data);
       setIsLoading(false);
     } catch (error) {
       toast({
