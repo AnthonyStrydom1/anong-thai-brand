@@ -54,6 +54,23 @@ export interface SupabaseOrder {
   created_at: string;
 }
 
+// Type for creating a new order (matches database insert type)
+type CreateOrderInput = {
+  customer_id?: number | null;
+  status?: string | null;
+  payment_status?: string | null;
+  subtotal: number;
+  total_amount: number;
+  tax_amount?: number | null;
+  shipping_amount?: number | null;
+  discount_amount?: number | null;
+  billing_address?: any;
+  shipping_address?: any;
+  notes?: string | null;
+  currency?: string | null;
+  fulfillment_status?: string | null;
+};
+
 class SupabaseService {
   // Products
   async getProducts(categoryId?: string) {
@@ -165,10 +182,10 @@ class SupabaseService {
   }
 
   // Orders
-  async createOrder(order: Omit<SupabaseOrder, 'id' | 'order_number' | 'created_at'>) {
+  async createOrder(order: CreateOrderInput) {
     const { data, error } = await supabase
       .from('orders')
-      .insert([order])
+      .insert(order)
       .select()
       .single();
     
