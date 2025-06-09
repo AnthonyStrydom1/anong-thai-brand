@@ -63,6 +63,12 @@ const NavigationBanner = ({ isLoggedIn, onLogin, onLogout }: NavigationBannerPro
       title: t.logoutSuccess,
     });
   };
+
+  // Mobile-specific login handler that navigates to account page
+  const handleMobileLogin = () => {
+    // For mobile, we don't show the modal, we navigate to the account page
+    // The account page handles both login and registration
+  };
   
   const t = navigationTranslations[language];
 
@@ -78,6 +84,14 @@ const NavigationBanner = ({ isLoggedIn, onLogin, onLogout }: NavigationBannerPro
     if (path === '/' && currentPath === '/') return true;
     if (path !== '/' && currentPath.startsWith(path)) return true;
     return false;
+  };
+
+  // Enhanced mobile translations with all required properties
+  const mobileTranslations = {
+    ...t,
+    account: t.account || (language === 'en' ? 'Account' : 'บัญชี'),
+    orders: t.orders || (language === 'en' ? 'Orders' : 'คำสั่งซื้อ'),
+    settings: t.settings || (language === 'en' ? 'Settings' : 'การตั้งค่า'),
   };
 
   return (
@@ -143,7 +157,7 @@ const NavigationBanner = ({ isLoggedIn, onLogin, onLogout }: NavigationBannerPro
                 isLoggedIn={isLoggedIn}
                 onLogin={handleLogin}
                 onLogout={handleLogout}
-                translations={t}
+                translations={mobileTranslations}
               />
               
               <CartDropdown />
@@ -167,7 +181,7 @@ const NavigationBanner = ({ isLoggedIn, onLogin, onLogout }: NavigationBannerPro
           onSearchChange={(e) => setSearchQuery(e.target.value)}
           onClear={handleClearSearch}
           onClose={toggleSearch}
-          translations={t}
+          translations={mobileTranslations}
         />
       </div>
       
@@ -178,9 +192,9 @@ const NavigationBanner = ({ isLoggedIn, onLogin, onLogout }: NavigationBannerPro
         isLoggedIn={isLoggedIn}
         onMenuItemClick={() => setIsMenuOpen(false)}
         onSearchClick={toggleSearch}
-        onLoginClick={handleLogin}
+        onLoginClick={handleMobileLogin}
         onLogoutClick={handleLogout}
-        translations={t}
+        translations={mobileTranslations}
       />
     </div>
   );

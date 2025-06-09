@@ -18,6 +18,9 @@ interface MobileMenuProps {
     profile: string;
     logout: string;
     myCart: string;
+    account: string;
+    orders: string;
+    settings: string;
   };
 }
 
@@ -34,7 +37,7 @@ const MobileMenu = ({
   if (!isOpen) return null;
 
   // Common button style for mobile menu links
-  const buttonStyle = "text-left w-full py-3 px-4 hover:bg-thai-purple hover:text-white transition-colors";
+  const buttonStyle = "text-left w-full py-3 px-4 hover:bg-thai-purple hover:text-white transition-colors justify-start";
 
   return (
     <div className="md:hidden bg-white shadow-lg absolute top-full left-0 w-full z-30 animate-in fade-in">
@@ -53,7 +56,10 @@ const MobileMenu = ({
         <Button
           variant="ghost"
           className={buttonStyle}
-          onClick={onSearchClick}
+          onClick={() => {
+            onSearchClick();
+            onMenuItemClick();
+          }}
         >
           <div className="flex items-center">
             <Search className="mr-2 h-5 w-5" />
@@ -76,10 +82,56 @@ const MobileMenu = ({
                 </div>
               </Link>
             </Button>
+            
             <Button
               variant="ghost"
               className={buttonStyle}
-              onClick={onLogoutClick}
+              onClick={onMenuItemClick}
+              asChild
+            >
+              <Link to="/account">
+                <div className="flex items-center">
+                  <User className="mr-2 h-5 w-5" />
+                  {translations.account}
+                </div>
+              </Link>
+            </Button>
+            
+            <Button
+              variant="ghost"
+              className={buttonStyle}
+              onClick={onMenuItemClick}
+              asChild
+            >
+              <Link to="/orders">
+                <div className="flex items-center">
+                  <User className="mr-2 h-5 w-5" />
+                  {translations.orders}
+                </div>
+              </Link>
+            </Button>
+            
+            <Button
+              variant="ghost"
+              className={buttonStyle}
+              onClick={onMenuItemClick}
+              asChild
+            >
+              <Link to="/settings">
+                <div className="flex items-center">
+                  <User className="mr-2 h-5 w-5" />
+                  {translations.settings}
+                </div>
+              </Link>
+            </Button>
+            
+            <Button
+              variant="ghost"
+              className={buttonStyle}
+              onClick={() => {
+                onLogoutClick();
+                onMenuItemClick();
+              }}
             >
               <div className="flex items-center">
                 {translations.logout}
@@ -90,12 +142,17 @@ const MobileMenu = ({
           <Button
             variant="ghost"
             className={buttonStyle}
-            onClick={onLoginClick}
+            onClick={() => {
+              onMenuItemClick();
+            }}
+            asChild
           >
-            <div className="flex items-center">
-              <User className="mr-2 h-5 w-5" />
-              {translations.login}
-            </div>
+            <Link to="/account">
+              <div className="flex items-center">
+                <User className="mr-2 h-5 w-5" />
+                {translations.login}
+              </div>
+            </Link>
           </Button>
         )}
         
