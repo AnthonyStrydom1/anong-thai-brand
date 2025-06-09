@@ -35,7 +35,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })
 })
 
-// Update existing customer by id
+// API routes - These must come BEFORE any catch-all routes
+app.use('/api/products', productsRouter)
+app.use('/api/contact', contactRouter)
+
+// Customer endpoints
 app.post('/api/update-customer', async (req, res) => {
   try {
     const { id, ...updates } = req.body
@@ -66,7 +70,6 @@ app.post('/api/update-customer', async (req, res) => {
   }
 })
 
-// Create new customer
 app.post('/api/create-customer', async (req, res) => {
   try {
     const data = req.body
@@ -101,7 +104,6 @@ app.post('/api/create-customer', async (req, res) => {
   }
 })
 
-// Get all customers
 app.get('/api/customers', async (req, res) => {
   try {
     const { limit = 50, offset = 0 } = req.query
@@ -122,10 +124,6 @@ app.get('/api/customers', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 })
-
-// Use route modules - IMPORTANT: These must come after the direct routes above
-app.use('/api/products', productsRouter)
-app.use('/api/contact', contactRouter)
 
 // Error handling middleware
 app.use((err, req, res, next) => {
