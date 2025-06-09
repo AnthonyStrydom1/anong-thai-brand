@@ -35,8 +35,8 @@ router.get('/', async (req, res) => {
   }
 })
 
-// Get single product by ID - using more explicit route pattern
-router.get('/:productId', async (req, res) => {
+// Get single product by ID - Fixed route parameter
+router.get('/product/:productId', async (req, res) => {
   try {
     const { productId } = req.params
     

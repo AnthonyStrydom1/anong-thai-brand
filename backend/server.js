@@ -35,10 +35,6 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })
 })
 
-// Use route modules
-app.use('/api/products', productsRouter)
-app.use('/api/contact', contactRouter)
-
 // Update existing customer by id
 app.post('/api/update-customer', async (req, res) => {
   try {
@@ -126,6 +122,10 @@ app.get('/api/customers', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 })
+
+// Use route modules - IMPORTANT: These must come after the direct routes above
+app.use('/api/products', productsRouter)
+app.use('/api/contact', contactRouter)
 
 // Error handling middleware
 app.use((err, req, res, next) => {
