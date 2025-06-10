@@ -1,15 +1,12 @@
 
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/hooks/useAuth';
 import Footer from '@/components/Footer';
 
-interface ProfileProps {
-  isLoggedIn: boolean;
-  userEmail?: string;
-}
-
-const Profile = ({ isLoggedIn = true, userEmail = "user@example.com" }: ProfileProps) => {
+const Profile = () => {
   const { language } = useLanguage();
+  const { user, userProfile, isLoading } = useAuth();
   
   const translations = {
     en: {
@@ -38,15 +35,18 @@ const Profile = ({ isLoggedIn = true, userEmail = "user@example.com" }: ProfileP
 
   const t = translations[language];
 
-  // Use real user data instead of hardcoded
-  const profileData = {
-    name: userEmail?.split('@')[0] || 'User', // Extract name from email
-    email: userEmail || '',
-    phone: '',
-    address: ''
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-anong-cream">
+        <main className="flex-1 container mx-auto px-4 py-12 watercolor-bg flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-anong-dark-green"></div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
-  if (!isLoggedIn) {
+  if (!user) {
     return (
       <div className="min-h-screen flex flex-col bg-anong-cream">
         <main className="flex-1 container mx-auto px-4 py-12 watercolor-bg">
@@ -59,6 +59,14 @@ const Profile = ({ isLoggedIn = true, userEmail = "user@example.com" }: ProfileP
       </div>
     );
   }
+
+  // Use real user profile data
+  const profileData = {
+    name: userProfile ? `${userProfile.firstName || ''} ${userProfile.lastName || ''}`.trim() || user.email?.split('@')[0] : user.email?.split('@')[0] || 'User',
+    email: user.email || '',
+    phone: userProfile?.phone || '',
+    address: '' // Address would come from a separate address table if implemented
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-anong-cream">

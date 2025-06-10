@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Menu, Search, X } from "lucide-react";
 import CartDropdown from './CartDropdown';
@@ -13,15 +14,10 @@ import MobileMenu from './navigation/MobileMenu';
 import UserMenu from './navigation/UserMenu';
 import { navigationTranslations } from '@/translations/navigation';
 
-interface NavigationBannerProps {
-  isLoggedIn: boolean;
-  onLogin: (email?: string, password?: string) => void;
-  onLogout: () => void;
-}
-
-const NavigationBanner = ({ isLoggedIn, onLogin, onLogout }: NavigationBannerProps) => {
+const NavigationBanner = () => {
   const location = useLocation();
   const { language, toggleLanguage } = useLanguage();
+  const { user, signOut } = useAuth();
   const currentPath = location.pathname;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -40,34 +36,24 @@ const NavigationBanner = ({ isLoggedIn, onLogin, onLogout }: NavigationBannerPro
     setSearchQuery('');
   };
 
-  // Updated handleLogin - this now handles actual login with credentials
-  const handleLogin = (email?: string, password?: string) => {
-    // If called with credentials (from login form)
-    if (email && password) {
-      onLogin(email, password);
+  const handleLogout = async () => {
+    try {
+      await signOut();
       toast({
-        title: t.loginSuccess,
-        description: t.welcomeBack,
+        title: t.logoutSuccess || 'Successfully logged out',
       });
-      return;
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: 'Error logging out',
+        variant: 'destructive',
+      });
     }
-    
-    // If called without credentials, it means we want to open the login form
-    // The UserMenu component will handle showing the login modal
-    // This function will be called again WITH credentials when the form is submitted
-  };
-
-  const handleLogout = () => {
-    onLogout();
-    toast({
-      title: t.logoutSuccess,
-    });
   };
 
   // Mobile-specific login handler that navigates to account page
   const handleMobileLogin = () => {
-    // For mobile, we don't show the modal, we navigate to the account page
-    // The account page handles both login and registration
+    // For mobile, we navigate to the account page for login
   };
   
   const t = navigationTranslations[language];
@@ -154,8 +140,7 @@ const NavigationBanner = ({ isLoggedIn, onLogin, onLogout }: NavigationBannerPro
               </Button>
               
               <UserMenu 
-                isLoggedIn={isLoggedIn}
-                onLogin={handleLogin}
+                isLoggedIn={!!user}
                 onLogout={handleLogout}
                 translations={mobileTranslations}
               />
@@ -189,7 +174,7 @@ const NavigationBanner = ({ isLoggedIn, onLogin, onLogout }: NavigationBannerPro
       <MobileMenu 
         isOpen={isMenuOpen}
         navItems={navItems}
-        isLoggedIn={isLoggedIn}
+        isLoggedIn={!!user}
         onMenuItemClick={() => setIsMenuOpen(false)}
         onSearchClick={toggleSearch}
         onLoginClick={handleMobileLogin}

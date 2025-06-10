@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +25,6 @@ import {
 
 interface UserMenuProps {
   isLoggedIn: boolean;
-  onLogin: (email?: string, password?: string) => void;
   onLogout: () => void;
   translations: {
     login: string;
@@ -37,14 +38,17 @@ interface UserMenuProps {
 
 const UserMenu = ({
   isLoggedIn,
-  onLogin,
   onLogout,
   translations
 }: UserMenuProps) => {
+  const { signIn, signUp } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleTriggerClick = (e: React.MouseEvent) => {
@@ -58,18 +62,32 @@ const UserMenu = ({
     setShowLoginModal(true);
   };
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
     
     setIsLoading(true);
     try {
-      onLogin(email, password);
-      setEmail('');
-      setPassword('');
-      setShowLoginModal(false);
-    } catch (error) {
-      console.error('Login failed:', error);
+      if (isSignUp) {
+        await signUp(email, password, firstName, lastName);
+        toast({
+          title: 'Account created successfully!',
+          description: 'Please check your email to confirm your account.',
+        });
+      } else {
+        await signIn(email, password);
+        toast({
+          title: 'Successfully signed in!',
+        });
+      }
+      handleCloseModal();
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      toast({
+        title: isSignUp ? 'Sign up failed' : 'Sign in failed',
+        description: error.message || 'An error occurred',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +96,9 @@ const UserMenu = ({
   const handleCloseModal = () => {
     setEmail('');
     setPassword('');
+    setFirstName('');
+    setLastName('');
+    setIsSignUp(false);
     setShowLoginModal(false);
   };
 
@@ -142,18 +163,49 @@ const UserMenu = ({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Login Modal */}
+      {/* Auth Modal */}
       <Dialog open={showLoginModal} onOpenChange={handleCloseModal}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Sign In</DialogTitle>
+            <DialogTitle>{isSignUp ? 'Create Account' : 'Sign In'}</DialogTitle>
             <DialogDescription>
-              Enter your credentials to access your account dashboard.
+              {isSignUp 
+                ? 'Create your account to start shopping with Anong Thai.'
+                : 'Enter your credentials to access your account dashboard.'
+              }
             </DialogDescription>
           </DialogHeader>
           
-          <form onSubmit={handleLoginSubmit}>
+          <form onSubmit={handleAuthSubmit}>
             <div className="grid gap-4 py-4">
+              {isSignUp && (
+                <>
+                  <div className="grid gap-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="Enter your first name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Enter your last name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      disabled={isLoading}
+                    />
+                  </div>
+                </>
+              )}
+              
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -181,16 +233,29 @@ const UserMenu = ({
               </div>
             </div>
             
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleCloseModal} disabled={isLoading}>
-                Cancel
-              </Button>
+            <DialogFooter className="flex-col space-y-2">
               <Button 
                 type="submit" 
-                className="bg-thai-purple hover:bg-thai-purple/90"
+                className="bg-thai-purple hover:bg-thai-purple/90 w-full"
                 disabled={isLoading || !email || !password}
               >
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {isLoading 
+                  ? (isSignUp ? 'Creating Account...' : 'Signing In...')
+                  : (isSignUp ? 'Create Account' : 'Sign In')
+                }
+              </Button>
+              
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={() => setIsSignUp(!isSignUp)}
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isSignUp 
+                  ? 'Already have an account? Sign In'
+                  : "Don't have an account? Create one"
+                }
               </Button>
             </DialogFooter>
           </form>
