@@ -1,12 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import Footer from '@/components/Footer';
+import EditProfileForm from '@/components/EditProfileForm';
+import { Button } from "@/components/ui/button";
+import { Edit } from 'lucide-react';
 
 const Profile = () => {
   const { language } = useLanguage();
   const { user, userProfile, isLoading } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
   
   const translations = {
     en: {
@@ -18,7 +22,9 @@ const Profile = () => {
       phone: 'Phone',
       address: 'Address',
       placeholder: 'Not provided',
-      loginRequired: 'Please log in to view your profile'
+      loginRequired: 'Please log in to view your profile',
+      editProfile: 'Edit Profile',
+      viewMode: 'View Profile'
     },
     th: {
       title: 'โปรไฟล์ของฉัน',
@@ -29,7 +35,9 @@ const Profile = () => {
       phone: 'โทรศัพท์',
       address: 'ที่อยู่',
       placeholder: 'ไม่ได้ให้ข้อมูล',
-      loginRequired: 'กรุณาเข้าสู่ระบบเพื่อดูโปรไฟล์ของคุณ'
+      loginRequired: 'กรุณาเข้าสู่ระบบเพื่อดูโปรไฟล์ของคุณ',
+      editProfile: 'แก้ไขโปรไฟล์',
+      viewMode: 'ดูโปรไฟล์'
     }
   };
 
@@ -68,46 +76,77 @@ const Profile = () => {
     address: '' // Address would come from a separate address table if implemented
   };
 
+  const handleEditSave = () => {
+    setIsEditing(false);
+  };
+
+  const handleEditCancel = () => {
+    setIsEditing(false);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-anong-cream">
       <main className="flex-1 container mx-auto px-4 py-12 watercolor-bg">
-        <h1 className="heading-premium text-3xl mb-8 text-anong-dark-green">{t.title}</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="heading-premium text-3xl text-anong-dark-green">{t.title}</h1>
+          
+          <Button
+            onClick={() => setIsEditing(!isEditing)}
+            variant="outline"
+            className="border-anong-sage/20 text-anong-charcoal hover:bg-anong-sage/10 font-serif"
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            {isEditing ? t.viewMode : t.editProfile}
+          </Button>
+        </div>
         
         <div className="luxury-card p-8 mb-8">
-          <h2 className="heading-elegant text-xl mb-6 text-anong-dark-green">{t.welcome}</h2>
-          <p className="text-luxury mb-8 text-anong-charcoal/80">{t.profileInfo}</p>
-          
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.name}</label>
-                <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
-                  {profileData.name}
-                </p>
-              </div>
+          {isEditing ? (
+            <>
+              <h2 className="heading-elegant text-xl mb-6 text-anong-dark-green">Edit Profile</h2>
+              <EditProfileForm 
+                onSave={handleEditSave}
+                onCancel={handleEditCancel}
+              />
+            </>
+          ) : (
+            <>
+              <h2 className="heading-elegant text-xl mb-6 text-anong-dark-green">{t.welcome}</h2>
+              <p className="text-luxury mb-8 text-anong-charcoal/80">{t.profileInfo}</p>
               
-              <div>
-                <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.email}</label>
-                <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
-                  {profileData.email}
-                </p>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.name}</label>
+                    <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
+                      {profileData.name}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.email}</label>
+                    <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
+                      {profileData.email}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.phone}</label>
+                    <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
+                      {profileData.phone || t.placeholder}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.address}</label>
+                    <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
+                      {profileData.address || t.placeholder}
+                    </p>
+                  </div>
+                </div>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.phone}</label>
-                <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
-                  {profileData.phone || t.placeholder}
-                </p>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-anong-charcoal mb-2 font-serif">{t.address}</label>
-                <p className="p-4 border border-anong-sage/20 rounded-lg bg-anong-warm-cream/50 font-serif">
-                  {profileData.address || t.placeholder}
-                </p>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </main>
       <Footer />
