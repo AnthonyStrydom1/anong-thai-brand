@@ -47,8 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // Check for existing session
-    authService.getCurrentSession().then(({ data: { session } }) => {
+    // Check for existing session - Fix the destructuring error
+    authService.getCurrentSession().then((session) => {
       if (session) {
         setUser(session.user);
         setSession(session);
