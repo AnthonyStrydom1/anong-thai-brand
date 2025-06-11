@@ -6,7 +6,7 @@ const router = express.Router()
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
 // Get single product by ID - MUST come before the general GET route
-router.get('/:productId', async (req, res) => {
+router.get('/:productId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})', async (req, res) => {
   try {
     const { productId } = req.params
     

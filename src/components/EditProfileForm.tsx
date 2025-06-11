@@ -53,7 +53,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-anong-dark-green"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-anong-gold"></div>
       </div>
     );
   }
@@ -108,7 +108,8 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="bg-anong-dark-green hover:bg-anong-dark-green/90 text-white font-serif"
+          variant="gold"
+          className="font-serif"
         >
           {isSubmitting ? 'Saving...' : 'Save Changes'}
         </Button>

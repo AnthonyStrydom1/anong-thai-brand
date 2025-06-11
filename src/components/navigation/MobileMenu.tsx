@@ -37,16 +37,16 @@ const MobileMenu = ({
   if (!isOpen) return null;
 
   // Common button style for mobile menu links
-  const buttonStyle = "text-left w-full py-3 px-4 hover:bg-thai-purple hover:text-white transition-colors justify-start";
+  const buttonStyle = "text-left w-full py-3 px-4 hover:bg-anong-gold hover:text-anong-black transition-colors justify-start font-serif";
 
   return (
-    <div className="md:hidden bg-white shadow-lg absolute top-full left-0 w-full z-30 animate-in fade-in">
+    <div className="md:hidden bg-anong-black shadow-lg absolute top-full left-0 w-full z-30 animate-in fade-in border-t border-anong-gold/20">
       <nav className="flex flex-col">
         {navItems.map((item) => (
           <Link 
             key={item.path}
             to={item.path}
-            className="py-3 px-4 border-b border-gray-100 hover:bg-thai-purple hover:text-white transition-colors"
+            className="py-3 px-4 border-b border-anong-gold/10 hover:bg-anong-gold hover:text-anong-black transition-colors text-white font-serif"
             onClick={onMenuItemClick}
           >
             {item.label}
@@ -61,7 +61,7 @@ const MobileMenu = ({
             onMenuItemClick();
           }}
         >
-          <div className="flex items-center">
+          <div className="flex items-center text-white">
             <Search className="mr-2 h-5 w-5" />
             {translations.search}
           </div>
@@ -76,7 +76,7 @@ const MobileMenu = ({
               asChild
             >
               <Link to="/profile">
-                <div className="flex items-center">
+                <div className="flex items-center text-white">
                   <User className="mr-2 h-5 w-5" />
                   {translations.profile}
                 </div>
@@ -90,7 +90,7 @@ const MobileMenu = ({
               asChild
             >
               <Link to="/account">
-                <div className="flex items-center">
+                <div className="flex items-center text-white">
                   <User className="mr-2 h-5 w-5" />
                   {translations.account}
                 </div>
@@ -104,7 +104,7 @@ const MobileMenu = ({
               asChild
             >
               <Link to="/orders">
-                <div className="flex items-center">
+                <div className="flex items-center text-white">
                   <User className="mr-2 h-5 w-5" />
                   {translations.orders}
                 </div>
@@ -118,7 +118,7 @@ const MobileMenu = ({
               asChild
             >
               <Link to="/settings">
-                <div className="flex items-center">
+                <div className="flex items-center text-white">
                   <User className="mr-2 h-5 w-5" />
                   {translations.settings}
                 </div>
@@ -133,7 +133,7 @@ const MobileMenu = ({
                 onMenuItemClick();
               }}
             >
-              <div className="flex items-center">
+              <div className="flex items-center text-white">
                 {translations.logout}
               </div>
             </Button>
@@ -142,13 +142,11 @@ const MobileMenu = ({
           <Button
             variant="ghost"
             className={buttonStyle}
-            onClick={() => {
-              onMenuItemClick();
-            }}
+            onClick={onMenuItemClick}
             asChild
           >
             <Link to="/account">
-              <div className="flex items-center">
+              <div className="flex items-center text-white">
                 <User className="mr-2 h-5 w-5" />
                 {translations.login}
               </div>
@@ -163,7 +161,7 @@ const MobileMenu = ({
           asChild
         >
           <Link to="/cart">
-            <div className="flex items-center">
+            <div className="flex items-center text-white">
               <ShoppingCart className="mr-2 h-5 w-5" />
               {translations.myCart}
             </div>
