@@ -35,19 +35,19 @@ router.get('/', async (req, res) => {
   }
 })
 
-// Get single product by ID - using string parameter
-router.get('/product/:productId', async (req, res) => {
+// Get single product by ID
+router.get('/:id', async (req, res) => {
   try {
-    const { productId } = req.params
+    const { id } = req.params
     
-    if (!productId) {
+    if (!id) {
       return res.status(400).json({ error: 'Product ID is required' })
     }
     
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .eq('id', productId)
+      .eq('id', id)
       .single()
     
     if (error) {
