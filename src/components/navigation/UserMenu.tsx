@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +43,7 @@ const UserMenu = ({
   translations
 }: UserMenuProps) => {
   const { signIn, signUp } = useAuth();
+  const isMobile = useIsMobile();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -51,10 +53,24 @@ const UserMenu = ({
   const [lastName, setLastName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Auto-open login modal on mobile when not logged in
+  useEffect(() => {
+    if (isMobile && !isLoggedIn && window.location.pathname === '/account') {
+      setShowLoginModal(true);
+    }
+  }, [isMobile, isLoggedIn]);
+
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDropdownOpen(!isDropdownOpen);
+    
+    if (!isLoggedIn) {
+      // If not logged in, immediately show login modal
+      setShowLoginModal(true);
+    } else {
+      // If logged in, show dropdown menu
+      setIsDropdownOpen(!isDropdownOpen);
+    }
   };
 
   const handleLoginClick = () => {
@@ -109,7 +125,7 @@ const UserMenu = ({
 
   return (
     <>
-      <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+      <DropdownMenu open={isLoggedIn ? isDropdownOpen : false} onOpenChange={setIsDropdownOpen}>
         <DropdownMenuTrigger asChild>
           <Button 
             variant="ghost" 
@@ -122,45 +138,39 @@ const UserMenu = ({
           </Button>
         </DropdownMenuTrigger>
         
-        <DropdownMenuContent align="end" className="w-48">
-          {isLoggedIn ? (
-            <>
-              <DropdownMenuItem asChild>
-                <Link to="/profile" className="w-full cursor-pointer">
-                  {translations.profile}
-                </Link>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem asChild>
-                <Link to="/account" className="w-full cursor-pointer">
-                  {translations.account}
-                </Link>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem asChild>
-                <Link to="/orders" className="w-full cursor-pointer">
-                  {translations.orders}
-                </Link>
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem asChild>
-                <Link to="/settings" className="w-full cursor-pointer">
-                  {translations.settings}
-                </Link>
-              </DropdownMenuItem>
-              
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
-                {translations.logout}
-              </DropdownMenuItem>
-            </>
-          ) : (
-            <DropdownMenuItem onClick={handleLoginClick} className="cursor-pointer">
-              {translations.login}
+        {isLoggedIn && (
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem asChild>
+              <Link to="/profile" className="w-full cursor-pointer">
+                {translations.profile}
+              </Link>
             </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
+            
+            <DropdownMenuItem asChild>
+              <Link to="/account" className="w-full cursor-pointer">
+                {translations.account}
+              </Link>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem asChild>
+              <Link to="/orders" className="w-full cursor-pointer">
+                {translations.orders}
+              </Link>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem asChild>
+              <Link to="/settings" className="w-full cursor-pointer">
+                {translations.settings}
+              </Link>
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+            
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
+              {translations.logout}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        )}
       </DropdownMenu>
 
       {/* Auth Modal */}
@@ -236,7 +246,7 @@ const UserMenu = ({
             <DialogFooter className="flex-col space-y-2">
               <Button 
                 type="submit" 
-                className="bg-thai-purple hover:bg-thai-purple/90 w-full"
+                className="bg-anong-gold hover:bg-anong-gold/90 text-anong-black w-full font-serif"
                 disabled={isLoading || !email || !password}
               >
                 {isLoading 

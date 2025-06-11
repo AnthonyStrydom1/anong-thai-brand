@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import Footer from '@/components/Footer';
@@ -7,11 +7,13 @@ import UserMenu from '@/components/navigation/UserMenu';
 import { User, ShoppingBag, Settings, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from "@/components/ui/button";
 
 const Account = () => {
   const { language } = useLanguage();
   const { user, userProfile, isLoading, signOut } = useAuth();
   const isMobile = useIsMobile();
+  const [showMobileLogin, setShowMobileLogin] = useState(false);
   
   const translations = {
     en: {
@@ -30,7 +32,8 @@ const Account = () => {
       logout: 'Logout',
       account: 'Account',
       orders: 'Orders',
-      settings: 'Settings'
+      settings: 'Settings',
+      signIn: 'Sign In'
     },
     th: {
       title: 'บัญชีของฉัน',
@@ -48,11 +51,19 @@ const Account = () => {
       logout: 'ออกจากระบบ',
       account: 'บัญชี',
       orders: 'คำสั่งซื้อ',
-      settings: 'การตั้งค่า'
+      settings: 'การตั้งค่า',
+      signIn: 'เข้าสู่ระบบ'
     }
   };
 
   const t = translations[language];
+
+  // Show mobile login modal when on mobile and not logged in
+  useEffect(() => {
+    if (isMobile && !user && !isLoading) {
+      setShowMobileLogin(true);
+    }
+  }, [isMobile, user, isLoading]);
 
   const handleLogout = async () => {
     try {
@@ -87,12 +98,15 @@ const Account = () => {
               <p className="text-gray-600 mb-6">{t.loginRequired}</p>
               
               {isMobile ? (
-                <div className="flex justify-center">
+                <div className="space-y-4">
                   <UserMenu 
                     isLoggedIn={false}
                     onLogout={handleLogout}
                     translations={t}
                   />
+                  <p className="text-sm text-gray-500">
+                    Tap the user icon above to sign in or create an account.
+                  </p>
                 </div>
               ) : (
                 <p className="text-sm text-gray-500">
