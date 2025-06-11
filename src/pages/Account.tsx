@@ -1,14 +1,17 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import Footer from '@/components/Footer';
+import UserMenu from '@/components/navigation/UserMenu';
 import { User, ShoppingBag, Settings, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Account = () => {
   const { language } = useLanguage();
-  const { user, userProfile, isLoading } = useAuth();
+  const { user, userProfile, isLoading, signOut } = useAuth();
+  const isMobile = useIsMobile();
   
   const translations = {
     en: {
@@ -21,7 +24,13 @@ const Account = () => {
       accountSettings: 'Account Settings',
       loginRequired: 'Please log in to access your account',
       recentActivity: 'Recent Activity',
-      noRecentActivity: 'No recent activity'
+      noRecentActivity: 'No recent activity',
+      login: 'Login',
+      profile: 'Profile',
+      logout: 'Logout',
+      account: 'Account',
+      orders: 'Orders',
+      settings: 'Settings'
     },
     th: {
       title: 'บัญชีของฉัน',
@@ -33,11 +42,25 @@ const Account = () => {
       accountSettings: 'การตั้งค่าบัญชี',
       loginRequired: 'กรุณาเข้าสู่ระบบเพื่อเข้าถึงบัญชีของคุณ',
       recentActivity: 'กิจกรรมล่าสุด',
-      noRecentActivity: 'ไม่มีกิจกรรมล่าสุด'
+      noRecentActivity: 'ไม่มีกิจกรรมล่าสุด',
+      login: 'เข้าสู่ระบบ',
+      profile: 'โปรไฟล์',
+      logout: 'ออกจากระบบ',
+      account: 'บัญชี',
+      orders: 'คำสั่งซื้อ',
+      settings: 'การตั้งค่า'
     }
   };
 
   const t = translations[language];
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -62,9 +85,20 @@ const Account = () => {
               <User className="h-16 w-16 text-thai-purple mx-auto mb-4" />
               <h1 className="text-2xl font-bold mb-4 text-thai-purple">{t.title}</h1>
               <p className="text-gray-600 mb-6">{t.loginRequired}</p>
-              <p className="text-sm text-gray-500">
-                Use the user menu (👤) in the navigation bar to sign in or create an account.
-              </p>
+              
+              {isMobile ? (
+                <div className="flex justify-center">
+                  <UserMenu 
+                    isLoggedIn={false}
+                    onLogout={handleLogout}
+                    translations={t}
+                  />
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">
+                  Use the user menu (👤) in the navigation bar to sign in or create an account.
+                </p>
+              )}
             </div>
           </div>
         </main>

@@ -5,36 +5,6 @@ import { createClient } from '@supabase/supabase-js'
 const router = express.Router()
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
-// Get single product by ID - MUST come before the general GET route
-router.get('/:productId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})', async (req, res) => {
-  try {
-    const { productId } = req.params
-    
-    if (!productId) {
-      return res.status(400).json({ error: 'Product ID is required' })
-    }
-    
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('id', productId)
-      .single()
-    
-    if (error) {
-      return res.status(500).json({ error: error.message })
-    }
-    
-    if (!data) {
-      return res.status(404).json({ error: 'Product not found' })
-    }
-    
-    res.json({ product: data })
-  } catch (err) {
-    console.error('Get product error:', err)
-    res.status(500).json({ error: 'Internal server error' })
-  }
-})
-
 // Get all products with optional filtering
 router.get('/', async (req, res) => {
   try {
@@ -61,6 +31,36 @@ router.get('/', async (req, res) => {
     res.json({ products: data })
   } catch (err) {
     console.error('Get products error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// Get single product by ID - using a simpler route pattern
+router.get('/:productId', async (req, res) => {
+  try {
+    const { productId } = req.params
+    
+    if (!productId) {
+      return res.status(400).json({ error: 'Product ID is required' })
+    }
+    
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', productId)
+      .single()
+    
+    if (error) {
+      return res.status(500).json({ error: error.message })
+    }
+    
+    if (!data) {
+      return res.status(404).json({ error: 'Product not found' })
+    }
+    
+    res.json({ product: data })
+  } catch (err) {
+    console.error('Get product error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

@@ -51,9 +51,10 @@ const NavigationBanner = () => {
     }
   };
 
-  // Mobile-specific login handler that navigates to account page
+  // Mobile-specific login handler that opens UserMenu
   const handleMobileLogin = () => {
-    // For mobile, we navigate to the account page for login
+    // This will be handled by the Link to /account in MobileMenu
+    // which will show the login modal when not authenticated
   };
   
   const t = navigationTranslations[language];
