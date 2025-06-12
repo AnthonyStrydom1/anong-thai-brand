@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -41,6 +40,10 @@ export interface SupabaseCustomer {
   last_name: string | null;
   phone: string | null;
   created_at: string | null;
+  total_orders: number | null;
+  total_spent: number | null;
+  is_active: boolean | null;
+  user_id: string | null;
 }
 
 export interface SupabaseOrder {
@@ -55,6 +58,9 @@ export interface SupabaseOrder {
 }
 
 class SupabaseService {
+  // Expose the supabase client for direct access when needed
+  public supabase = supabase;
+
   // Products
   async getProducts(categoryId?: string) {
     let query = supabase
