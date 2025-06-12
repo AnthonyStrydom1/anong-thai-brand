@@ -1,10 +1,28 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/hooks/useAuth';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { supabaseService } from '@/services/supabaseService';
+import { toast } from '@/hooks/use-toast';
+
+interface CustomerOrder {
+  id: string;
+  order_number: string;
+  status: string;
+  payment_status: string;
+  total_amount: number;
+  created_at: string;
+}
 
 const Orders = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const [orders, setOrders] = useState<CustomerOrder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const translations = {
     en: {
@@ -17,7 +35,14 @@ const Orders = () => {
       viewDetails: 'View Details',
       processing: 'Processing',
       shipped: 'Shipped',
-      delivered: 'Delivered'
+      delivered: 'Delivered',
+      pending: 'Pending',
+      cancelled: 'Cancelled',
+      paid: 'Paid',
+      failed: 'Failed',
+      refunded: 'Refunded',
+      loading: 'Loading your orders...',
+      pleaseLogin: 'Please log in to view your orders.'
     },
     th: {
       title: 'คำสั่งซื้อของฉัน',
@@ -29,70 +54,137 @@ const Orders = () => {
       viewDetails: 'ดูรายละเอียด',
       processing: 'กำลังดำเนินการ',
       shipped: 'จัดส่งแล้ว',
-      delivered: 'จัดส่งถึงแล้ว'
+      delivered: 'จัดส่งถึงแล้ว',
+      pending: 'รอดำเนินการ',
+      cancelled: 'ยกเลิก',
+      paid: 'ชำระแล้ว',
+      failed: 'ชำระไม่สำเร็จ',
+      refunded: 'คืนเงินแล้ว',
+      loading: 'กำลังโหลดคำสั่งซื้อ...',
+      pleaseLogin: 'กรุณาเข้าสู่ระบบเพื่อดูคำสั่งซื้อ'
     }
   };
 
   const t = translations[language];
-  
-  // Mock orders data
-  const mockOrders = [
-    {
-      id: '1001',
-      date: '2025-05-10',
-      status: 'delivered',
-      total: 45.90,
-      items: 3
-    },
-    {
-      id: '1002',
-      date: '2025-05-15',
-      status: 'shipped',
-      total: 28.50,
-      items: 2
-    },
-    {
-      id: '1003',
-      date: '2025-05-17',
-      status: 'processing',
-      total: 56.75,
-      items: 4
+
+  useEffect(() => {
+    if (user?.id) {
+      loadOrders();
+      
+      // Set up real-time subscription for order updates
+      const channel = supabaseService.supabase
+        .channel('order-updates')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'orders'
+          },
+          (payload) => {
+            console.log('Order update received:', payload);
+            loadOrders(); // Reload orders when there's an update
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabaseService.supabase.removeChannel(channel);
+      };
     }
-  ];
+  }, [user?.id]);
+
+  const loadOrders = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabaseService.supabase
+        .rpc('get_customer_orders', { user_uuid: user.id });
+      
+      if (error) throw error;
+      setOrders(data || []);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load orders",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const getStatusClass = (status: string) => {
     switch(status) {
-      case 'processing':
+      case 'pending':
         return 'bg-yellow-100 text-yellow-800';
-      case 'shipped':
+      case 'processing':
         return 'bg-blue-100 text-blue-800';
+      case 'shipped':
+        return 'bg-purple-100 text-purple-800';
       case 'delivered':
         return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      case 'paid':
+        return 'bg-green-100 text-green-800';
+      case 'failed':
+        return 'bg-red-100 text-red-800';
+      case 'refunded':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
   
   const getStatusLabel = (status: string) => {
-    switch(status) {
-      case 'processing':
-        return t.processing;
-      case 'shipped':
-        return t.shipped;
-      case 'delivered':
-        return t.delivered;
-      default:
-        return status;
-    }
+    const statusMap: { [key: string]: string } = {
+      'processing': t.processing,
+      'shipped': t.shipped,
+      'delivered': t.delivered,
+      'pending': t.pending,
+      'cancelled': t.cancelled,
+      'paid': t.paid,
+      'failed': t.failed,
+      'refunded': t.refunded
+    };
+    return statusMap[status] || status;
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <p className="text-center text-gray-500">{t.pleaseLogin}</p>
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6 text-thai-purple">{t.title}</h1>
         
-        {mockOrders.length === 0 ? (
-          <p className="text-center py-8 text-gray-500">{t.noOrders}</p>
+        {isLoading ? (
+          <Card>
+            <CardContent className="flex justify-center py-8">
+              <p className="text-gray-500">{t.loading}</p>
+            </CardContent>
+          </Card>
+        ) : orders.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <p className="text-center text-gray-500">{t.noOrders}</p>
+            </CardContent>
+          </Card>
         ) : (
           <div className="bg-white shadow-md rounded-lg overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
@@ -116,21 +208,26 @@ const Orders = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {mockOrders.map((order) => (
+                {orders.map((order) => (
                   <tr key={order.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{order.id}
+                      #{order.order_number}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(order.date).toLocaleDateString(language === 'en' ? 'en-US' : 'th-TH')}
+                      {new Date(order.created_at).toLocaleDateString(language === 'en' ? 'en-US' : 'th-TH')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(order.status)}`}>
-                        {getStatusLabel(order.status)}
-                      </span>
+                      <div className="flex flex-col space-y-1">
+                        <Badge className={getStatusClass(order.status)}>
+                          {getStatusLabel(order.status)}
+                        </Badge>
+                        <Badge className={getStatusClass(order.payment_status)}>
+                          {getStatusLabel(order.payment_status)}
+                        </Badge>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      ${order.total.toFixed(2)}
+                      ${order.total_amount.toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Button variant="ghost" size="sm" className="text-thai-purple hover:text-thai-purple-dark">

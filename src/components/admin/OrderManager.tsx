@@ -3,13 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Eye, Package2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ShoppingCart, Eye, Package2, Truck, CheckCircle } from "lucide-react";
 import { supabaseService, SupabaseOrder } from "@/services/supabaseService";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 const OrderManager = () => {
   const [orders, setOrders] = useState<SupabaseOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
 
   useEffect(() => {
     loadOrders();
@@ -30,6 +34,85 @@ const OrderManager = () => {
     }
   };
 
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const { data, error } = await supabaseService.supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update the local state
+      setOrders(orders.map(order => 
+        order.id === orderId ? { ...order, status: newStatus } : order
+      ));
+
+      toast({
+        title: "Success",
+        description: `Order status updated to ${newStatus}`,
+      });
+
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder({ ...selectedOrder, status: newStatus });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update order status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const updatePaymentStatus = async (orderId: string, newPaymentStatus: string) => {
+    try {
+      const { data, error } = await supabaseService.supabase
+        .from('orders')
+        .update({ payment_status: newPaymentStatus })
+        .eq('id', orderId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setOrders(orders.map(order => 
+        order.id === orderId ? { ...order, payment_status: newPaymentStatus } : order
+      ));
+
+      toast({
+        title: "Success",
+        description: `Payment status updated to ${newPaymentStatus}`,
+      });
+
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder({ ...selectedOrder, payment_status: newPaymentStatus });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update payment status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const viewOrderDetails = async (orderId: string) => {
+    try {
+      const orderDetails = await supabaseService.getOrder(orderId);
+      setSelectedOrder(orderDetails);
+      setIsOrderDialogOpen(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load order details",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getStatusBadgeVariant = (status: string | null) => {
     switch (status) {
       case 'pending':
@@ -47,6 +130,19 @@ const OrderManager = () => {
     }
   };
 
+  const getStatusIcon = (status: string | null) => {
+    switch (status) {
+      case 'processing':
+        return <Package2 className="w-4 h-4" />;
+      case 'shipped':
+        return <Truck className="w-4 h-4" />;
+      case 'delivered':
+        return <CheckCircle className="w-4 h-4" />;
+      default:
+        return <ShoppingCart className="w-4 h-4" />;
+    }
+  };
+
   if (isLoading) {
     return <div className="p-6">Loading orders...</div>;
   }
@@ -55,6 +151,9 @@ const OrderManager = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Order Manager</h1>
+        <Button onClick={loadOrders} variant="outline">
+          Refresh Orders
+        </Button>
       </div>
 
       {orders.length === 0 ? (
@@ -73,11 +172,14 @@ const OrderManager = () => {
             <Card key={order.id}>
               <CardContent className="flex justify-between items-center p-6">
                 <div className="flex items-center space-x-4">
-                  <Package2 className="w-8 h-8 text-gray-400" />
+                  {getStatusIcon(order.status)}
                   <div>
                     <h3 className="font-semibold">Order #{order.order_number}</h3>
                     <p className="text-sm text-gray-600">
                       {new Date(order.created_at).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Customer ID: {order.customer_id}
                     </p>
                   </div>
                 </div>
@@ -85,7 +187,7 @@ const OrderManager = () => {
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
                     <p className="font-semibold">${order.total_amount.toFixed(2)}</p>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 mt-1">
                       <Badge variant={getStatusBadgeVariant(order.status)}>
                         {order.status}
                       </Badge>
@@ -95,10 +197,96 @@ const OrderManager = () => {
                     </div>
                   </div>
                   
-                  <Button variant="outline" size="sm">
-                    <Eye className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
+                  <div className="flex flex-col space-y-2">
+                    <Select onValueChange={(value) => updateOrderStatus(order.id, value)}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="processing">Processing</SelectItem>
+                        <SelectItem value="shipped">Shipped</SelectItem>
+                        <SelectItem value="delivered">Delivered</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Select onValueChange={(value) => updatePaymentStatus(order.id, value)}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Payment" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="paid">Paid</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                        <SelectItem value="refunded">Refunded</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => viewOrderDetails(order.id)}
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Details
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Order Details - #{selectedOrder?.order_number}</DialogTitle>
+                      </DialogHeader>
+                      {selectedOrder && (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="font-semibold">Status:</p>
+                              <Badge variant={getStatusBadgeVariant(selectedOrder.status)}>
+                                {selectedOrder.status}
+                              </Badge>
+                            </div>
+                            <div>
+                              <p className="font-semibold">Payment Status:</p>
+                              <Badge variant={getStatusBadgeVariant(selectedOrder.payment_status)}>
+                                {selectedOrder.payment_status}
+                              </Badge>
+                            </div>
+                            <div>
+                              <p className="font-semibold">Total Amount:</p>
+                              <p>${selectedOrder.total_amount?.toFixed(2)}</p>
+                            </div>
+                            <div>
+                              <p className="font-semibold">Created:</p>
+                              <p>{new Date(selectedOrder.created_at).toLocaleString()}</p>
+                            </div>
+                          </div>
+                          
+                          {selectedOrder.order_items && (
+                            <div>
+                              <h4 className="font-semibold mb-2">Order Items:</h4>
+                              <div className="space-y-2">
+                                {selectedOrder.order_items.map((item: any, index: number) => (
+                                  <div key={index} className="flex justify-between items-center p-2 border rounded">
+                                    <div>
+                                      <p className="font-medium">{item.product_name}</p>
+                                      <p className="text-sm text-gray-600">SKU: {item.product_sku}</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p>Qty: {item.quantity}</p>
+                                      <p>${item.total_price.toFixed(2)}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>

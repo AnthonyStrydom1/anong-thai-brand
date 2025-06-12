@@ -608,6 +608,18 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_customer_orders: {
+        Args: { user_uuid: string }
+        Returns: {
+          id: string
+          order_number: string
+          status: string
+          payment_status: string
+          total_amount: number
+          created_at: string
+          customer_id: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

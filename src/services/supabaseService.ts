@@ -273,6 +273,41 @@ class SupabaseService {
     if (error) throw error;
     return data as SupabaseProduct[];
   }
+
+  // Add new method for updating order status
+  async updateOrderStatus(orderId: string, status: string) {
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ status })
+      .eq('id', orderId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as SupabaseOrder;
+  }
+
+  // Add new method for updating payment status
+  async updatePaymentStatus(orderId: string, paymentStatus: string) {
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ payment_status: paymentStatus })
+      .eq('id', orderId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as SupabaseOrder;
+  }
+
+  // Add method to get customer orders by user ID
+  async getCustomerOrdersByUserId(userId: string) {
+    const { data, error } = await supabase
+      .rpc('get_customer_orders', { user_uuid: userId });
+    
+    if (error) throw error;
+    return data;
+  }
 }
 
 export const supabaseService = new SupabaseService();
