@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Package } from "lucide-react";
 import { supabaseService, SupabaseProduct, SupabaseCategory } from "@/services/supabaseService";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 const ProductManager = () => {
   const [products, setProducts] = useState<SupabaseProduct[]>([]);
@@ -32,13 +32,28 @@ const ProductManager = () => {
 
   const loadData = async () => {
     try {
-      const [productsData, categoriesData] = await Promise.all([
-        supabaseService.getProducts(),
-        supabaseService.getCategories()
-      ]);
-      setProducts(productsData);
+      console.log('Loading products and categories...');
+      
+      // Load all products (not just active ones for admin)
+      const { data: productsData, error: productsError } = await supabaseService.supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (productsError) {
+        console.error('Products error:', productsError);
+        throw productsError;
+      }
+
+      const categoriesData = await supabaseService.getCategories();
+      
+      console.log('Loaded products:', productsData);
+      console.log('Loaded categories:', categoriesData);
+      
+      setProducts(productsData || []);
       setCategories(categoriesData);
     } catch (error) {
+      console.error('Failed to load data:', error);
       toast({
         title: "Error",
         description: "Failed to load data",
@@ -53,28 +68,61 @@ const ProductManager = () => {
     e.preventDefault();
     try {
       if (editingProduct) {
-        // Update logic would go here
+        const { data, error } = await supabaseService.supabase
+          .from('products')
+          .update({
+            name: formData.name,
+            description: formData.description,
+            short_description: formData.short_description,
+            sku: formData.sku,
+            price: formData.price,
+            category_id: formData.category_id || null,
+            stock_quantity: formData.stock_quantity,
+            is_featured: formData.is_featured,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', editingProduct.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
         toast({
           title: "Success",
           description: "Product updated successfully"
         });
       } else {
-        await supabaseService.createProduct({
-          ...formData,
-          images: [],
-          is_active: true,
-          is_featured: formData.is_featured
-        });
+        const { data, error } = await supabaseService.supabase
+          .from('products')
+          .insert({
+            name: formData.name,
+            description: formData.description,
+            short_description: formData.short_description,
+            sku: formData.sku,
+            price: formData.price,
+            category_id: formData.category_id || null,
+            stock_quantity: formData.stock_quantity,
+            is_featured: formData.is_featured,
+            is_active: true,
+            images: []
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
         toast({
           title: "Success",
           description: "Product created successfully"
         });
       }
+      
       setShowForm(false);
       setEditingProduct(null);
       resetForm();
       loadData();
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
         description: "Failed to save product",
@@ -112,7 +160,7 @@ const ProductManager = () => {
   };
 
   if (isLoading) {
-    return <div className="p-6">Loading...</div>;
+    return <div className="p-6">Loading products...</div>;
   }
 
   return (
@@ -222,52 +270,76 @@ const ProductManager = () => {
         </Card>
       )}
 
-      <div className="grid gap-4">
-        {products.map((product) => (
-          <Card key={product.id}>
-            <CardContent className="flex justify-between items-center p-6">
-              <div className="flex-1">
-                <div className="flex items-center space-x-4">
-                  <Package className="w-8 h-8 text-gray-400" />
-                  <div>
-                    <h3 className="font-semibold">{product.name}</h3>
-                    <p className="text-sm text-gray-600">SKU: {product.sku}</p>
-                    <p className="text-sm text-gray-600">
-                      Stock: {product.stock_quantity} units
-                    </p>
+      {products.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Package className="w-12 h-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-600 mb-2">No Products Yet</h3>
+            <p className="text-gray-500 text-center">
+              Start by adding your first product to the catalog.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {products.map((product) => (
+            <Card key={product.id}>
+              <CardContent className="flex justify-between items-center p-6">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-4">
+                    <Package className="w-8 h-8 text-gray-400" />
+                    <div>
+                      <h3 className="font-semibold">{product.name}</h3>
+                      <p className="text-sm text-gray-600">SKU: {product.sku}</p>
+                      <p className="text-sm text-gray-600">
+                        Stock: {product.stock_quantity} units
+                      </p>
+                      <div className="flex gap-2 mt-1">
+                        {!product.is_active && (
+                          <Badge variant="destructive">Inactive</Badge>
+                        )}
+                        {product.is_featured && (
+                          <Badge variant="secondary">Featured</Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <div className="text-right">
-                  <p className="font-semibold">${product.price.toFixed(2)}</p>
-                  {product.is_featured && (
-                    <Badge variant="secondary">Featured</Badge>
-                  )}
-                </div>
                 
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(product)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-red-600"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                <div className="flex items-center space-x-4">
+                  <div className="text-right">
+                    <p className="font-semibold">${product.price.toFixed(2)}</p>
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(product)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600"
+                      onClick={() => {
+                        // Add delete functionality if needed
+                        toast({
+                          title: "Info",
+                          description: "Delete functionality not implemented yet"
+                        });
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

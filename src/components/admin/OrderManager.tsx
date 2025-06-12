@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,10 +20,22 @@ const OrderManager = () => {
 
   const loadOrders = async () => {
     try {
-      const data = await supabaseService.getAllOrders();
-      setOrders(data);
+      console.log('Loading orders...');
+      const { data, error } = await supabaseService.supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Orders error:', error);
+        throw error;
+      }
+
+      console.log('Loaded orders:', data);
+      setOrders(data || []);
       setIsLoading(false);
     } catch (error) {
+      console.error('Failed to load orders:', error);
       toast({
         title: "Error",
         description: "Failed to load orders",
@@ -36,6 +47,8 @@ const OrderManager = () => {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
+      console.log('Updating order status:', orderId, newStatus);
+      
       const { data, error } = await supabaseService.supabase
         .from('orders')
         .update({ status: newStatus })
@@ -43,7 +56,12 @@ const OrderManager = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
+
+      console.log('Update successful:', data);
 
       // Update the local state
       setOrders(orders.map(order => 
@@ -59,6 +77,7 @@ const OrderManager = () => {
         setSelectedOrder({ ...selectedOrder, status: newStatus });
       }
     } catch (error) {
+      console.error('Failed to update order status:', error);
       toast({
         title: "Error",
         description: "Failed to update order status",
@@ -69,6 +88,8 @@ const OrderManager = () => {
 
   const updatePaymentStatus = async (orderId: string, newPaymentStatus: string) => {
     try {
+      console.log('Updating payment status:', orderId, newPaymentStatus);
+      
       const { data, error } = await supabaseService.supabase
         .from('orders')
         .update({ payment_status: newPaymentStatus })
@@ -76,7 +97,12 @@ const OrderManager = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Payment update error:', error);
+        throw error;
+      }
+
+      console.log('Payment update successful:', data);
 
       setOrders(orders.map(order => 
         order.id === orderId ? { ...order, payment_status: newPaymentStatus } : order
@@ -91,6 +117,7 @@ const OrderManager = () => {
         setSelectedOrder({ ...selectedOrder, payment_status: newPaymentStatus });
       }
     } catch (error) {
+      console.error('Failed to update payment status:', error);
       toast({
         title: "Error",
         description: "Failed to update payment status",
@@ -101,10 +128,30 @@ const OrderManager = () => {
 
   const viewOrderDetails = async (orderId: string) => {
     try {
-      const orderDetails = await supabaseService.getOrder(orderId);
-      setSelectedOrder(orderDetails);
+      console.log('Loading order details for:', orderId);
+      
+      const { data, error } = await supabaseService.supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            *,
+            products (name, sku, price)
+          )
+        `)
+        .eq('id', orderId)
+        .single();
+
+      if (error) {
+        console.error('Order details error:', error);
+        throw error;
+      }
+
+      console.log('Order details loaded:', data);
+      setSelectedOrder(data);
       setIsOrderDialogOpen(true);
     } catch (error) {
+      console.error('Failed to load order details:', error);
       toast({
         title: "Error",
         description: "Failed to load order details",
