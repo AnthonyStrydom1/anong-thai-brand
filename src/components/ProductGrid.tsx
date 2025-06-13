@@ -1,10 +1,9 @@
 
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { products } from '@/data/products';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
-import { useProductFilters } from '@/hooks/useProductFilters';
+import { useSupabaseProducts } from '@/hooks/useSupabaseProducts';
 import ProductSearch from './product/ProductSearch';
 import ProductCategoryFilter from './product/ProductCategoryFilter';
 import ProductList from './product/ProductList';
@@ -12,19 +11,7 @@ import ProductList from './product/ProductList';
 const ProductGrid = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { language } = useLanguage();
-  
-  const {
-    filteredProducts,
-    searchTerm,
-    activeCategory,
-    handleSearchChange,
-    handleClearSearch,
-    handleCategoryChange
-  } = useProductFilters({
-    products,
-    initialCategory: searchParams.get('category') || 'all',
-    language
-  });
+  const { products, isLoading, error } = useSupabaseProducts();
   
   const translations = {
     en: {
@@ -60,24 +47,30 @@ const ProductGrid = () => {
     { id: 'dipping-sauces', name: { en: t.dippingSauces, th: t.dippingSauces } }
   ];
 
-  useEffect(() => {
-    const category = searchParams.get('category');
-    if (category) {
-      handleCategoryChange(category);
-    }
-  }, [searchParams]);
+  if (isLoading) {
+    return (
+      <section className="anong-section px-4 md:px-6 bg-anong-ivory thai-pattern-bg">
+        <div className="container mx-auto max-w-7xl">
+          <div className="text-center py-16">
+            <p className="text-lg">Loading products...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
-  const onCategoryChange = (categoryId: string) => {
-    handleCategoryChange(categoryId);
-    
-    // Update URL query parameters
-    if (categoryId === 'all') {
-      searchParams.delete('category');
-    } else {
-      searchParams.set('category', categoryId);
-    }
-    setSearchParams(searchParams);
-  };
+  if (error) {
+    return (
+      <section className="anong-section px-4 md:px-6 bg-anong-ivory thai-pattern-bg">
+        <div className="container mx-auto max-w-7xl">
+          <div className="text-center py-16">
+            <p className="text-red-600 mb-4">Unable to load products. Please try again later.</p>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="anong-section px-4 md:px-6 bg-anong-ivory thai-pattern-bg">
@@ -115,33 +108,9 @@ const ProductGrid = () => {
           </p>
         </motion.div>
         
-        {/* Search and Filter */}
-        <motion.div 
-          className="mb-16 md:mb-20 anong-card p-8 md:p-10"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <div className="flex flex-col md:flex-row gap-6">
-            <ProductSearch
-              searchTerm={searchTerm}
-              onSearchChange={handleSearchChange}
-              onClearSearch={handleClearSearch}
-              placeholder={t.search}
-            />
-            
-            <ProductCategoryFilter
-              categories={categories}
-              activeCategory={activeCategory}
-              onCategoryChange={onCategoryChange}
-              language={language}
-            />
-          </div>
-        </motion.div>
-        
         {/* Products List */}
         <ProductList
-          products={filteredProducts}
+          products={products}
           noProductsMessage={t.noProducts}
         />
       </div>

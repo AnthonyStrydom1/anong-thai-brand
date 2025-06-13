@@ -26,10 +26,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
       image: product.images && Array.isArray(product.images) && product.images.length > 0 
         ? product.images[0] 
         : '/placeholder.svg',
-      quantity: 1
     };
     
-    addItem(cartItem);
+    addItem(cartItem, 1); // Pass item and quantity separately
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
