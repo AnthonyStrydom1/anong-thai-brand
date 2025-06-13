@@ -51,12 +51,30 @@ const ProductDetail = () => {
   // Convert Supabase product to the format expected by existing components
   const convertedProduct = {
     id: product.id,
-    name: { [language]: product.name },
-    description: { [language]: product.description || product.short_description || '' },
-    shortDescription: { [language]: product.short_description || '' },
-    ingredients: { [language]: 'Ingredients information coming soon...' },
-    howToUse: { [language]: 'Usage instructions coming soon...' },
-    useIn: { [language]: ['Usage instructions coming soon...'] },
+    name: { 
+      en: product.name, 
+      th: product.name 
+    },
+    description: { 
+      en: product.description || product.short_description || '', 
+      th: product.description || product.short_description || '' 
+    },
+    shortDescription: { 
+      en: product.short_description || '', 
+      th: product.short_description || '' 
+    },
+    ingredients: { 
+      en: ['Ingredients information coming soon...'], 
+      th: ['ข้อมูลส่วนผสมจะมาเร็วๆ นี้...'] 
+    },
+    howToUse: { 
+      en: 'Usage instructions coming soon...', 
+      th: 'คำแนะนำการใช้งานจะมาเร็วๆ นี้...' 
+    },
+    useIn: { 
+      en: ['Usage instructions coming soon...'], 
+      th: ['คำแนะนำการใช้งานจะมาเร็วๆ นี้...'] 
+    },
     price: product.price,
     image: Array.isArray(product.images) ? product.images[0] : (typeof product.images === 'string' ? product.images : '/placeholder.svg'),
     category: (product.category_id as 'curry-pastes' | 'stir-fry-sauces' | 'dipping-sauces') || 'curry-pastes'
