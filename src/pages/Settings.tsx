@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import NavigationBanner from '@/components/NavigationBanner';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 
 const Settings = () => {
   const { language } = useLanguage();
+  
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   const translations = {
     en: {
@@ -45,6 +51,7 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <NavigationBanner />
       <main className="flex-1 container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6 text-thai-purple">{t.title}</h1>
         

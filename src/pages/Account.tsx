@@ -1,7 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import NavigationBanner from '@/components/NavigationBanner';
 import Footer from '@/components/Footer';
 import UserMenu from '@/components/navigation/UserMenu';
 import { User, ShoppingBag, Settings, FileText } from 'lucide-react';
@@ -15,6 +15,11 @@ const Account = () => {
   const isMobile = useIsMobile();
   const [showMobileLogin, setShowMobileLogin] = useState(false);
   
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const translations = {
     en: {
       title: 'My Account',
@@ -76,6 +81,7 @@ const Account = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-[#c2b59b]">
+        <NavigationBanner />
         <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-thai-purple mx-auto mb-4"></div>
@@ -90,6 +96,7 @@ const Account = () => {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col bg-[#c2b59b]">
+        <NavigationBanner />
         <main className="flex-1 container mx-auto px-4 py-8">
           <div className="max-w-md mx-auto">
             <div className="bg-white shadow-md rounded-lg p-8 text-center">
@@ -123,6 +130,7 @@ const Account = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#c2b59b]">
+      <NavigationBanner />
       <main className="flex-1 container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6 text-thai-purple">{t.title}</h1>
         
