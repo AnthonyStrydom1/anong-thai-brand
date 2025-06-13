@@ -111,7 +111,6 @@ const HeroBanner = () => {
                   alt="ANONG Premium Logo"
                   className="w-full h-full object-contain drop-shadow-xl"
                   loading="eager"
-                  fetchPriority="high"
                 />
               </div>
               <h1 className="anong-heading text-3xl md:text-4xl text-anong-gold tracking-[0.2em] font-medium mb-2">

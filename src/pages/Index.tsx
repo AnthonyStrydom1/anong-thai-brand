@@ -1,4 +1,6 @@
+
 import { useLanguage } from "@/contexts/LanguageContext";
+import NavigationBanner from "@/components/NavigationBanner";
 import Footer from "@/components/Footer";
 import HeroBanner from "@/components/HeroBanner";
 import FeaturedProducts from "@/components/FeaturedProducts";
@@ -35,6 +37,8 @@ const Index = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-anong-ivory">
+      <NavigationBanner />
+      
       <main className="flex-grow">
         <HeroBanner />
         
