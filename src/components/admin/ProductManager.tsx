@@ -1,16 +1,20 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Plus, Edit, Trash2, Package } from "lucide-react";
 import { supabaseService, SupabaseProduct, SupabaseCategory } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
 
+const PRODUCTS_PER_PAGE = 12;
+
 const ProductManager = () => {
   const [products, setProducts] = useState<SupabaseProduct[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [categories, setCategories] = useState<SupabaseCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -28,17 +32,21 @@ const ProductManager = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [currentPage]);
 
   const loadData = async () => {
     try {
       console.log('Loading products and categories...');
+      setIsLoading(true);
       
-      // Load all products (not just active ones for admin)
-      const { data: productsData, error: productsError } = await supabaseService.supabase
+      const offset = (currentPage - 1) * PRODUCTS_PER_PAGE;
+      
+      // Load products with pagination
+      const { data: productsData, error: productsError, count } = await supabaseService.supabase
         .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(offset, offset + PRODUCTS_PER_PAGE - 1);
 
       if (productsError) {
         console.error('Products error:', productsError);
@@ -51,6 +59,7 @@ const ProductManager = () => {
       console.log('Loaded categories:', categoriesData);
       
       setProducts(productsData || []);
+      setTotalProducts(count || 0);
       setCategories(categoriesData);
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -158,6 +167,8 @@ const ProductManager = () => {
     });
     setShowForm(true);
   };
+
+  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
 
   if (isLoading) {
     return <div className="p-6">Loading products...</div>;
@@ -281,64 +292,122 @@ const ProductManager = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {products.map((product) => (
-            <Card key={product.id}>
-              <CardContent className="flex justify-between items-center p-6">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-4">
-                    <Package className="w-8 h-8 text-gray-400" />
-                    <div>
-                      <h3 className="font-semibold">{product.name}</h3>
-                      <p className="text-sm text-gray-600">SKU: {product.sku}</p>
-                      <p className="text-sm text-gray-600">
-                        Stock: {product.stock_quantity} units
-                      </p>
-                      <div className="flex gap-2 mt-1">
-                        {!product.is_active && (
-                          <Badge variant="destructive">Inactive</Badge>
-                        )}
-                        {product.is_featured && (
-                          <Badge variant="secondary">Featured</Badge>
-                        )}
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Products ({totalProducts} total)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                {products.map((product) => (
+                  <Card key={product.id}>
+                    <CardContent className="flex justify-between items-center p-6">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-4">
+                          <Package className="w-8 h-8 text-gray-400" />
+                          <div>
+                            <h3 className="font-semibold">{product.name}</h3>
+                            <p className="text-sm text-gray-600">SKU: {product.sku}</p>
+                            <p className="text-sm text-gray-600">
+                              Stock: {product.stock_quantity} units
+                            </p>
+                            <div className="flex gap-2 mt-1">
+                              {!product.is_active && (
+                                <Badge variant="destructive">Inactive</Badge>
+                              )}
+                              {product.is_featured && (
+                                <Badge variant="secondary">Featured</Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <p className="font-semibold">${product.price.toFixed(2)}</p>
-                  </div>
+                      
+                      <div className="flex items-center space-x-4">
+                        <div className="text-right">
+                          <p className="font-semibold">${product.price.toFixed(2)}</p>
+                        </div>
+                        
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(product)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600"
+                            onClick={() => {
+                              toast({
+                                title: "Info",
+                                description: "Delete functionality not implemented yet"
+                              });
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {totalPages > 1 && (
+            <div className="flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(currentPage - 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
                   
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(product)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-red-600"
-                      onClick={() => {
-                        // Add delete functionality if needed
-                        toast({
-                          title: "Info",
-                          description: "Delete functionality not implemented yet"
-                        });
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <PaginationItem key={pageNum}>
+                        <PaginationLink
+                          href="#"
+                          isActive={currentPage === pageNum}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(pageNum);
+                          }}
+                        >
+                          {pageNum}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(currentPage + 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
