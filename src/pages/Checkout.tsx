@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -15,7 +14,7 @@ import { useState, useEffect } from "react";
 
 const Checkout = () => {
   const { language } = useLanguage();
-  const { items, totalAmount, clearCart } = useCart();
+  const { items, total, clearCart } = useCart();
   const { formatPrice } = useCurrency();
   
   // Scroll to top when component mounts
@@ -89,7 +88,7 @@ const Checkout = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle order submission here
-    console.log('Order submitted:', { formData, items, totalAmount });
+    console.log('Order submitted:', { formData, items, total });
     // Clear cart after successful order
     clearCart();
     // Redirect to success page or show success message
@@ -288,7 +287,7 @@ const Checkout = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between anong-body">
                     <span className="text-anong-black/80">{t.subtotal}</span>
-                    <span className="text-anong-black">{formatPrice(totalAmount)}</span>
+                    <span className="text-anong-black">{formatPrice(total)}</span>
                   </div>
                   <div className="flex justify-between anong-body">
                     <span className="text-anong-black/80">{t.shipping}</span>
@@ -300,7 +299,7 @@ const Checkout = () => {
 
                 <div className="flex justify-between anong-subheading text-lg mb-6">
                   <span className="text-anong-black">{t.total}</span>
-                  <span className="text-anong-black">{formatPrice(totalAmount)}</span>
+                  <span className="text-anong-black">{formatPrice(total)}</span>
                 </div>
 
                 <Button type="submit" className="w-full anong-btn-primary">

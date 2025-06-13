@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -12,7 +11,7 @@ import { useEffect } from "react";
 
 const CartPage = () => {
   const { language } = useLanguage();
-  const { items, updateQuantity, removeItem, totalAmount } = useCart();
+  const { items, updateQuantity, removeItem, total } = useCart();
   const { formatPrice } = useCurrency();
   
   // Scroll to top when component mounts
@@ -178,7 +177,7 @@ const CartPage = () => {
                 <div className="border-t border-anong-gold/20 pt-4 mb-6">
                   <div className="flex justify-between anong-subheading text-lg">
                     <span className="text-anong-black">Total</span>
-                    <span className="text-anong-black">{formatPrice(totalAmount)}</span>
+                    <span className="text-anong-black">{formatPrice(total)}</span>
                   </div>
                 </div>
                 
