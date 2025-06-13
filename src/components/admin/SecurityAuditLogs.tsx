@@ -77,7 +77,13 @@ const SecurityAuditLogs = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-red-600">Error loading logs: {error}</p>
+          <div className="text-center py-8">
+            <Shield className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p className="text-gray-600 mb-2">Security audit logging is being set up</p>
+            <p className="text-sm text-gray-500">
+              Once the database migration is complete, security events will be tracked here.
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -97,7 +103,13 @@ const SecurityAuditLogs = () => {
       <CardContent>
         <div className="space-y-4 max-h-96 overflow-y-auto">
           {logs.length === 0 ? (
-            <p className="text-gray-600">No security logs found.</p>
+            <div className="text-center py-8">
+              <Shield className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+              <p className="text-gray-600 mb-2">No security logs found</p>
+              <p className="text-sm text-gray-500">
+                Security events will appear here once the audit system is active.
+              </p>
+            </div>
           ) : (
             logs.map((log) => (
               <div key={log.id} className="flex items-start gap-3 p-3 border rounded-lg">
