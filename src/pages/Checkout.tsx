@@ -5,6 +5,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import NavigationBanner from "@/components/NavigationBanner";
 import Footer from "@/components/Footer";
 import FrequentlyBoughtItems from "@/components/checkout/FrequentlyBoughtItems";
+import OrderSuccess from "@/components/checkout/OrderSuccess";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,8 @@ const Checkout = () => {
   const { language } = useLanguage();
   const { items, total, clearCart } = useCart();
   const { formatPrice } = useCurrency();
+  const [orderSubmitted, setOrderSubmitted] = useState(false);
+  const [orderData, setOrderData] = useState<any>(null);
   
   // Scroll to top when component mounts
   useEffect(() => {
@@ -89,14 +92,35 @@ const Checkout = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle order submission here
-    console.log('Order submitted:', { formData, items, total });
+    
+    // Generate order number
+    const orderNumber = `ORD-${Date.now()}`;
+    
+    // Store order data for success page
+    const orderInfo = {
+      orderNumber,
+      items: items,
+      total: total,
+      customerInfo: {
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName
+      }
+    };
+    
+    setOrderData(orderInfo);
+    
     // Clear cart after successful order
     clearCart();
-    // Redirect to success page or show success message
+    
+    // Show success page
+    setOrderSubmitted(true);
+    
+    // Log order for debugging
+    console.log('Order submitted:', { formData, items, total });
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 && !orderSubmitted) {
     return (
       <div className="min-h-screen flex flex-col bg-anong-ivory">
         <NavigationBanner />
@@ -110,6 +134,21 @@ const Checkout = () => {
               <Link to="/shop">{t.continueShopping}</Link>
             </Button>
           </div>
+        </main>
+        
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show order success page
+  if (orderSubmitted && orderData) {
+    return (
+      <div className="min-h-screen flex flex-col bg-anong-ivory">
+        <NavigationBanner />
+        
+        <main className="flex-grow container mx-auto px-4 py-12">
+          <OrderSuccess {...orderData} />
         </main>
         
         <Footer />
