@@ -28,12 +28,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
     });
   };
 
-  // Enhanced image extraction function with fallback mapping
+  // Enhanced image extraction with exact mapping to uploaded images
   const getProductImage = () => {
-    console.log("Product name:", product.name);
-    console.log("Product images:", product.images, typeof product.images);
-    
-    // Map product names to uploaded images
     const imageMap: { [key: string]: string } = {
       'Pad Thai Sauce': '/lovable-uploads/5a0dec88-a26c-4e29-bda6-8d921887615e.png',
       'Sukiyaki Dipping Sauce': '/lovable-uploads/a7096f1f-006f-4264-879e-539ad029747a.png',
@@ -45,63 +41,31 @@ const ProductCard = ({ product }: ProductCardProps) => {
       'Yellow Curry Paste': '/lovable-uploads/acf32ec1-9435-4a5c-8baf-1943b85b93bf.png'
     };
 
-    // Check if we have a mapped image for this product name
-    if (imageMap[product.name]) {
-      console.log("Found mapped image for product:", product.name, imageMap[product.name]);
-      return imageMap[product.name];
-    }
-
-    if (product.images) {
-      // If it's already an array
-      if (Array.isArray(product.images) && product.images.length > 0) {
-        return product.images[0];
-      }
-      
-      // If it's a string that might be JSON
-      if (typeof product.images === 'string') {
-        try {
-          const parsed = JSON.parse(product.images);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed[0];
-          }
-          // If it's just a string URL
-          return product.images;
-        } catch {
-          // If JSON parsing fails, treat as direct URL
-          return product.images;
-        }
-      }
-      
-      // If it's an object (jsonb), try to extract first value
-      if (typeof product.images === 'object' && product.images !== null) {
-        const values = Object.values(product.images);
-        if (values.length > 0 && typeof values[0] === 'string') {
-          return values[0];
-        }
-      }
-    }
-    
-    console.log("No image found, using placeholder");
-    return '/placeholder.svg';
+    return imageMap[product.name] || '/placeholder.svg';
   };
 
   const productImage = getProductImage();
-  console.log("Final product image URL:", productImage);
 
   return (
     <Card className="group hover:shadow-lg transition-shadow duration-300 overflow-hidden">
       <Link to={`/product/${product.id}`} className="block">
         <div className="relative">
-          <img
-            src={productImage}
-            alt={product.name}
-            className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-            onError={(e) => {
-              console.log("Image failed to load:", productImage);
-              (e.target as HTMLImageElement).src = '/placeholder.svg';
-            }}
-          />
+          <div className="w-full h-64 bg-gradient-to-b from-anong-cream to-anong-ivory flex items-center justify-center p-6">
+            <img
+              src={productImage}
+              alt={product.name}
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+              style={{ 
+                maxWidth: '80%', 
+                maxHeight: '80%',
+                objectFit: 'contain'
+              }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/placeholder.svg';
+              }}
+            />
+          </div>
           {product.is_featured && (
             <Badge className="absolute top-3 left-3 bg-red-500 hover:bg-red-600">
               Featured
@@ -140,7 +104,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       <div className="px-6 pb-6">
         <Button 
           onClick={handleAddToCart}
-          className="w-full bg-anong-black text-white hover:bg-anong-gold hover:text-anong-black transition-colors"
+          className="w-full bg-anong-black text-white hover:bg-gradient-to-r hover:from-anong-black hover:to-anong-gold hover:text-anong-black transition-all duration-300"
           disabled={product.stock_quantity === 0}
         >
           <ShoppingCart className="w-4 h-4 mr-2" />

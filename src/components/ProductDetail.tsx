@@ -15,11 +15,7 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
   
-  console.log("Product ID from params:", id);
-  
   const { product, isLoading, error } = useSupabaseProduct(id || '');
-  
-  console.log("Found product:", product);
   
   if (isLoading) {
     return (
@@ -50,12 +46,8 @@ const ProductDetail = () => {
     }
   };
 
-  // Enhanced image extraction function with product name mapping
+  // Enhanced image extraction with exact mapping
   const getProductImage = () => {
-    console.log("Product name:", product.name);
-    console.log("Product images:", product.images, typeof product.images);
-    
-    // Map product names to uploaded images
     const imageMap: { [key: string]: string } = {
       'Pad Thai Sauce': '/lovable-uploads/5a0dec88-a26c-4e29-bda6-8d921887615e.png',
       'Sukiyaki Dipping Sauce': '/lovable-uploads/a7096f1f-006f-4264-879e-539ad029747a.png',
@@ -67,44 +59,7 @@ const ProductDetail = () => {
       'Yellow Curry Paste': '/lovable-uploads/acf32ec1-9435-4a5c-8baf-1943b85b93bf.png'
     };
 
-    // Check if we have a mapped image for this product name
-    if (imageMap[product.name]) {
-      console.log("Found mapped image for product:", product.name, imageMap[product.name]);
-      return imageMap[product.name];
-    }
-
-    if (product.images) {
-      // If it's already an array
-      if (Array.isArray(product.images) && product.images.length > 0) {
-        return product.images[0];
-      }
-      
-      // If it's a string that might be JSON
-      if (typeof product.images === 'string') {
-        try {
-          const parsed = JSON.parse(product.images);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed[0];
-          }
-          // If it's just a string URL
-          return product.images;
-        } catch {
-          // If JSON parsing fails, treat as direct URL
-          return product.images;
-        }
-      }
-      
-      // If it's an object (jsonb), try to extract first value
-      if (typeof product.images === 'object' && product.images !== null) {
-        const values = Object.values(product.images);
-        if (values.length > 0 && typeof values[0] === 'string') {
-          return values[0];
-        }
-      }
-    }
-    
-    console.log("No image found, using placeholder");
-    return '/placeholder.svg';
+    return imageMap[product.name] || '/placeholder.svg';
   };
 
   // Convert Supabase product to the format expected by existing components
@@ -139,9 +94,6 @@ const ProductDetail = () => {
     category: (product.category_id as 'curry-pastes' | 'stir-fry-sauces' | 'dipping-sauces') || 'curry-pastes'
   };
 
-  const productImage = convertedProduct.image;
-  console.log("Final product image URL:", productImage);
-
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Back to Shop Button */}
@@ -163,14 +115,18 @@ const ProductDetail = () => {
           initial="hidden"
           animate="visible"
           variants={fadeIn}
-          className="rounded-xl overflow-hidden shadow-lg bg-gradient-to-b from-white to-gray-50 p-8 flex items-center justify-center"
+          className="rounded-xl overflow-hidden shadow-lg bg-gradient-to-b from-anong-cream to-anong-ivory p-12 flex items-center justify-center"
         >
           <img 
-            src={productImage}
+            src={convertedProduct.image}
             alt={product.name}
-            className="w-4/5 h-4/5 object-contain"
+            className="w-full h-full object-contain"
+            style={{ 
+              maxWidth: '80%', 
+              maxHeight: '80%',
+              objectFit: 'contain'
+            }}
             onError={(e) => {
-              console.log("Product detail image failed to load:", productImage);
               (e.target as HTMLImageElement).src = '/placeholder.svg';
             }}
           />
