@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import CustomerManager from '@/components/admin/CustomerManager';
 import StockManager from '@/components/admin/StockManager';
 import SecurityDashboard from '@/components/admin/SecurityDashboard';
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
+import NavigationBanner from '@/components/NavigationBanner';
 import { Package, ShoppingCart, Users, BarChart3, Warehouse, Shield } from 'lucide-react';
 import { supabaseService } from '@/services/supabaseService';
 
@@ -21,6 +21,11 @@ const AdminPage = () => {
     lowStockItems: 0,
     outOfStockItems: 0
   });
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     loadStats();
@@ -53,8 +58,9 @@ const AdminPage = () => {
 
   return (
     <ProtectedAdminRoute>
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto py-8">
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <NavigationBanner />
+        <div className="flex-1 container mx-auto py-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
             <p className="text-gray-600 mt-2">Manage your e-commerce store</p>

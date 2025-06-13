@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import NavigationBanner from '@/components/NavigationBanner';
 import Footer from '@/components/Footer';
 import EditProfileForm from '@/components/EditProfileForm';
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,7 @@ const Profile = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-anong-cream">
+        <NavigationBanner />
         <main className="flex-1 container mx-auto px-4 py-12 watercolor-bg flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-anong-dark-green"></div>
         </main>
@@ -57,6 +58,7 @@ const Profile = () => {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col bg-anong-cream">
+        <NavigationBanner />
         <main className="flex-1 container mx-auto px-4 py-12 watercolor-bg">
           <div className="luxury-card p-8 text-center">
             <h1 className="heading-premium text-3xl mb-8 text-anong-dark-green">{t.title}</h1>
@@ -86,6 +88,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-anong-cream">
+      <NavigationBanner />
       <main className="flex-1 container mx-auto px-4 py-12 watercolor-bg">
         <div className="flex items-center justify-between mb-8">
           <h1 className="heading-premium text-3xl text-anong-dark-green">{t.title}</h1>

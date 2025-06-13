@@ -247,7 +247,7 @@ const Checkout = () => {
               </CardContent>
             </Card>
           </div>
-
+          
           {/* Order Summary */}
           <div>
             <Card className="anong-card sticky top-24">
@@ -256,34 +256,22 @@ const Checkout = () => {
                   {t.orderSummary}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4 mb-6">
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
                   {items.map((item) => (
-                    <div key={item.product.id} className="flex justify-between items-center">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-gradient-to-b from-anong-cream to-anong-ivory rounded flex items-center justify-center">
-                          <span className="anong-body text-xs font-medium text-anong-black">
-                            {item.quantity}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="anong-body font-medium text-anong-black">
-                            {item.product.name}
-                          </p>
-                          <p className="anong-body text-sm text-anong-black/70">
-                            {formatPrice(item.product.price)}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="anong-body font-medium text-anong-black">
+                    <div key={item.product.id} className="flex justify-between anong-body text-sm">
+                      <span className="text-anong-black/80">
+                        {item.product.name} × {item.quantity}
+                      </span>
+                      <span className="text-anong-black">
                         {formatPrice(item.product.price * item.quantity)}
-                      </p>
+                      </span>
                     </div>
                   ))}
                 </div>
-
-                <Separator className="my-4" />
-
+                
+                <Separator />
+                
                 <div className="space-y-2">
                   <div className="flex justify-between anong-body">
                     <span className="text-anong-black/80">{t.subtotal}</span>
@@ -294,15 +282,15 @@ const Checkout = () => {
                     <span className="text-anong-black">{t.free}</span>
                   </div>
                 </div>
-
-                <Separator className="my-4" />
-
-                <div className="flex justify-between anong-subheading text-lg mb-6">
+                
+                <Separator />
+                
+                <div className="flex justify-between anong-subheading text-lg">
                   <span className="text-anong-black">{t.total}</span>
                   <span className="text-anong-black">{formatPrice(total)}</span>
                 </div>
-
-                <Button type="submit" className="w-full anong-btn-primary">
+                
+                <Button type="submit" className="w-full anong-btn-primary mt-6">
                   {t.placeOrder}
                 </Button>
               </CardContent>

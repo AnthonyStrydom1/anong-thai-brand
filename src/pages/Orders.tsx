@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import NavigationBanner from '@/components/NavigationBanner';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +23,11 @@ const Orders = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<CustomerOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   const translations = {
     en: {
@@ -156,6 +161,7 @@ const Orders = () => {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col">
+        <NavigationBanner />
         <main className="flex-1 container mx-auto px-4 py-8">
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
@@ -170,6 +176,7 @@ const Orders = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <NavigationBanner />
       <main className="flex-1 container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6 text-thai-purple">{t.title}</h1>
         
