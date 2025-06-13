@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -142,57 +143,64 @@ const CartPage = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {items.map((item) => (
-                      <tr key={item.product.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-16 w-16">
-                              <img className="h-16 w-16 object-cover rounded" src={item.product.image} alt={item.product.name[language]} />
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                <Link to={`/product/${item.product.id}`} className="hover:text-thai-purple">
-                                  {item.product.name[language]}
-                                </Link>
+                    {items.map((item) => {
+                      // Get the first image from the images array, or use placeholder
+                      const productImage = item.product.images && Array.isArray(item.product.images) && item.product.images.length > 0 
+                        ? item.product.images[0] 
+                        : '/placeholder.svg';
+
+                      return (
+                        <tr key={item.product.id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-16 w-16">
+                                <img className="h-16 w-16 object-cover rounded" src={productImage} alt={item.product.name} />
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">
+                                  <Link to={`/product/${item.product.id}`} className="hover:text-thai-purple">
+                                    {item.product.name}
+                                  </Link>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">${item.product.price.toFixed(2)}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center border border-gray-300 rounded-md w-24">
-                            <button 
-                              onClick={() => updateQuantity(item.product.id, Math.max(0, item.quantity - 1))}
-                              className="p-1 hover:bg-gray-100 transition"
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">${item.product.price.toFixed(2)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center border border-gray-300 rounded-md w-24">
+                              <button 
+                                onClick={() => updateQuantity(item.product.id, Math.max(0, item.quantity - 1))}
+                                className="p-1 hover:bg-gray-100 transition"
+                              >
+                                <Minus className="h-4 w-4" />
+                              </button>
+                              <span className="px-3 py-1 text-center flex-1">{item.quantity}</span>
+                              <button 
+                                onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                                className="p-1 hover:bg-gray-100 transition"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">${(item.product.price * item.quantity).toFixed(2)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveItem(item.product.id, item.product.name)}
+                              className="text-red-600 hover:text-red-900"
                             >
-                              <Minus className="h-4 w-4" />
-                            </button>
-                            <span className="px-3 py-1 text-center flex-1">{item.quantity}</span>
-                            <button 
-                              onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                              className="p-1 hover:bg-gray-100 transition"
-                            >
-                              <Plus className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">${(item.product.price * item.quantity).toFixed(2)}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveItem(item.product.id, item.product.name[language])}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

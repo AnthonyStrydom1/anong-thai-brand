@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from "@/types";
+import { SupabaseProduct } from "@/services/supabaseService";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
@@ -33,7 +34,24 @@ const FeaturedProductCarousel: React.FC<FeaturedProductCarouselProps> = ({
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product, 1);
+    
+    // Convert Product to SupabaseProduct format for cart
+    const supabaseProduct: SupabaseProduct = {
+      id: product.id,
+      name: product.name[language],
+      description: product.description[language],
+      short_description: product.shortDescription[language],
+      sku: `SKU-${product.id}`,
+      price: product.price,
+      category_id: product.category,
+      images: [product.image],
+      stock_quantity: 100, // Default stock
+      is_active: true,
+      is_featured: true,
+      created_at: new Date().toISOString(),
+    };
+    
+    addItem(supabaseProduct, 1);
     toast({
       title: translations.addedToCart,
       description: `${product.name[language]} x 1`,

@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { Product } from "@/types";
+import { SupabaseProduct } from "@/services/supabaseService";
 import { useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -26,7 +27,23 @@ export const ProductInfo = ({ product, language, translations }: ProductInfoProp
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
   
   const handleAddToCart = () => {
-    addItem(product, quantity);
+    // Convert Product to SupabaseProduct format for cart
+    const supabaseProduct: SupabaseProduct = {
+      id: product.id,
+      name: product.name[language],
+      description: product.description[language],
+      short_description: product.shortDescription[language],
+      sku: `SKU-${product.id}`,
+      price: product.price,
+      category_id: product.category,
+      images: [product.image],
+      stock_quantity: 100, // Default stock
+      is_active: true,
+      is_featured: false,
+      created_at: new Date().toISOString(),
+    };
+    
+    addItem(supabaseProduct, quantity);
     toast({
       title: translations.addedToCart,
       description: `${product.name[language]} x ${quantity}`,
