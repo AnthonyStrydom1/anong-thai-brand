@@ -4,10 +4,16 @@ import Footer from "@/components/Footer";
 import ProductDetail from "@/components/ProductDetail";
 import NavigationBanner from "@/components/NavigationBanner";
 import { useParams } from "react-router-dom";
+import { useEffect } from "react";
 
 const ProductDetailPage = () => {
   const { language } = useLanguage();
   const { id } = useParams<{ id: string }>();
+  
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   return (
     <div className="min-h-screen flex flex-col bg-anong-cream">

@@ -1,282 +1,315 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import NavigationBanner from "@/components/NavigationBanner";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, CreditCard } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
-import { Link } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { ShoppingBag } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const Checkout = () => {
   const { language } = useLanguage();
-  const { items, total, clearCart } = useCart();
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
-  const navigate = useNavigate();
+  const { items, totalAmount, clearCart } = useCart();
+  const { formatPrice } = useCurrency();
   
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
+  const [formData, setFormData] = useState({
+    email: '',
+    firstName: '',
+    lastName: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    phone: ''
+  });
+
   const translations = {
     en: {
-      checkout: "Checkout",
+      title: "Checkout",
+      emptyCart: "Your cart is empty",
+      continueShopping: "Continue Shopping",
       contactInfo: "Contact Information",
+      email: "Email",
       shippingAddress: "Shipping Address",
-      paymentMethod: "Payment Method",
-      orderSummary: "Order Summary",
       firstName: "First Name",
       lastName: "Last Name",
-      email: "Email",
-      phone: "Phone",
       address: "Address",
       city: "City",
-      state: "State",
-      zip: "ZIP / Postal Code",
-      country: "Country",
-      cardDetails: "Card Details",
-      cardNumber: "Card Number",
-      cardName: "Name on Card",
-      expiry: "Expiry Date",
-      cvc: "CVC",
-      payWithCard: "Pay with Credit Card",
-      payWithPayfast: "Pay with PayFast",
-      items: "Items",
+      postalCode: "Postal Code",
+      phone: "Phone Number",
+      orderSummary: "Order Summary",
+      subtotal: "Subtotal",
       shipping: "Shipping",
-      freeShipping: "Free",
       total: "Total",
       placeOrder: "Place Order",
-      orderSuccess: "Order placed successfully!",
-      processingPayment: "Processing payment...",
-      backToCart: "Back to Cart"
+      free: "Free"
     },
     th: {
-      checkout: "ชำระเงิน",
+      title: "ชำระเงิน",
+      emptyCart: "ตะกร้าสินค้าของคุณว่างเปล่า",
+      continueShopping: "เลือกซื้อสินค้าต่อ",
       contactInfo: "ข้อมูลการติดต่อ",
+      email: "อีเมล",
       shippingAddress: "ที่อยู่จัดส่ง",
-      paymentMethod: "วิธีการชำระเงิน",
-      orderSummary: "สรุปคำสั่งซื้อ",
       firstName: "ชื่อ",
       lastName: "นามสกุล",
-      email: "อีเมล",
-      phone: "เบอร์โทรศัพท์",
       address: "ที่อยู่",
       city: "เมือง",
-      state: "รัฐ / จังหวัด",
-      zip: "รหัสไปรษณีย์",
-      country: "ประเทศ",
-      cardDetails: "รายละเอียดบัตร",
-      cardNumber: "หมายเลขบัตร",
-      cardName: "ชื่อบนบัตร",
-      expiry: "วันหมดอายุ",
-      cvc: "CVC",
-      payWithCard: "ชำระด้วยบัตรเครดิต",
-      payWithPayfast: "ชำระด้วย PayFast",
-      items: "รายการ",
-      shipping: "การจัดส่ง",
-      freeShipping: "ฟรี",
-      total: "รวมทั้งหมด",
+      postalCode: "รหัสไปรษณีย์",
+      phone: "หมายเลขโทรศัพท์",
+      orderSummary: "สรุปคำสั่งซื้อ",
+      subtotal: "ราคารวม",
+      shipping: "ค่าจัดส่ง",
+      total: "ราคารวมทั้งสิ้น",
       placeOrder: "สั่งซื้อ",
-      orderSuccess: "สั่งซื้อสำเร็จ!",
-      processingPayment: "กำลังดำเนินการชำระเงิน...",
-      backToCart: "กลับไปที่ตะกร้า"
+      free: "ฟรี"
     }
   };
 
   const t = translations[language];
 
-  const handlePayment = (paymentMethod: string) => {
-    setPaymentProcessing(true);
-    
-    // Simulate payment processing
-    setTimeout(() => {
-      setPaymentProcessing(false);
-      toast({
-        title: t.orderSuccess,
-        description: `Payment method: ${paymentMethod}`,
-      });
-      
-      // Clear the cart and redirect to home page
-      clearCart();
-      navigate('/');
-    }, 1500);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle order submission here
+    console.log('Order submitted:', { formData, items, totalAmount });
+    // Clear cart after successful order
+    clearCart();
+    // Redirect to success page or show success message
   };
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <main className="flex-grow container mx-auto px-4 py-8 text-center">
-          <h1 className="text-2xl font-semibold mb-4">{t.checkout}</h1>
-          <p className="mb-4">Your cart is empty</p>
-          <Button asChild>
-            <Link to="/shop">Continue Shopping</Link>
-          </Button>
+      <div className="min-h-screen flex flex-col bg-anong-ivory">
+        <NavigationBanner />
+        
+        <main className="flex-grow container mx-auto px-4 py-12">
+          <div className="text-center max-w-md mx-auto">
+            <ShoppingBag className="w-16 h-16 mx-auto mb-6 text-anong-black/50" />
+            <h1 className="anong-heading text-3xl mb-4 text-anong-black">{t.title}</h1>
+            <p className="anong-body text-anong-black/80 mb-8">{t.emptyCart}</p>
+            <Button asChild className="anong-btn-primary">
+              <Link to="/shop">{t.continueShopping}</Link>
+            </Button>
+          </div>
         </main>
+        
         <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-grow container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <div className="mb-6 flex items-center text-sm text-gray-500">
-          <Link to="/" className="hover:text-thai-purple transition">
-            {language === 'en' ? 'Home' : 'หน้าหลัก'}
-          </Link>
-          <ChevronRight className="h-4 w-4 mx-2" />
-          <Link to="/cart" className="hover:text-thai-purple transition">
-            {language === 'en' ? 'Cart' : 'ตะกร้าสินค้า'}
-          </Link>
-          <ChevronRight className="h-4 w-4 mx-2" />
-          <span className="text-gray-700">{t.checkout}</span>
-        </div>
-
-        <h1 className="text-3xl font-semibold mb-8 text-gray-800">{t.checkout}</h1>
+    <div className="min-h-screen flex flex-col bg-anong-ivory">
+      <NavigationBanner />
+      
+      <main className="flex-grow container mx-auto px-4 py-12">
+        <h1 className="anong-heading text-4xl mb-8 text-anong-black">{t.title}</h1>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Checkout Form */}
+          <div className="space-y-6">
             {/* Contact Information */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <h2 className="text-xl font-medium mb-4">{t.contactInfo}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="anong-card">
+              <CardHeader>
+                <CardTitle className="anong-subheading text-xl text-anong-black">
+                  {t.contactInfo}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="firstName">{t.firstName}</Label>
-                  <Input id="firstName" className="mt-1" />
+                  <Label htmlFor="email" className="anong-body text-anong-black">
+                    {t.email}
+                  </Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="anong-input"
+                  />
                 </div>
-                <div>
-                  <Label htmlFor="lastName">{t.lastName}</Label>
-                  <Input id="lastName" className="mt-1" />
-                </div>
-                <div>
-                  <Label htmlFor="email">{t.email}</Label>
-                  <Input id="email" type="email" className="mt-1" />
-                </div>
-                <div>
-                  <Label htmlFor="phone">{t.phone}</Label>
-                  <Input id="phone" className="mt-1" />
-                </div>
-              </div>
-            </div>
-            
+              </CardContent>
+            </Card>
+
             {/* Shipping Address */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <h2 className="text-xl font-medium mb-4">{t.shippingAddress}</h2>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="address">{t.address}</Label>
-                  <Input id="address" className="mt-1" />
-                </div>
+            <Card className="anong-card">
+              <CardHeader>
+                <CardTitle className="anong-subheading text-xl text-anong-black">
+                  {t.shippingAddress}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="city">{t.city}</Label>
-                    <Input id="city" className="mt-1" />
+                    <Label htmlFor="firstName" className="anong-body text-anong-black">
+                      {t.firstName}
+                    </Label>
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      required
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      className="anong-input"
+                    />
                   </div>
                   <div>
-                    <Label htmlFor="state">{t.state}</Label>
-                    <Input id="state" className="mt-1" />
-                  </div>
-                  <div>
-                    <Label htmlFor="zip">{t.zip}</Label>
-                    <Input id="zip" className="mt-1" />
-                  </div>
-                  <div>
-                    <Label htmlFor="country">{t.country}</Label>
-                    <Input id="country" className="mt-1" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Payment Method */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <h2 className="text-xl font-medium mb-4">{t.paymentMethod}</h2>
-              
-              <div className="space-y-6">
-                <div className="border-b pb-6">
-                  <h3 className="font-medium mb-4">{t.cardDetails}</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="cardNumber">{t.cardNumber}</Label>
-                      <Input id="cardNumber" placeholder="1234 5678 9012 3456" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label htmlFor="cardName">{t.cardName}</Label>
-                      <Input id="cardName" className="mt-1" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="cardExpiry">{t.expiry}</Label>
-                        <Input id="cardExpiry" placeholder="MM/YY" className="mt-1" />
-                      </div>
-                      <div>
-                        <Label htmlFor="cardCvc">{t.cvc}</Label>
-                        <Input id="cardCvc" className="mt-1" />
-                      </div>
-                    </div>
+                    <Label htmlFor="lastName" className="anong-body text-anong-black">
+                      {t.lastName}
+                    </Label>
+                    <Input
+                      id="lastName"
+                      name="lastName"
+                      required
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      className="anong-input"
+                    />
                   </div>
                 </div>
                 
-                <div className="flex flex-col md:flex-row gap-4">
-                  <Button 
-                    className="flex-1"
-                    onClick={() => handlePayment('credit-card')}
-                    disabled={paymentProcessing}
-                  >
-                    <CreditCard className="mr-2 h-5 w-5" />
-                    {t.payWithCard}
-                  </Button>
-                  
-                  <Button 
-                    variant="secondary"
-                    className="flex-1"
-                    onClick={() => handlePayment('payfast')}
-                    disabled={paymentProcessing}
-                  >
-                    {t.payWithPayfast}
-                  </Button>
+                <div>
+                  <Label htmlFor="address" className="anong-body text-anong-black">
+                    {t.address}
+                  </Label>
+                  <Input
+                    id="address"
+                    name="address"
+                    required
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className="anong-input"
+                  />
                 </div>
-              </div>
-            </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="city" className="anong-body text-anong-black">
+                      {t.city}
+                    </Label>
+                    <Input
+                      id="city"
+                      name="city"
+                      required
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      className="anong-input"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="postalCode" className="anong-body text-anong-black">
+                      {t.postalCode}
+                    </Label>
+                    <Input
+                      id="postalCode"
+                      name="postalCode"
+                      required
+                      value={formData.postalCode}
+                      onChange={handleInputChange}
+                      className="anong-input"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="phone" className="anong-body text-anong-black">
+                    {t.phone}
+                  </Label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    required
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="anong-input"
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          
+
           {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-gray-50 p-6 rounded-lg sticky top-24">
-              <h2 className="text-xl font-medium mb-4">{t.orderSummary}</h2>
-              
-              <div className="space-y-4 mb-6">
-                <div className="flex justify-between pb-2 border-b border-gray-200">
-                  <span>{t.items} ({items.length})</span>
-                  <span>${total.toFixed(2)}</span>
+          <div>
+            <Card className="anong-card sticky top-24">
+              <CardHeader>
+                <CardTitle className="anong-subheading text-xl text-anong-black">
+                  {t.orderSummary}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 mb-6">
+                  {items.map((item) => (
+                    <div key={item.product.id} className="flex justify-between items-center">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-b from-anong-cream to-anong-ivory rounded flex items-center justify-center">
+                          <span className="anong-body text-xs font-medium text-anong-black">
+                            {item.quantity}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="anong-body font-medium text-anong-black">
+                            {item.product.name}
+                          </p>
+                          <p className="anong-body text-sm text-anong-black/70">
+                            {formatPrice(item.product.price)}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="anong-body font-medium text-anong-black">
+                        {formatPrice(item.product.price * item.quantity)}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex justify-between pb-2 border-b border-gray-200">
-                  <span>{t.shipping}</span>
-                  <span className="text-green-600">{t.freeShipping}</span>
+
+                <Separator className="my-4" />
+
+                <div className="space-y-2">
+                  <div className="flex justify-between anong-body">
+                    <span className="text-anong-black/80">{t.subtotal}</span>
+                    <span className="text-anong-black">{formatPrice(totalAmount)}</span>
+                  </div>
+                  <div className="flex justify-between anong-body">
+                    <span className="text-anong-black/80">{t.shipping}</span>
+                    <span className="text-anong-black">{t.free}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-lg font-medium pt-2">
-                  <span>{t.total}</span>
-                  <span>${total.toFixed(2)}</span>
+
+                <Separator className="my-4" />
+
+                <div className="flex justify-between anong-subheading text-lg mb-6">
+                  <span className="text-anong-black">{t.total}</span>
+                  <span className="text-anong-black">{formatPrice(totalAmount)}</span>
                 </div>
-              </div>
-              
-              <Button 
-                className="w-full mb-4"
-                onClick={() => handlePayment('credit-card')}
-                disabled={paymentProcessing}
-              >
-                {t.placeOrder}
-              </Button>
-              
-              <Button
-                variant="outline"
-                asChild
-                className="w-full"
-              >
-                <Link to="/cart">{t.backToCart}</Link>
-              </Button>
-            </div>
+
+                <Button type="submit" className="w-full anong-btn-primary">
+                  {t.placeOrder}
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-        </div>
+        </form>
       </main>
       
       <Footer />
