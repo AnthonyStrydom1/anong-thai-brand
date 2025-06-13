@@ -39,12 +39,13 @@ class ApiService {
 
     try {
       const response = await fetch(url, config)
-      const data = await response.json()
-
+      
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`)
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
       }
 
+      const data = await response.json()
       return data
     } catch (error) {
       console.error('API request failed:', error)
@@ -52,26 +53,62 @@ class ApiService {
     }
   }
 
+  private getAuthHeaders(): HeadersInit {
+    // Get token from localStorage or session storage
+    const token = localStorage.getItem('sb-nyadgiutmweuyxqetfuh-auth-token')
+    if (token) {
+      try {
+        const authData = JSON.parse(token)
+        if (authData.access_token) {
+          return {
+            'Authorization': `Bearer ${authData.access_token}`
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing auth token:', e)
+      }
+    }
+    return {}
+  }
+
   // Customer endpoints
   async createCustomer(customerData: Omit<Customer, 'id' | 'created_at'>) {
-    return this.request<{ message: string; customer: Customer }>('/create-customer', {
+    return this.request<{ message: string; customer: Customer }>('/api/create-customer', {
       method: 'POST',
+      headers: {
+        ...this.getAuthHeaders()
+      },
       body: JSON.stringify(customerData),
     })
   }
 
   async updateCustomer(id: string, updates: Partial<Omit<Customer, 'id' | 'created_at'>>) {
-    return this.request<{ message: string; customer: Customer }>('/update-customer', {
+    return this.request<{ message: string; customer: Customer }>('/api/update-customer', {
       method: 'POST',
+      headers: {
+        ...this.getAuthHeaders()
+      },
       body: JSON.stringify({ id, ...updates }),
     })
   }
 
   async getCustomers(limit = 50, offset = 0) {
-    return this.request<{ customers: Customer[] }>(`/customers?limit=${limit}&offset=${offset}`)
+    return this.request<{ customers: Customer[] }>(`/api/customers?limit=${limit}&offset=${offset}`, {
+      headers: {
+        ...this.getAuthHeaders()
+      }
+    })
   }
 
-  // Product endpoints
+  async getMyCustomer() {
+    return this.request<{ customer: Customer }>('/api/customer/me', {
+      headers: {
+        ...this.getAuthHeaders()
+      }
+    })
+  }
+
+  // Product endpoints (public)
   async getProducts(params?: { category?: string; search?: string; limit?: number }) {
     const queryParams = new URLSearchParams()
     if (params?.category) queryParams.append('category', params.category)
@@ -79,30 +116,37 @@ class ApiService {
     if (params?.limit) queryParams.append('limit', params.limit.toString())
 
     const queryString = queryParams.toString()
-    return this.request<{ products: Product[] }>(`/products${queryString ? `?${queryString}` : ''}`)
+    return this.request<{ products: Product[] }>(`/api/products${queryString ? `?${queryString}` : ''}`)
   }
 
   async getProduct(id: string) {
-    return this.request<{ product: Product }>(`/products/${id}`)
+    return this.request<{ product: Product }>(`/api/products/${id}`)
   }
 
   async createProduct(productData: Omit<Product, 'id' | 'created_at'>) {
-    return this.request<{ message: string; product: Product }>('/products', {
+    return this.request<{ message: string; product: Product }>('/api/products', {
       method: 'POST',
+      headers: {
+        ...this.getAuthHeaders()
+      },
       body: JSON.stringify(productData),
     })
   }
 
-  // Contact endpoints
+  // Contact endpoints (public)
   async submitContactForm(contactData: ContactSubmission) {
-    return this.request<{ message: string; submission: any }>('/contact', {
+    return this.request<{ message: string; submission: any }>('/api/contact', {
       method: 'POST',
       body: JSON.stringify(contactData),
     })
   }
 
   async getContactSubmissions() {
-    return this.request<{ submissions: any[] }>('/contact')
+    return this.request<{ submissions: any[] }>('/api/contact', {
+      headers: {
+        ...this.getAuthHeaders()
+      }
+    })
   }
 
   // Health check

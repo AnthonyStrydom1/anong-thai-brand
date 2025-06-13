@@ -2,88 +2,53 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { createClient } from '@supabase/supabase-js'
 
 // Import routes
 import productsRouter from './routes/products.js'
 import contactRouter from './routes/contact.js'
 
-// Import middleware
-import { authenticateUser, requireAdmin, validateCustomerAccess } from './middleware/authMiddleware.js'
+// Import security middleware
+import { verifyJWT, rateLimiter, validateInput } from './middleware/jwtAuth.js'
+import { securityHeaders } from './middleware/securityHeaders.js'
+import { requireAdminRole, validateCustomerOwnership } from './middleware/adminAuth.js'
 
 dotenv.config()
 
 // Validate required environment variables
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY')
+if (!process.env.SUPABASE_URL) {
+  console.error('Missing required environment variable: SUPABASE_URL')
   process.exit(1)
 }
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
-
 const app = express()
 
-// Security headers
-app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff')
-  res.setHeader('X-Frame-Options', 'DENY')
-  res.setHeader('X-XSS-Protection', '1; mode=block')
-  next()
-})
+// Apply security middleware first
+app.use(securityHeaders)
+app.use(rateLimiter)
 
-// Middleware
+// CORS configuration
 app.use(cors({
   origin: process.env.FRONTEND_URL || ['http://localhost:3000', 'http://localhost:5173'],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-client-info', 'apikey']
 }))
-app.use(express.json({ limit: '10mb' }))
-app.use(express.urlencoded({ extended: true }))
+
+app.use(express.json({ limit: '1mb' })) // Reduced from 10mb
+app.use(express.urlencoded({ extended: true, limit: '1mb' }))
+app.use(validateInput)
 
 // Health check endpoint (public)
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })
 })
 
-// API routes
+// Public API routes (no authentication required)
 app.use('/api/products', productsRouter)
 app.use('/api/contact', contactRouter)
 
-// Secured customer endpoints
-app.post('/api/update-customer', authenticateUser, validateCustomerAccess, async (req, res) => {
-  try {
-    const { id, ...updates } = req.body
-    
-    if (!id) {
-      return res.status(400).json({ error: 'Missing customer id' })
-    }
-    
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({ error: 'No fields to update' })
-    }
-
-    // Ensure user_id cannot be changed
-    delete updates.user_id
-
-    const { data, error } = await supabase
-      .from('customers')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Update customer error:', error)
-      return res.status(500).json({ error: 'Failed to update customer' })
-    }
-
-    res.json({ message: 'Customer updated successfully', customer: data })
-  } catch (err) {
-    console.error('Update customer error:', err)
-    res.status(500).json({ error: 'Internal server error' })
-  }
-})
-
-app.post('/api/create-customer', authenticateUser, async (req, res) => {
+// Protected customer endpoints
+app.post('/api/create-customer', verifyJWT, async (req, res) => {
   try {
     const data = req.body
     
@@ -102,14 +67,23 @@ app.post('/api/create-customer', authenticateUser, async (req, res) => {
       return res.status(400).json({ error: 'Invalid email format' })
     }
 
-    // Ensure user_id is set to the authenticated user
+    // Use user's own Supabase client for this operation
+    const { createClient } = await import('@supabase/supabase-js')
+    const userClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+    
+    // Set the user's JWT token
+    await userClient.auth.setSession({
+      access_token: req.headers.authorization.substring(7),
+      refresh_token: null
+    })
+
     const customerData = {
       ...data,
       user_id: req.user.id,
       created_at: new Date().toISOString()
     }
 
-    const { data: createdCustomer, error } = await supabase
+    const { data: createdCustomer, error } = await userClient
       .from('customers')
       .insert([customerData])
       .select()
@@ -120,6 +94,7 @@ app.post('/api/create-customer', authenticateUser, async (req, res) => {
       return res.status(500).json({ error: 'Failed to create customer' })
     }
 
+    console.log(`Customer created: ${createdCustomer.id} for user: ${req.user.id}`)
     res.status(201).json({ message: 'Customer created successfully', customer: createdCustomer })
   } catch (err) {
     console.error('Create customer error:', err)
@@ -127,12 +102,58 @@ app.post('/api/create-customer', authenticateUser, async (req, res) => {
   }
 })
 
+app.post('/api/update-customer', verifyJWT, validateCustomerOwnership, async (req, res) => {
+  try {
+    const { id, ...updates } = req.body
+    
+    if (!id) {
+      return res.status(400).json({ error: 'Missing customer id' })
+    }
+    
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'No fields to update' })
+    }
+
+    // Ensure user_id cannot be changed
+    delete updates.user_id
+
+    const { createClient } = await import('@supabase/supabase-js')
+    const userClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+    
+    await userClient.auth.setSession({
+      access_token: req.headers.authorization.substring(7),
+      refresh_token: null
+    })
+
+    const { data, error } = await userClient
+      .from('customers')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Update customer error:', error)
+      return res.status(500).json({ error: 'Failed to update customer' })
+    }
+
+    console.log(`Customer updated: ${id} by user: ${req.user.id}`)
+    res.json({ message: 'Customer updated successfully', customer: data })
+  } catch (err) {
+    console.error('Update customer error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 // Admin-only endpoint to get all customers
-app.get('/api/customers', authenticateUser, requireAdmin, async (req, res) => {
+app.get('/api/customers', verifyJWT, requireAdminRole, async (req, res) => {
   try {
     const { limit = 50, offset = 0 } = req.query
     
-    const { data, error } = await supabase
+    const { createClient } = await import('@supabase/supabase-js')
+    const adminClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+
+    const { data, error } = await adminClient
       .from('customers')
       .select('*')
       .order('created_at', { ascending: false })
@@ -143,6 +164,7 @@ app.get('/api/customers', authenticateUser, requireAdmin, async (req, res) => {
       return res.status(500).json({ error: 'Failed to fetch customers' })
     }
 
+    console.log(`Admin ${req.user.id} accessed customer list`)
     res.json({ customers: data })
   } catch (err) {
     console.error('Get customers error:', err)
@@ -151,9 +173,17 @@ app.get('/api/customers', authenticateUser, requireAdmin, async (req, res) => {
 })
 
 // User endpoint to get their own customer record
-app.get('/api/customer/me', authenticateUser, async (req, res) => {
+app.get('/api/customer/me', verifyJWT, async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { createClient } = await import('@supabase/supabase-js')
+    const userClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+    
+    await userClient.auth.setSession({
+      access_token: req.headers.authorization.substring(7),
+      refresh_token: null
+    })
+
+    const { data, error } = await userClient
       .from('customers')
       .select('*')
       .eq('user_id', req.user.id)
