@@ -2,14 +2,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Settings } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 const AdminLink = () => {
-  const { user } = useAuth();
+  const { isAdmin, isLoading } = useUserRoles();
 
-  // Simple admin check - in a real app you'd want to check user roles from your database
-  // For now, we'll just check if the user is authenticated
-  if (!user) {
+  // Don't show anything while loading or if user is not admin
+  if (isLoading || !isAdmin()) {
     return null;
   }
 

@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Product } from '@/types';
+import { SupabaseProduct } from '@/services/supabaseService';
 import ProductCard from '../ProductCard';
 
 interface ProductListProps {
-  products: Product[];
+  products: SupabaseProduct[];
   noProductsMessage: string;
 }
 

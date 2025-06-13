@@ -14,7 +14,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const { addToCart } = useCart();
+  const { addItem } = useCart();
   const { formatPrice } = useCurrency();
 
   const handleAddToCart = () => {
@@ -29,7 +29,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       quantity: 1
     };
     
-    addToCart(cartItem);
+    addItem(cartItem);
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
