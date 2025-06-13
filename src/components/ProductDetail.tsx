@@ -1,35 +1,43 @@
 
 import { useParams } from 'react-router-dom';
-import { products } from '@/data/products';
-import { recipes } from '@/data/recipes';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSupabaseProduct } from '@/hooks/useSupabaseProducts';
 import { ProductInfo } from './product/ProductInfo';
 import { ProductDetailTabs } from './product/ProductDetailTabs';
-import { RelatedRecipes } from './product/RelatedRecipes';
 import { ProductBreadcrumb } from './product/ProductBreadcrumb';
 import { ProductNotFound } from './product/ProductNotFound';
-import { useProductTranslations } from './product/useProductTranslations';
 import { motion } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
   
   console.log("Product ID from params:", id);
-  console.log("Available products:", products);
   
-  const product = products.find(p => p.id === id);
+  const { product, isLoading, error } = useSupabaseProduct(id || '');
+  
   console.log("Found product:", product);
   
-  if (!product) {
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <Skeleton className="h-96 w-full rounded-xl" />
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-6 w-1/3" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
     return <ProductNotFound language={language} />;
   }
-  
-  const relatedRecipes = recipes.filter(recipe => 
-    recipe.relatedProducts.includes(product.id)
-  );
-  
-  const t = useProductTranslations(language);
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
@@ -40,10 +48,21 @@ const ProductDetail = () => {
     }
   };
 
+  // Convert Supabase product to the format expected by existing components
+  const convertedProduct = {
+    id: product.id,
+    name: { [language]: product.name },
+    description: { [language]: product.description || product.short_description || '' },
+    ingredients: { [language]: 'Ingredients information coming soon...' },
+    howToUse: { [language]: 'Usage instructions coming soon...' },
+    price: product.price,
+    image: Array.isArray(product.images) ? product.images[0] : (typeof product.images === 'string' ? product.images : '/placeholder.svg')
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Breadcrumb */}
-      <ProductBreadcrumb productName={product.name[language]} language={language} />
+      <ProductBreadcrumb productName={product.name} language={language} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Product Image */}
@@ -54,9 +73,12 @@ const ProductDetail = () => {
           className="rounded-xl overflow-hidden shadow-lg bg-gradient-to-b from-white to-gray-50 p-8 flex items-center justify-center"
         >
           <img 
-            src={product.image}
-            alt={product.name[language]}
+            src={convertedProduct.image}
+            alt={product.name}
             className="w-4/5 h-4/5 object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/placeholder.svg';
+            }}
           />
         </motion.div>
         
@@ -68,45 +90,27 @@ const ProductDetail = () => {
           transition={{ delay: 0.2 }}
         >
           <ProductInfo 
-            product={product} 
+            product={convertedProduct} 
             language={language} 
             translations={{
-              addToCart: t.addToCart,
-              quantity: t.quantity,
-              addedToCart: t.addedToCart
+              addToCart: language === 'en' ? 'Add to Cart' : 'เพิ่มลงตะกร้า',
+              quantity: language === 'en' ? 'Quantity' : 'จำนวน',
+              addedToCart: language === 'en' ? 'Added to cart!' : 'เพิ่มลงตะกร้าแล้ว!'
             }} 
           />
           
           {/* Product Details Tabs */}
           <ProductDetailTabs 
-            product={product} 
+            product={convertedProduct} 
             language={language} 
             translations={{
-              description: t.description,
-              ingredients: t.ingredients,
-              howToUse: t.howToUse
+              description: language === 'en' ? 'Description' : 'รายละเอียด',
+              ingredients: language === 'en' ? 'Ingredients' : 'ส่วนผสม',
+              howToUse: language === 'en' ? 'How to Use' : 'วิธีใช้'
             }} 
           />
         </motion.div>
       </div>
-      
-      {/* Related Recipes */}
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-        transition={{ delay: 0.4 }}
-      >
-        <RelatedRecipes 
-          recipes={relatedRecipes} 
-          language={language} 
-          translations={{
-            relatedRecipes: t.relatedRecipes,
-            viewRecipe: t.viewRecipe,
-            noRecipes: t.noRecipes
-          }} 
-        />
-      </motion.div>
     </div>
   );
 };
