@@ -78,29 +78,36 @@ const CartDropdown = () => {
             ) : (
               <>
                 <div className="max-h-60 overflow-y-auto">
-                  {items.map(item => (
-                    <div key={item.product.id} className="flex p-3 border-b border-gray-100">
-                      <img 
-                        src={item.product.image} 
-                        alt={item.product.name[language]} 
-                        className="w-16 h-16 object-cover rounded"
-                      />
-                      <div className="ml-3 flex-grow">
-                        <div className="flex justify-between">
-                          <p className="text-sm font-medium">{item.product.name[language]}</p>
-                          <button 
-                            onClick={() => removeItem(item.product.id)}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
+                  {items.map(item => {
+                    // Get the first image from the images array, or use placeholder
+                    const productImage = item.product.images && Array.isArray(item.product.images) && item.product.images.length > 0 
+                      ? item.product.images[0] 
+                      : '/placeholder.svg';
+
+                    return (
+                      <div key={item.product.id} className="flex p-3 border-b border-gray-100">
+                        <img 
+                          src={productImage} 
+                          alt={item.product.name} 
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                        <div className="ml-3 flex-grow">
+                          <div className="flex justify-between">
+                            <p className="text-sm font-medium">{item.product.name}</p>
+                            <button 
+                              onClick={() => removeItem(item.product.id)}
+                              className="text-gray-400 hover:text-gray-600"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            {item.quantity} x ${item.product.price.toFixed(2)}
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-500">
-                          {item.quantity} x ${item.product.price.toFixed(2)}
-                        </p>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 
                 <div className="p-4 border-t border-gray-200">

@@ -18,17 +18,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { formatPrice } = useCurrency();
 
   const handleAddToCart = () => {
-    // Convert SupabaseProduct to the format expected by CartContext
-    const cartItem = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.images && Array.isArray(product.images) && product.images.length > 0 
-        ? product.images[0] 
-        : '/placeholder.svg',
-    };
-    
-    addItem(cartItem, 1); // Pass item and quantity separately
+    addItem(product, 1); // Pass the full SupabaseProduct and quantity
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,

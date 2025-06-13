@@ -1,16 +1,16 @@
 
 import React, { createContext, useContext, useState } from 'react';
-import { Product } from '@/types';
+import { SupabaseProduct } from '@/services/supabaseService';
 import { toast } from "@/components/ui/use-toast";
 
 interface CartItem {
-  product: Product;
+  product: SupabaseProduct;
   quantity: number;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product, quantity: number) => void;
+  addItem: (product: SupabaseProduct, quantity: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -23,7 +23,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  const addItem = (product: Product, quantity: number) => {
+  const addItem = (product: SupabaseProduct, quantity: number) => {
     setItems(currentItems => {
       const existingItem = currentItems.find(item => item.product.id === product.id);
       
