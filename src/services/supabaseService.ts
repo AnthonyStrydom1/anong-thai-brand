@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -61,7 +62,7 @@ class SupabaseService {
   // Expose the supabase client for direct access when needed
   public supabase = supabase;
 
-  // Products
+  // Products - These are public as per RLS policies
   async getProducts(categoryId?: string) {
     let query = supabase
       .from('products')
@@ -89,6 +90,7 @@ class SupabaseService {
     return data as SupabaseProduct;
   }
 
+  // Admin-only product management
   async createProduct(product: Omit<SupabaseProduct, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from('products')
@@ -112,7 +114,7 @@ class SupabaseService {
     return data as SupabaseProduct;
   }
 
-  // Categories
+  // Categories - Public as per RLS policies
   async getCategories() {
     const { data, error } = await supabase
       .from('categories')
@@ -124,6 +126,7 @@ class SupabaseService {
     return data as SupabaseCategory[];
   }
 
+  // Admin-only category management
   async createCategory(category: Omit<SupabaseCategory, 'id'>) {
     const { data, error } = await supabase
       .from('categories')
@@ -135,7 +138,7 @@ class SupabaseService {
     return data as SupabaseCategory;
   }
 
-  // Customers
+  // Secure customer operations
   async createCustomer(customer: Omit<SupabaseCustomer, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from('customers')
@@ -158,6 +161,17 @@ class SupabaseService {
     return data as SupabaseCustomer;
   }
 
+  async getCurrentUserCustomer() {
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+      .maybeSingle();
+    
+    if (error) throw error;
+    return data as SupabaseCustomer | null;
+  }
+
   async updateCustomer(id: number, updates: Partial<Omit<SupabaseCustomer, 'id' | 'created_at'>>) {
     const { data, error } = await supabase
       .from('customers')
@@ -170,7 +184,7 @@ class SupabaseService {
     return data as SupabaseCustomer;
   }
 
-  // Orders
+  // Order operations - secured by RLS
   async createOrder(order: Database['public']['Tables']['orders']['Insert']) {
     const { data, error } = await supabase
       .from('orders')
@@ -193,6 +207,7 @@ class SupabaseService {
     return data as SupabaseOrder[];
   }
 
+  // Admin-only: Get all orders
   async getAllOrders() {
     const { data, error } = await supabase
       .from('orders')
@@ -220,7 +235,7 @@ class SupabaseService {
     return data;
   }
 
-  // Order Items
+  // Order Items - secured by RLS
   async createOrderItem(orderItem: Omit<DbOrderItem, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from('order_items')
@@ -232,7 +247,7 @@ class SupabaseService {
     return data;
   }
 
-  // Inventory
+  // Admin-only: Inventory operations
   async createInventoryMovement(movement: {
     product_id: string;
     movement_type: 'in' | 'out' | 'adjustment';
@@ -262,7 +277,7 @@ class SupabaseService {
     return data;
   }
 
-  // Search
+  // Search - Public products only
   async searchProducts(searchTerm: string) {
     const { data, error } = await supabase
       .from('products')
@@ -274,7 +289,7 @@ class SupabaseService {
     return data as SupabaseProduct[];
   }
 
-  // Add new method for updating order status
+  // Admin-only: Order management
   async updateOrderStatus(orderId: string, status: string) {
     const { data, error } = await supabase
       .from('orders')
@@ -287,7 +302,6 @@ class SupabaseService {
     return data as SupabaseOrder;
   }
 
-  // Add new method for updating payment status
   async updatePaymentStatus(orderId: string, paymentStatus: string) {
     const { data, error } = await supabase
       .from('orders')
@@ -300,7 +314,7 @@ class SupabaseService {
     return data as SupabaseOrder;
   }
 
-  // Add method to get customer orders by user ID
+  // Secure: Get customer orders by user ID
   async getCustomerOrdersByUserId(userId: string) {
     const { data, error } = await supabase
       .rpc('get_customer_orders', { user_uuid: userId });
