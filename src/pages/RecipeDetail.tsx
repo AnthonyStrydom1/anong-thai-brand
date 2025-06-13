@@ -18,7 +18,7 @@ const ProductCard = memo(({ product, language, t }: {
   const getProductImage = () => {
     const imageMap: { [key: string]: string } = {
       'pad-thai-sauce': '/lovable-uploads/5a0dec88-a26c-4e29-bda6-8d921887615e.png',
-      'sukiyaki-sauce': '/lovable-uploads/a7096f1f-006f-4264-879e-539ad029747a.png',
+      'sukiyaki-sauce': '/lovable-uploads/322ef915-5db5-4834-9e45-92a34dc3adb6.png',
       'tom-yum-paste': '/lovable-uploads/fc66a288-b44b-4bf4-a82f-a2c844b58979.png',
       'red-curry-paste': '/lovable-uploads/dbb561f8-a97a-447c-8946-5a1d279bed05.png',
       'panang-curry-paste': '/lovable-uploads/5308a5d2-4f12-42ed-b3f8-f2aa5d7fbac9.png',
@@ -33,12 +33,13 @@ const ProductCard = memo(({ product, language, t }: {
   return (
     <div className="bg-white rounded-lg border border-anong-gold/20 overflow-hidden group hover:shadow-lg transition-all duration-300">
       <div className="flex">
-        <div className="w-32 h-32 bg-gradient-to-b from-anong-cream to-anong-ivory flex items-center justify-center p-4">
+        <div className="w-32 h-32 bg-gradient-to-b from-anong-cream to-anong-ivory flex items-center justify-center p-6">
           <img
             src={getProductImage()}
             alt={product.name[language]}
-            className="w-full h-full object-contain"
+            className="max-w-[80px] max-h-[80px] w-auto h-auto object-contain"
             loading="lazy"
+            decoding="async"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/placeholder.svg';
             }}
@@ -178,13 +179,12 @@ const RecipeDetail = () => {
               {/* Recipe Image - Load eagerly since it's the main content */}
               <Card className="anong-card overflow-hidden">
                 <div className="h-64 md:h-80 bg-gradient-to-b from-anong-cream to-anong-ivory p-8 flex items-center justify-center">
-                  <OptimizedLazyImage
+                  <img
                     src={recipe.image}
                     alt={recipe.name[language]}
-                    className="w-full h-full object-contain"
-                    containerClassName="w-full h-full relative"
-                    priority={true}
-                    eager={true}
+                    className="max-w-[320px] max-h-[320px] w-auto h-auto object-contain"
+                    loading="eager"
+                    decoding="async"
                   />
                 </div>
               </Card>

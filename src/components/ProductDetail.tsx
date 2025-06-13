@@ -50,7 +50,7 @@ const ProductDetail = () => {
   const getProductImage = () => {
     const imageMap: { [key: string]: string } = {
       'Pad Thai Sauce': '/lovable-uploads/5a0dec88-a26c-4e29-bda6-8d921887615e.png',
-      'Sukiyaki Dipping Sauce': '/lovable-uploads/a7096f1f-006f-4264-879e-539ad029747a.png',
+      'Sukiyaki Dipping Sauce': '/lovable-uploads/322ef915-5db5-4834-9e45-92a34dc3adb6.png',
       'Tom Yum Chili Paste': '/lovable-uploads/fc66a288-b44b-4bf4-a82f-a2c844b58979.png',
       'Red Curry Paste': '/lovable-uploads/dbb561f8-a97a-447c-8946-5a1d279bed05.png',
       'Panang Curry Paste': '/lovable-uploads/5308a5d2-4f12-42ed-b3f8-f2aa5d7fbac9.png',
@@ -120,12 +120,9 @@ const ProductDetail = () => {
           <img 
             src={convertedProduct.image}
             alt={product.name}
-            className="w-full h-full object-contain"
-            style={{ 
-              maxWidth: '80%', 
-              maxHeight: '80%',
-              objectFit: 'contain'
-            }}
+            className="max-w-[320px] max-h-[320px] w-auto h-auto object-contain"
+            loading="eager"
+            decoding="async"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/placeholder.svg';
             }}
