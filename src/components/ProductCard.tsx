@@ -101,7 +101,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       <div className="px-6 pb-6">
         <Button 
           onClick={handleAddToCart}
-          className="w-full bg-anong-deep-green text-white hover:bg-anong-charcoal transition-colors"
+          className="w-full bg-anong-black text-white hover:bg-anong-gold hover:text-anong-black transition-colors"
           disabled={product.stock_quantity === 0}
         >
           <ShoppingCart className="w-4 h-4 mr-2" />
