@@ -53,10 +53,13 @@ const ProductDetail = () => {
     id: product.id,
     name: { [language]: product.name },
     description: { [language]: product.description || product.short_description || '' },
+    shortDescription: { [language]: product.short_description || '' },
     ingredients: { [language]: 'Ingredients information coming soon...' },
     howToUse: { [language]: 'Usage instructions coming soon...' },
+    useIn: { [language]: ['Usage instructions coming soon...'] },
     price: product.price,
-    image: Array.isArray(product.images) ? product.images[0] : (typeof product.images === 'string' ? product.images : '/placeholder.svg')
+    image: Array.isArray(product.images) ? product.images[0] : (typeof product.images === 'string' ? product.images : '/placeholder.svg'),
+    category: (product.category_id as 'curry-pastes' | 'stir-fry-sauces' | 'dipping-sauces') || 'curry-pastes'
   };
 
   return (
