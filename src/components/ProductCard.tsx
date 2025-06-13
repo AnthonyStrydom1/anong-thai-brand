@@ -30,25 +30,43 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   // Get the first image from the images array, handle different data formats
   const getProductImage = () => {
+    console.log("Product images:", product.images, typeof product.images);
+    
     if (product.images) {
+      // If it's already an array
       if (Array.isArray(product.images) && product.images.length > 0) {
         return product.images[0];
       }
+      
+      // If it's a string that might be JSON
       if (typeof product.images === 'string') {
         try {
           const parsed = JSON.parse(product.images);
           if (Array.isArray(parsed) && parsed.length > 0) {
             return parsed[0];
           }
+          // If it's just a string URL
+          return product.images;
         } catch {
+          // If JSON parsing fails, treat as direct URL
           return product.images;
         }
       }
+      
+      // If it's an object (jsonb), try to extract first value
+      if (typeof product.images === 'object' && product.images !== null) {
+        const values = Object.values(product.images);
+        if (values.length > 0 && typeof values[0] === 'string') {
+          return values[0];
+        }
+      }
     }
+    
     return '/placeholder.svg';
   };
 
   const productImage = getProductImage();
+  console.log("Final product image URL:", productImage);
 
   return (
     <Card className="group hover:shadow-lg transition-shadow duration-300 overflow-hidden">
@@ -60,6 +78,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
             onError={(e) => {
+              console.log("Image failed to load:", productImage);
               (e.target as HTMLImageElement).src = '/placeholder.svg';
             }}
           />
