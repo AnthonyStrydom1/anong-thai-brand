@@ -1,4 +1,3 @@
-
 import { useParams, Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSupabaseProduct } from '@/hooks/useSupabaseProducts';
@@ -6,11 +5,13 @@ import { ProductInfo } from './product/ProductInfo';
 import { ProductDetailTabs } from './product/ProductDetailTabs';
 import { ProductBreadcrumb } from './product/ProductBreadcrumb';
 import { ProductNotFound } from './product/ProductNotFound';
+import { RelatedRecipes } from './product/RelatedRecipes';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
+import { recipes } from '@/data/recipes';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -230,6 +231,25 @@ const ProductDetail = () => {
     category: (product.category_id as 'curry-pastes' | 'stir-fry-sauces' | 'dipping-sauces') || 'curry-pastes'
   };
 
+  // Get related recipes based on product name
+  const getRelatedRecipes = () => {
+    const productToRecipeMap: { [key: string]: string[] } = {
+      'Pad Thai Sauce': ['pad-thai', 'thai-fried-noodles'],
+      'Sukiyaki Dipping Sauce': ['thai-sukiyaki', 'hot-pot-vegetables'],
+      'Tom Yum Chili Paste': ['tom-yum-goong', 'tom-yum-kai', 'spicy-thai-soup'],
+      'Red Curry Paste': ['gaeng-daeng', 'red-curry-chicken', 'thai-red-curry'],
+      'Panang Curry Paste': ['panang-curry', 'panang-beef', 'thai-panang'],
+      'Massaman Curry Paste': ['massaman-curry', 'massaman-beef', 'thai-massaman'],
+      'Green Curry Paste': ['gaeng-keow-wan', 'green-curry-chicken', 'thai-green-curry'],
+      'Yellow Curry Paste': ['gaeng-kari', 'yellow-curry-chicken', 'thai-yellow-curry']
+    };
+
+    const relatedRecipeIds = productToRecipeMap[product.name] || [];
+    return recipes.filter(recipe => relatedRecipeIds.includes(recipe.id));
+  };
+
+  const relatedRecipes = getRelatedRecipes();
+
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Back to Shop Button */}
@@ -294,6 +314,19 @@ const ProductDetail = () => {
           />
         </motion.div>
       </div>
+
+      {/* Related Recipes Section */}
+      {relatedRecipes.length > 0 && (
+        <RelatedRecipes 
+          recipes={relatedRecipes}
+          language={language}
+          translations={{
+            relatedRecipes: language === 'en' ? 'Related Recipes' : 'สูตรอาหารที่เกี่ยวข้อง',
+            viewRecipe: language === 'en' ? 'View Recipe' : 'ดูสูตรอาหาร',
+            noRecipes: language === 'en' ? 'No related recipes available' : 'ไม่มีสูตรอาหารที่เกี่ยวข้อง'
+          }}
+        />
+      )}
     </div>
   );
 };
