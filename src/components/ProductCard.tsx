@@ -28,10 +28,29 @@ const ProductCard = ({ product }: ProductCardProps) => {
     });
   };
 
-  // Get the first image from the images array, handle different data formats
+  // Enhanced image extraction function with fallback mapping
   const getProductImage = () => {
+    console.log("Product name:", product.name);
     console.log("Product images:", product.images, typeof product.images);
     
+    // Map product names to uploaded images
+    const imageMap: { [key: string]: string } = {
+      'Pad Thai Sauce': '/lovable-uploads/5a0dec88-a26c-4e29-bda6-8d921887615e.png',
+      'Sukiyaki Dipping Sauce': '/lovable-uploads/a7096f1f-006f-4264-879e-539ad029747a.png',
+      'Tom Yum Chili Paste': '/lovable-uploads/fc66a288-b44b-4bf4-a82f-a2c844b58979.png',
+      'Red Curry Paste': '/lovable-uploads/dbb561f8-a97a-447c-8946-5a1d279bed05.png',
+      'Panang Curry Paste': '/lovable-uploads/5308a5d2-4f12-42ed-b3f8-f2aa5d7fbac9.png',
+      'Massaman Curry Paste': '/lovable-uploads/c936ed96-2c61-4919-9e6d-14f740c80b80.png',
+      'Green Curry Paste': '/lovable-uploads/1ae4d3c5-e136-4ed4-9a71-f1e9d6123a83.png',
+      'Yellow Curry Paste': '/lovable-uploads/acf32ec1-9435-4a5c-8baf-1943b85b93bf.png'
+    };
+
+    // Check if we have a mapped image for this product name
+    if (imageMap[product.name]) {
+      console.log("Found mapped image for product:", product.name, imageMap[product.name]);
+      return imageMap[product.name];
+    }
+
     if (product.images) {
       // If it's already an array
       if (Array.isArray(product.images) && product.images.length > 0) {
@@ -62,6 +81,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       }
     }
     
+    console.log("No image found, using placeholder");
     return '/placeholder.svg';
   };
 
