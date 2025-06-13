@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState, useMemo } from "react";
 import Footer from "@/components/Footer";
@@ -132,7 +131,6 @@ const Recipes = () => {
                       src={recipe.image}
                       alt={recipe.name[language]}
                       className="max-w-[160px] max-h-[160px] w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
                     />
                   </div>
                   
