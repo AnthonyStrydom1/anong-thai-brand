@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,8 +6,9 @@ import ProductManager from '@/components/admin/ProductManager';
 import OrderManager from '@/components/admin/OrderManager';
 import CustomerManager from '@/components/admin/CustomerManager';
 import StockManager from '@/components/admin/StockManager';
+import SecurityDashboard from '@/components/admin/SecurityDashboard';
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
-import { Package, ShoppingCart, Users, BarChart3, Warehouse } from 'lucide-react';
+import { Package, ShoppingCart, Users, BarChart3, Warehouse, Shield } from 'lucide-react';
 import { supabaseService } from '@/services/supabaseService';
 
 const AdminPage = () => {
@@ -59,12 +61,13 @@ const AdminPage = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="products">Products</TabsTrigger>
               <TabsTrigger value="stock">Stock</TabsTrigger>
               <TabsTrigger value="orders">Orders</TabsTrigger>
               <TabsTrigger value="customers">Customers</TabsTrigger>
+              <TabsTrigger value="security">Security</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
 
@@ -204,6 +207,10 @@ const AdminPage = () => {
 
             <TabsContent value="customers">
               <CustomerManager />
+            </TabsContent>
+
+            <TabsContent value="security">
+              <SecurityDashboard />
             </TabsContent>
 
             <TabsContent value="analytics">
