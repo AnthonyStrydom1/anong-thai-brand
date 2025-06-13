@@ -26,20 +26,15 @@ export const useSecurityAudit = () => {
     details?: any
   ) => {
     try {
-      // Use direct SQL execution through supabase client for now
-      // This will work once the security_audit_log table exists
-      const { error } = await supabaseService.supabase.rpc('log_security_event', {
-        _action: action,
-        _resource_type: resourceType,
-        _resource_id: resourceId || null,
-        _details: details || null
-      }).catch(() => {
-        // Fallback: log to console if RPC doesn't exist yet
-        console.log('Security Event:', { action, resourceType, resourceId, details });
-        return { error: null };
+      // For now, just log to console until the database function is properly set up
+      console.log('Security Event:', {
+        action,
+        resourceType,
+        resourceId,
+        details,
+        timestamp: new Date().toISOString(),
+        userId: 'current-user' // Would get from auth context
       });
-
-      if (error) throw error;
     } catch (err) {
       console.error('Failed to log security event:', err);
     }
@@ -50,23 +45,12 @@ export const useSecurityAudit = () => {
       setIsLoading(true);
       setError(null);
       
-      // Try to query the security_audit_log table directly
-      // Use any type casting to bypass TypeScript restrictions
-      const { data, error } = await (supabaseService.supabase as any)
-        .from('security_audit_log')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100)
-        .catch(() => {
-          // Fallback: return empty data if table doesn't exist
-          return { data: [], error: null };
-        });
-
-      if (error) throw error;
-      setLogs(data || []);
+      // For now, return empty data since the table types aren't available yet
+      // Once the database migration is complete and types are updated, 
+      // we can query the security_audit_log table directly
+      setLogs([]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch security logs');
-      // Set empty logs as fallback
       setLogs([]);
     } finally {
       setIsLoading(false);

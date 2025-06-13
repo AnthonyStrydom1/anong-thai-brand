@@ -70,22 +70,14 @@ class SecurityService {
     details?: any
   ): Promise<void> {
     try {
-      // Try using the RPC function if it exists
-      await supabaseService.supabase.rpc('log_security_event', {
-        _action: action,
-        _resource_type: resourceType,
-        _resource_id: resourceId || null,
-        _details: details || null
-      }).catch(() => {
-        // Fallback: log to console if RPC doesn't exist
-        console.log('Security Event:', {
-          action,
-          resourceType,
-          resourceId,
-          details,
-          timestamp: new Date().toISOString(),
-          userId: 'current-user' // Would get from auth context
-        });
+      // For now, just log to console until the database function is properly set up
+      console.log('Security Event:', {
+        action,
+        resourceType,
+        resourceId,
+        details,
+        timestamp: new Date().toISOString(),
+        userId: 'current-user' // Would get from auth context
       });
     } catch (error) {
       console.error('Failed to log security event:', error);
