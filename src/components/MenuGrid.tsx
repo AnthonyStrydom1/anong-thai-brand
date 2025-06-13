@@ -1,102 +1,49 @@
-import { useState } from "react";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { motion } from "framer-motion";
 
-interface MenuCategory {
-  id: string;
-  label: string;
-  image: string;
-}
+import React from 'react';
+import ProductCard from './ProductCard';
+import { useSupabaseProducts } from '@/hooks/useSupabaseProducts';
+import { Skeleton } from '@/components/ui/skeleton';
 
-interface MenuGridProps {
-  categories: MenuCategory[];
-}
+const MenuGrid = () => {
+  const { products, isLoading, error } = useSupabaseProducts();
 
-const MenuGrid = ({ categories }: MenuGridProps) => {
-  const { language } = useLanguage();
-  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(null);
-  
-  const handleViewMenu = (category: MenuCategory) => {
-    setSelectedCategory(category);
-  };
-  
-  return (
-    <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-        {categories.map((category) => (
-          <motion.div
-            key={category.id}
-            onMouseEnter={() => setHoveredCategory(category.id)}
-            onMouseLeave={() => setHoveredCategory(null)}
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.2 }}
-            className="cursor-pointer"
-          >
-            <Card className="luxury-card border-0 shadow-lg overflow-hidden h-full">
-              <CardContent className="p-0 relative">
-                <div className="aspect-[3/4] overflow-hidden">
-                  <img 
-                    src={category.image} 
-                    alt={category.label}
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                  />
-                </div>
-                
-                {/* Overlay with category name */}
-                <div className="absolute inset-0 bg-gradient-to-t from-anong-deep-black/60 via-transparent to-transparent flex items-end">
-                  <div className="p-2 md:p-3 w-full">
-                    <h3 className="font-elegant text-white text-sm md:text-base font-medium text-center">
-                      {category.label}
-                    </h3>
-                  </div>
-                </div>
-                
-                {/* Hover effect overlay */}
-                {hoveredCategory === category.id && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="absolute inset-0 bg-anong-dark-green/20 flex items-center justify-center"
-                  >
-                    <button
-                      onClick={() => handleViewMenu(category)}
-                      className="bg-anong-cream/90 backdrop-blur-sm rounded-lg px-3 py-2 hover:bg-anong-cream transition-colors"
-                    >
-                      <span className="text-anong-deep-black text-xs font-medium">
-                        View Menu
-                      </span>
-                    </button>
-                  </motion.div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="space-y-4">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
         ))}
       </div>
+    );
+  }
 
-      {/* Modal Dialog for Menu View */}
-      <Dialog open={!!selectedCategory} onOpenChange={() => setSelectedCategory(null)}>
-        <DialogContent className="max-w-4xl w-[90vw] max-h-[90vh] p-0 bg-white flex flex-col">
-          <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
-            <DialogTitle className="font-elegant text-xl text-anong-deep-black">
-              {selectedCategory?.label}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
-            {selectedCategory && (
-              <img 
-                src={selectedCategory.image} 
-                alt={selectedCategory.label}
-                className="max-w-full max-h-full object-contain"
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600 mb-4">Unable to load products. Please try again later.</p>
+        <p className="text-gray-600">{error}</p>
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">No products available at the moment.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
   );
 };
 
