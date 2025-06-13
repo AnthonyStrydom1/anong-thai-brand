@@ -1,8 +1,10 @@
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import NavigationBanner from "@/components/NavigationBanner";
 import Footer from "@/components/Footer";
+import FrequentlyBoughtItems from "@/components/checkout/FrequentlyBoughtItems";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -114,6 +116,9 @@ const Checkout = () => {
       </div>
     );
   }
+
+  // Get current product IDs for frequently bought suggestions
+  const currentProductIds = items.map(item => item.product.id);
 
   return (
     <div className="min-h-screen flex flex-col bg-anong-ivory">
@@ -250,51 +255,56 @@ const Checkout = () => {
           
           {/* Order Summary */}
           <div>
-            <Card className="anong-card sticky top-24">
-              <CardHeader>
-                <CardTitle className="anong-subheading text-xl text-anong-black">
-                  {t.orderSummary}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  {items.map((item) => (
-                    <div key={item.product.id} className="flex justify-between anong-body text-sm">
-                      <span className="text-anong-black/80">
-                        {item.product.name} × {item.quantity}
-                      </span>
-                      <span className="text-anong-black">
-                        {formatPrice(item.product.price * item.quantity)}
-                      </span>
+            <div className="space-y-6">
+              <Card className="anong-card sticky top-24">
+                <CardHeader>
+                  <CardTitle className="anong-subheading text-xl text-anong-black">
+                    {t.orderSummary}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    {items.map((item) => (
+                      <div key={item.product.id} className="flex justify-between anong-body text-sm">
+                        <span className="text-anong-black/80">
+                          {item.product.name} × {item.quantity}
+                        </span>
+                        <span className="text-anong-black">
+                          {formatPrice(item.product.price * item.quantity)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between anong-body">
+                      <span className="text-anong-black/80">{t.subtotal}</span>
+                      <span className="text-anong-black">{formatPrice(total)}</span>
                     </div>
-                  ))}
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between anong-body">
-                    <span className="text-anong-black/80">{t.subtotal}</span>
+                    <div className="flex justify-between anong-body">
+                      <span className="text-anong-black/80">{t.shipping}</span>
+                      <span className="text-anong-black">{t.free}</span>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="flex justify-between anong-subheading text-lg">
+                    <span className="text-anong-black">{t.total}</span>
                     <span className="text-anong-black">{formatPrice(total)}</span>
                   </div>
-                  <div className="flex justify-between anong-body">
-                    <span className="text-anong-black/80">{t.shipping}</span>
-                    <span className="text-anong-black">{t.free}</span>
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="flex justify-between anong-subheading text-lg">
-                  <span className="text-anong-black">{t.total}</span>
-                  <span className="text-anong-black">{formatPrice(total)}</span>
-                </div>
-                
-                <Button type="submit" className="w-full anong-btn-primary mt-6">
-                  {t.placeOrder}
-                </Button>
-              </CardContent>
-            </Card>
+                  
+                  <Button type="submit" className="w-full anong-btn-primary mt-6">
+                    {t.placeOrder}
+                  </Button>
+                </CardContent>
+              </Card>
+              
+              {/* Frequently Bought Items */}
+              <FrequentlyBoughtItems currentItems={currentProductIds} />
+            </div>
           </div>
         </form>
       </main>
