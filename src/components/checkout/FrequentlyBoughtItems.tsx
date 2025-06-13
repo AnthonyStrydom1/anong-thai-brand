@@ -85,17 +85,17 @@ const FrequentlyBoughtItems = ({ currentItems }: FrequentlyBoughtItemsProps) => 
               <div className="w-16 h-16 flex-shrink-0">
                 <OptimizedLazyImage
                   src={product.image}
-                  alt={product.name}
+                  alt={product.name[language]}
                   className="w-full h-full object-contain"
                 />
               </div>
               
               <div className="flex-grow">
                 <h4 className="anong-body font-medium text-anong-black line-clamp-1">
-                  {product.name}
+                  {product.name[language]}
                 </h4>
                 <p className="anong-body-light text-sm text-anong-black/70 line-clamp-1">
-                  {product.description}
+                  {product.description[language]}
                 </p>
                 <p className="anong-subheading text-sm text-anong-gold mt-1">
                   {formatPrice(product.price)}
