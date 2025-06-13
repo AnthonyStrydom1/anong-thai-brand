@@ -25,6 +25,7 @@ import Orders from "./pages/Orders";
 import Settings from "./pages/Settings";
 import AdminPage from "./pages/AdminPage";
 import AdminSetupPage from "./pages/AdminSetupPage";
+import AuthPage from "./pages/AuthPage";
 import CreateCustomerPage from "./pages/CreateCustomerPage";
 import NotFound from "./pages/NotFound";
 
@@ -59,6 +60,7 @@ function App() {
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/admin-setup" element={<AdminSetupPage />} />
+                    <Route path="/auth" element={<AuthPage />} />
                     <Route path="/create-customer" element={<CreateCustomerPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>

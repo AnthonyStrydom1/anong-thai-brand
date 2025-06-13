@@ -30,7 +30,7 @@ const ProtectedAdminRoute = ({ children }: ProtectedAdminRouteProps) => {
 
   // Redirect to login if not authenticated
   if (!user) {
-    return <Navigate to="/admin-setup" replace />;
+    return <Navigate to="/auth" replace />;
   }
 
   // Show access denied if not admin
