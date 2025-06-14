@@ -46,7 +46,7 @@ export class ShippingService {
     if (code >= 2000 && code <= 2199) return 'local'; // Johannesburg
     if (code >= 8000 && code <= 8099) return 'local'; // Cape Town
     if (code >= 4000 && code <= 4099) return 'local'; // Durban
-    if (code >= 0000 && code <= 1999) return 'regional'; // Pretoria area
+    if (code >= 1 && code <= 1999) return 'regional'; // Pretoria area (fixed octal literal)
     
     return 'national'; // Other areas
   }
