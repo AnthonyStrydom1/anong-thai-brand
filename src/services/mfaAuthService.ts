@@ -6,12 +6,6 @@ interface MFASignInData {
   password: string;
 }
 
-interface MFAVerificationData {
-  email: string;
-  code: string;
-  password: string;
-}
-
 class MFAAuthService {
   private readonly MFA_SESSION_KEY = 'mfa_session_data';
 
@@ -30,7 +24,7 @@ class MFAAuthService {
     // Store encrypted session data temporarily
     const sessionData = {
       email,
-      password,
+      password, // In production, this should be encrypted
       timestamp: Date.now()
     };
     
@@ -111,7 +105,6 @@ class MFAAuthService {
     return data ? JSON.parse(data) : null;
   }
 
-  // Made this method public so it can be called from AuthPage
   clearMFASession() {
     sessionStorage.removeItem(this.MFA_SESSION_KEY);
   }
