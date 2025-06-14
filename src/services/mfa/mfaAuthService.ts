@@ -10,11 +10,9 @@ class MFAAuthService {
     console.log('🔑 MFA Service: Starting sign in for', email);
     
     try {
-      // Clear any existing session first
-      console.log('🧹 MFA Service: Clearing existing session...');
-      await supabase.auth.signOut();
-      await new Promise(resolve => setTimeout(resolve, 500));
-
+      // Clear any existing MFA session first
+      mfaSessionManager.clearSession();
+      
       // First, validate credentials by attempting sign in
       console.log('🔍 MFA Service: Validating credentials...');
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -29,23 +27,17 @@ class MFAAuthService {
 
       console.log('✅ MFA Service: Credentials validated for user:', data.user?.id);
 
-      // Get the user ID before signing out
+      // Get the user ID before proceeding with MFA
       const userId = data.user?.id;
       
-      // Immediately sign out to prevent session persistence
-      console.log('🚪 MFA Service: Signing out to prevent session persistence...');
+      // Sign out immediately to prevent session persistence until MFA is complete
+      console.log('🚪 MFA Service: Signing out to start MFA flow...');
       await supabase.auth.signOut();
+      
+      // Wait a bit to ensure signout is complete
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Verify we're actually signed out
-      const { data: sessionCheck } = await supabase.auth.getSession();
-      if (sessionCheck.session) {
-        console.log('⚠️ MFA Service: Still have session, forcing another signout...');
-        await supabase.auth.signOut();
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
-
-      // Store the session data temporarily
+      // Store the session data temporarily for MFA
       const sessionData: MFASessionData = {
         email,
         password,
@@ -58,7 +50,7 @@ class MFAAuthService {
       // Send MFA email
       await mfaEmailService.sendMFAEmail(email);
 
-      console.log('🎯 MFA Service: Sign in initiated successfully');
+      console.log('🎯 MFA Service: MFA flow initiated successfully');
       return { mfaRequired: true };
     } catch (error: any) {
       console.error('❌ MFA Service: Sign in initiation failed:', error);

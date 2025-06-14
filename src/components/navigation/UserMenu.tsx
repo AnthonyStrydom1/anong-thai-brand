@@ -31,7 +31,6 @@ const UserMenu = ({
   const isMobile = useIsMobile();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [hasPendingMFA, setHasPendingMFA] = useState(false);
-  const [isCheckingMFA, setIsCheckingMFA] = useState(true);
   
   const {
     showLoginModal,
@@ -53,26 +52,36 @@ const UserMenu = ({
     setLastName,
   } = useAuthModal();
 
-  // Check for pending MFA on mount and auth state changes
+  // Check for pending MFA status
   useEffect(() => {
     const checkMFAStatus = () => {
-      console.log('🔍 UserMenu: Checking MFA status...');
       const pendingMFA = mfaAuthService.hasPendingMFA();
-      const pendingEmail = mfaAuthService.getPendingMFAEmail();
-      
-      console.log('📊 UserMenu: MFA Status:', { pendingMFA, pendingEmail, isLoggedIn });
-      
       setHasPendingMFA(pendingMFA);
-      setIsCheckingMFA(false);
       
-      // If we have pending MFA and we're not logged in, show the login modal
-      if (pendingMFA && pendingEmail && !isLoggedIn) {
-        console.log('🚨 UserMenu: Pending MFA detected, should redirect to AuthPage');
-        // Don't auto-open modal here, let AuthPage handle it
-      }
+      console.log('🔍 UserMenu: MFA Status Check:', { pendingMFA, isLoggedIn });
     };
 
+    // Check immediately and on auth state changes
     checkMFAStatus();
+    
+    // Listen for MFA session events
+    const handleMFAStored = () => {
+      console.log('📧 UserMenu: MFA session stored');
+      setHasPendingMFA(true);
+    };
+
+    const handleMFACleared = () => {
+      console.log('🧹 UserMenu: MFA session cleared');
+      setHasPendingMFA(false);
+    };
+
+    window.addEventListener('mfa-session-stored', handleMFAStored);
+    window.addEventListener('mfa-session-cleared', handleMFACleared);
+
+    return () => {
+      window.removeEventListener('mfa-session-stored', handleMFAStored);
+      window.removeEventListener('mfa-session-cleared', handleMFACleared);
+    };
   }, [isLoggedIn]);
 
   // Auto-open login modal on mobile when not logged in (only for /account route)
@@ -113,60 +122,19 @@ const UserMenu = ({
     onLogout();
   };
 
-  // Don't render anything while checking MFA status to prevent flashing
-  if (isCheckingMFA) {
-    return (
-      <div className="w-10 h-10 flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  // If there's pending MFA, show a different state
-  if (hasPendingMFA) {
-    return (
-      <>
-        <UserMenuButton 
-          isLoggedIn={false}
-          onClick={handleTriggerClick}
-          translations={translations}
-        />
-        
-        {/* Auth Modal - only show if not on auth page */}
-        {!window.location.pathname.includes('/auth') && (
-          <AuthModal
-            showModal={showLoginModal}
-            isSignUp={isSignUp}
-            showForgotPassword={showForgotPassword}
-            email={email}
-            password={password}
-            firstName={firstName}
-            lastName={lastName}
-            isLoading={isLoading}
-            onClose={handleCloseModal}
-            onToggleSignUp={() => setIsSignUp(!isSignUp)}
-            onSubmit={handleAuthSubmit}
-            onEmailChange={handleEmailChange}
-            onPasswordChange={handlePasswordChange}
-            onFirstNameChange={setFirstName}
-            onLastNameChange={setLastName}
-            onForgotPassword={handleForgotPassword}
-          />
-        )}
-      </>
-    );
-  }
+  // Show different states based on auth and MFA status
+  const shouldShowAsLoggedOut = !isLoggedIn || hasPendingMFA;
 
   return (
     <>
-      <DropdownMenu open={isLoggedIn ? isDropdownOpen : false} onOpenChange={setIsDropdownOpen}>
+      <DropdownMenu open={isLoggedIn && !hasPendingMFA ? isDropdownOpen : false} onOpenChange={setIsDropdownOpen}>
         <UserMenuButton 
-          isLoggedIn={isLoggedIn}
+          isLoggedIn={!shouldShowAsLoggedOut}
           onClick={handleTriggerClick}
           translations={translations}
         />
         
-        {isLoggedIn && (
+        {isLoggedIn && !hasPendingMFA && (
           <UserMenuDropdown 
             onLogout={handleLogout}
             translations={translations}

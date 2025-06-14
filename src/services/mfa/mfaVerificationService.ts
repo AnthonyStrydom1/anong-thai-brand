@@ -22,12 +22,15 @@ export class MFAVerificationService {
   }
 
   async signInWithCredentials(email: string, password: string) {
-    // Ensure we're signed out before attempting final sign in
+    // Ensure we're starting fresh
+    console.log('🔐 MFA Verification Service: Signing out any existing session...');
     await supabase.auth.signOut();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    // Wait for signout to complete
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Complete sign in with verified credentials
-    console.log('🔐 MFA Verification Service: Completing sign in...');
+    console.log('🔐 MFA Verification Service: Completing final sign in...');
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -57,7 +60,7 @@ export class MFAVerificationService {
     if (mfaSessionManager.isSessionExpired(sessionData)) {
       console.log('⏰ MFA Verification Service: Session expired');
       mfaSessionManager.clearSession();
-      throw new Error('MFA session expired');
+      throw new Error('MFA session expired. Please sign in again.');
     }
 
     try {
@@ -68,11 +71,18 @@ export class MFAVerificationService {
       const data = await this.signInWithCredentials(sessionData.email, sessionData.password);
 
       // Clear MFA session data after successful login
+      console.log('🧹 MFA Verification Service: Clearing MFA session after successful login');
       mfaSessionManager.clearSession();
 
       return data;
     } catch (error: any) {
       console.error('❌ MFA Verification Service: Verification failed:', error);
+      
+      // Don't clear session on verification failures - let user retry
+      if (error.message?.includes('expired')) {
+        mfaSessionManager.clearSession();
+      }
+      
       throw new Error(error.message || 'Verification failed');
     }
   }

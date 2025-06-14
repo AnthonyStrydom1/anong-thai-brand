@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { authService, type AuthUser } from '@/services/authService';
+import { mfaAuthService } from '@/services/mfaAuthService';
 
 interface AuthContextType {
   user: User | null;
@@ -24,23 +25,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = authService.onAuthStateChange(
       (user, session) => {
-        console.log('Auth state changed:', { user: user?.id, session: !!session });
+        if (!mounted) return;
+        
+        console.log('🔄 Auth state changed:', { 
+          userId: user?.id, 
+          hasSession: !!session,
+          sessionExpiry: session?.expires_at 
+        });
         
         setUser(user);
         setSession(session);
         
         if (user && session) {
-          // Defer profile loading to prevent auth deadlock
+          // Load user profile after successful auth
           setTimeout(async () => {
+            if (!mounted) return;
             try {
               const profile = await authService.getUserProfile(user.id);
-              setUserProfile(profile);
+              if (mounted) {
+                setUserProfile(profile);
+              }
             } catch (error) {
               console.error('Error fetching user profile:', error);
-              setUserProfile(null);
+              if (mounted) {
+                setUserProfile(null);
+              }
             }
           }, 0);
         } else {
@@ -51,26 +65,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // Check for existing session
-    authService.getCurrentSession().then((session) => {
-      if (session?.user) {
-        console.log('Found existing session:', session.user.id);
-        setUser(session.user);
-        setSession(session);
-      } else {
-        console.log('No valid session found');
-        setUser(null);
-        setSession(null);
+    // Check for existing session on mount
+    const checkSession = async () => {
+      try {
+        const session = await authService.getCurrentSession();
+        if (mounted) {
+          if (session?.user) {
+            console.log('✅ Found existing session:', session.user.id);
+            setUser(session.user);
+            setSession(session);
+          } else {
+            console.log('❌ No valid session found');
+            setUser(null);
+            setSession(null);
+          }
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        if (mounted) {
+          setUser(null);
+          setSession(null);
+          setIsLoading(false);
+        }
       }
-      setIsLoading(false);
-    }).catch((error) => {
-      console.error('Session check error:', error);
-      setUser(null);
-      setSession(null);
-      setIsLoading(false);
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    checkSession();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
@@ -86,18 +112,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       console.log('🔐 Starting sign in process');
+      
+      // Clear any existing MFA session first
+      mfaAuthService.clearMFASession();
+      
+      // Try MFA signin first (which validates credentials and starts MFA flow)
+      const mfaResult = await mfaAuthService.initiateSignIn({ email, password });
+      
+      if (mfaResult.mfaRequired) {
+        console.log('🔒 MFA required, returning mfaRequired flag');
+        return { mfaRequired: true };
+      }
+      
+      // If no MFA required, proceed with regular signin
       const result = await authService.signIn({ email, password });
-      console.log('✅ Sign in result:', result);
+      console.log('✅ Regular sign in completed:', result);
       return result;
     } catch (error) {
       console.error('❌ Sign in error:', error);
+      // Clear any MFA session on error
+      mfaAuthService.clearMFASession();
       throw error;
     }
   };
 
   const signOut = async () => {
     try {
+      // Clear MFA session first
+      mfaAuthService.clearMFASession();
+      
+      // Then sign out from Supabase
       await authService.signOut();
+      
       // Clear local state immediately
       setUser(null);
       setSession(null);
