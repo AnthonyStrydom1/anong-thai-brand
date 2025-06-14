@@ -1,9 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabaseService } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
 import { useAdminSecurity } from "@/hooks/useAdminSecurity";
 import OrderManagerHeader from './orders/OrderManagerHeader';
+import OrderManagerStats from './orders/OrderManagerStats';
+import OrderFilters from './orders/OrderFilters';
+import OrderActions from './orders/OrderActions';
 import OrderStatusCard from './orders/OrderStatusCard';
 import OrderDetailsDialog from './orders/OrderDetailsDialog';
 import OrdersEmptyState from './orders/OrdersEmptyState';
@@ -29,14 +31,23 @@ interface ExtendedOrder {
 
 const OrderManager = () => {
   const [orders, setOrders] = useState<ExtendedOrder[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<ExtendedOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [paymentFilter, setPaymentFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const { logAdminAction } = useAdminSecurity();
 
   useEffect(() => {
     loadOrders();
   }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [orders, statusFilter, paymentFilter, searchTerm]);
 
   const loadOrders = async () => {
     try {
@@ -66,6 +77,86 @@ const OrderManager = () => {
       });
       setIsLoading(false);
     }
+  };
+
+  const applyFilters = () => {
+    let filtered = [...orders];
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(order => order.status === statusFilter);
+    }
+
+    // Apply payment filter
+    if (paymentFilter !== 'all') {
+      filtered = filtered.filter(order => order.payment_status === paymentFilter);
+    }
+
+    // Apply search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(order => 
+        order.order_number.toLowerCase().includes(term) ||
+        order.customer_id.toString().includes(term)
+      );
+    }
+
+    setFilteredOrders(filtered);
+  };
+
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setPaymentFilter('all');
+    setSearchTerm('');
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedOrders(filteredOrders.map(order => order.id));
+    } else {
+      setSelectedOrders([]);
+    }
+  };
+
+  const handleBulkStatusUpdate = async (newStatus: string) => {
+    try {
+      for (const orderId of selectedOrders) {
+        await updateOrderStatus(orderId, newStatus);
+      }
+      setSelectedOrders([]);
+      toast({
+        title: "Success",
+        description: `Updated ${selectedOrders.length} orders to ${newStatus}`,
+      });
+    } catch (error) {
+      console.error('Bulk update failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update some orders",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleExportOrders = () => {
+    const csvContent = [
+      ['Order Number', 'Status', 'Payment Status', 'Total Amount', 'Created Date'].join(','),
+      ...filteredOrders.map(order => [
+        order.order_number,
+        order.status,
+        order.payment_status,
+        order.total_amount,
+        new Date(order.created_at).toLocaleDateString()
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'orders-export.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
@@ -284,12 +375,32 @@ const OrderManager = () => {
   return (
     <div className="p-6 space-y-6">
       <OrderManagerHeader onRefresh={loadOrders} />
+      
+      <OrderManagerStats orders={orders} />
 
-      {orders.length === 0 ? (
+      <OrderFilters
+        statusFilter={statusFilter}
+        paymentFilter={paymentFilter}
+        searchTerm={searchTerm}
+        onStatusFilterChange={setStatusFilter}
+        onPaymentFilterChange={setPaymentFilter}
+        onSearchChange={setSearchTerm}
+        onClearFilters={clearFilters}
+      />
+
+      <OrderActions
+        selectedOrders={selectedOrders}
+        onSelectAll={handleSelectAll}
+        onBulkStatusUpdate={handleBulkStatusUpdate}
+        onExportOrders={handleExportOrders}
+        totalOrders={filteredOrders.length}
+      />
+
+      {filteredOrders.length === 0 ? (
         <OrdersEmptyState />
       ) : (
         <div className="grid gap-4">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <OrderStatusCard
               key={order.id}
               order={order}
