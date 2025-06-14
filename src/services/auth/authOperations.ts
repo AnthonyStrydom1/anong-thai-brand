@@ -27,7 +27,9 @@ export class AuthOperationsService {
     // Clear any existing session
     await supabase.auth.signOut();
 
-    // Sign up without email confirmation - user account is immediately active
+    console.log('🔄 Auth Operations: Starting sign up without email confirmation');
+
+    // Sign up without email confirmation - account is immediately active
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -40,11 +42,19 @@ export class AuthOperationsService {
       }
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Auth Operations: Sign up error:', error);
+      throw error;
+    }
+
+    console.log('✅ Auth Operations: Sign up successful - account active immediately');
 
     // The account is now created and active, no email confirmation needed
-    // User can immediately proceed to sign in with MFA
-    return { ...data, accountCreated: true };
+    return { 
+      user: data.user, 
+      session: data.session,
+      accountCreated: true 
+    };
   }
 
   async signIn({ email, password }: SignInData) {

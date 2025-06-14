@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
       timestamp: new Date().toISOString()
     });
 
-    // Only handle password recovery events - no emails for account creation
+    // Only handle password recovery events - NO emails for account creation or confirmation
     switch (hookData.event) {
       case 'user.password_recovery.requested':
         console.log('🔑 Password recovery requested - sending reset email');
@@ -45,21 +45,21 @@ const handler = async (req: Request): Promise<Response> => {
         break;
         
       case 'user.created':
-        console.log('👤 User created - no email sent (confirmation disabled)');
+        console.log('👤 User created - NO email sent (confirmation disabled by design)');
         break;
         
       case 'user.confirmation.requested':
-        console.log('📧 User confirmation requested - ignoring (confirmation disabled)');
+        console.log('📧 User confirmation requested - IGNORING (confirmation disabled by design)');
         break;
         
       default:
-        console.log('ℹ️ Unhandled auth event:', hookData.event);
+        console.log('ℹ️ Unhandled auth event (no action required):', hookData.event);
     }
 
     // Always return success - never block authentication
     return new Response(JSON.stringify({ 
       success: true,
-      message: "Authentication processed successfully"
+      message: "Authentication processed successfully - no confirmation emails sent"
     }), {
       status: 200,
       headers: {
@@ -71,7 +71,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("❌ Error in auth hook:", error);
     
-    // CRITICAL: Never fail the auth process
+    // CRITICAL: Never fail the auth process - always return success
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -86,7 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-// Only send password reset emails - no welcome/confirmation emails
+// Only send password reset emails - NO welcome/confirmation emails
 async function sendPasswordResetEmail(user: any) {
   const firstName = user.user_metadata?.first_name || 'there';
   
