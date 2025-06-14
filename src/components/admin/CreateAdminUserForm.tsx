@@ -37,20 +37,40 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
 
     setIsCreating(true);
     try {
-      // Create user account
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // First, check if user already exists
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', formData.email)
+        .maybeSingle();
+
+      if (existingUser) {
+        toast({
+          title: "Error",
+          description: "A user with this email already exists.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Create user using the sign up method with auto-confirm
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        user_metadata: {
-          first_name: formData.firstName,
-          last_name: formData.lastName
-        },
-        email_confirm: true // Auto-confirm email for admin-created users
+        options: {
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName
+          }
+        }
       });
 
       if (authError) throw authError;
 
       if (authData.user) {
+        // Wait a moment for the user to be created
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         // Assign admin role using the RPC function
         const { error: roleError } = await supabase.rpc('assign_admin_role', {
           _user_id: authData.user.id
@@ -58,13 +78,17 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
 
         if (roleError) {
           console.error('Role assignment error:', roleError);
-          // Don't throw here as user was created successfully
+          toast({
+            title: "Warning",
+            description: `User created but admin role assignment failed: ${roleError.message}`,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Success!",
+            description: `Admin user ${formData.email} created successfully.`,
+          });
         }
-
-        toast({
-          title: "Success!",
-          description: `Admin user ${formData.email} created successfully.`,
-        });
 
         // Clear form
         setFormData({ email: '', password: '', firstName: '', lastName: '' });

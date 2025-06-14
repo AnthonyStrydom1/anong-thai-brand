@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,6 @@ interface UserWithProfile {
   id: string;
   email: string;
   created_at: string;
-  last_sign_in_at?: string;
   first_name?: string;
   last_name?: string;
 }
@@ -34,7 +34,6 @@ const UserManagement = () => {
   const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
   const { isAdmin } = useUserRoles();
 
-  // Load users from both profiles and auth.users to ensure comprehensive search
   useEffect(() => {
     if (isAdmin()) {
       loadUsers();
@@ -52,8 +51,12 @@ const UserManagement = () => {
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading users:', error);
+        throw error;
+      }
       
+      console.log('Loaded users:', data);
       setUsers(data || []);
     } catch (error) {
       console.error('Error loading users:', error);
@@ -119,12 +122,17 @@ const UserManagement = () => {
     return getUserRoles(userId).some(role => role.role === 'admin');
   };
 
-  const filteredUsers = users.filter(user => 
-    user.email?.toLowerCase().includes(searchEmail.toLowerCase()) ||
-    user.first_name?.toLowerCase().includes(searchEmail.toLowerCase()) ||
-    user.last_name?.toLowerCase().includes(searchEmail.toLowerCase()) ||
-    `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchEmail.toLowerCase())
-  );
+  const filteredUsers = users.filter(user => {
+    const searchTerm = searchEmail.toLowerCase();
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim().toLowerCase();
+    
+    return (
+      user.email?.toLowerCase().includes(searchTerm) ||
+      user.first_name?.toLowerCase().includes(searchTerm) ||
+      user.last_name?.toLowerCase().includes(searchTerm) ||
+      fullName.includes(searchTerm)
+    );
+  });
 
   if (!isAdmin()) {
     return (
@@ -219,11 +227,6 @@ const UserManagement = () => {
                           <p className="text-sm text-gray-500">
                             Joined: {new Date(user.created_at).toLocaleDateString()}
                           </p>
-                          {user.last_sign_in_at && (
-                            <p className="text-sm text-gray-500">
-                              Last login: {new Date(user.last_sign_in_at).toLocaleDateString()}
-                            </p>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -281,8 +284,8 @@ const UserManagement = () => {
             <div className="text-sm text-blue-800">
               <p className="font-medium mb-1">Admin User Management</p>
               <p>
-                You can create new admin users directly from this interface, or assign admin roles to existing users. 
-                Admin users have full access to the dashboard and can manage other users.
+                You can create new admin users directly from this interface, search existing users by name or email, 
+                and assign admin roles to existing users. Admin users have full access to the dashboard.
               </p>
             </div>
           </div>

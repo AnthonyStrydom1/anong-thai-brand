@@ -747,6 +747,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      create_admin_user: {
+        Args: {
+          user_email: string
+          user_password: string
+          first_name?: string
+          last_name?: string
+        }
+        Returns: Json
+      }
       create_mfa_challenge: {
         Args: { user_email: string }
         Returns: {
