@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { toast } from '@/hooks/use-toast';
 import { mfaAuthService } from '@/services/mfaAuthService';
 import { Shield, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
@@ -165,7 +164,8 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
                         
                         // Auto-focus next input
                         if (value && index < 5) {
-                          const nextInput = e.target.parentElement?.children[index + 1] as HTMLInputElement;
+                          const inputElement = e.target as HTMLInputElement;
+                          const nextInput = inputElement.parentElement?.children[index + 1] as HTMLInputElement;
                           nextInput?.focus();
                         }
                       }
@@ -173,7 +173,8 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
                     onKeyDown={(e) => {
                       // Handle backspace
                       if (e.key === 'Backspace' && !code[index] && index > 0) {
-                        const prevInput = e.target.parentElement?.children[index - 1] as HTMLInputElement;
+                        const inputElement = e.target as HTMLInputElement;
+                        const prevInput = inputElement.parentElement?.children[index - 1] as HTMLInputElement;
                         prevInput?.focus();
                       }
                     }}
