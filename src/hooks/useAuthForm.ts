@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { mfaAuthService } from '@/services/mfaAuthService';
@@ -33,14 +34,19 @@ export const useAuthForm = () => {
 
     try {
       if (isLogin) {
-        // Use MFA service for login - this should ALWAYS require MFA
-        const result = await mfaAuthService.initiateSignIn({
-          email: formData.email,
-          password: formData.password
-        });
+        // For login, ALWAYS use MFA - never allow direct login
+        try {
+          await mfaAuthService.initiateSignIn({
+            email: formData.email,
+            password: formData.password
+          });
 
-        // MFA should always be required for login
-        return { mfaRequired: true };
+          // If we get here, credentials are valid and MFA is initiated
+          return { mfaRequired: true };
+        } catch (error: any) {
+          // If initiation fails, it means invalid credentials
+          throw error;
+        }
       } else {
         // For sign-up, create account without auto-login
         await authService.signUp({
@@ -50,12 +56,12 @@ export const useAuthForm = () => {
           lastName: formData.lastName
         });
         
-        // Wait a moment to ensure signup completes
-        await new Promise(resolve => setTimeout(resolve, 200));
+        // Wait longer to ensure signup completes and any auto-login is cleared
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // After successful sign-up, initiate MFA flow (no auto-login)
+        // After successful sign-up, initiate MFA flow (no auto-login allowed)
         try {
-          const mfaResult = await mfaAuthService.initiateSignIn({
+          await mfaAuthService.initiateSignIn({
             email: formData.email,
             password: formData.password
           });

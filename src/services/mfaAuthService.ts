@@ -13,13 +13,13 @@ class MFAAuthService {
 
   async initiateSignIn({ email, password }: MFASignInData) {
     try {
-      // Clear any existing session first
+      // Clear any existing session first - be more aggressive about this
       await supabase.auth.signOut();
       
-      // Wait a moment to ensure signout completes
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait longer to ensure signout completes
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Verify credentials without completing sign in
+      // First, just validate credentials by attempting sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -27,18 +27,34 @@ class MFAAuthService {
 
       if (error) throw error;
 
-      // Immediately sign out to prevent session creation
+      // Get the user ID before signing out
+      const userId = data.user?.id;
+      
+      // Immediately and aggressively sign out to prevent session persistence
       await supabase.auth.signOut();
       
-      // Wait to ensure signout completes
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Clear local storage to ensure no session remnants
+      localStorage.removeItem('supabase.auth.token');
+      sessionStorage.removeItem('supabase.auth.token');
+      
+      // Wait longer to ensure signout completes
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Verify we're actually signed out
+      const { data: sessionCheck } = await supabase.auth.getSession();
+      if (sessionCheck.session) {
+        console.warn('Session still exists after signout attempt');
+        // Force another signout
+        await supabase.auth.signOut();
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
 
       // Store the session data temporarily (encrypted in production)
       const sessionData = {
         email,
         password, // In production, this should be encrypted
         timestamp: Date.now(),
-        userId: data.user.id
+        userId: userId
       };
       
       sessionStorage.setItem(this.MFA_SESSION_KEY, JSON.stringify(sessionData));
@@ -88,9 +104,9 @@ class MFAAuthService {
       throw new Error('Invalid MFA code');
     }
 
-    // Clear any existing session before signing in
+    // Ensure we're signed out before attempting final sign in
     await supabase.auth.signOut();
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     // Complete sign in with verified credentials
     const { data, error } = await supabase.auth.signInWithPassword({
