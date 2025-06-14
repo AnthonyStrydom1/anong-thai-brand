@@ -3,6 +3,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Footer from "@/components/Footer";
 import ProductDetail from "@/components/ProductDetail";
 import NavigationBanner from "@/components/NavigationBanner";
+import ProductRatings from "@/components/product/ProductRatings";
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 
@@ -21,6 +22,11 @@ const ProductDetailPage = () => {
       
       <main className="flex-grow thai-pattern-bg">
         <ProductDetail />
+        {id && (
+          <div className="container mx-auto px-4 py-8">
+            <ProductRatings productId={id} />
+          </div>
+        )}
       </main>
       
       <Footer />

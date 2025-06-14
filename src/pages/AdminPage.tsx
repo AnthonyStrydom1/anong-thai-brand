@@ -7,7 +7,6 @@ import CustomerManager from '@/components/admin/CustomerManager';
 import StockManager from '@/components/admin/StockManager';
 import SecurityDashboard from '@/components/admin/SecurityDashboard';
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
-import NavigationBanner from '@/components/NavigationBanner';
 import { Package, ShoppingCart, Users, BarChart3, Warehouse, Shield } from 'lucide-react';
 import { supabaseService } from '@/services/supabaseService';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -70,7 +69,6 @@ const AdminPage = () => {
   return (
     <ProtectedAdminRoute>
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <NavigationBanner />
         <div className="flex-1 container mx-auto py-4 px-4 md:py-8">
           <div className="mb-6 md:mb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Admin Dashboard</h1>
