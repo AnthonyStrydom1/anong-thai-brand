@@ -16,7 +16,7 @@ export const products: Product[] = [
       en: "A rich, aromatic paste for authentic Thai red curry",
       th: "พริกแกงเผ็ดสูตรต้นตำรับจากอนงค์ เหมาะสำหรับแกงไทยแท้"
     },
-    price: 120.00,
+    price: 138.00, // VAT inclusive (was 120.00, now 120.00 * 1.15 = 138.00)
     image: "/lovable-uploads/59d60aec-006e-402a-b7fe-08e8f466618c.png",
     category: "curry-pastes",
     ingredients: {
@@ -42,7 +42,7 @@ export const products: Product[] = [
       en: "Sweet, tangy, and savory for authentic Pad Thai",
       th: "ซอสผัดไทย รสกลมกล่อม ใช้ง่ายพร้อมปรุง"
     },
-    price: 75.00,
+    price: 86.25, // VAT inclusive (was 75.00, now 75.00 * 1.15 = 86.25)
     image: "/lovable-uploads/a76ed6cd-be29-4a21-bf31-03e862c4826e.png",
     category: "stir-fry-sauces",
     ingredients: {
@@ -68,7 +68,7 @@ export const products: Product[] = [
       en: "Rich and nutty Thai curry paste with a hint of sweetness",
       th: "พริกแกงแพนงรสชาติเข้มข้น มีความหอมของถั่ว และหวานนิดๆ"
     },
-    price: 135.00,
+    price: 155.25, // VAT inclusive (was 135.00, now 135.00 * 1.15 = 155.25)
     image: "/lovable-uploads/fbfc8d89-fd2d-424e-b4da-d308f2b934aa.png",
     category: "curry-pastes",
     ingredients: {
@@ -94,7 +94,7 @@ export const products: Product[] = [
       en: "Aromatic green curry paste with a fresh herbaceous flavor",
       th: "พริกแกงเขียวหวานกลิ่นหอมสดชื่นจากสมุนไพร"
     },
-    price: 130.00,
+    price: 149.50, // VAT inclusive (was 130.00, now 130.00 * 1.15 = 149.50)
     image: "/lovable-uploads/a9343c5d-3d1a-4926-bb18-4c2794610f89.png",
     category: "curry-pastes",
     ingredients: {
@@ -120,7 +120,7 @@ export const products: Product[] = [
       en: "Spicy and tangy paste perfect for Tom Yum soup",
       th: "พริกเผารสเผ็ดเปรี้ยว เหมาะสำหรับต้มยำ"
     },
-    price: 115.00,
+    price: 132.25, // VAT inclusive (was 115.00, now 115.00 * 1.15 = 132.25)
     image: "/lovable-uploads/d9396e1e-dde7-48a0-966a-6263ccb57de3.png",
     category: "curry-pastes",
     ingredients: {
@@ -146,7 +146,7 @@ export const products: Product[] = [
       en: "Complex curry paste with warm spices and nutty flavors",
       th: "พริกแกงรสซับซ้อน มีกลิ่นเครื่องเทศอบอุ่นและถั่ว"
     },
-    price: 140.00,
+    price: 161.00, // VAT inclusive (was 140.00, now 140.00 * 1.15 = 161.00)
     image: "/lovable-uploads/79ede76f-515f-435f-b671-7d1bbe124f12.png",
     category: "curry-pastes",
     ingredients: {
@@ -172,7 +172,7 @@ export const products: Product[] = [
       en: "Sweet and tangy dipping sauce perfect for hot pot",
       th: "น้ำจิ้มรสหวานเปรี้ยว เหมาะสำหรับสุกี้"
     },
-    price: 85.00,
+    price: 97.75, // VAT inclusive (was 85.00, now 85.00 * 1.15 = 97.75)
     image: "/lovable-uploads/5f6f5412-7f80-441c-872c-3a89462dea0c.png",
     category: "dipping-sauces",
     ingredients: {
