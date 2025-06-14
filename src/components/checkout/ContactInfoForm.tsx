@@ -40,18 +40,19 @@ export const ContactInfoForm = ({ formData, onInputChange, translations }: Conta
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="email" className="anong-body text-anong-black">
-              {translations.email}
+              {translations.email} *
             </Label>
             <Input
               id="email"
               name="email"
               type="email"
               required
-              value={formData.email}
+              value={formData.email || ''}
               onChange={onInputChange}
               className="anong-input"
               maxLength={254}
               placeholder="your@email.com"
+              autoComplete="email"
             />
           </div>
         </CardContent>
@@ -68,99 +69,105 @@ export const ContactInfoForm = ({ formData, onInputChange, translations }: Conta
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="firstName" className="anong-body text-anong-black">
-                {translations.firstName}
+                {translations.firstName} *
               </Label>
               <Input
                 id="firstName"
                 name="firstName"
                 required
-                value={formData.firstName}
+                value={formData.firstName || ''}
                 onChange={onInputChange}
                 className="anong-input"
                 maxLength={50}
                 placeholder="First name"
+                autoComplete="given-name"
               />
             </div>
             <div>
               <Label htmlFor="lastName" className="anong-body text-anong-black">
-                {translations.lastName}
+                {translations.lastName} *
               </Label>
               <Input
                 id="lastName"
                 name="lastName"
                 required
-                value={formData.lastName}
+                value={formData.lastName || ''}
                 onChange={onInputChange}
                 className="anong-input"
                 maxLength={50}
                 placeholder="Last name"
+                autoComplete="family-name"
               />
             </div>
           </div>
           
           <div>
             <Label htmlFor="address" className="anong-body text-anong-black">
-              {translations.address}
+              {translations.address} *
             </Label>
             <Input
               id="address"
               name="address"
               required
-              value={formData.address}
+              value={formData.address || ''}
               onChange={onInputChange}
               className="anong-input"
               maxLength={200}
               placeholder="Street address"
+              autoComplete="street-address"
             />
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="city" className="anong-body text-anong-black">
-                {translations.city}
+                {translations.city} *
               </Label>
               <Input
                 id="city"
                 name="city"
                 required
-                value={formData.city}
+                value={formData.city || ''}
                 onChange={onInputChange}
                 className="anong-input"
                 maxLength={100}
                 placeholder="City"
+                autoComplete="address-level2"
               />
             </div>
             <div>
               <Label htmlFor="postalCode" className="anong-body text-anong-black">
-                {translations.postalCode}
+                {translations.postalCode} *
               </Label>
               <Input
                 id="postalCode"
                 name="postalCode"
                 required
-                value={formData.postalCode}
+                value={formData.postalCode || ''}
                 onChange={onInputChange}
                 className="anong-input"
                 maxLength={20}
                 placeholder="Postal code"
+                autoComplete="postal-code"
               />
             </div>
           </div>
           
           <div>
             <Label htmlFor="phone" className="anong-body text-anong-black">
-              {translations.phone}
+              {translations.phone} *
             </Label>
             <Input
               id="phone"
               name="phone"
               type="tel"
               required
-              value={formData.phone}
+              value={formData.phone || ''}
               onChange={onInputChange}
               className="anong-input"
               maxLength={20}
               placeholder="Phone number"
+              autoComplete="tel"
             />
           </div>
         </CardContent>

@@ -69,18 +69,21 @@ export const useCheckoutForm = () => {
       return updated;
     });
 
-    // Auto-calculate shipping when address fields change
-    if ((name === 'city' || name === 'postalCode') && value.trim() && formData.city && formData.postalCode) {
-      console.log('🚚 Triggering shipping calculation...');
-      setTimeout(() => calculateShipping(), 500); // Debounce
+    // Auto-calculate shipping when both city and postal code are filled
+    if ((name === 'city' || name === 'postalCode') && value.trim()) {
+      const newFormData = { ...formData, [name]: value };
+      if (newFormData.city && newFormData.postalCode && items.length > 0) {
+        console.log('🚚 Triggering shipping calculation...');
+        setTimeout(() => calculateShippingForAddress(newFormData.city, newFormData.postalCode), 500);
+      }
     }
   };
 
-  const calculateShipping = async () => {
-    if (!formData.city || !formData.postalCode || items.length === 0) {
+  const calculateShippingForAddress = async (city: string, postalCode: string) => {
+    if (!city || !postalCode || items.length === 0) {
       console.log('⚠️ Missing shipping calculation requirements:', { 
-        city: formData.city, 
-        postalCode: formData.postalCode, 
+        city, 
+        postalCode, 
         itemsCount: items.length 
       });
       return;
@@ -88,10 +91,10 @@ export const useCheckoutForm = () => {
 
     setIsCalculatingShipping(true);
     try {
-      console.log('🚚 Calculating shipping for:', { city: formData.city, postalCode: formData.postalCode });
+      console.log('🚚 Calculating shipping for:', { city, postalCode });
       
       const rates = await orderService.calculateShipping(
-        { city: formData.city, postalCode: formData.postalCode },
+        { city, postalCode },
         items
       );
       
@@ -104,8 +107,8 @@ export const useCheckoutForm = () => {
       }
 
       await logSecurityEvent('shipping_calculation', 'checkout', undefined, {
-        city: formData.city,
-        postalCode: formData.postalCode,
+        city,
+        postalCode,
         ratesFound: rates.length
       });
     } catch (error) {
@@ -124,18 +127,32 @@ export const useCheckoutForm = () => {
     }
   };
 
+  const calculateShipping = () => {
+    if (formData.city && formData.postalCode) {
+      calculateShippingForAddress(formData.city, formData.postalCode);
+    }
+  };
+
   const validateForm = () => {
     const errors: string[] = [];
 
-    if (!formData.email) errors.push('Email is required');
-    if (!formData.firstName) errors.push('First name is required');
-    if (!formData.lastName) errors.push('Last name is required');
-    if (!formData.address) errors.push('Address is required');
-    if (!formData.city) errors.push('City is required');
-    if (!formData.postalCode) errors.push('Postal code is required');
-    if (!formData.phone) errors.push('Phone number is required');
+    // Check required fields
+    if (!formData.email?.trim()) errors.push('Email is required');
+    if (!formData.firstName?.trim()) errors.push('First name is required');
+    if (!formData.lastName?.trim()) errors.push('Last name is required');
+    if (!formData.address?.trim()) errors.push('Address is required');
+    if (!formData.city?.trim()) errors.push('City is required');
+    if (!formData.postalCode?.trim()) errors.push('Postal code is required');
+    if (!formData.phone?.trim()) errors.push('Phone number is required');
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      errors.push('Please enter a valid email address');
+    }
 
     if (errors.length > 0) {
+      console.error('❌ Form validation errors:', errors);
       toast({
         title: 'Form Validation Error',
         description: errors.join(', '),
@@ -151,6 +168,9 @@ export const useCheckoutForm = () => {
     e.preventDefault();
 
     console.log('🛒 Starting order submission...');
+    console.log('📋 Current form data:', formData);
+    console.log('🛍️ Cart items:', items);
+    console.log('📦 Selected shipping:', selectedShippingRate);
 
     // Rate limiting check
     if (!checkRateLimit()) {
@@ -168,6 +188,7 @@ export const useCheckoutForm = () => {
     }
 
     if (!user) {
+      console.error('❌ No user found');
       toast({
         title: 'Authentication Required',
         description: 'Please log in to complete your order.',
@@ -177,6 +198,7 @@ export const useCheckoutForm = () => {
     }
 
     if (!selectedShippingRate) {
+      console.error('❌ No shipping rate selected');
       toast({
         title: 'Shipping Required',
         description: 'Please select a shipping method.',
@@ -186,6 +208,7 @@ export const useCheckoutForm = () => {
     }
 
     if (items.length === 0) {
+      console.error('❌ Empty cart');
       toast({
         title: 'Empty Cart',
         description: 'Your cart is empty. Please add items before checking out.',
@@ -206,21 +229,23 @@ export const useCheckoutForm = () => {
     });
 
     try {
-      // Validate all form data
+      // Validate email
       const emailValidation = enhancedSecurityService.validateEmail(formData.email);
       if (!emailValidation.isValid) {
-        throw new Error('Invalid email address');
+        throw new Error('Invalid email address format');
       }
 
       // Check for SQL injection in all fields
       for (const [key, value] of Object.entries(formData)) {
-        const sqlCheck = enhancedSecurityService.containsSqlInjection(value);
-        if (!sqlCheck.isValid) {
-          await logSecurityEvent('sql_injection_attempt', 'checkout', undefined, {
-            field: key,
-            value: value.substring(0, 50)
-          }, false);
-          throw new Error('Invalid input detected');
+        if (value) {
+          const sqlCheck = enhancedSecurityService.containsSqlInjection(value);
+          if (!sqlCheck.isValid) {
+            await logSecurityEvent('sql_injection_attempt', 'checkout', undefined, {
+              field: key,
+              value: value.substring(0, 50)
+            }, false);
+            throw new Error('Invalid input detected in form data');
+          }
         }
       }
 
@@ -256,7 +281,7 @@ export const useCheckoutForm = () => {
 
       console.log('💰 Order totals calculated:', orderTotals);
 
-      // Create order
+      // Create order data
       const orderData = {
         customer_id: customer.id,
         items: items.map(item => ({
