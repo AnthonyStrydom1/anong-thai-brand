@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { supabaseService } from '@/services/supabaseService';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useProductTranslations } from './useProductTranslations';
 import StarRating from './StarRating';
 
 interface ReviewFormProps {
@@ -29,14 +31,16 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const t = useProductTranslations(language);
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user) {
       toast({
-        title: 'Authentication Required',
-        description: 'Please sign in to leave a review',
+        title: t.authRequired,
+        description: t.signInToReview,
         variant: 'destructive'
       });
       return;
@@ -44,8 +48,8 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
 
     if (!newReview.title.trim() || !newReview.content.trim()) {
       toast({
-        title: 'Missing Information',
-        description: 'Please provide both a title and review content',
+        title: t.missingInfo,
+        description: t.provideTitleAndContent,
         variant: 'destructive'
       });
       return;
@@ -57,8 +61,8 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
       
       if (!customer) {
         toast({
-          title: 'Customer Profile Required',
-          description: 'Please complete your profile to leave a review',
+          title: t.customerProfileRequired,
+          description: t.completeProfile,
           variant: 'destructive'
         });
         return;
@@ -78,8 +82,8 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
       if (error) throw error;
 
       toast({
-        title: 'Review Submitted!',
-        description: 'Your review has been submitted and is pending approval.',
+        title: t.reviewSubmitted,
+        description: t.reviewPending,
       });
 
       setNewReview({ rating: 5, title: '', content: '' });
@@ -87,8 +91,8 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
     } catch (error: any) {
       console.error('Error submitting review:', error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to submit review',
+        title: t.error,
+        description: error.message || t.failedToSubmitReview,
         variant: 'destructive'
       });
     } finally {
@@ -99,7 +103,7 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
   return (
     <form onSubmit={handleSubmitReview} className="space-y-4 p-4 border rounded-lg bg-gray-50 mb-6">
       <div>
-        <Label>Rating</Label>
+        <Label>{t.rating}</Label>
         <div className="mt-1">
           <StarRating
             rating={newReview.rating}
@@ -110,23 +114,23 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
       </div>
       
       <div>
-        <Label htmlFor="review-title">Review Title</Label>
+        <Label htmlFor="review-title">{t.reviewTitle}</Label>
         <Input
           id="review-title"
           value={newReview.title}
           onChange={(e) => setNewReview(prev => ({ ...prev, title: e.target.value }))}
-          placeholder="Summarize your review"
+          placeholder={t.reviewTitlePlaceholder}
           required
         />
       </div>
       
       <div>
-        <Label htmlFor="review-content">Your Review</Label>
+        <Label htmlFor="review-content">{t.yourReview}</Label>
         <Textarea
           id="review-content"
           value={newReview.content}
           onChange={(e) => setNewReview(prev => ({ ...prev, content: e.target.value }))}
-          placeholder="Share your experience with this product"
+          placeholder={t.reviewContentPlaceholder}
           rows={4}
           required
         />
@@ -134,10 +138,10 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
       
       <div className="flex space-x-2">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Submitting...' : 'Submit Review'}
+          {isSubmitting ? t.submitting : t.submitReview}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          {t.cancel}
         </Button>
       </div>
     </form>

@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { User } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useProductTranslations } from './useProductTranslations';
 import StarRating from './StarRating';
 
 interface ReviewItemProps {
@@ -20,9 +22,12 @@ interface ReviewItemProps {
 }
 
 const ReviewItem = ({ review }: ReviewItemProps) => {
+  const { language } = useLanguage();
+  const t = useProductTranslations(language);
+  
   const customerName = review.customer?.fullname || 
     `${review.customer?.first_name || ''} ${review.customer?.last_name || ''}`.trim() || 
-    'Anonymous';
+    t.anonymous;
 
   return (
     <div className="border-b border-gray-200 pb-4 last:border-b-0">
@@ -32,7 +37,7 @@ const ReviewItem = ({ review }: ReviewItemProps) => {
           <span className="font-medium">{customerName}</span>
           {review.is_verified_purchase && (
             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-              Verified Purchase
+              {t.verifiedPurchase}
             </span>
           )}
         </div>

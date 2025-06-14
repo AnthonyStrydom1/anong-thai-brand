@@ -6,6 +6,7 @@ import { ProductDetailTabs } from './product/ProductDetailTabs';
 import { ProductBreadcrumb } from './product/ProductBreadcrumb';
 import { ProductNotFound } from './product/ProductNotFound';
 import { RelatedRecipes } from './product/RelatedRecipes';
+import ProductRatings from './product/ProductRatings';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -69,14 +70,21 @@ const ProductDetail = () => {
     return imageMap[product.name] || '/placeholder.svg';
   };
 
-  // Get real product data based on product name
+  // Get real product data based on product name with Thai translations
   const getProductData = () => {
     const productData: { [key: string]: { 
       ingredients: { en: string[], th: string[] }, 
       howToUse: { en: string[], th: string[] },
-      description: { en: string, th: string }
+      description: { en: string, th: string },
+      name: { en: string, th: string },
+      shortDescription: { en: string, th: string }
     }} = {
       'Pad Thai Sauce': {
+        name: { en: 'Pad Thai Sauce', th: 'ซอสผัดไทย' },
+        shortDescription: { 
+          en: 'Authentic Thai Pad Thai sauce with the perfect balance of sweet, sour, and savory flavors.',
+          th: 'ซอสผัดไทยแท้รสชาติสมดุลระหว่างหวาน เปรียว และเค็ม'
+        },
         ingredients: {
           en: ['Tamarind paste', 'Palm sugar', 'Fish sauce', 'Tomato paste', 'Garlic', 'Shallots', 'Dried shrimp', 'Vegetable oil'],
           th: ['น้ำมะขามเปียก', 'น้ำตาลปี๊บ', 'น้ำปลา', 'มะเขือเทศ', 'กระเทียม', 'หอมแดง', 'กุ้งแห้ง', 'น้ำมันพืช']
@@ -88,6 +96,25 @@ const ProductDetail = () => {
         description: {
           en: 'Authentic Thai Pad Thai sauce with the perfect balance of sweet, sour, and savory flavors. Made with traditional ingredients for an authentic taste.',
           th: 'ซอสผัดไทยแท้รสชาติสมดุลระหว่างหวาน เปรียว และเค็ม ทำจากส่วนผสมดั้งเดิมเพื่อรสชาติที่แท้จริง'
+        }
+      },
+      'Panang Curry Paste': {
+        name: { en: 'Panang Curry Paste', th: 'พริกแกงพะแนง' },
+        shortDescription: { 
+          en: 'Rich and nutty Thai curry paste with a hint of sweetness',
+          th: 'พริกแกงไทยเข้มข้นหอมถั่วคั่ว มีรสหวานอ่อนๆ'
+        },
+        ingredients: {
+          en: ['Red chilies', 'Galangal', 'Lemongrass', 'Kaffir lime zest', 'Garlic', 'Shallots', 'Peanuts', 'Shrimp paste'],
+          th: ['พริกแกงพะแนง', 'ข่า', 'ตะไคร้', 'ผิวมะกรูด', 'กระเทียม', 'หอมแดง', 'ถั่วลิสง', 'กะปิ']
+        },
+        howToUse: {
+          en: ['Fry paste in oil until aromatic', 'Add thick coconut cream', 'Simmer with meat until tender', 'Garnish with Thai basil'],
+          th: ['ผัดพริกแกงในน้ำมันให้หอม', 'ใส่หัวกะทิข้น', 'ต้มกับเนื้อจนนุ่ม', 'โรยใบโหระพา']
+        },
+        description: {
+          en: 'Rich and nutty Panang curry paste with roasted peanuts. Creates thick, creamy curry with mild heat and complex flavors.',
+          th: 'พริกแกงพะแนงเข้มข้นหอมถั่วคั่ว สร้างแกงข้นครีมี รสไม่เผ็ดมาก และซับซ้อน'
         }
       },
       'Sukiyaki Dipping Sauce': {
@@ -130,20 +157,6 @@ const ProductDetail = () => {
         description: {
           en: 'Traditional Thai red curry paste made from fresh chilies and aromatic herbs. Creates rich, spicy, and flavorful curry dishes.',
           th: 'พริกแกงแดงไทยแท้จากพริกสดและสมุนไพรหอม สร้างแกงรสจัดจ้าน เผ็ดร้อน และหอมหวน'
-        }
-      },
-      'Panang Curry Paste': {
-        ingredients: {
-          en: ['Red chilies', 'Galangal', 'Lemongrass', 'Kaffir lime zest', 'Garlic', 'Shallots', 'Peanuts', 'Shrimp paste'],
-          th: ['พริกแกงพะแนง', 'ข่า', 'ตะไคร้', 'ผิวมะกรูด', 'กระเทียม', 'หอมแดง', 'ถั่วลิสง', 'กะปิ']
-        },
-        howToUse: {
-          en: ['Fry paste in oil until aromatic', 'Add thick coconut cream', 'Simmer with meat until tender', 'Garnish with Thai basil'],
-          th: ['ผัดพริกแกงในน้ำมันให้หอม', 'ใส่หัวกะทิข้น', 'ต้มกับเนื้อจนนุ่ม', 'โรยใบโหระพา']
-        },
-        description: {
-          en: 'Rich and nutty Panang curry paste with roasted peanuts. Creates thick, creamy curry with mild heat and complex flavors.',
-          th: 'พริกแกงพะแนงเข้มข้นหอมถั่วคั่ว สร้างแกงข้นครีมี รสไม่เผ็ดมาก และซับซ้อน'
         }
       },
       'Massaman Curry Paste': {
@@ -191,6 +204,11 @@ const ProductDetail = () => {
     };
 
     return productData[product.name] || {
+      name: { en: product.name, th: product.name },
+      shortDescription: { 
+        en: product.short_description || '', 
+        th: product.short_description || '' 
+      },
       ingredients: { 
         en: ['Premium quality ingredients'], 
         th: ['ส่วนผสมคุณภาพพรีเมียม'] 
@@ -211,15 +229,9 @@ const ProductDetail = () => {
   // Convert Supabase product to the format expected by existing components
   const convertedProduct = {
     id: product.id,
-    name: { 
-      en: product.name, 
-      th: product.name 
-    },
+    name: productData.name,
     description: productData.description,
-    shortDescription: { 
-      en: product.short_description || '', 
-      th: product.short_description || '' 
-    },
+    shortDescription: productData.shortDescription,
     ingredients: productData.ingredients,
     howToUse: { 
       en: productData.howToUse.en.join('. '), 
@@ -263,7 +275,7 @@ const ProductDetail = () => {
       </div>
 
       {/* Breadcrumb */}
-      <ProductBreadcrumb productName={product.name} language={language} />
+      <ProductBreadcrumb productName={convertedProduct.name[language]} language={language} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Product Image */}
@@ -275,7 +287,7 @@ const ProductDetail = () => {
         >
           <img 
             src={convertedProduct.image}
-            alt={product.name}
+            alt={convertedProduct.name[language]}
             className="max-w-[280px] max-h-[280px] w-auto h-auto object-contain"
             loading="eager"
             decoding="async"
@@ -313,6 +325,11 @@ const ProductDetail = () => {
             }} 
           />
         </motion.div>
+      </div>
+
+      {/* Product Reviews Section */}
+      <div className="mt-12">
+        <ProductRatings productId={product.id} />
       </div>
 
       {/* Related Recipes Section */}

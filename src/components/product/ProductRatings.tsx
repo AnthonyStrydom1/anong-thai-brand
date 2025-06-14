@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabaseService } from '@/services/supabaseService';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from '@/components/ui/use-toast';
+import { useProductTranslations } from './useProductTranslations';
 import StarRating from './StarRating';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
@@ -33,6 +35,8 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAddReview, setShowAddReview] = useState(false);
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const t = useProductTranslations(language);
 
   useEffect(() => {
     loadReviews();
@@ -67,8 +71,8 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
     } catch (error) {
       console.error('Error loading reviews:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load reviews',
+        title: t.error,
+        description: t.failedToLoadReviews,
         variant: 'destructive'
       });
     } finally {
@@ -103,22 +107,22 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Customer Reviews</span>
+            <span>{t.customerReviews}</span>
             {user && (
               <Button 
                 onClick={() => setShowAddReview(!showAddReview)}
                 variant="outline"
                 size="sm"
               >
-                {showAddReview ? 'Cancel' : 'Write a Review'}
+                {showAddReview ? t.cancel : t.writeReview}
               </Button>
             )}
           </CardTitle>
           {reviews.length > 0 && (
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <StarRating rating={Math.round(averageRating)} />
-              <span>{averageRating.toFixed(1)} out of 5</span>
-              <span>({reviews.length} review{reviews.length !== 1 ? 's' : ''})</span>
+              <span>{averageRating.toFixed(1)} {t.outOf5}</span>
+              <span>({reviews.length} {reviews.length !== 1 ? t.reviews : t.review})</span>
             </div>
           )}
         </CardHeader>

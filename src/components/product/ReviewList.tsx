@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useProductTranslations } from './useProductTranslations';
 import ReviewItem from './ReviewItem';
 
 interface Review {
@@ -22,10 +24,13 @@ interface ReviewListProps {
 }
 
 const ReviewList = ({ reviews }: ReviewListProps) => {
+  const { language } = useLanguage();
+  const t = useProductTranslations(language);
+
   if (reviews.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <p>No reviews yet. Be the first to review this product!</p>
+        <p>{t.noReviews}</p>
       </div>
     );
   }
