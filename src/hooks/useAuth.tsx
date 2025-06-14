@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { authService, type AuthUser } from '@/services/authService';
@@ -70,55 +69,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           sessionId: session?.access_token ? 'present' : 'missing'
         });
 
-        // CRITICAL FIX: Check MFA status but with a small delay to allow clearing to complete
-        setTimeout(() => {
-          if (!mounted) return;
+        // For authenticated users, always clear MFA and proceed
+        if (user && session) {
+          console.log('✅ Auth: User authenticated, clearing MFA and setting state');
           
-          const pendingMFA = isMFAPending();
-          console.log('🔍 Auth: MFA check after delay:', pendingMFA);
-          setMfaPending(pendingMFA);
-
-          // If there's a pending MFA, block session/user/profile
-          if (pendingMFA) {
-            console.log('🔒 Auth: MFA pending, blocking auth state');
-            setUser(null);
-            setSession(null);
-            setUserProfile(null);
-            setIsLoading(false);
-            return;
-          }
-
-          // No pending MFA - proceed with normal auth state
-          console.log('✅ Auth: No pending MFA, setting auth state');
+          // Force clear MFA session for authenticated users
+          mfaSessionManager.clearSession();
+          setMfaPending(false);
+          
           setUser(user);
           setSession(session);
 
-          if (user && session) {
-            console.log('✅ Auth: User authenticated, ensuring MFA session is cleared');
-            // Ensure MFA session is cleared for authenticated users
-            setTimeout(() => {
-              if (mounted) {
-                mfaAuthService.clearMFASession();
-              }
-            }, 100);
-
-            setTimeout(async () => {
-              if (!mounted) return;
-              try {
-                const profile = await authService.getUserProfile(user.id);
-                if (mounted) setUserProfile(profile);
-              } catch (error) {
-                console.error('❌ Auth: Failed to load user profile:', error);
-                if (mounted) setUserProfile(null);
-              }
-            }, 0);
-          } else {
-            console.log('❌ Auth: No user/session, clearing profile');
-            setUserProfile(null);
-          }
-
+          // Load user profile
+          setTimeout(async () => {
+            if (!mounted) return;
+            try {
+              const profile = await authService.getUserProfile(user.id);
+              if (mounted) setUserProfile(profile);
+            } catch (error) {
+              console.error('❌ Auth: Failed to load user profile:', error);
+              if (mounted) setUserProfile(null);
+            }
+          }, 0);
+          
           setIsLoading(false);
-        }, 50); // Small delay to allow MFA clearing to complete
+          return;
+        }
+
+        // For unauthenticated users, check MFA status
+        const pendingMFA = isMFAPending();
+        console.log('🔍 Auth: No user/session, MFA check:', pendingMFA);
+        
+        setMfaPending(pendingMFA);
+        setUser(null);
+        setSession(null);
+        setUserProfile(null);
+        setIsLoading(false);
       }
     );
 
@@ -133,31 +119,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         
         if (mounted) {
-          // Small delay for MFA check to ensure any clearing has completed
-          setTimeout(() => {
-            if (!mounted) return;
-            
+          if (session?.user) {
+            console.log('✅ Auth: Found existing session, clearing MFA');
+            // Clear MFA for existing sessions
+            mfaSessionManager.clearSession();
+            setMfaPending(false);
+            setUser(session.user);
+            setSession(session);
+          } else {
+            console.log('❌ Auth: No existing session found');
             const pendingMFA = isMFAPending();
             setMfaPending(pendingMFA);
-            if (pendingMFA) {
-              console.log('🔒 Auth: MFA pending during session check');
-              setUser(null);
-              setSession(null);
-              setUserProfile(null);
-              setIsLoading(false);
-              return;
-            }
-            if (session?.user) {
-              console.log('✅ Auth: Found existing session');
-              setUser(session.user);
-              setSession(session);
-            } else {
-              console.log('❌ Auth: No existing session found');
-              setUser(null);
-              setSession(null);
-            }
-            setIsLoading(false);
-          }, 50);
+            setUser(null);
+            setSession(null);
+          }
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('❌ Auth: Session check failed:', error);

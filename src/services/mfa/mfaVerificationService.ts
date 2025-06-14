@@ -67,20 +67,16 @@ export class MFAVerificationService {
       // Verify the MFA code
       await this.verifyCode(code, sessionData);
 
-      // CRITICAL FIX: Clear MFA session IMMEDIATELY after successful verification
-      // This prevents the auth state from seeing pending MFA and blocking the session
-      console.log('🧹 MFA Verification Service: Clearing MFA session IMMEDIATELY after verification');
-      mfaSessionManager.clearSession();
-      
-      // Small delay to ensure clearing is complete
-      await new Promise(resolve => setTimeout(resolve, 100));
-
       // Complete sign in with verified credentials
       const data = await this.signInWithCredentials(sessionData.email, sessionData.password);
 
-      // Double-check MFA session is cleared
-      console.log('🔍 MFA Verification Service: Double-checking MFA session cleared');
+      // CRITICAL FIX: Clear MFA session ONLY after successful sign-in completion
+      // This prevents the auth state from seeing pending MFA after login
+      console.log('🧹 MFA Verification Service: Clearing MFA session after successful login');
       mfaSessionManager.clearSession();
+      
+      // Dispatch event to notify that MFA has been cleared
+      window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
 
       return data;
     } catch (error: any) {
