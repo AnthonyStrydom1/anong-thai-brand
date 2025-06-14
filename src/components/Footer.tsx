@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 
 interface FooterProps {
   className?: string;
@@ -13,6 +15,8 @@ interface FooterProps {
 
 const Footer = ({ className }: FooterProps) => {
   const { language } = useLanguage();
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const translations = {
     en: {
@@ -34,7 +38,12 @@ const Footer = ({ className }: FooterProps) => {
       returns: "Returns & Exchanges",
       privacy: "Privacy Policy",
       terms: "Terms of Service",
-      rights: "© 2025 ANONG Thai Brand. Crafted with tradition, delivered with love."
+      rights: "© 2025 ANONG Thai Brand. Crafted with tradition, delivered with love.",
+      subscribeSuccess: "Welcome to our culinary family!",
+      subscribeSuccessDesc: "You'll receive our latest recipes and product updates.",
+      subscribeError: "Subscription failed. Please try again.",
+      alreadySubscribed: "You're already subscribed!",
+      alreadySubscribedDesc: "Thank you for being part of our culinary family."
     },
     th: {
       newsletter: "ติดตามข่าวสาร",
@@ -55,18 +64,65 @@ const Footer = ({ className }: FooterProps) => {
       returns: "การคืนสินค้าและการแลกเปลี่ยน",
       privacy: "นโยบายความเป็นส่วนตัว",
       terms: "เงื่อนไขการใช้บริการ",
-      rights: "© 2025 แบรนด์อาหารไทยอนงค์ สร้างด้วยประเพณี ส่งมอบด้วยความรัก"
+      rights: "© 2025 แบรนด์อาหารไทยอนงค์ สร้างด้วยประเพณี ส่งมอบด้วยความรัก",
+      subscribeSuccess: "ยินดีต้อนรับสู่ครอบครัวอาหารของเรา!",
+      subscribeSuccessDesc: "คุณจะได้รับสูตรอาหารและข่าวสารผลิตภัณฑ์ล่าสุด",
+      subscribeError: "การสมัครสมาชิกล้มเหลว กรุณาลองใหม่อีกครั้ง",
+      alreadySubscribed: "คุณได้สมัครสมาชิกแล้ว!",
+      alreadySubscribedDesc: "ขอบคุณที่เป็นส่วนหนึ่งของครอบครัวอาหารของเรา"
     }
   };
 
   const t = translations[language];
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: language === 'en' ? "Welcome to our culinary family!" : "ยินดีต้อนรับสู่ครอบครัวอาหารของเรา!",
-      description: language === 'en' ? "You'll receive our latest recipes and product updates." : "คุณจะได้รับสูตรอาหารและข่าวสารผลิตภัณฑ์ล่าสุด",
-    });
+    
+    if (!email.trim()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('newsletter_subscriptions')
+        .insert([
+          {
+            email: email.trim(),
+            source: 'footer_signup'
+          }
+        ]);
+
+      if (error) {
+        // Check if error is due to duplicate email
+        if (error.code === '23505') {
+          toast({
+            title: t.alreadySubscribed,
+            description: t.alreadySubscribedDesc,
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: t.subscribeSuccess,
+          description: t.subscribeSuccessDesc,
+        });
+      }
+      
+      // Clear the input field on success or if already subscribed
+      setEmail('');
+    } catch (error) {
+      console.error('Newsletter subscription error:', error);
+      toast({
+        title: t.subscribeError,
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -125,7 +181,7 @@ const Footer = ({ className }: FooterProps) => {
             </ul>
           </div>
           
-          {/* Visit Restaurant Section - Fixed text visibility */}
+          {/* Visit Restaurant Section */}
           <div className="space-y-4">
             <h4 className="anong-subheading text-anong-gold text-lg font-medium">
               {t.visitUs}
@@ -157,11 +213,18 @@ const Footer = ({ className }: FooterProps) => {
               <Input 
                 type="email" 
                 placeholder={t.email} 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="bg-anong-ivory/10 border-anong-gold/30 text-anong-ivory placeholder:text-anong-ivory/60 focus:border-anong-gold" 
                 required 
+                disabled={isSubmitting}
               />
-              <Button type="submit" className="w-full bg-anong-gold text-anong-black hover:bg-anong-gold/90">
-                {t.submit}
+              <Button 
+                type="submit" 
+                className="w-full bg-anong-gold text-anong-black hover:bg-anong-gold/90"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (language === 'en' ? 'Subscribing...' : 'กำลังสมัคร...') : t.submit}
               </Button>
             </form>
             
