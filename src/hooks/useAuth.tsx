@@ -11,6 +11,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   updateProfile: (updates: Partial<Omit<AuthUser, 'id' | 'email'>>) => Promise<void>;
 }
 
@@ -102,6 +103,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      await authService.resetPassword(email);
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
+  };
+
   const updateProfile = async (updates: Partial<Omit<AuthUser, 'id' | 'email'>>) => {
     if (!user) throw new Error('No user logged in');
     
@@ -123,6 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signUp,
     signIn,
     signOut,
+    resetPassword,
     updateProfile,
   };
 

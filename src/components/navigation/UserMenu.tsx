@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -43,11 +44,12 @@ const UserMenu = ({
   onLogout,
   translations
 }: UserMenuProps) => {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resetPassword } = useAuth();
   const isMobile = useIsMobile();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -105,6 +107,40 @@ const UserMenu = ({
         description: error.message || 'An error occurred',
         variant: 'destructive',
       });
+      
+      // Show forgot password option for login failures
+      if (!isSignUp && error.message?.includes('Invalid login credentials')) {
+        setShowForgotPassword(true);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await resetPassword(email);
+      toast({
+        title: "Reset Email Sent!",
+        description: "Check your email for password reset instructions.",
+      });
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reset email.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -116,6 +152,7 @@ const UserMenu = ({
     setFirstName('');
     setLastName('');
     setIsSignUp(false);
+    setShowForgotPassword(false);
     setShowLoginModal(false);
   };
 
@@ -224,7 +261,10 @@ const UserMenu = ({
                   type="email"
                   placeholder="Enter your email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (showForgotPassword) setShowForgotPassword(false);
+                  }}
                   required
                   disabled={isLoading}
                 />
@@ -237,11 +277,33 @@ const UserMenu = ({
                   type="password"
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (showForgotPassword) setShowForgotPassword(false);
+                  }}
                   required
                   disabled={isLoading}
                 />
               </div>
+
+              {/* Forgot Password Section */}
+              {!isSignUp && showForgotPassword && (
+                <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
+                  <p className="text-sm text-blue-800 mb-2">
+                    Forgot your password? We can help you reset it.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleForgotPassword}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    Send Reset Email
+                  </Button>
+                </div>
+              )}
             </div>
             
             <DialogFooter className="flex-col space-y-2">

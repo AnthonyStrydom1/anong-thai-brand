@@ -89,6 +89,18 @@ class AuthService {
     if (error) throw error;
   }
 
+  async resetPassword(email: string) {
+    if (!this.isDomainValid()) {
+      throw new Error('Authentication not available on this domain');
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth?mode=reset`,
+    });
+
+    if (error) throw error;
+  }
+
   async getCurrentUser(): Promise<User | null> {
     if (!this.isDomainValid()) {
       return null;

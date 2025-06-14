@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +14,8 @@ const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [loginAttempted, setLoginAttempted] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -20,7 +23,7 @@ const AuthPage = () => {
     lastName: ''
   });
 
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
 
   // Scroll to top when component mounts
@@ -31,6 +34,7 @@ const AuthPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setLoginAttempted(true);
 
     try {
       if (isLogin) {
@@ -48,10 +52,46 @@ const AuthPage = () => {
         });
         setIsLogin(true);
       }
+      setShowForgotPassword(false);
     } catch (error: any) {
+      console.error('Auth error:', error);
       toast({
         title: "Error",
         description: error.message || "An error occurred during authentication.",
+        variant: "destructive"
+      });
+      
+      // Show forgot password option for login failures
+      if (isLogin && error.message?.includes('Invalid login credentials')) {
+        setShowForgotPassword(true);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await resetPassword(formData.email);
+      toast({
+        title: "Reset Email Sent!",
+        description: "Check your email for password reset instructions.",
+      });
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reset email.",
         variant: "destructive"
       });
     } finally {
@@ -64,6 +104,23 @@ const AuthPage = () => {
       ...prev,
       [e.target.name]: e.target.value
     }));
+    
+    // Hide forgot password when user starts typing again
+    if (e.target.name === 'password' && showForgotPassword) {
+      setShowForgotPassword(false);
+    }
+  };
+
+  const switchToLogin = () => {
+    setIsLogin(true);
+    setShowForgotPassword(false);
+    setLoginAttempted(false);
+  };
+
+  const switchToSignUp = () => {
+    setIsLogin(false);
+    setShowForgotPassword(false);
+    setLoginAttempted(false);
   };
 
   return (
@@ -172,6 +229,25 @@ const AuthPage = () => {
                 </div>
               </div>
 
+              {/* Forgot Password Section */}
+              {isLogin && showForgotPassword && (
+                <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
+                  <p className="text-sm text-blue-800 mb-2">
+                    Forgot your password? We can help you reset it.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleForgotPassword}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    Send Reset Email
+                  </Button>
+                </div>
+              )}
+
               <Button 
                 type="submit" 
                 className="w-full"
@@ -184,7 +260,7 @@ const AuthPage = () => {
                 <Button
                   type="button"
                   variant="link"
-                  onClick={() => setIsLogin(!isLogin)}
+                  onClick={isLogin ? switchToSignUp : switchToLogin}
                   disabled={isLoading}
                 >
                   {isLogin 
