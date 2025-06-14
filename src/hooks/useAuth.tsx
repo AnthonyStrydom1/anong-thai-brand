@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { authService, type AuthUser } from '@/services/authService';
@@ -198,38 +199,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     console.log('🔄 Auth: Starting logout process');
     
+    // Always clear local state first, regardless of Supabase session validity
+    console.log('🧹 Auth: Clearing local state immediately');
+    mfaAuthService.clearMFASession();
+    setMfaPending(false);
+    setUser(null);
+    setSession(null);
+    setUserProfile(null);
+    
+    // Check if we have a valid session before attempting Supabase logout
     try {
-      // First, clear MFA session and local state immediately
-      console.log('🧹 Auth: Clearing MFA session and local state');
-      mfaAuthService.clearMFASession();
-      setMfaPending(false);
+      console.log('🔍 Auth: Checking current session validity');
+      const currentSession = await authService.getCurrentSession();
       
-      // Clear local state first to prevent UI issues
-      setUser(null);
-      setSession(null);
-      setUserProfile(null);
-      
-      console.log('✅ Auth: Local state cleared successfully');
-      
-      // Then attempt to sign out from Supabase (this might fail due to session mismatch)
-      console.log('🔄 Auth: Attempting Supabase logout');
-      await authService.signOut();
-      console.log('✅ Auth: Supabase logout successful');
+      if (currentSession) {
+        console.log('🔄 Auth: Valid session found, attempting Supabase logout');
+        await authService.signOut();
+        console.log('✅ Auth: Supabase logout successful');
+      } else {
+        console.log('ℹ️ Auth: No valid session found, skipping Supabase logout');
+      }
       
     } catch (error: any) {
-      console.error('❌ Auth: Supabase logout failed:', error);
-      console.log('ℹ️ Auth: This is expected if session was already invalid');
-      
-      // Don't throw the error - the user is effectively logged out locally
-      // Just ensure everything is clean
-      mfaAuthService.clearMFASession();
-      setUser(null);
-      setSession(null);
-      setUserProfile(null);
-      setMfaPending(false);
-      
-      console.log('✅ Auth: Logout completed despite Supabase error');
+      console.log('ℹ️ Auth: Supabase logout failed (expected for invalid sessions):', error?.message);
+      // Don't throw - the user is effectively logged out locally
     }
+    
+    console.log('✅ Auth: Logout process completed');
   };
 
   const resetPassword = async (email: string) => {

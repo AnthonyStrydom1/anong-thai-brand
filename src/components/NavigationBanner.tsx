@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -50,14 +51,9 @@ const NavigationBanner = () => {
       navigate('/');
       
     } catch (error: any) {
-      console.error('❌ NavigationBanner: Logout error details:', {
-        message: error?.message,
-        code: error?.code,
-        status: error?.status,
-        error: error
-      });
+      // This should never happen now since signOut doesn't throw
+      console.error('❌ NavigationBanner: Unexpected logout error:', error);
       
-      // Since we handle logout errors in useAuth, we should always show success
       toast({
         title: 'Logged out successfully',
         description: 'You have been logged out of your account',
