@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
       timestamp: new Date().toISOString()
     });
 
-    // Only handle password recovery events - NO emails for account creation or confirmation
+    // Handle events - NO email confirmations sent
     switch (hookData.event) {
       case 'user.password_recovery.requested':
         console.log('🔑 Password recovery requested - sending reset email');
@@ -45,21 +45,21 @@ const handler = async (req: Request): Promise<Response> => {
         break;
         
       case 'user.created':
-        console.log('👤 User created - NO email sent (confirmation disabled by design)');
+        console.log('👤 User created - SKIPPING email confirmation (disabled by design)');
         break;
         
       case 'user.confirmation.requested':
-        console.log('📧 User confirmation requested - IGNORING (confirmation disabled by design)');
+        console.log('📧 Confirmation requested - BLOCKED (confirmation disabled)');
         break;
         
       default:
-        console.log('ℹ️ Unhandled auth event (no action required):', hookData.event);
+        console.log('ℹ️ Auth event processed without email:', hookData.event);
     }
 
-    // Always return success - never block authentication
+    // ALWAYS return success to prevent blocking auth flow
     return new Response(JSON.stringify({ 
       success: true,
-      message: "Authentication processed successfully - no confirmation emails sent"
+      message: "Auth event processed - email confirmations disabled"
     }), {
       status: 200,
       headers: {
@@ -71,12 +71,12 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("❌ Error in auth hook:", error);
     
-    // CRITICAL: Never fail the auth process - always return success
+    // NEVER block auth flow - always return success
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Authentication successful",
-        warning: "Email processing handled separately" 
+        message: "Auth processed successfully",
+        note: "Email handling bypassed" 
       }),
       {
         status: 200,
