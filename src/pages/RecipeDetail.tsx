@@ -83,9 +83,10 @@ const RecipeDetail = () => {
   const recipe = useMemo(() => recipes.find(r => r.id === id), [id]);
   
   useEffect(() => {
-    // Faster loading for recipe details
+    // Scroll to top when component mounts or recipe changes
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setIsLoading(false);
-  }, []);
+  }, [id]);
   
   const relatedProducts = useMemo(() => {
     if (!recipe) return [];
