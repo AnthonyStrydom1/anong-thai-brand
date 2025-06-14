@@ -26,9 +26,15 @@ const AuthPage = () => {
     switchToSignUp
   } = useAuthForm();
 
-  // Check for pending MFA on component mount
+  // Check for pending MFA on component mount and when URL changes
   useEffect(() => {
-    if (mfaAuthService.hasPendingMFA()) {
+    console.log('Checking for pending MFA...');
+    const hasPending = mfaAuthService.hasPendingMFA();
+    const pendingEmail = mfaAuthService.getPendingMFAEmail();
+    console.log('Has pending MFA:', hasPending, 'Email:', pendingEmail);
+    
+    if (hasPending && pendingEmail) {
+      console.log('Setting showMFA to true');
       setShowMFA(true);
     }
   }, []);
@@ -40,8 +46,12 @@ const AuthPage = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     try {
+      console.log('Submitting auth form...');
       const result = await handleSubmit(e);
+      console.log('Auth result:', result);
+      
       if (result?.mfaRequired) {
+        console.log('MFA required, showing verification UI');
         setShowMFA(true);
         toast({
           title: isLogin ? "MFA Required" : "Account Created!",
@@ -51,11 +61,13 @@ const AuthPage = () => {
         });
       }
     } catch (error) {
+      console.error('Auth form submission error:', error);
       // Error handling is done in useAuthForm
     }
   };
 
   const handleMFASuccess = () => {
+    console.log('MFA verification successful');
     setShowMFA(false);
     toast({
       title: "Success!",
@@ -65,6 +77,7 @@ const AuthPage = () => {
   };
 
   const handleMFACancel = () => {
+    console.log('MFA verification cancelled');
     setShowMFA(false);
     mfaAuthService.clearMFASession();
   };
@@ -77,14 +90,20 @@ const AuthPage = () => {
     }
   };
 
+  // Get the pending email for MFA
+  const pendingMFAEmail = mfaAuthService.getPendingMFAEmail();
+  
+  console.log('Current state - showMFA:', showMFA, 'pendingEmail:', pendingMFAEmail);
+
   // Show MFA verification if needed
-  if (showMFA) {
+  if (showMFA && pendingMFAEmail) {
+    console.log('Rendering MFA verification component');
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <NavigationBanner />
         <div className="flex-1 flex items-center justify-center p-4">
           <MfaVerification
-            email={mfaAuthService.getPendingMFAEmail() || ''}
+            email={pendingMFAEmail}
             onSuccess={handleMFASuccess}
             onCancel={handleMFACancel}
           />
@@ -93,6 +112,7 @@ const AuthPage = () => {
     );
   }
 
+  console.log('Rendering auth form');
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <NavigationBanner />

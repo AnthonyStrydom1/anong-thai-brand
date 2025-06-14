@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { mfaAuthService } from '@/services/mfaAuthService';
 
 interface AuthFormProps {
   isLogin: boolean;
@@ -36,6 +37,21 @@ const AuthForm = ({
   onForgotPassword,
   onSwitchMode
 }: AuthFormProps) => {
+  // Check for pending MFA for debug purposes
+  const hasPendingMFA = mfaAuthService.hasPendingMFA();
+  const pendingEmail = mfaAuthService.getPendingMFAEmail();
+
+  const handleCheckMFA = () => {
+    console.log('MFA Debug Check:');
+    console.log('Has pending MFA:', mfaAuthService.hasPendingMFA());
+    console.log('Pending email:', mfaAuthService.getPendingMFAEmail());
+    console.log('Session storage MFA key:', sessionStorage.getItem('mfa_session_data'));
+    console.log('Session storage challenge key:', sessionStorage.getItem('mfa_challenge_id'));
+    
+    // Force reload the page to trigger MFA check
+    window.location.reload();
+  };
+
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
@@ -50,6 +66,27 @@ const AuthForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Debug section for MFA */}
+        {(hasPendingMFA || pendingEmail) && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-800 mb-2">
+              <strong>Debug Info:</strong> Pending MFA verification detected
+            </p>
+            <p className="text-xs text-yellow-700 mb-2">
+              Email: {pendingEmail || 'No email found'}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleCheckMFA}
+              className="w-full"
+            >
+              Check MFA Status & Reload
+            </Button>
+          </div>
+        )}
+
         <form onSubmit={onSubmit} className="space-y-4">
           {!isLogin && (
             <div className="grid grid-cols-2 gap-4">
