@@ -145,14 +145,15 @@ serve(async (req: Request) => {
       </div>
     `;
 
+    // Use Resend's default domain to test if API key works
     const emailPayload = {
-      from: 'Anong Thai Brand <noreply@anonghthaibrand.com>',
+      from: 'Anong Thai Brand <onboarding@resend.dev>',
       to: [email],
       subject: 'Your Verification Code - Anong Thai Brand',
       html: emailHtml,
     };
 
-    console.log('📧 Email payload prepared:', {
+    console.log('📧 Email payload prepared (using Resend default domain for testing):', {
       from: emailPayload.from,
       to: emailPayload.to,
       subject: emailPayload.subject,
@@ -194,7 +195,7 @@ serve(async (req: Request) => {
       let emailResult;
       try {
         emailResult = JSON.parse(responseText);
-        console.log('✅ Email sent successfully:', emailResult);
+        console.log('✅ Email sent successfully with Resend default domain:', emailResult);
       } catch (parseError) {
         console.error('❌ Failed to parse Resend response as JSON:', parseError);
         console.log('📄 Raw response text:', responseText);
@@ -204,12 +205,13 @@ serve(async (req: Request) => {
       const response = {
         success: true,
         challengeId: challengeId,
-        message: 'Verification code sent successfully',
+        message: 'Verification code sent successfully (using Resend default domain)',
         debug: {
           emailSent: true,
           emailId: emailResult.id,
           challengeCreated: true,
-          resendResponse: emailResult
+          resendResponse: emailResult,
+          note: 'Email sent from onboarding@resend.dev - check your domain configuration in Resend'
         }
       };
 
