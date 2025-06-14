@@ -146,7 +146,7 @@ serve(async (req: Request) => {
     `;
 
     const emailPayload = {
-      from: 'Anong Thai Brand <onboarding@resend.dev>',
+      from: 'Anong Thai Brand <hello@anonghthaibrand.com>',
       to: [email],
       subject: 'Your Verification Code - Anong Thai Brand',
       html: emailHtml,
