@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,40 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Package, Plus, Edit, Trash2, Eye } from "lucide-react";
-import { supabaseService } from "@/services/supabaseService";
+import { supabaseService, SupabaseProduct } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
 import { useAdminSecurity } from "@/hooks/useAdminSecurity";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
-interface Product {
-  id: string;
-  name: string;
-  description?: string;
-  short_description?: string;
-  sku: string;
-  price: number;
-  compare_price?: number;
-  cost_price?: number;
-  stock_quantity: number;
-  low_stock_threshold?: number;
-  manage_stock: boolean;
-  allow_backorders: boolean;
-  is_active: boolean;
-  is_featured: boolean;
-  weight?: number;
-  dimensions?: any;
-  images?: any[];
-  category_id?: string;
-  meta_title?: string;
-  meta_description?: string;
-  created_at: string;
-  updated_at: string;
-}
-
 const ProductManager = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<SupabaseProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<SupabaseProduct | null>(null);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const { logAdminAction } = useAdminSecurity();
@@ -163,7 +137,16 @@ const ProductManager = () => {
           sku: productData.sku
         });
         
-        savedProduct = await supabaseService.updateProduct(selectedProduct.id, productData);
+        // Use supabase client directly for update since updateProduct doesn't exist
+        const { data, error } = await supabaseService.supabase
+          .from('products')
+          .update(productData)
+          .eq('id', selectedProduct.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        savedProduct = data;
         
         setProducts(products.map(p => p.id === selectedProduct.id ? savedProduct : p));
         toast({
@@ -204,7 +187,7 @@ const ProductManager = () => {
     }
   };
 
-  const editProduct = (product: Product) => {
+  const editProduct = (product: SupabaseProduct) => {
     setSelectedProduct(product);
     setFormData({
       name: product.name,
@@ -238,7 +221,14 @@ const ProductManager = () => {
         sku: product?.sku
       });
       
-      await supabaseService.deleteProduct(productId);
+      // Use supabase client directly for delete since deleteProduct doesn't exist
+      const { error } = await supabaseService.supabase
+        .from('products')
+        .delete()
+        .eq('id', productId);
+
+      if (error) throw error;
+      
       setProducts(products.filter(p => p.id !== productId));
       
       toast({
@@ -260,7 +250,7 @@ const ProductManager = () => {
     }
   };
 
-  const getStockStatus = (product: Product) => {
+  const getStockStatus = (product: SupabaseProduct) => {
     if (product.stock_quantity === 0) return { status: 'Out of Stock', variant: 'destructive' as const };
     if (product.stock_quantity <= (product.low_stock_threshold || 5)) return { status: 'Low Stock', variant: 'secondary' as const };
     return { status: 'In Stock', variant: 'default' as const };
