@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -52,10 +53,18 @@ const UserMenu = ({
     setLastName,
   } = useAuthModal();
 
-  const { mfaPending } = useAuth();
+  const { mfaPending, user } = useAuth();
 
-  // "isLoggedIn" should not be true if MFA is pending
-  const isLoggedIn = isLoggedInProp && !mfaPending;
+  // Use auth hook directly for more reliable state
+  const isLoggedIn = !!user && !mfaPending;
+
+  console.log('🎯 UserMenu: Auth state check:', { 
+    user: !!user, 
+    mfaPending,
+    isLoggedInProp,
+    finalIsLoggedIn: isLoggedIn,
+    currentPath: window.location.pathname
+  });
 
   // Clear MFA state when user logs in successfully
   useEffect(() => {
@@ -169,26 +178,23 @@ const UserMenu = ({
     onLogout();
   };
 
-  // Show dropdown only if logged in
-  const shouldShowDropdown = isLoggedIn;
-
   console.log('🎯 UserMenu render state:', { 
     isLoggedIn, 
     hasPendingMFA, 
-    shouldShowDropdown,
+    shouldShowDropdown: isLoggedIn,
     currentPath: window.location.pathname
   });
 
   return (
     <>
-      <DropdownMenu open={shouldShowDropdown ? isDropdownOpen : false} onOpenChange={setIsDropdownOpen}>
+      <DropdownMenu open={isLoggedIn ? isDropdownOpen : false} onOpenChange={setIsDropdownOpen}>
         <UserMenuButton 
           isLoggedIn={isLoggedIn}
           onClick={handleTriggerClick}
           translations={translations}
         />
         
-        {shouldShowDropdown && (
+        {isLoggedIn && (
           <UserMenuDropdown 
             onLogout={handleLogout}
             translations={translations}
