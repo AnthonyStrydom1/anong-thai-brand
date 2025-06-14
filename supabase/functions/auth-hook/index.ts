@@ -22,44 +22,38 @@ interface AuthHookRequest {
   };
 }
 
-// Simple in-memory rate limiting
-const emailQueue: Array<() => Promise<void>> = [];
-let isProcessingQueue = false;
+// Enhanced rate limiting with timestamps
+const emailTimestamps: number[] = [];
+const MAX_EMAILS_PER_SECOND = 1; // Conservative limit (less than Resend's 2/sec)
+const RATE_LIMIT_WINDOW = 1000; // 1 second
 
-const processEmailQueue = async () => {
-  if (isProcessingQueue || emailQueue.length === 0) return;
-  
-  isProcessingQueue = true;
-  console.log(`📬 Processing email queue with ${emailQueue.length} emails`);
-  
-  while (emailQueue.length > 0) {
-    const emailTask = emailQueue.shift();
-    if (emailTask) {
-      try {
-        await emailTask();
-        console.log('✅ Email sent from queue');
-        // Wait 600ms between emails to respect 2/second limit with buffer
-        await new Promise(resolve => setTimeout(resolve, 600));
-      } catch (error: any) {
-        console.error('❌ Queue email failed:', error);
-        // If rate limited, wait longer before next attempt
-        if (error.message?.includes('rate limit') || error.message?.includes('429')) {
-          console.log('⏱️ Rate limited, waiting 2 seconds');
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        }
-      }
-    }
+// Clean old timestamps
+const cleanTimestamps = () => {
+  const now = Date.now();
+  while (emailTimestamps.length > 0 && emailTimestamps[0] < now - RATE_LIMIT_WINDOW) {
+    emailTimestamps.shift();
   }
-  
-  isProcessingQueue = false;
-  console.log('📭 Email queue processing complete');
 };
 
-const queueEmail = (emailTask: () => Promise<void>) => {
-  emailQueue.push(emailTask);
-  console.log(`📨 Email queued. Queue length: ${emailQueue.length}`);
-  // Start processing if not already running
-  setTimeout(processEmailQueue, 100);
+// Check if we can send an email now
+const canSendEmail = (): boolean => {
+  cleanTimestamps();
+  return emailTimestamps.length < MAX_EMAILS_PER_SECOND;
+};
+
+// Add timestamp when sending email
+const recordEmailSent = () => {
+  emailTimestamps.push(Date.now());
+};
+
+// Calculate delay needed before next email
+const getDelayUntilNextSlot = (): number => {
+  cleanTimestamps();
+  if (emailTimestamps.length === 0) return 0;
+  
+  const oldestTimestamp = emailTimestamps[0];
+  const timeSinceOldest = Date.now() - oldestTimestamp;
+  return Math.max(0, RATE_LIMIT_WINDOW - timeSinceOldest + 100); // Add 100ms buffer
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -78,21 +72,22 @@ const handler = async (req: Request): Promise<Response> => {
     switch (hookData.event) {
       case 'user.created':
         console.log('Handling user.created event for:', hookData.user.email);
-        queueEmail(() => sendWelcomeEmail(hookData.user));
+        // Don't block auth process - send email in background
+        sendEmailWithRateLimit(() => sendWelcomeEmail(hookData.user));
         break;
       case 'user.confirmation.requested':
         console.log('Handling user.confirmation.requested event for:', hookData.user.email);
-        queueEmail(() => sendWelcomeEmail(hookData.user));
+        sendEmailWithRateLimit(() => sendWelcomeEmail(hookData.user));
         break;
       case 'user.password_recovery.requested':
         console.log('Handling password recovery for:', hookData.user.email);
-        queueEmail(() => sendPasswordResetEmail(hookData.user));
+        sendEmailWithRateLimit(() => sendPasswordResetEmail(hookData.user));
         break;
       default:
         console.log('Unhandled auth event:', hookData.event);
     }
 
-    // Always return success immediately - don't wait for email
+    // Always return success immediately - never block auth
     return new Response(JSON.stringify({ 
       success: true,
       message: "Authentication processed successfully",
@@ -108,7 +103,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.error("Error in auth hook:", error);
     console.error("Error stack:", error.stack);
     
-    // Never fail the auth process
+    // Never fail the auth process - always return success
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -121,6 +116,36 @@ const handler = async (req: Request): Promise<Response> => {
     );
   }
 };
+
+// Background email sending with rate limiting
+async function sendEmailWithRateLimit(emailFunction: () => Promise<void>) {
+  // Use setTimeout to not block the response
+  setTimeout(async () => {
+    try {
+      // Check if we can send immediately
+      if (canSendEmail()) {
+        console.log('📧 Sending email immediately');
+        recordEmailSent();
+        await emailFunction();
+      } else {
+        // Calculate delay and wait
+        const delay = getDelayUntilNextSlot();
+        console.log(`⏱️ Rate limit active, delaying email by ${delay}ms`);
+        
+        setTimeout(async () => {
+          try {
+            recordEmailSent();
+            await emailFunction();
+          } catch (error: any) {
+            console.error('❌ Delayed email failed:', error);
+          }
+        }, delay);
+      }
+    } catch (error: any) {
+      console.error('❌ Email rate limit handler failed:', error);
+    }
+  }, 0);
+}
 
 async function sendWelcomeEmail(user: any) {
   const firstName = user.user_metadata?.first_name || 'there';
@@ -163,10 +188,16 @@ async function sendWelcomeEmail(user: any) {
         </div>
       `,
     });
-    console.log('Welcome email sent successfully:', result);
+    console.log('✅ Welcome email sent successfully:', result);
   } catch (error: any) {
-    console.error('Failed to send welcome email:', error);
-    throw error;
+    console.error('❌ Failed to send welcome email:', error);
+    
+    // If it's a rate limit error, log it but don't throw
+    if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+      console.log('⚠️ Email rate limited, but auth process continues');
+    } else {
+      throw error;
+    }
   }
 }
 
@@ -200,10 +231,16 @@ async function sendPasswordResetEmail(user: any) {
         </div>
       `,
     });
-    console.log('Password reset email sent successfully:', result);
+    console.log('✅ Password reset email sent successfully:', result);
   } catch (error: any) {
-    console.error('Failed to send password reset email:', error);
-    throw error;
+    console.error('❌ Failed to send password reset email:', error);
+    
+    // If it's a rate limit error, log it but don't throw
+    if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+      console.log('⚠️ Email rate limited, but auth process continues');
+    } else {
+      throw error;
+    }
   }
 }
 
