@@ -23,6 +23,9 @@ export class AuthOperationsService {
 
     domainValidationService.clearCrossDomainSessions();
 
+    // Clear any existing session
+    await supabase.auth.signOut();
+
     // Sign up without email confirmation and without automatic sign-in
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -38,7 +41,7 @@ export class AuthOperationsService {
 
     if (error) throw error;
 
-    // Immediately sign out to prevent auto-login
+    // Immediately sign out to prevent auto-login and force MFA flow
     if (data.session) {
       await supabase.auth.signOut();
     }

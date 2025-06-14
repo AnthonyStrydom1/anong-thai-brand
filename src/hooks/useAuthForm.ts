@@ -33,17 +33,16 @@ export const useAuthForm = () => {
 
     try {
       if (isLogin) {
-        // Use MFA service for login
+        // Use MFA service for login - this should ALWAYS require MFA
         const result = await mfaAuthService.initiateSignIn({
           email: formData.email,
           password: formData.password
         });
 
-        if (result.mfaRequired) {
-          return { mfaRequired: true };
-        }
+        // MFA should always be required for login
+        return { mfaRequired: true };
       } else {
-        // For sign-up, create account directly
+        // For sign-up, create account without auto-login
         await authService.signUp({
           email: formData.email,
           password: formData.password,
@@ -51,29 +50,28 @@ export const useAuthForm = () => {
           lastName: formData.lastName
         });
         
-        // After successful sign-up, initiate MFA flow
+        // Wait a moment to ensure signup completes
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // After successful sign-up, initiate MFA flow (no auto-login)
         try {
           const mfaResult = await mfaAuthService.initiateSignIn({
             email: formData.email,
             password: formData.password
           });
 
-          if (mfaResult.mfaRequired) {
-            return { mfaRequired: true };
-          }
+          // Always require MFA for new accounts
+          return { mfaRequired: true };
         } catch (mfaError) {
-          // If MFA fails after signup, that's okay - user can try signing in later
-          console.warn('MFA initiation failed after signup:', mfaError);
+          console.error('MFA initiation failed after signup:', mfaError);
           toast({
             title: "Account Created!",
-            description: "Your account has been created. Please try signing in.",
+            description: "Your account has been created. Please try signing in with MFA verification.",
           });
           setIsLogin(true); // Switch to login mode
           return { mfaRequired: false };
         }
       }
-      setShowForgotPassword(false);
-      return { mfaRequired: false };
     } catch (error: any) {
       console.error('Auth error:', error);
       

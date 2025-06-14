@@ -13,7 +13,13 @@ class MFAAuthService {
 
   async initiateSignIn({ email, password }: MFASignInData) {
     try {
-      // First verify credentials without completing sign in
+      // Clear any existing session first
+      await supabase.auth.signOut();
+      
+      // Wait a moment to ensure signout completes
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Verify credentials without completing sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -21,7 +27,13 @@ class MFAAuthService {
 
       if (error) throw error;
 
-      // Store the session data temporarily
+      // Immediately sign out to prevent session creation
+      await supabase.auth.signOut();
+      
+      // Wait to ensure signout completes
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Store the session data temporarily (encrypted in production)
       const sessionData = {
         email,
         password, // In production, this should be encrypted
@@ -30,9 +42,6 @@ class MFAAuthService {
       };
       
       sessionStorage.setItem(this.MFA_SESSION_KEY, JSON.stringify(sessionData));
-
-      // Immediately sign out to prevent session creation
-      await supabase.auth.signOut();
 
       // Generate a simple 6-digit code for demonstration
       const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -78,6 +87,10 @@ class MFAAuthService {
     if (code !== storedCode) {
       throw new Error('Invalid MFA code');
     }
+
+    // Clear any existing session before signing in
+    await supabase.auth.signOut();
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Complete sign in with verified credentials
     const { data, error } = await supabase.auth.signInWithPassword({
