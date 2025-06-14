@@ -1,17 +1,14 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from "@/components/ui/button";
-import { ShoppingCart, Menu, Search, X } from "lucide-react";
-import CartDropdown from './CartDropdown';
-import CurrencySelector from './CurrencySelector';
 import { toast } from "@/hooks/use-toast";
-import NavItem from './navigation/NavItem';
 import SearchOverlay from './navigation/SearchOverlay';
 import MobileMenu from './navigation/MobileMenu';
-import UserMenu from './navigation/UserMenu';
+import LogoSection from './navigation/LogoSection';
+import DesktopNav from './navigation/DesktopNav';
+import RightActions from './navigation/RightActions';
 import { navigationTranslations } from '@/translations/navigation';
 
 const NavigationBanner = () => {
@@ -47,11 +44,9 @@ const NavigationBanner = () => {
         title: t.logoutSuccess || 'Successfully logged out',
       });
       
-      // Navigate to home after successful logout
       navigate('/');
       
     } catch (error: any) {
-      // This should never happen now since signOut doesn't throw
       console.error('❌ NavigationBanner: Unexpected logout error:', error);
       
       toast({
@@ -59,12 +54,10 @@ const NavigationBanner = () => {
         description: 'You have been logged out of your account',
       });
       
-      // Navigate to home regardless
       navigate('/');
     }
   };
 
-  // Mobile-specific login handler that opens UserMenu
   const handleMobileLogin = () => {
     // This will be handled by the Link to /account in MobileMenu
     // which will show the login modal when not authenticated
@@ -79,12 +72,6 @@ const NavigationBanner = () => {
     { path: '/recipes', label: t.recipes },
     { path: '/contact', label: t.contact },
   ];
-
-  const isActive = (path: string) => {
-    if (path === '/' && currentPath === '/') return true;
-    if (path !== '/' && currentPath.startsWith(path)) return true;
-    return false;
-  };
 
   // Enhanced mobile translations with all required properties
   const mobileTranslations = {
@@ -109,77 +96,21 @@ const NavigationBanner = () => {
         <div className="flex justify-between items-center py-4">
           {/* Logo and Navigation */}
           <div className="flex items-center">
-            <Link to="/" className="mr-8 lg:mr-12 flex items-center">
-              <div className="w-8 h-8 mr-3">
-                <img 
-                  src="/lovable-uploads/f440215b-ebf7-4c9f-9cf6-412d4018796e.png" 
-                  alt="ANONG Logo"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <h1 className="text-xl lg:text-2xl font-serif font-semibold text-anong-gold tracking-wide">
-                ANONG
-              </h1>
-            </Link>
-            
-            <nav className="hidden md:flex space-x-8">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`font-sans text-sm tracking-wide transition-colors duration-300 ${
-                    isActive(item.path)
-                      ? 'text-anong-gold border-b border-anong-gold pb-1'
-                      : 'text-white/80 hover:text-anong-gold'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+            <LogoSection />
+            <DesktopNav navItems={navItems} />
           </div>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-3">
-            <CurrencySelector />
-            
-            <Button 
-              variant="ghost" 
-              onClick={toggleLanguage}
-              className="text-white/70 hover:text-anong-gold hover:bg-white/5 text-xs font-medium tracking-wider px-3 py-2 h-auto"
-            >
-              {language === 'en' ? 'TH' : 'EN'}
-            </Button>
-            
-            <div className="hidden md:flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={toggleSearch}
-                aria-label={t.search}
-                className="text-white/70 hover:text-anong-gold hover:bg-white/5"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-              
-              <UserMenu 
-                isLoggedIn={isLoggedIn}
-                onLogout={handleLogout}
-                translations={mobileTranslations}
-              />
-              
-              <CartDropdown />
-            </div>
-            
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-white/70 hover:text-anong-gold hover:bg-white/5 md:hidden" 
-              onClick={toggleMenu}
-            >
-              {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </Button>
-          </div>
+          <RightActions
+            language={language}
+            isLoggedIn={isLoggedIn}
+            isMenuOpen={isMenuOpen}
+            onToggleLanguage={toggleLanguage}
+            onToggleSearch={toggleSearch}
+            onToggleMenu={toggleMenu}
+            onLogout={handleLogout}
+            translations={mobileTranslations}
+          />
         </div>
 
         {/* Search overlay */}
