@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { supabaseService } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
-import { ShoppingBag, Package } from "lucide-react";
+import { ShoppingBag, Package, Eye } from "lucide-react";
 import OrderTracking from "@/components/OrderTracking";
 
 const Orders = () => {
@@ -105,6 +105,16 @@ const Orders = () => {
     });
   };
 
+  const handleViewDetails = (order: any) => {
+    // For now, show order details in a toast or console
+    // In the future, this could navigate to a detailed order page
+    console.log('Order details:', order);
+    toast({
+      title: `Order #${order.order_number}`,
+      description: `Status: ${order.status} | Total: ${formatPrice(order.total_amount)}`,
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-anong-ivory">
@@ -130,7 +140,7 @@ const Orders = () => {
             <ShoppingBag className="w-16 h-16 mx-auto mb-6 text-anong-black/50" />
             <h1 className="text-3xl font-bold mb-4 text-anong-black">{t.title}</h1>
             <p className="text-anong-black/80 mb-8">{t.noOrders}</p>
-            <Button asChild>
+            <Button asChild className="bg-anong-black text-white hover:bg-anong-gold hover:text-anong-black">
               <Link to="/shop">{t.startShopping}</Link>
             </Button>
           </div>
@@ -151,7 +161,7 @@ const Orders = () => {
         <div className="space-y-6">
           {orders.map((order) => (
             <div key={order.id} className="space-y-4">
-              <Card className="shadow-sm">
+              <Card className="shadow-sm border-anong-gold/20">
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
@@ -177,14 +187,19 @@ const Orders = () => {
                     <div className="text-anong-black/80">
                       {t.status}: <span className="font-medium">{order.payment_status}</span>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewDetails(order)}
+                      className="border-anong-gold text-anong-black hover:bg-anong-gold hover:text-anong-black"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
                       {t.viewDetails}
                     </Button>
                   </div>
                 </CardContent>
               </Card>
               
-              {/* Add order tracking component */}
               <OrderTracking order={order} />
             </div>
           ))}
