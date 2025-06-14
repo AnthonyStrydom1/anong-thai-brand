@@ -23,12 +23,39 @@ export interface SignInData {
 }
 
 class AuthService {
+  private readonly DOMAIN_KEY = 'anongthaibrand_domain';
+  private readonly TARGET_DOMAIN = 'anongthaibrand.com';
+
+  private isDomainValid(): boolean {
+    const currentDomain = window.location.hostname.toLowerCase();
+    return currentDomain === this.TARGET_DOMAIN || currentDomain === 'localhost';
+  }
+
+  private clearCrossDomainSessions() {
+    // Clear any sessions that may have been set from other domains
+    const storedDomain = localStorage.getItem(this.DOMAIN_KEY);
+    const currentDomain = window.location.hostname.toLowerCase();
+    
+    if (storedDomain && storedDomain !== currentDomain) {
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+    
+    localStorage.setItem(this.DOMAIN_KEY, currentDomain);
+  }
+
   async signUp({ email, password, firstName, lastName }: SignUpData) {
+    if (!this.isDomainValid()) {
+      throw new Error('Authentication not available on this domain');
+    }
+
+    this.clearCrossDomainSessions();
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
+        emailRedirectTo: `https://${this.TARGET_DOMAIN}/`,
         data: {
           first_name: firstName,
           last_name: lastName,
@@ -41,6 +68,12 @@ class AuthService {
   }
 
   async signIn({ email, password }: SignInData) {
+    if (!this.isDomainValid()) {
+      throw new Error('Authentication not available on this domain');
+    }
+
+    this.clearCrossDomainSessions();
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -52,26 +85,53 @@ class AuthService {
 
   async signOut() {
     const { error } = await supabase.auth.signOut();
+    localStorage.removeItem(this.DOMAIN_KEY);
     if (error) throw error;
   }
 
   async getCurrentUser(): Promise<User | null> {
+    if (!this.isDomainValid()) {
+      return null;
+    }
+
+    this.clearCrossDomainSessions();
+
     const { data: { user }, error } = await supabase.auth.getUser();
-    if (error) throw error;
+    if (error) {
+      console.error('Get user error:', error);
+      return null;
+    }
     return user;
   }
 
   async getCurrentSession(): Promise<Session | null> {
+    if (!this.isDomainValid()) {
+      return null;
+    }
+
+    this.clearCrossDomainSessions();
+
     const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) throw error;
+    if (error) {
+      console.error('Get session error:', error);
+      return null;
+    }
     
-    // Validate session is not expired and belongs to current domain
+    // Strict session validation
     if (session && session.expires_at) {
       const expiresAt = new Date(session.expires_at * 1000);
       const now = new Date();
       
       if (expiresAt <= now) {
-        // Session expired, sign out
+        console.log('Session expired, signing out');
+        await this.signOut();
+        return null;
+      }
+
+      // Additional validation - check if session is from correct domain
+      const sessionDomain = localStorage.getItem(this.DOMAIN_KEY);
+      if (sessionDomain && sessionDomain !== window.location.hostname.toLowerCase()) {
+        console.log('Cross-domain session detected, clearing');
         await this.signOut();
         return null;
       }
@@ -119,8 +179,22 @@ class AuthService {
 
   onAuthStateChange(callback: (user: User | null, session: Session | null) => void) {
     return supabase.auth.onAuthStateChange((event, session) => {
-      // Only process valid sessions
+      console.log('Auth state change event:', event, 'Valid domain:', this.isDomainValid());
+      
+      // Only process auth changes on valid domain
+      if (!this.isDomainValid()) {
+        callback(null, null);
+        return;
+      }
+
       if (session && session.user) {
+        // Validate session belongs to current domain
+        const sessionDomain = localStorage.getItem(this.DOMAIN_KEY);
+        if (sessionDomain && sessionDomain !== window.location.hostname.toLowerCase()) {
+          console.log('Rejecting cross-domain session');
+          callback(null, null);
+          return;
+        }
         callback(session.user, session);
       } else {
         callback(null, null);

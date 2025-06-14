@@ -8,31 +8,55 @@
     <meta name="description" content="Anong Thai Brand - Premium authentic Thai curry pastes and sauces crafted with traditional recipes." />
     <meta name="author" content="Anong Thai Brand" />
 
-    <!-- Canonical URL to prevent duplicate content issues -->
+    <!-- Strong canonical URL enforcement -->
     <link rel="canonical" href="https://anongthaibrand.com/" />
     
-    <!-- Prevent indexing of staging/development URLs -->
+    <!-- Prevent duplicate indexing -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    
+    <!-- Comprehensive domain redirect script -->
     <script>
-      // Redirect staging URLs to production domain
-      if (window.location.hostname.includes('lovable.app') || 
-          window.location.hostname.includes('localhost') ||
-          window.location.protocol === 'http:') {
-        if (window.location.hostname !== 'localhost') {
-          window.location.replace('https://anongthaibrand.com' + window.location.pathname + window.location.search);
+      (function() {
+        const targetDomain = 'anongthaibrand.com';
+        const currentHost = window.location.hostname.toLowerCase();
+        const currentProtocol = window.location.protocol;
+        
+        // List of all possible variations that should redirect
+        const shouldRedirect = 
+          currentHost !== targetDomain || 
+          currentProtocol !== 'https:' ||
+          currentHost.includes('lovable.app') ||
+          currentHost.includes('localhost') ||
+          currentHost.startsWith('www.') ||
+          currentHost.includes('staging') ||
+          currentHost.includes('preview');
+        
+        if (shouldRedirect && currentHost !== 'localhost') {
+          const newUrl = 'https://' + targetDomain + window.location.pathname + window.location.search + window.location.hash;
+          window.location.replace(newUrl);
         }
-      }
+      })();
     </script>
 
+    <!-- Enhanced Open Graph for social media -->
     <meta property="og:title" content="Anong Thai Brand | Authentic Thai Flavors" />
     <meta property="og:description" content="Premium authentic Thai curry pastes and sauces crafted with traditional recipes." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://anongthaibrand.com/" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:site_name" content="Anong Thai Brand" />
 
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:site" content="@anongthaibrand" />
+    <meta name="twitter:title" content="Anong Thai Brand | Authentic Thai Flavors" />
+    <meta name="twitter:description" content="Premium authentic Thai curry pastes and sauces crafted with traditional recipes." />
     <meta name="twitter:url" content="https://anongthaibrand.com/" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- Additional SEO meta tags -->
+    <meta name="generator" content="Lovable" />
+    <meta name="theme-color" content="#D4AF37" />
     
     <!-- Premium Typography Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

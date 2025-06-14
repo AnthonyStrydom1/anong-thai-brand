@@ -1,9 +1,15 @@
 
 User-agent: Googlebot
 Allow: /
+Disallow: /admin*
+Disallow: /auth*
+Disallow: /*?*
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin*
+Disallow: /auth*
+Disallow: /*?*
 
 User-agent: Twitterbot
 Allow: /
@@ -13,10 +19,24 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin*
+Disallow: /auth*
+Disallow: /*?*
 
-# Prevent crawling of staging URLs
+# Prevent crawling of all staging/development URLs
 User-agent: *
 Disallow: /*.lovable.app/
+Disallow: /*preview*/
+Disallow: /*staging*/
+Disallow: /*localhost*/
 
-# Sitemap location
+# Prevent duplicate content from URL parameters
+User-agent: *
+Disallow: /*?
+Disallow: /*&
+
+# Main sitemap location
 Sitemap: https://anongthaibrand.com/sitemap.xml
+
+# Alternative sitemap formats (if they exist)
+Sitemap: https://anongthaibrand.com/sitemap_index.xml
