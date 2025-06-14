@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { mfaAuthService } from '@/services/mfaAuthService';
-import { Shield, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
+import MfaHeader from './mfa/MfaHeader';
+import MfaCodeInput from './mfa/MfaCodeInput';
+import MfaActions from './mfa/MfaActions';
+import MfaStatus from './mfa/MfaStatus';
 
 interface MfaVerificationProps {
   email: string;
@@ -104,12 +106,6 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const handleCodeChange = (index: number, value: string) => {
     if (value.length > 1) return; // Prevent multiple characters
     if (!/^\d*$/.test(value)) return; // Only allow digits
@@ -140,112 +136,31 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
 
   return (
     <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="text-center">
-        <div className="flex justify-center mb-4">
-          <Shield className="h-12 w-12 text-blue-600" />
-        </div>
-        <CardTitle className="text-2xl font-bold">
-          Two-Factor Authentication
-        </CardTitle>
-        <CardDescription>
-          We've sent a 6-digit verification code to<br />
-          <strong>{email}</strong>
-        </CardDescription>
-      </CardHeader>
+      <MfaHeader email={email} />
       <CardContent className="space-y-6">
-        {isEmailConfirmed && (
-          <div className="bg-green-50 p-3 rounded-md border border-green-200 flex items-center space-x-2">
-            <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-            <p className="text-sm text-green-800">
-              Verification code sent successfully!
-            </p>
-          </div>
-        )}
+        <MfaStatus 
+          isEmailConfirmed={isEmailConfirmed}
+          hasError={hasError}
+        />
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              Enter verification code
-            </label>
-            <div className="flex justify-center gap-2">
-              {code.map((digit, index) => (
-                <input
-                  key={index}
-                  id={`otp-${index}`}
-                  type="text"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleCodeChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-12 h-12 text-center text-lg font-semibold border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  disabled={isVerifying}
-                  autoFocus={index === 0}
-                />
-              ))}
-            </div>
-          </div>
+          <MfaCodeInput
+            code={code}
+            isVerifying={isVerifying}
+            onCodeChange={handleCodeChange}
+            onKeyDown={handleKeyDown}
+          />
 
-          <Button 
-            onClick={handleVerify}
-            disabled={code.join('').length !== 6 || isVerifying}
-            className="w-full"
-          >
-            {isVerifying ? "Verifying..." : "Verify Code"}
-          </Button>
-        </div>
-
-        <div className="text-center space-y-2">
-          <p className="text-sm text-gray-600">
-            Code expires in {formatTime(timeLeft)}
-          </p>
-          
-          <div className="flex justify-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleResend}
-              disabled={!canResend || isResending || timeLeft > 240}
-            >
-              {isResending ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Resending...
-                </>
-              ) : (
-                'Resend Code'
-              )}
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onCancel}
-              disabled={isVerifying}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-
-        {hasError && (
-          <div className="bg-red-50 p-3 rounded-md border border-red-200 flex items-start space-x-2">
-            <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-sm text-red-800 font-medium">
-                Having trouble receiving the code?
-              </p>
-              <p className="text-xs text-red-700 mt-1">
-                Check your spam folder or try resending the code.
-              </p>
-            </div>
-          </div>
-        )}
-
-        <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
-          <p className="text-xs text-blue-800">
-            <strong>Check your email:</strong> The verification code has been sent to your email address. 
-            If you don't see it, check your spam folder.
-          </p>
+          <MfaActions
+            code={code}
+            isVerifying={isVerifying}
+            isResending={isResending}
+            canResend={canResend}
+            timeLeft={timeLeft}
+            onVerify={handleVerify}
+            onResend={handleResend}
+            onCancel={onCancel}
+          />
         </div>
       </CardContent>
     </Card>
