@@ -51,7 +51,7 @@ additional_redirect_urls = ["https://127.0.0.1:3000"]
 jwt_expiry = 3600
 enable_signup = true
 enable_email_confirmations = false
-enable_email_change_confirmations = true
+enable_email_change_confirmations = false
 enable_phone_confirmations = false
 enable_phone_change_confirmations = false
 
@@ -59,12 +59,12 @@ enable_phone_change_confirmations = false
 enable_signup = true
 enable_confirmations = false
 
-[functions.auth-hook]
-verify_jwt = false
-
 [auth.hook.send_email]
 enabled = true
 uri = "http://127.0.0.1:54321/functions/v1/auth-hook"
+
+[functions.auth-hook]
+verify_jwt = false
 
 [edge_runtime]
 enabled = true

@@ -31,25 +31,21 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const hookData: AuthHookRequest = await req.json();
     
-    console.log('Auth hook triggered:', hookData);
-    console.log('Event type:', hookData.event);
-    console.log('User email:', hookData.user.email);
-    console.log('Email confirmed at:', hookData.user.email_confirmed_at);
+    console.log('Auth hook triggered:', JSON.stringify(hookData, null, 2));
+    console.log('RESEND_API_KEY configured:', !!Deno.env.get("RESEND_API_KEY"));
 
     // Handle different auth events
     switch (hookData.event) {
       case 'user.created':
-        // Send account confirmation email when user signs up
-        console.log('New user created, sending confirmation email for:', hookData.user.email);
-        await sendAccountConfirmationEmail(hookData.user);
+        console.log('Handling user.created event for:', hookData.user.email);
+        await sendWelcomeEmail(hookData.user);
         break;
       case 'user.confirmation.requested':
-        // Alternative event name for confirmation requests
-        console.log('User confirmation requested for:', hookData.user.email);
-        await sendAccountConfirmationEmail(hookData.user);
+        console.log('Handling user.confirmation.requested event for:', hookData.user.email);
+        await sendWelcomeEmail(hookData.user);
         break;
       case 'user.password_recovery.requested':
-        console.log('Password recovery requested for:', hookData.user.email);
+        console.log('Handling password recovery for:', hookData.user.email);
         await sendPasswordResetEmail(hookData.user);
         break;
       default:
@@ -65,6 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error in auth hook:", error);
+    console.error("Error stack:", error.stack);
     return new Response(
       JSON.stringify({ error: error.message }),
       {
@@ -75,8 +72,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-async function sendAccountConfirmationEmail(user: any) {
+async function sendWelcomeEmail(user: any) {
   const firstName = user.user_metadata?.first_name || 'there';
+  
+  console.log('Attempting to send welcome email to:', user.email);
+  console.log('Using Resend API key:', Deno.env.get("RESEND_API_KEY") ? 'Present' : 'Missing');
   
   try {
     const result = await resend.emails.send({
@@ -97,9 +97,9 @@ async function sendAccountConfirmationEmail(user: any) {
             </ul>
           </div>
           <p style="margin: 30px 0;">
-            <a href="${getAppUrl()}/shop" 
+            <a href="https://nyadgiutmweuyxqetfuh.supabase.co/auth" 
                style="background-color: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
-              Start Shopping
+              Sign In Now
             </a>
           </p>
           <p style="color: #666; font-size: 14px; margin-top: 30px;">
@@ -114,9 +114,10 @@ async function sendAccountConfirmationEmail(user: any) {
         </div>
       `,
     });
-    console.log('Account confirmation email sent successfully:', result);
+    console.log('Welcome email sent successfully:', result);
   } catch (error) {
-    console.error('Failed to send account confirmation email:', error);
+    console.error('Failed to send welcome email:', error);
+    console.error('Resend error details:', JSON.stringify(error, null, 2));
     throw error;
   }
 }
@@ -136,7 +137,7 @@ async function sendPasswordResetEmail(user: any) {
           <p>You requested to reset your password for your Anong Thai account.</p>
           <p>Your password has been reset. You can now sign in with your new password.</p>
           <p style="margin: 30px 0;">
-            <a href="${getAppUrl()}/auth" 
+            <a href="https://nyadgiutmweuyxqetfuh.supabase.co/auth" 
                style="background-color: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
               Sign In Now
             </a>
@@ -156,18 +157,6 @@ async function sendPasswordResetEmail(user: any) {
     console.error('Failed to send password reset email:', error);
     throw error;
   }
-}
-
-function getAppUrl(): string {
-  // Try to get the app URL from various sources
-  const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  if (supabaseUrl) {
-    // Convert Supabase URL to likely app URL
-    return supabaseUrl.replace('.supabase.co', '.vercel.app');
-  }
-  
-  // Fallback to a default URL
-  return 'https://your-domain.com';
 }
 
 serve(handler);
