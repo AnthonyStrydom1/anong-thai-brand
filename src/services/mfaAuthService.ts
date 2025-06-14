@@ -15,6 +15,7 @@ class MFAAuthService {
     
     try {
       // Clear any existing session first
+      console.log('🧹 MFA Service: Clearing existing session...');
       await supabase.auth.signOut();
       await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -36,12 +37,14 @@ class MFAAuthService {
       const userId = data.user?.id;
       
       // Immediately sign out to prevent session persistence
+      console.log('🚪 MFA Service: Signing out to prevent session persistence...');
       await supabase.auth.signOut();
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Verify we're actually signed out
       const { data: sessionCheck } = await supabase.auth.getSession();
       if (sessionCheck.session) {
+        console.log('⚠️ MFA Service: Still have session, forcing another signout...');
         await supabase.auth.signOut();
         await new Promise(resolve => setTimeout(resolve, 300));
       }
@@ -54,8 +57,15 @@ class MFAAuthService {
         userId: userId
       };
       
-      console.log('💾 MFA Service: Storing session data:', { email, userId, timestamp: sessionData.timestamp });
+      console.log('💾 MFA Service: Storing session data...', { email, userId, timestamp: sessionData.timestamp });
+      
+      // Use both sessionStorage and a custom event to ensure detection
       sessionStorage.setItem(this.MFA_SESSION_KEY, JSON.stringify(sessionData));
+      
+      // Dispatch a custom event to notify listeners
+      window.dispatchEvent(new CustomEvent('mfa-session-stored', { detail: sessionData }));
+      
+      console.log('📡 MFA Service: Session data stored and event dispatched');
 
       // Call the send-mfa-email edge function to send the actual email
       console.log('📧 MFA Service: Sending MFA email...');
@@ -178,7 +188,7 @@ class MFAAuthService {
   private getMFASessionData() {
     const data = sessionStorage.getItem(this.MFA_SESSION_KEY);
     const parsed = data ? JSON.parse(data) : null;
-    console.log('📖 MFA Service: Getting session data:', parsed ? { email: parsed.email, hasData: true } : null);
+    console.log('📖 MFA Service: Getting session data:', parsed ? { email: parsed.email, hasData: true, timestamp: parsed.timestamp } : null);
     return parsed;
   }
 
@@ -186,6 +196,9 @@ class MFAAuthService {
     console.log('🧹 MFA Service: Clearing session data');
     sessionStorage.removeItem(this.MFA_SESSION_KEY);
     sessionStorage.removeItem(this.MFA_CHALLENGE_KEY);
+    
+    // Dispatch event to notify listeners
+    window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
   }
 
   getPendingMFAEmail(): string | null {
