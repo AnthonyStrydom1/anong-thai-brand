@@ -318,11 +318,13 @@ export type Database = {
       orders: {
         Row: {
           billing_address: Json | null
+          courier_service: string | null
           created_at: string
           currency: string | null
           customer_id: number | null
           delivered_at: string | null
           discount_amount: number | null
+          estimated_delivery_days: number | null
           fulfillment_status: string | null
           id: string
           notes: string | null
@@ -331,20 +333,24 @@ export type Database = {
           shipped_at: string | null
           shipping_address: Json | null
           shipping_amount: number | null
+          shipping_method: string | null
           status: string | null
           subtotal: number
           tax_amount: number | null
           total_amount: number
           tracking_number: string | null
           updated_at: string
+          vat_amount: number | null
         }
         Insert: {
           billing_address?: Json | null
+          courier_service?: string | null
           created_at?: string
           currency?: string | null
           customer_id?: number | null
           delivered_at?: string | null
           discount_amount?: number | null
+          estimated_delivery_days?: number | null
           fulfillment_status?: string | null
           id?: string
           notes?: string | null
@@ -353,20 +359,24 @@ export type Database = {
           shipped_at?: string | null
           shipping_address?: Json | null
           shipping_amount?: number | null
+          shipping_method?: string | null
           status?: string | null
           subtotal: number
           tax_amount?: number | null
           total_amount: number
           tracking_number?: string | null
           updated_at?: string
+          vat_amount?: number | null
         }
         Update: {
           billing_address?: Json | null
+          courier_service?: string | null
           created_at?: string
           currency?: string | null
           customer_id?: number | null
           delivered_at?: string | null
           discount_amount?: number | null
+          estimated_delivery_days?: number | null
           fulfillment_status?: string | null
           id?: string
           notes?: string | null
@@ -375,12 +385,14 @@ export type Database = {
           shipped_at?: string | null
           shipping_address?: Json | null
           shipping_amount?: number | null
+          shipping_method?: string | null
           status?: string | null
           subtotal?: number
           tax_amount?: number | null
           total_amount?: number
           tracking_number?: string | null
           updated_at?: string
+          vat_amount?: number | null
         }
         Relationships: [
           {

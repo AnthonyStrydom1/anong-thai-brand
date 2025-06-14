@@ -1,5 +1,8 @@
+
 import { supabaseService } from './supabaseService';
 import { supabase } from '@/integrations/supabase/client';
+import { shippingService, ShippingRate } from './shippingService';
+import { VATCalculator } from '@/utils/vatCalculator';
 
 interface CreateOrderData {
   customerInfo: {
@@ -16,10 +19,12 @@ interface CreateOrderData {
       id: string;
       name: string;
       price: number;
+      weight?: number;
     };
     quantity: number;
   }>;
   total: number;
+  selectedShipping?: ShippingRate;
 }
 
 export class OrderService {
@@ -29,6 +34,16 @@ export class OrderService {
     const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
     const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
     return `ORD-${dateStr}-${randomNum}`;
+  }
+
+  // Calculate shipping rates for an order
+  async calculateShipping(customerInfo: CreateOrderData['customerInfo'], items: CreateOrderData['items']): Promise<ShippingRate[]> {
+    const totalWeight = items.reduce((weight, item) => weight + (item.product.weight || 0.5) * item.quantity, 0);
+    
+    return shippingService.calculateShipping({
+      city: customerInfo.city,
+      postalCode: customerInfo.postalCode
+    }, totalWeight);
   }
 
   async createOrder(orderData: CreateOrderData) {
@@ -77,19 +92,19 @@ export class OrderService {
         console.log('Existing customer found:', customer.id);
       }
 
-      // Calculate totals
-      const subtotal = orderData.total;
-      const shipping_amount = 0;
-      const tax_amount = 0;
-      const total_amount = subtotal + shipping_amount + tax_amount;
+      // Calculate order totals with VAT breakdown
+      const shippingCost = orderData.selectedShipping?.cost || 0;
+      const totals = VATCalculator.calculateOrderTotals(
+        orderData.items.map(item => ({ price: item.product.price, quantity: item.quantity })),
+        shippingCost
+      );
+
       const order_number = this.generateOrderNumber();
 
-      console.log('Order calculations:', {
-        subtotal,
-        shipping_amount,
-        tax_amount,
-        total_amount,
-        order_number
+      console.log('Order calculations with VAT:', {
+        ...totals,
+        order_number,
+        shipping_method: orderData.selectedShipping?.description || 'Standard Shipping'
       });
 
       // Create order
@@ -99,13 +114,17 @@ export class OrderService {
         status: 'pending',
         payment_status: 'pending',
         fulfillment_status: 'unfulfilled',
-        subtotal: subtotal,
-        shipping_amount: shipping_amount,
-        tax_amount: tax_amount,
+        subtotal: totals.subtotal,
+        vat_amount: totals.vatAmount,
+        shipping_amount: totals.shippingAmount,
+        tax_amount: 0, // Keep for compatibility, VAT is handled separately
         discount_amount: 0,
-        total_amount: total_amount,
-        currency: 'USD',
+        total_amount: totals.totalAmount,
+        currency: 'ZAR',
         order_number: order_number,
+        shipping_method: orderData.selectedShipping?.description || 'Standard Shipping',
+        courier_service: 'courier_guy',
+        estimated_delivery_days: orderData.selectedShipping?.estimatedDays || 3,
         billing_address: {
           first_name: orderData.customerInfo.firstName,
           last_name: orderData.customerInfo.lastName,

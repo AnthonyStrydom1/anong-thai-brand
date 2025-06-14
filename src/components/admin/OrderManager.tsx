@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +9,7 @@ import { supabaseService, SupabaseOrder } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
 import { useAdminSecurity } from "@/hooks/useAdminSecurity";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { Input } from "@/components/ui/input";
 
 const OrderManager = () => {
   const [orders, setOrders] = useState<SupabaseOrder[]>([]);
@@ -170,6 +170,61 @@ const OrderManager = () => {
     }
   };
 
+  const updateTrackingNumber = async (orderId: string, trackingNumber: string) => {
+    const order = orders.find(o => o.id === orderId);
+    
+    try {
+      console.log('Updating tracking number:', orderId, trackingNumber);
+      
+      const { data, error } = await supabaseService.supabase
+        .from('orders')
+        .update({ tracking_number: trackingNumber })
+        .eq('id', orderId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Tracking update error:', error);
+        throw error;
+      }
+
+      console.log('Tracking update successful:', data);
+
+      // Log the security event
+      await logAdminAction('update', 'order_tracking', orderId, {
+        order_number: order?.order_number,
+        tracking_number: trackingNumber,
+        customer_id: order?.customer_id
+      });
+
+      // Update the local state
+      setOrders(orders.map(order => 
+        order.id === orderId ? { ...order, tracking_number: trackingNumber } : order
+      ));
+
+      toast({
+        title: "Success",
+        description: "Tracking number updated successfully",
+      });
+
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder({ ...selectedOrder, tracking_number: trackingNumber });
+      }
+    } catch (error) {
+      console.error('Failed to update tracking number:', error);
+      await logAdminAction('update', 'order_tracking', orderId, {
+        error: error.message,
+        order_number: order?.order_number
+      }, false);
+      
+      toast({
+        title: "Error",
+        description: "Failed to update tracking number",
+        variant: "destructive"
+      });
+    }
+  };
+
   const viewOrderDetails = async (orderId: string) => {
     try {
       console.log('Loading order details for:', orderId);
@@ -280,12 +335,20 @@ const OrderManager = () => {
                     <p className="text-sm text-gray-600">
                       Customer ID: {order.customer_id}
                     </p>
+                    {order.tracking_number && (
+                      <p className="text-sm text-blue-600">
+                        Tracking: {order.tracking_number}
+                      </p>
+                    )}
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
                     <p className="font-semibold">{formatPrice(order.total_amount)}</p>
+                    <p className="text-xs text-gray-500">
+                      VAT: {formatPrice(order.vat_amount || 0)}
+                    </p>
                     <div className="flex space-x-2 mt-1">
                       <Badge variant={getStatusBadgeVariant(order.status)}>
                         {order.status}
@@ -321,6 +384,19 @@ const OrderManager = () => {
                         <SelectItem value="refunded">Refunded</SelectItem>
                       </SelectContent>
                     </Select>
+
+                    <div className="flex space-x-1">
+                      <Input
+                        placeholder="Tracking #"
+                        className="w-24 h-8 text-xs"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            updateTrackingNumber(order.id, e.currentTarget.value);
+                            e.currentTarget.value = '';
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                   
                   <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
@@ -354,13 +430,47 @@ const OrderManager = () => {
                               </Badge>
                             </div>
                             <div>
+                              <p className="font-semibold">Subtotal (excl. VAT):</p>
+                              <p>{formatPrice(selectedOrder.subtotal)}</p>
+                            </div>
+                            <div>
+                              <p className="font-semibold">VAT Amount:</p>
+                              <p>{formatPrice(selectedOrder.vat_amount || 0)}</p>
+                            </div>
+                            <div>
+                              <p className="font-semibold">Shipping:</p>
+                              <p>{formatPrice(selectedOrder.shipping_amount || 0)}</p>
+                            </div>
+                            <div>
                               <p className="font-semibold">Total Amount:</p>
-                              <p>{formatPrice(selectedOrder.total_amount)}</p>
+                              <p className="font-bold">{formatPrice(selectedOrder.total_amount)}</p>
+                            </div>
+                            <div>
+                              <p className="font-semibold">Currency:</p>
+                              <p>{selectedOrder.currency}</p>
                             </div>
                             <div>
                               <p className="font-semibold">Created:</p>
                               <p>{new Date(selectedOrder.created_at).toLocaleString()}</p>
                             </div>
+                            {selectedOrder.tracking_number && (
+                              <div className="col-span-2">
+                                <p className="font-semibold">Tracking Number:</p>
+                                <div className="flex items-center space-x-2">
+                                  <p>{selectedOrder.tracking_number}</p>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => window.open(
+                                      `https://www.thecourierguy.co.za/track-and-trace?tracking_number=${selectedOrder.tracking_number}`,
+                                      '_blank'
+                                    )}
+                                  >
+                                    Track Order
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                           
                           {selectedOrder.order_items && (

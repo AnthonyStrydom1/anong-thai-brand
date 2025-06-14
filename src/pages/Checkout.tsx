@@ -11,12 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingBag, CreditCard, Building2 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ShoppingBag, CreditCard, Building2, Truck } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { orderService } from "@/services/orderService";
+import { shippingService, ShippingRate } from "@/services/shippingService";
+import { VATCalculator } from "@/utils/vatCalculator";
 
 const Checkout = () => {
   const { language } = useLanguage();
@@ -26,6 +29,9 @@ const Checkout = () => {
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [orderData, setOrderData] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
+  const [selectedShippingRate, setSelectedShippingRate] = useState<ShippingRate | null>(null);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
   
   // Scroll to top when component mounts
   useEffect(() => {
@@ -42,6 +48,41 @@ const Checkout = () => {
     phone: ''
   });
 
+  // Calculate shipping when address changes
+  useEffect(() => {
+    if (formData.city && formData.postalCode && items.length > 0) {
+      calculateShipping();
+    }
+  }, [formData.city, formData.postalCode, items]);
+
+  const calculateShipping = async () => {
+    if (!formData.city || !formData.postalCode) return;
+    
+    setIsCalculatingShipping(true);
+    try {
+      const rates = await orderService.calculateShipping(formData, items);
+      setShippingRates(rates);
+      if (rates.length > 0 && !selectedShippingRate) {
+        setSelectedShippingRate(rates[0]);
+      }
+    } catch (error) {
+      console.error('Error calculating shipping:', error);
+      toast({
+        title: "Shipping Error",
+        description: "Could not calculate shipping rates. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCalculatingShipping(false);
+    }
+  };
+
+  // Calculate order totals with VAT
+  const orderTotals = VATCalculator.calculateOrderTotals(
+    items.map(item => ({ price: item.product.price, quantity: item.quantity })),
+    selectedShippingRate?.cost || 0
+  );
+
   const translations = {
     en: {
       title: "Checkout",
@@ -56,8 +97,10 @@ const Checkout = () => {
       city: "City",
       postalCode: "Postal Code",
       phone: "Phone Number",
+      shippingMethod: "Shipping Method",
       orderSummary: "Order Summary",
-      subtotal: "Subtotal",
+      subtotal: "Subtotal (excl. VAT)",
+      vatAmount: "VAT (15%)",
       shipping: "Shipping",
       total: "Total",
       placeOrder: "Place Order (EFT Payment)",
@@ -72,7 +115,8 @@ const Checkout = () => {
       accountNumber: "Account Number",
       branchCode: "Branch Code",
       paymentInstructions: "Payment Instructions",
-      paymentNote: "Please use your order number as the payment reference and email proof of payment to orders@anong.com"
+      paymentNote: "Please use your order number as the payment reference and email proof of payment to orders@anong.com",
+      calculatingShipping: "Calculating shipping..."
     },
     th: {
       title: "ชำระเงิน",
@@ -87,8 +131,10 @@ const Checkout = () => {
       city: "เมือง",
       postalCode: "รหัสไปรษณีย์",
       phone: "หมายเลขโทรศัพท์",
+      shippingMethod: "วิธีการจัดส่ง",
       orderSummary: "สรุปคำสั่งซื้อ",
-      subtotal: "ราคารวม",
+      subtotal: "ราคารวม (ไม่รวม VAT)",
+      vatAmount: "VAT (15%)",
       shipping: "ค่าจัดส่ง",
       total: "ราคารวมทั้งสิ้น",
       placeOrder: "สั่งซื้อ (โอนเงินผ่านธนาคาร)",
@@ -103,7 +149,8 @@ const Checkout = () => {
       accountNumber: "เลขที่บัญชี",
       branchCode: "รหัสสาขา",
       paymentInstructions: "คำแนะนำการชำระเงิน",
-      paymentNote: "กรุณาใช้หมายเลขคำสั่งซื้อเป็นข้อมูลอ้างอิงและส่งหลักฐานการชำระเงินไปที่ orders@anong.com"
+      paymentNote: "กรุณาใช้หมายเลขคำสั่งซื้อเป็นข้อมูลอ้างอิงและส่งหลักฐานการชำระเงินไปที่ orders@anong.com",
+      calculatingShipping: "กำลังคำนวณค่าจัดส่ง..."
     }
   };
 
@@ -148,11 +195,22 @@ const Checkout = () => {
         return;
       }
 
+      if (!selectedShippingRate) {
+        toast({
+          title: "Shipping Required",
+          description: "Please select a shipping method.",
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+        return;
+      }
+
       // Create order using EFT payment method
       const orderDataForSubmission = {
         items: items,
         total: total,
-        customerInfo: formData
+        customerInfo: formData,
+        selectedShipping: selectedShippingRate
       };
 
       console.log('Creating EFT order with data:', orderDataForSubmission);
@@ -162,8 +220,10 @@ const Checkout = () => {
       const orderResult = {
         orderNumber: order.order_number,
         items: items,
-        total: total,
-        customerInfo: formData
+        total: orderTotals.totalAmount,
+        customerInfo: formData,
+        shippingCost: selectedShippingRate.cost,
+        vatAmount: orderTotals.vatAmount
       };
 
       setOrderData(orderResult);
@@ -413,6 +473,52 @@ const Checkout = () => {
               </CardContent>
             </Card>
 
+            {/* Shipping Method */}
+            {(shippingRates.length > 0 || isCalculatingShipping) && (
+              <Card className="anong-card">
+                <CardHeader>
+                  <CardTitle className="anong-subheading text-xl text-anong-black flex items-center">
+                    <Truck className="w-5 h-5 mr-2" />
+                    {t.shippingMethod}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isCalculatingShipping ? (
+                    <div className="text-center py-4">
+                      <p className="anong-body text-anong-black/70">{t.calculatingShipping}</p>
+                    </div>
+                  ) : (
+                    <RadioGroup 
+                      value={selectedShippingRate?.service || ''} 
+                      onValueChange={(value) => {
+                        const rate = shippingRates.find(r => r.service === value);
+                        setSelectedShippingRate(rate || null);
+                      }}
+                    >
+                      {shippingRates.map((rate) => (
+                        <div key={rate.service} className="flex items-center space-x-3 p-3 border rounded-lg">
+                          <RadioGroupItem value={rate.service} id={rate.service} />
+                          <Label htmlFor={rate.service} className="flex-1 cursor-pointer">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="anong-body font-semibold text-anong-black">{rate.description}</p>
+                                <p className="anong-body-light text-sm text-anong-black/70">
+                                  Estimated delivery: {rate.estimatedDays} business days
+                                </p>
+                              </div>
+                              <span className="anong-body font-semibold text-anong-black">
+                                {formatPrice(rate.cost)}
+                              </span>
+                            </div>
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Payment Method */}
             <Card className="anong-card">
               <CardHeader>
@@ -460,11 +566,17 @@ const Checkout = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between anong-body">
                       <span className="text-anong-black/80">{t.subtotal}</span>
-                      <span className="text-anong-black">{formatPrice(total)}</span>
+                      <span className="text-anong-black">{formatPrice(orderTotals.subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between anong-body">
+                      <span className="text-anong-black/80">{t.vatAmount}</span>
+                      <span className="text-anong-black">{formatPrice(orderTotals.vatAmount)}</span>
                     </div>
                     <div className="flex justify-between anong-body">
                       <span className="text-anong-black/80">{t.shipping}</span>
-                      <span className="text-anong-black">{t.free}</span>
+                      <span className="text-anong-black">
+                        {selectedShippingRate ? formatPrice(selectedShippingRate.cost) : '-'}
+                      </span>
                     </div>
                   </div>
                   
@@ -472,13 +584,13 @@ const Checkout = () => {
                   
                   <div className="flex justify-between anong-subheading text-lg">
                     <span className="text-anong-black">{t.total}</span>
-                    <span className="text-anong-black">{formatPrice(total)}</span>
+                    <span className="text-anong-black">{formatPrice(orderTotals.totalAmount)}</span>
                   </div>
                   
                   <Button 
                     type="submit" 
                     className="w-full anong-btn-primary mt-6"
-                    disabled={isProcessing}
+                    disabled={isProcessing || !selectedShippingRate}
                   >
                     {isProcessing ? t.processing : t.placeOrder}
                   </Button>
