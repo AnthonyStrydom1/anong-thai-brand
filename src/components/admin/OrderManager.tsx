@@ -1,24 +1,30 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ShoppingCart, Eye, Package2, Truck, CheckCircle } from "lucide-react";
-import { supabaseService, SupabaseOrder } from "@/services/supabaseService";
+import { supabaseService } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
 import { useAdminSecurity } from "@/hooks/useAdminSecurity";
-import { useCurrency } from "@/contexts/CurrencyContext";
-import { Input } from "@/components/ui/input";
+import OrderManagerHeader from './orders/OrderManagerHeader';
+import OrderStatusCard from './orders/OrderStatusCard';
+import OrderDetailsDialog from './orders/OrderDetailsDialog';
+import OrdersEmptyState from './orders/OrdersEmptyState';
 
 // Extended order type to include new fields
-interface ExtendedOrder extends SupabaseOrder {
-  tracking_number?: string | null;
+interface ExtendedOrder {
+  id: string;
+  order_number: string;
+  status: string;
+  payment_status: string;
+  total_amount: number;
   vat_amount?: number | null;
+  customer_id: number;
+  created_at: string;
+  tracking_number?: string | null;
   shipping_method?: string | null;
   courier_service?: string | null;
   estimated_delivery_days?: number | null;
+  subtotal?: number;
+  shipping_amount?: number;
+  currency?: string;
 }
 
 const OrderManager = () => {
@@ -27,7 +33,6 @@ const OrderManager = () => {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
   const { logAdminAction } = useAdminSecurity();
-  const { formatPrice, selectedCurrency } = useCurrency();
 
   useEffect(() => {
     loadOrders();
@@ -272,246 +277,36 @@ const OrderManager = () => {
     }
   };
 
-  const getStatusBadgeVariant = (status: string | null) => {
-    switch (status) {
-      case 'pending':
-        return 'secondary';
-      case 'processing':
-        return 'default';
-      case 'shipped':
-        return 'outline';
-      case 'delivered':
-        return 'default';
-      case 'cancelled':
-        return 'destructive';
-      default:
-        return 'secondary';
-    }
-  };
-
-  const getStatusIcon = (status: string | null) => {
-    switch (status) {
-      case 'processing':
-        return <Package2 className="w-4 h-4" />;
-      case 'shipped':
-        return <Truck className="w-4 h-4" />;
-      case 'delivered':
-        return <CheckCircle className="w-4 h-4" />;
-      default:
-        return <ShoppingCart className="w-4 h-4" />;
-    }
-  };
-
   if (isLoading) {
     return <div className="p-6">Loading orders...</div>;
   }
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Order Manager</h1>
-          <p className="text-gray-600 text-sm mt-1">
-            All amounts displayed in {selectedCurrency.name} ({selectedCurrency.symbol})
-          </p>
-        </div>
-        <Button onClick={loadOrders} variant="outline">
-          Refresh Orders
-        </Button>
-      </div>
+      <OrderManagerHeader onRefresh={loadOrders} />
 
       {orders.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <ShoppingCart className="w-12 h-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">No Orders Yet</h3>
-            <p className="text-gray-500 text-center">
-              Orders will appear here once customers start making purchases.
-            </p>
-          </CardContent>
-        </Card>
+        <OrdersEmptyState />
       ) : (
         <div className="grid gap-4">
           {orders.map((order) => (
-            <Card key={order.id}>
-              <CardContent className="flex justify-between items-center p-6">
-                <div className="flex items-center space-x-4">
-                  {getStatusIcon(order.status)}
-                  <div>
-                    <h3 className="font-semibold">Order #{order.order_number}</h3>
-                    <p className="text-sm text-gray-600">
-                      {new Date(order.created_at).toLocaleDateString()}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Customer ID: {order.customer_id}
-                    </p>
-                    {order.tracking_number && (
-                      <p className="text-sm text-blue-600">
-                        Tracking: {order.tracking_number}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <p className="font-semibold">{formatPrice(order.total_amount)}</p>
-                    <p className="text-xs text-gray-500">
-                      VAT: {formatPrice(order.vat_amount || 0)}
-                    </p>
-                    <div className="flex space-x-2 mt-1">
-                      <Badge variant={getStatusBadgeVariant(order.status)}>
-                        {order.status}
-                      </Badge>
-                      <Badge variant={getStatusBadgeVariant(order.payment_status)}>
-                        {order.payment_status}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col space-y-2">
-                    <Select onValueChange={(value) => updateOrderStatus(order.id, value)}>
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="processing">Processing</SelectItem>
-                        <SelectItem value="shipped">Shipped</SelectItem>
-                        <SelectItem value="delivered">Delivered</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    
-                    <Select onValueChange={(value) => updatePaymentStatus(order.id, value)}>
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Payment" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="paid">Paid</SelectItem>
-                        <SelectItem value="failed">Failed</SelectItem>
-                        <SelectItem value="refunded">Refunded</SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    <div className="flex space-x-1">
-                      <Input
-                        placeholder="Tracking #"
-                        className="w-24 h-8 text-xs"
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            updateTrackingNumber(order.id, e.currentTarget.value);
-                            e.currentTarget.value = '';
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                  
-                  <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => viewOrderDetails(order.id)}
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        View Details
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle>Order Details - #{selectedOrder?.order_number}</DialogTitle>
-                      </DialogHeader>
-                      {selectedOrder && (
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <p className="font-semibold">Status:</p>
-                              <Badge variant={getStatusBadgeVariant(selectedOrder.status)}>
-                                {selectedOrder.status}
-                              </Badge>
-                            </div>
-                            <div>
-                              <p className="font-semibold">Payment Status:</p>
-                              <Badge variant={getStatusBadgeVariant(selectedOrder.payment_status)}>
-                                {selectedOrder.payment_status}
-                              </Badge>
-                            </div>
-                            <div>
-                              <p className="font-semibold">Subtotal (excl. VAT):</p>
-                              <p>{formatPrice(selectedOrder.subtotal)}</p>
-                            </div>
-                            <div>
-                              <p className="font-semibold">VAT Amount:</p>
-                              <p>{formatPrice(selectedOrder.vat_amount || 0)}</p>
-                            </div>
-                            <div>
-                              <p className="font-semibold">Shipping:</p>
-                              <p>{formatPrice(selectedOrder.shipping_amount || 0)}</p>
-                            </div>
-                            <div>
-                              <p className="font-semibold">Total Amount:</p>
-                              <p className="font-bold">{formatPrice(selectedOrder.total_amount)}</p>
-                            </div>
-                            <div>
-                              <p className="font-semibold">Currency:</p>
-                              <p>{selectedOrder.currency}</p>
-                            </div>
-                            <div>
-                              <p className="font-semibold">Created:</p>
-                              <p>{new Date(selectedOrder.created_at).toLocaleString()}</p>
-                            </div>
-                            {selectedOrder.tracking_number && (
-                              <div className="col-span-2">
-                                <p className="font-semibold">Tracking Number:</p>
-                                <div className="flex items-center space-x-2">
-                                  <p>{selectedOrder.tracking_number}</p>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => window.open(
-                                      `https://www.thecourierguy.co.za/track-and-trace?tracking_number=${selectedOrder.tracking_number}`,
-                                      '_blank'
-                                    )}
-                                  >
-                                    Track Order
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {selectedOrder.order_items && (
-                            <div>
-                              <h4 className="font-semibold mb-2">Order Items:</h4>
-                              <div className="space-y-2">
-                                {selectedOrder.order_items.map((item: any, index: number) => (
-                                  <div key={index} className="flex justify-between items-center p-2 border rounded">
-                                    <div>
-                                      <p className="font-medium">{item.product_name}</p>
-                                      <p className="text-sm text-gray-600">SKU: {item.product_sku}</p>
-                                    </div>
-                                    <div className="text-right">
-                                      <p>Qty: {item.quantity}</p>
-                                      <p>{formatPrice(item.total_price)}</p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardContent>
-            </Card>
+            <OrderStatusCard
+              key={order.id}
+              order={order}
+              onStatusUpdate={updateOrderStatus}
+              onPaymentStatusUpdate={updatePaymentStatus}
+              onTrackingUpdate={updateTrackingNumber}
+              onViewDetails={viewOrderDetails}
+            />
           ))}
         </div>
       )}
+
+      <OrderDetailsDialog
+        isOpen={isOrderDialogOpen}
+        onOpenChange={setIsOrderDialogOpen}
+        selectedOrder={selectedOrder}
+      />
     </div>
   );
 };
