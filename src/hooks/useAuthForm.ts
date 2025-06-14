@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { mfaAuthService } from '@/services/mfaAuthService';
@@ -44,7 +43,7 @@ export const useAuthForm = () => {
           return { mfaRequired: true };
         }
       } else {
-        // For sign-up, create account directly without email confirmation
+        // For sign-up, create account directly
         await authService.signUp({
           email: formData.email,
           password: formData.password,
@@ -53,29 +52,52 @@ export const useAuthForm = () => {
         });
         
         // After successful sign-up, initiate MFA flow
-        const mfaResult = await mfaAuthService.initiateSignIn({
-          email: formData.email,
-          password: formData.password
-        });
+        try {
+          const mfaResult = await mfaAuthService.initiateSignIn({
+            email: formData.email,
+            password: formData.password
+          });
 
-        if (mfaResult.mfaRequired) {
-          return { mfaRequired: true };
+          if (mfaResult.mfaRequired) {
+            return { mfaRequired: true };
+          }
+        } catch (mfaError) {
+          // If MFA fails after signup, that's okay - user can try signing in later
+          console.warn('MFA initiation failed after signup:', mfaError);
+          toast({
+            title: "Account Created!",
+            description: "Your account has been created. Please try signing in.",
+          });
+          setIsLogin(true); // Switch to login mode
+          return { mfaRequired: false };
         }
       }
       setShowForgotPassword(false);
       return { mfaRequired: false };
     } catch (error: any) {
       console.error('Auth error:', error);
+      
+      let errorMessage = error.message || "An error occurred during authentication.";
+      
+      // Handle specific error cases
+      if (error.message?.includes('Invalid login credentials')) {
+        errorMessage = "Invalid email or password. Please check your credentials.";
+        if (isLogin) {
+          setShowForgotPassword(true);
+        }
+      } else if (error.message?.includes('Email not confirmed')) {
+        errorMessage = "Please check your email and confirm your account before signing in.";
+      } else if (error.message?.includes('User already registered')) {
+        errorMessage = "An account with this email already exists. Please sign in instead.";
+        setIsLogin(true);
+      }
+      
       toast({
         title: "Error",
-        description: error.message || "An error occurred during authentication.",
+        description: errorMessage,
         variant: "destructive"
       });
       
-      // Show forgot password option for login failures
-      if (isLogin && error.message?.includes('Invalid login credentials')) {
-        setShowForgotPassword(true);
-      }
       throw error;
     } finally {
       setIsLoading(false);
