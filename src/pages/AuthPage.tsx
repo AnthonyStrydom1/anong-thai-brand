@@ -11,6 +11,7 @@ import { useAuthForm } from '@/hooks/useAuthForm';
 const AuthPage = () => {
   const [showMFA, setShowMFA] = useState(false);
   const [mfaEmail, setMfaEmail] = useState<string>('');
+  const [isCheckingMFA, setIsCheckingMFA] = useState(true);
   const navigate = useNavigate();
 
   const {
@@ -29,19 +30,36 @@ const AuthPage = () => {
 
   // Check for existing MFA session on mount
   useEffect(() => {
-    console.log('🔍 Checking for existing MFA session...');
-    const pendingEmail = mfaAuthService.getPendingMFAEmail();
-    if (pendingEmail) {
-      console.log('✅ Found existing MFA session for:', pendingEmail);
-      setShowMFA(true);
-      setMfaEmail(pendingEmail);
-    }
+    console.log('🔍 AuthPage: Checking for existing MFA session...');
+    
+    const checkMFAStatus = () => {
+      const hasPending = mfaAuthService.hasPendingMFA();
+      const pendingEmail = mfaAuthService.getPendingMFAEmail();
+      
+      console.log('📊 AuthPage: MFA Status Check:', { hasPending, pendingEmail });
+      
+      if (hasPending && pendingEmail) {
+        console.log('✅ AuthPage: Found existing MFA session for:', pendingEmail);
+        setShowMFA(true);
+        setMfaEmail(pendingEmail);
+      } else {
+        console.log('❌ AuthPage: No existing MFA session found');
+        setShowMFA(false);
+        setMfaEmail('');
+      }
+      
+      setIsCheckingMFA(false);
+    };
+
+    // Small delay to ensure all services are initialized
+    const timer = setTimeout(checkMFAStatus, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // Listen for MFA session events
   useEffect(() => {
     const handleMFAStored = (event: CustomEvent) => {
-      console.log('📧 MFA session stored event received:', event.detail);
+      console.log('📧 AuthPage: MFA session stored event received:', event.detail);
       const email = event.detail?.email;
       if (email) {
         setShowMFA(true);
@@ -56,7 +74,7 @@ const AuthPage = () => {
     };
 
     const handleMFACleared = () => {
-      console.log('🧹 MFA session cleared event received');
+      console.log('🧹 AuthPage: MFA session cleared event received');
       setShowMFA(false);
       setMfaEmail('');
     };
@@ -79,18 +97,22 @@ const AuthPage = () => {
     e.preventDefault();
     
     try {
-      console.log('🚀 Starting form submission...');
+      console.log('🚀 AuthPage: Starting form submission...');
       const result = await handleSubmit(e);
-      console.log('📝 Form submission result:', result);
+      console.log('📝 AuthPage: Form submission result:', result);
       
       if (result?.mfaRequired) {
-        console.log('🔐 MFA required! Checking for session data...');
+        console.log('🔐 AuthPage: MFA required! Waiting for session setup...');
         
-        // Give a small delay for the MFA service to complete setup
+        // Give more time for the MFA service to complete setup
         setTimeout(() => {
           const pendingEmail = mfaAuthService.getPendingMFAEmail();
-          if (pendingEmail) {
-            console.log('✅ MFA session found, showing verification');
+          const hasPending = mfaAuthService.hasPendingMFA();
+          
+          console.log('🔍 AuthPage: Delayed MFA check:', { pendingEmail, hasPending });
+          
+          if (hasPending && pendingEmail) {
+            console.log('✅ AuthPage: MFA session confirmed, showing verification');
             setShowMFA(true);
             setMfaEmail(pendingEmail);
             
@@ -101,17 +123,22 @@ const AuthPage = () => {
                 : "Please check your email for the verification code to complete your registration.",
             });
           } else {
-            console.log('⚠️ MFA required but no session found');
+            console.log('⚠️ AuthPage: MFA required but no session found after delay');
+            toast({
+              title: "Authentication Error",
+              description: "Please try signing in again.",
+              variant: "destructive"
+            });
           }
-        }, 500);
+        }, 1000); // Increased delay
       }
     } catch (error) {
-      console.error('❌ Form submission error:', error);
+      console.error('❌ AuthPage: Form submission error:', error);
     }
   };
 
   const handleMFASuccess = () => {
-    console.log('✅ MFA verification successful');
+    console.log('✅ AuthPage: MFA verification successful');
     setShowMFA(false);
     setMfaEmail('');
     mfaAuthService.clearMFASession();
@@ -123,7 +150,7 @@ const AuthPage = () => {
   };
 
   const handleMFACancel = () => {
-    console.log('❌ MFA verification cancelled');
+    console.log('❌ AuthPage: MFA verification cancelled');
     setShowMFA(false);
     setMfaEmail('');
     mfaAuthService.clearMFASession();
@@ -145,12 +172,28 @@ const AuthPage = () => {
   console.log('🎯 AuthPage render state:', { 
     showMFA, 
     mfaEmail, 
-    isLogin
+    isLogin,
+    isCheckingMFA
   });
+
+  // Show loading while checking MFA status
+  if (isCheckingMFA) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <NavigationBanner />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Show MFA verification if needed
   if (showMFA && mfaEmail) {
-    console.log('🔐 Rendering MFA verification component for:', mfaEmail);
+    console.log('🔐 AuthPage: Rendering MFA verification component for:', mfaEmail);
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <NavigationBanner />
@@ -165,7 +208,7 @@ const AuthPage = () => {
     );
   }
 
-  console.log('📝 Rendering auth form');
+  console.log('📝 AuthPage: Rendering auth form');
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <NavigationBanner />

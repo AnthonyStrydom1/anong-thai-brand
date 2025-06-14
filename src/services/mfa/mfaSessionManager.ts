@@ -12,42 +12,79 @@ export class MFASessionManager {
       timestamp: sessionData.timestamp 
     });
     
-    // Use both sessionStorage and a custom event to ensure detection
-    sessionStorage.setItem(this.MFA_SESSION_KEY, JSON.stringify(sessionData));
-    
-    // Dispatch a custom event to notify listeners
-    window.dispatchEvent(new CustomEvent('mfa-session-stored', { detail: sessionData }));
-    
-    console.log('📡 MFA Session Manager: Session data stored and event dispatched');
+    try {
+      // Use both sessionStorage and localStorage for redundancy
+      const dataStr = JSON.stringify(sessionData);
+      sessionStorage.setItem(this.MFA_SESSION_KEY, dataStr);
+      localStorage.setItem(this.MFA_SESSION_KEY, dataStr);
+      
+      // Dispatch a custom event to notify listeners
+      window.dispatchEvent(new CustomEvent('mfa-session-stored', { detail: sessionData }));
+      
+      console.log('📡 MFA Session Manager: Session data stored and event dispatched');
+    } catch (error) {
+      console.error('❌ MFA Session Manager: Failed to store session data:', error);
+    }
   }
 
   getSessionData(): MFASessionData | null {
-    const data = sessionStorage.getItem(this.MFA_SESSION_KEY);
-    const parsed = data ? JSON.parse(data) : null;
-    console.log('📖 MFA Session Manager: Getting session data:', parsed ? { 
-      email: parsed.email, 
-      hasData: true, 
-      timestamp: parsed.timestamp 
-    } : null);
-    return parsed;
+    try {
+      // Try sessionStorage first, then localStorage as fallback
+      let data = sessionStorage.getItem(this.MFA_SESSION_KEY);
+      if (!data) {
+        data = localStorage.getItem(this.MFA_SESSION_KEY);
+      }
+      
+      const parsed = data ? JSON.parse(data) : null;
+      console.log('📖 MFA Session Manager: Getting session data:', parsed ? { 
+        email: parsed.email, 
+        hasData: true, 
+        timestamp: parsed.timestamp 
+      } : null);
+      return parsed;
+    } catch (error) {
+      console.error('❌ MFA Session Manager: Failed to get session data:', error);
+      return null;
+    }
   }
 
   storeChallengeId(challengeId: string): void {
     console.log('🔑 MFA Session Manager: Storing challenge ID:', challengeId);
-    sessionStorage.setItem(this.MFA_CHALLENGE_KEY, challengeId);
+    try {
+      sessionStorage.setItem(this.MFA_CHALLENGE_KEY, challengeId);
+      localStorage.setItem(this.MFA_CHALLENGE_KEY, challengeId);
+    } catch (error) {
+      console.error('❌ MFA Session Manager: Failed to store challenge ID:', error);
+    }
   }
 
   getChallengeId(): string | null {
-    return sessionStorage.getItem(this.MFA_CHALLENGE_KEY);
+    try {
+      // Try sessionStorage first, then localStorage as fallback
+      let challengeId = sessionStorage.getItem(this.MFA_CHALLENGE_KEY);
+      if (!challengeId) {
+        challengeId = localStorage.getItem(this.MFA_CHALLENGE_KEY);
+      }
+      return challengeId;
+    } catch (error) {
+      console.error('❌ MFA Session Manager: Failed to get challenge ID:', error);
+      return null;
+    }
   }
 
   clearSession(): void {
     console.log('🧹 MFA Session Manager: Clearing session data');
-    sessionStorage.removeItem(this.MFA_SESSION_KEY);
-    sessionStorage.removeItem(this.MFA_CHALLENGE_KEY);
-    
-    // Dispatch event to notify listeners
-    window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
+    try {
+      sessionStorage.removeItem(this.MFA_SESSION_KEY);
+      sessionStorage.removeItem(this.MFA_CHALLENGE_KEY);
+      localStorage.removeItem(this.MFA_SESSION_KEY);
+      localStorage.removeItem(this.MFA_CHALLENGE_KEY);
+      
+      // Dispatch event to notify listeners
+      window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
+    } catch (error) {
+      console.error('❌ MFA Session Manager: Failed to clear session:', error);
+    }
   }
 
   isSessionExpired(sessionData: MFASessionData): boolean {
@@ -65,10 +102,11 @@ export class MFASessionManager {
   hasPendingMFA(): boolean {
     const sessionData = this.getSessionData();
     const hasChallenge = !!this.getChallengeId();
-    const result = !!sessionData && hasChallenge;
+    const result = !!sessionData && hasChallenge && !this.isSessionExpired(sessionData);
     console.log('❓ MFA Session Manager: Has pending MFA:', result, { 
       hasSessionData: !!sessionData, 
-      hasChallenge 
+      hasChallenge,
+      isExpired: sessionData ? this.isSessionExpired(sessionData) : false
     });
     return result;
   }
