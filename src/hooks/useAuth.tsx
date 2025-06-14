@@ -22,27 +22,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isMfaFlow, setIsMfaFlow] = useState(false);
 
   useEffect(() => {
-    // Set up auth state listener first
+    // Set up auth state listener
     const { data: { subscription } } = authService.onAuthStateChange(
       (user, session) => {
-        console.log('Auth state changed:', { user: user?.id, session: !!session, isMfaFlow });
-        
-        // If we're in MFA flow, ignore temporary auth states
-        if (isMfaFlow && !session) {
-          console.log('Ignoring auth state change during MFA flow');
-          return;
-        }
+        console.log('Auth state changed:', { user: user?.id, session: !!session });
         
         setUser(user);
         setSession(session);
         
         if (user && session) {
-          // Clear MFA flow state when successfully authenticated
-          setIsMfaFlow(false);
-          
           // Defer profile loading to prevent auth deadlock
           setTimeout(async () => {
             try {
@@ -61,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // Check for existing session with proper validation
+    // Check for existing session
     authService.getCurrentSession().then((session) => {
       if (session?.user) {
         console.log('Found existing session:', session.user.id);
@@ -81,15 +71,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [isMfaFlow]);
+  }, []);
 
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
     try {
-      setIsMfaFlow(true);
       const result = await authService.signUp({ email, password, firstName, lastName });
       return result;
     } catch (error) {
-      setIsMfaFlow(false);
       console.error('Sign up error:', error);
       throw error;
     }
@@ -97,21 +85,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('🔐 Starting sign in - setting MFA flow state');
-      setIsMfaFlow(true);
+      console.log('🔐 Starting sign in process');
       const result = await authService.signIn({ email, password });
       console.log('✅ Sign in result:', result);
       return result;
     } catch (error) {
       console.error('❌ Sign in error:', error);
-      setIsMfaFlow(false);
       throw error;
     }
   };
 
   const signOut = async () => {
     try {
-      setIsMfaFlow(false);
       await authService.signOut();
       // Clear local state immediately
       setUser(null);
