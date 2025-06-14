@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { supabaseService } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingBag, Package, Eye } from "lucide-react";
+import { ShoppingBag, Package, Eye, Calendar, CreditCard } from "lucide-react";
 import OrderTracking from "@/components/OrderTracking";
 
 const Orders = () => {
@@ -27,10 +28,6 @@ const Orders = () => {
       noOrders: "You haven't placed any orders yet",
       startShopping: "Start Shopping",
       order: "Order",
-      date: "Date",
-      status: "Status",
-      total: "Total",
-      items: "items",
       viewDetails: "View Details"
     },
     th: {
@@ -38,10 +35,6 @@ const Orders = () => {
       noOrders: "คุณยังไม่มีคำสั่งซื้อ",
       startShopping: "เริ่มซื้อสินค้า",
       order: "คำสั่งซื้อ",
-      date: "วันที่",
-      status: "สถานะ",
-      total: "ยอดรวม",
-      items: "รายการ",
       viewDetails: "ดูรายละเอียด"
     }
   };
@@ -154,48 +147,52 @@ const Orders = () => {
         
         <div className="space-y-6">
           {orders.map((order) => (
-            <div key={order.id} className="space-y-4">
-              <Card className="shadow-sm border-anong-gold/20">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg text-anong-black">
-                        {t.order} #{order.order_number}
-                      </CardTitle>
-                      <p className="text-sm text-anong-black/70 mt-1">
+            <Card key={order.id} className="shadow-sm border-anong-gold/20">
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg text-anong-black flex items-center gap-2">
+                      <Package className="w-5 h-5" />
+                      {t.order} #{order.order_number}
+                    </CardTitle>
+                    <div className="flex items-center gap-4 text-sm text-anong-black/70">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
                         {formatDate(order.created_at)}
-                      </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <CreditCard className="w-4 h-4" />
+                        {order.payment_status}
+                      </div>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
+                  </div>
+                  <div className="text-right space-y-2">
+                    <div className="text-lg font-semibold text-anong-black">
+                      {formatPrice(order.total_amount)}
+                    </div>
+                    <div className="flex gap-2">
                       <Badge variant={getStatusColor(order.status)}>
                         {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
                       </Badge>
-                      <p className="text-lg font-semibold text-anong-black">
-                        {formatPrice(order.total_amount)}
-                      </p>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center">
-                    <div className="text-anong-black/80">
-                      {t.status}: <span className="font-medium">{order.payment_status}</span>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleViewDetails(order)}
-                      className="border-anong-gold text-anong-black hover:bg-anong-gold hover:text-anong-black"
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      {t.viewDetails}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </CardHeader>
               
-              <OrderTracking order={order} />
-            </div>
+              <CardContent className="pt-0">
+                <div className="flex justify-end">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewDetails(order)}
+                    className="border-anong-gold text-anong-black hover:bg-anong-gold hover:text-anong-black"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    {t.viewDetails}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </main>
