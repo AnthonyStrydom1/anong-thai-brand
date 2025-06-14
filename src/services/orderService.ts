@@ -1,249 +1,113 @@
 
 import { supabaseService } from './supabaseService';
-import { supabase } from '@/integrations/supabase/client';
-import { shippingService, ShippingRate } from './shippingService';
 import { VATCalculator } from '@/utils/vatCalculator';
+import type { Database } from "@/integrations/supabase/types";
 
-interface CreateOrderData {
-  customerInfo: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    address: string;
-    city: string;
-    postalCode: string;
-    phone: string;
-  };
-  items: Array<{
-    product: {
-      id: string;
-      name: string;
-      price: number;
-      weight?: number;
-    };
-    quantity: number;
-  }>;
-  total: number;
-  selectedShipping?: ShippingRate;
+export interface OrderItem {
+  product_id: string;
+  product_name: string;
+  product_sku: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+}
+
+export interface CreateOrderData {
+  customer_id: number;
+  items: OrderItem[];
+  shipping_address: any;
+  billing_address: any;
+  shipping_amount?: number;
+  shipping_method?: string;
+  notes?: string;
 }
 
 export class OrderService {
-  // Generate order number in the frontend as fallback
-  private generateOrderNumber(): string {
-    const date = new Date();
-    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
-    const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-    return `ORD-${dateStr}-${randomNum}`;
-  }
-
-  // Calculate shipping rates for an order
-  async calculateShipping(customerInfo: CreateOrderData['customerInfo'], items: CreateOrderData['items']): Promise<ShippingRate[]> {
-    const totalWeight = items.reduce((weight, item) => weight + (item.product.weight || 0.5) * item.quantity, 0);
-    
-    return shippingService.calculateShipping({
-      city: customerInfo.city,
-      postalCode: customerInfo.postalCode
-    }, totalWeight);
-  }
-
   async createOrder(orderData: CreateOrderData) {
     try {
-      console.log('Starting order creation process...');
-      console.log('Order data received:', orderData);
-      
-      // Get current user
-      console.log('Getting current user...');
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) {
-        console.error('Auth error:', userError);
-        throw new Error('User not authenticated');
-      }
-
-      if (!user) {
-        console.error('No user found');
-        throw new Error('User not authenticated');
-      }
-      console.log('User authenticated:', user.id);
-
-      // Get or create customer
-      console.log('Getting or creating customer...');
-      let customer = await supabaseService.getCurrentUserCustomer();
-      
-      if (!customer) {
-        console.log('Customer not found, creating new customer...');
-        try {
-          customer = await supabaseService.createCustomer({
-            fullname: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
-            email: orderData.customerInfo.email,
-            first_name: orderData.customerInfo.firstName,
-            last_name: orderData.customerInfo.lastName,
-            phone: orderData.customerInfo.phone,
-            total_orders: 0,
-            total_spent: 0,
-            is_active: true,
-            user_id: user.id
-          });
-          console.log('Customer created successfully:', customer);
-        } catch (customerError) {
-          console.error('Failed to create customer:', customerError);
-          throw new Error('Failed to create customer profile');
-        }
-      } else {
-        console.log('Existing customer found:', customer.id);
-      }
-
-      // Calculate order totals with VAT breakdown
-      const shippingCost = orderData.selectedShipping?.cost || 0;
-      const totals = VATCalculator.calculateOrderTotals(
-        orderData.items.map(item => ({ price: item.product.price, quantity: item.quantity })),
-        shippingCost
+      // Calculate VAT breakdown for the order
+      const orderTotals = VATCalculator.calculateOrderTotals(
+        orderData.items.map(item => ({
+          price: item.unit_price,
+          quantity: item.quantity
+        })),
+        orderData.shipping_amount || 0
       );
 
-      const order_number = this.generateOrderNumber();
+      console.log('Order VAT calculation:', orderTotals);
 
-      console.log('Order calculations with VAT:', {
-        ...totals,
-        order_number,
-        shipping_method: orderData.selectedShipping?.description || 'Standard Shipping'
-      });
-
-      // Create order
-      console.log('Creating order...');
-      const orderInsertData = {
-        customer_id: customer.id,
+      // Create the order with proper VAT calculations
+      const order: Database['public']['Tables']['orders']['Insert'] = {
+        customer_id: orderData.customer_id,
+        subtotal: orderTotals.totalExclVAT, // Subtotal excluding VAT
+        vat_amount: orderTotals.vatAmount, // Total VAT amount
+        shipping_amount: orderData.shipping_amount || 0,
+        total_amount: orderTotals.totalAmount, // Total including VAT
+        shipping_address: orderData.shipping_address,
+        billing_address: orderData.billing_address,
+        shipping_method: orderData.shipping_method,
+        notes: orderData.notes,
         status: 'pending',
         payment_status: 'pending',
-        fulfillment_status: 'unfulfilled',
-        subtotal: totals.subtotal,
-        vat_amount: totals.vatAmount,
-        shipping_amount: totals.shippingAmount,
-        tax_amount: 0, // Keep for compatibility, VAT is handled separately
-        discount_amount: 0,
-        total_amount: totals.totalAmount,
-        currency: 'ZAR',
-        order_number: order_number,
-        shipping_method: orderData.selectedShipping?.description || 'Standard Shipping',
-        courier_service: 'courier_guy',
-        estimated_delivery_days: orderData.selectedShipping?.estimatedDays || 3,
-        billing_address: {
-          first_name: orderData.customerInfo.firstName,
-          last_name: orderData.customerInfo.lastName,
-          address: orderData.customerInfo.address,
-          city: orderData.customerInfo.city,
-          postal_code: orderData.customerInfo.postalCode,
-          phone: orderData.customerInfo.phone
-        },
-        shipping_address: {
-          first_name: orderData.customerInfo.firstName,
-          last_name: orderData.customerInfo.lastName,
-          address: orderData.customerInfo.address,
-          city: orderData.customerInfo.city,
-          postal_code: orderData.customerInfo.postalCode,
-          phone: orderData.customerInfo.phone
-        }
+        fulfillment_status: 'unfulfilled'
       };
 
-      console.log('Inserting order with data:', orderInsertData);
-
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert(orderInsertData)
-        .select()
-        .single();
-
-      if (orderError) {
-        console.error('Order creation error details:', {
-          error: orderError,
-          code: orderError.code,
-          message: orderError.message,
-          details: orderError.details,
-          hint: orderError.hint
-        });
-        throw new Error(`Database error: ${orderError.message}`);
-      }
-
-      console.log('Order created successfully:', order);
+      // Create the order
+      const createdOrder = await supabaseService.createOrder(order);
+      console.log('Created order:', createdOrder);
 
       // Create order items
-      console.log('Creating order items...');
-      for (const [index, item] of orderData.items.entries()) {
-        console.log(`Creating order item ${index + 1}:`, item);
-        
-        const orderItemData = {
-          order_id: order.id,
-          product_id: item.product.id,
-          product_name: item.product.name,
-          product_sku: item.product.id, // Using ID as SKU for now
+      for (const item of orderData.items) {
+        await supabaseService.createOrderItem({
+          order_id: createdOrder.id,
+          product_id: item.product_id,
+          product_name: item.product_name,
+          product_sku: item.product_sku,
           quantity: item.quantity,
-          unit_price: item.product.price,
-          total_price: item.product.price * item.quantity
-        };
-
-        const { data: orderItem, error: itemError } = await supabase
-          .from('order_items')
-          .insert(orderItemData)
-          .select()
-          .single();
-
-        if (itemError) {
-          console.error(`Order item ${index + 1} creation error:`, itemError);
-          throw new Error(`Failed to create order item: ${itemError.message}`);
-        }
-
-        console.log(`Order item ${index + 1} created:`, orderItem);
+          unit_price: item.unit_price,
+          total_price: item.total_price
+        });
       }
 
-      console.log('Order creation completed successfully');
-      return order;
+      return createdOrder;
     } catch (error) {
-      console.error('Order creation failed:', error);
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('An unexpected error occurred while creating the order');
+      console.error('Error creating order:', error);
+      throw error;
     }
   }
 
   async getOrderById(orderId: string) {
     try {
-      const order = await supabaseService.getOrder(orderId);
-      return order;
+      return await supabaseService.getOrder(orderId);
     } catch (error) {
       console.error('Error fetching order:', error);
       throw error;
     }
   }
 
-  async getUserOrders() {
+  async getCustomerOrders(customerId: number) {
     try {
-      console.log('Getting user orders...');
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError) {
-        console.error('Auth error:', userError);
-        throw new Error('User not authenticated');
-      }
-
-      if (!user) {
-        console.error('No user found');
-        throw new Error('User not authenticated');
-      }
-
-      console.log('Fetching orders for user:', user.id);
-      
-      // Use the Supabase function to get customer orders
-      const { data: orders, error } = await supabase
-        .rpc('get_customer_orders', { user_uuid: user.id });
-
-      if (error) {
-        console.error('Error fetching orders:', error);
-        throw error;
-      }
-
-      console.log('Fetched orders:', orders);
-      return orders || [];
+      return await supabaseService.getOrders(customerId);
     } catch (error) {
-      console.error('Error in getUserOrders:', error);
+      console.error('Error fetching customer orders:', error);
+      throw error;
+    }
+  }
+
+  async updateOrderStatus(orderId: string, status: string) {
+    try {
+      return await supabaseService.updateOrderStatus(orderId, status);
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      throw error;
+    }
+  }
+
+  async updatePaymentStatus(orderId: string, paymentStatus: string) {
+    try {
+      return await supabaseService.updatePaymentStatus(orderId, paymentStatus);
+    } catch (error) {
+      console.error('Error updating payment status:', error);
       throw error;
     }
   }
