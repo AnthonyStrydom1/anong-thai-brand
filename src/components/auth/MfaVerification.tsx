@@ -32,7 +32,7 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
 
   // Get the test code for demo purposes
   useEffect(() => {
-    const storedCode = sessionStorage.getItem('mfa_code');
+    const storedCode = mfaAuthService.getCurrentMFACode();
     if (storedCode) {
       setTestCode(storedCode);
     }
@@ -77,7 +77,7 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
       await mfaAuthService.resendCode();
       
       // Get the new test code
-      const newCode = sessionStorage.getItem('mfa_code');
+      const newCode = mfaAuthService.getCurrentMFACode();
       if (newCode) {
         setTestCode(newCode);
       }

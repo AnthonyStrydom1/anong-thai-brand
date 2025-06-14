@@ -8,6 +8,8 @@ interface MFASignInData {
 
 class MFAAuthService {
   private readonly MFA_SESSION_KEY = 'mfa_session_data';
+  private readonly MFA_CODE_KEY = 'mfa_code';
+  private readonly MFA_CODE_TIMESTAMP_KEY = 'mfa_code_timestamp';
 
   async initiateSignIn({ email, password }: MFASignInData) {
     try {
@@ -19,26 +21,26 @@ class MFAAuthService {
 
       if (error) throw error;
 
-      // Immediately sign out to prevent session creation
-      await supabase.auth.signOut();
-
-      // Store encrypted session data temporarily
+      // Store the session data temporarily
       const sessionData = {
         email,
         password, // In production, this should be encrypted
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        userId: data.user.id
       };
       
       sessionStorage.setItem(this.MFA_SESSION_KEY, JSON.stringify(sessionData));
 
+      // Immediately sign out to prevent session creation
+      await supabase.auth.signOut();
+
       // Generate a simple 6-digit code for demonstration
-      // In production, you'd want to send this via email
       const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log('MFA Code for testing:', mfaCode); // For testing purposes
+      console.log('MFA Code for testing:', mfaCode);
       
-      // Store the code temporarily (in production, this would be in the database)
-      sessionStorage.setItem('mfa_code', mfaCode);
-      sessionStorage.setItem('mfa_code_timestamp', Date.now().toString());
+      // Store the code temporarily
+      sessionStorage.setItem(this.MFA_CODE_KEY, mfaCode);
+      sessionStorage.setItem(this.MFA_CODE_TIMESTAMP_KEY, Date.now().toString());
 
       return { mfaRequired: true };
     } catch (error: any) {
@@ -60,8 +62,8 @@ class MFAAuthService {
     }
 
     // Verify MFA code
-    const storedCode = sessionStorage.getItem('mfa_code');
-    const codeTimestamp = sessionStorage.getItem('mfa_code_timestamp');
+    const storedCode = sessionStorage.getItem(this.MFA_CODE_KEY);
+    const codeTimestamp = sessionStorage.getItem(this.MFA_CODE_TIMESTAMP_KEY);
     
     if (!storedCode || !codeTimestamp) {
       throw new Error('No MFA code available');
@@ -69,8 +71,7 @@ class MFAAuthService {
 
     // Check if code is expired (5 minutes)
     if (Date.now() - parseInt(codeTimestamp) > 5 * 60 * 1000) {
-      sessionStorage.removeItem('mfa_code');
-      sessionStorage.removeItem('mfa_code_timestamp');
+      this.clearMFASession();
       throw new Error('MFA code expired');
     }
 
@@ -89,10 +90,8 @@ class MFAAuthService {
       throw error;
     }
 
-    // Clear MFA session data
+    // Clear MFA session data after successful login
     this.clearMFASession();
-    sessionStorage.removeItem('mfa_code');
-    sessionStorage.removeItem('mfa_code_timestamp');
 
     return data;
   }
@@ -105,11 +104,11 @@ class MFAAuthService {
 
     // Generate a new code
     const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log('New MFA Code for testing:', mfaCode); // For testing purposes
+    console.log('New MFA Code for testing:', mfaCode);
     
     // Store the new code
-    sessionStorage.setItem('mfa_code', mfaCode);
-    sessionStorage.setItem('mfa_code_timestamp', Date.now().toString());
+    sessionStorage.setItem(this.MFA_CODE_KEY, mfaCode);
+    sessionStorage.setItem(this.MFA_CODE_TIMESTAMP_KEY, Date.now().toString());
 
     return { success: true };
   }
@@ -121,6 +120,8 @@ class MFAAuthService {
 
   clearMFASession() {
     sessionStorage.removeItem(this.MFA_SESSION_KEY);
+    sessionStorage.removeItem(this.MFA_CODE_KEY);
+    sessionStorage.removeItem(this.MFA_CODE_TIMESTAMP_KEY);
   }
 
   getPendingMFAEmail(): string | null {
@@ -129,7 +130,13 @@ class MFAAuthService {
   }
 
   hasPendingMFA(): boolean {
-    return !!this.getMFASessionData();
+    const sessionData = this.getMFASessionData();
+    const hasCode = !!sessionStorage.getItem(this.MFA_CODE_KEY);
+    return !!sessionData && hasCode;
+  }
+
+  getCurrentMFACode(): string | null {
+    return sessionStorage.getItem(this.MFA_CODE_KEY);
   }
 }
 
