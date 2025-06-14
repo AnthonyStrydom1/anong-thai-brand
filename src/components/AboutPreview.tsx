@@ -21,6 +21,10 @@ const AboutPreview = () => {
 
   const t = translations[language];
 
+  const handleButtonClick = () => {
+    console.log('About button clicked - navigating to /about');
+  };
+
   return (
     <section className="bg-anong-ivory py-16">
       <div className="container mx-auto px-4">
@@ -37,7 +41,7 @@ const AboutPreview = () => {
             <p className="text-gray-700 mb-8 text-lg leading-relaxed">
               {t.description}
             </p>
-            <Link to="/about">
+            <Link to="/about" onClick={handleButtonClick}>
               <Button 
                 variant="default"
                 size="lg"
