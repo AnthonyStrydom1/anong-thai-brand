@@ -82,16 +82,11 @@ class MFAAuthService {
       throw new Error('MFA session expired');
     }
 
-    const challengeId = sessionStorage.getItem(this.MFA_CHALLENGE_KEY);
-    if (!challengeId) {
-      throw new Error('No MFA challenge available');
-    }
-
     try {
       // Verify the MFA code using Supabase RPC function
       const { data: verifyData, error: verifyError } = await supabase.rpc('verify_mfa_challenge', {
-        challenge_id: challengeId,
-        user_code: code
+        user_email: sessionData.email,
+        provided_code: code
       });
 
       if (verifyError || !verifyData) {
