@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -162,10 +161,24 @@ class SupabaseService {
   }
 
   async getCurrentUserCustomer() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
     const { data, error } = await supabase
       .from('customers')
       .select('*')
-      .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    if (error) throw error;
+    return data as SupabaseCustomer | null;
+  }
+
+  async getCustomerByUserId(userId: string) {
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('user_id', userId)
       .maybeSingle();
     
     if (error) throw error;

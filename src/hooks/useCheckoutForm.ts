@@ -13,7 +13,7 @@ import { enhancedSecurityService } from '@/services/enhancedSecurityService';
 import { useSecurityAudit } from '@/hooks/useSecurityAudit';
 
 export const useCheckoutForm = () => {
-  const { items, getTotalPrice, clearCart } = useCart();
+  const { items, total, clearCart } = useCart();
   const { user } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -34,6 +34,8 @@ export const useCheckoutForm = () => {
   const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderNumber, setOrderNumber] = useState<string>('');
+  const [orderSubmitted, setOrderSubmitted] = useState(false);
+  const [orderData, setOrderData] = useState<any>(null);
   const [csrfToken] = useState(() => enhancedSecurityService.generateCSRFToken());
 
   // Rate limiting for form submissions
@@ -152,7 +154,7 @@ export const useCheckoutForm = () => {
       }
 
       // Get or create customer
-      let customer = await supabaseService.getCustomerByUserId(user.id);
+      let customer = await supabaseService.getCurrentUserCustomer();
       
       if (!customer) {
         const customerData = {
@@ -161,7 +163,10 @@ export const useCheckoutForm = () => {
           email: formData.email,
           first_name: formData.firstName,
           last_name: formData.lastName,
-          phone: formData.phone
+          phone: formData.phone,
+          is_active: true,
+          total_orders: 0,
+          total_spent: 0
         };
         customer = await supabaseService.createCustomer(customerData);
       }
@@ -216,8 +221,16 @@ export const useCheckoutForm = () => {
         itemCount: items.length
       });
 
+      // Set order submission state
+      setOrderSubmitted(true);
+      setOrderData({
+        orderNumber: createdOrder.order_number,
+        total: orderTotals.totalAmount,
+        email: formData.email,
+        shippingAddress: orderData.shipping_address
+      });
+
       clearCart();
-      navigate('/checkout/success');
 
       toast({
         title: 'Order Placed Successfully',
@@ -254,6 +267,8 @@ export const useCheckoutForm = () => {
     isCalculatingShipping,
     isProcessing,
     orderNumber,
+    orderSubmitted,
+    orderData,
     handleInputChange,
     setSelectedShippingRate,
     handleSubmit,

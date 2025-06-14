@@ -186,7 +186,7 @@ const Checkout = () => {
       <main className="flex-grow container mx-auto px-4 py-12">
         <h1 className="anong-heading text-4xl mb-8 text-anong-black">{t.title}</h1>
         
-        <form onSubmit={(e) => handleSubmit(e, t)} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Checkout Form */}
           <div className="space-y-6">
             <ContactInfoForm
