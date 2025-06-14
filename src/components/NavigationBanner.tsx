@@ -1,6 +1,5 @@
-
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
@@ -16,8 +15,9 @@ import { navigationTranslations } from '@/translations/navigation';
 
 const NavigationBanner = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { language, toggleLanguage } = useLanguage();
-  const { user, signOut } = useAuth();
+  const { user, signOut, mfaPending } = useAuth();
   const currentPath = location.pathname;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -81,6 +81,15 @@ const NavigationBanner = () => {
     settings: t.settings || (language === 'en' ? 'Settings' : 'การตั้งค่า'),
   };
 
+  useEffect(() => {
+    if (mfaPending && currentPath !== '/auth') {
+      navigate("/auth", { replace: true });
+    }
+  }, [mfaPending, currentPath, navigate]);
+
+  // Update "isLoggedIn" logic to factor mfaPending
+  const isLoggedIn = !!user && !mfaPending;
+
   return (
     <div className="bg-anong-black nav-premium sticky top-0 z-40 border-b border-anong-gold/20">
       <div className="container mx-auto px-4">
@@ -141,7 +150,7 @@ const NavigationBanner = () => {
               </Button>
               
               <UserMenu 
-                isLoggedIn={!!user}
+                isLoggedIn={isLoggedIn}
                 onLogout={handleLogout}
                 translations={mobileTranslations}
               />
@@ -175,7 +184,7 @@ const NavigationBanner = () => {
       <MobileMenu 
         isOpen={isMenuOpen}
         navItems={navItems}
-        isLoggedIn={!!user}
+        isLoggedIn={isLoggedIn}
         onMenuItemClick={() => setIsMenuOpen(false)}
         onSearchClick={toggleSearch}
         onLoginClick={handleMobileLogin}

@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { authService, type AuthUser } from '@/services/authService';
@@ -14,6 +13,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updateProfile: (updates: Partial<Omit<AuthUser, 'id' | 'email'>>) => Promise<void>;
+  mfaPending: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,29 +23,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mfaPending, setMfaPending] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
-    // Core helper: should we block any login if MFA is pending in this browser?
     const isMFAPending = () => {
       const pending = mfaAuthService.hasPendingMFA();
-      if (pending) {
-        console.log('🛑 [useAuth] Pending MFA detected, blocking login UI/session until OTP is complete');
-      }
       return pending;
     };
 
-    // Setup auth state listener
+    const handleMFAStored = () => { if (mounted) setMfaPending(true); };
+    const handleMFACleared = () => { if (mounted) setMfaPending(false); };
+
+    window.addEventListener('mfa-session-stored', handleMFAStored);
+    window.addEventListener('mfa-session-cleared', handleMFACleared);
+
+    setMfaPending(isMFAPending());
+
     const { data: { subscription } } = authService.onAuthStateChange(
       (user, session) => {
         if (!mounted) return;
 
         const pendingMFA = isMFAPending();
+        setMfaPending(pendingMFA);
 
         if (pendingMFA) {
-          // If MFA is pending, don't set user/session (block UI as "not logged in")
-          console.log('🔒 [useAuth] Auth state changed, but MFA required -- session/user not set');
           setUser(null);
           setSession(null);
           setUserProfile(null);
@@ -53,55 +56,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        console.log('🔄 [useAuth] Auth state changed:', { 
-          userId: user?.id, 
-          hasSession: !!session,
-          sessionExpiry: session?.expires_at 
-        });
-        
         setUser(user);
         setSession(session);
-        
+
         if (user && session) {
-          // Clear any pending MFA on successful auth
           setTimeout(() => {
             if (mounted) {
-              console.log('🧹 Auth: Clearing MFA session after successful login');
               mfaAuthService.clearMFASession();
             }
           }, 100);
-          
-          // Load user profile after successful auth
+
           setTimeout(async () => {
             if (!mounted) return;
             try {
               const profile = await authService.getUserProfile(user.id);
-              if (mounted) {
-                setUserProfile(profile);
-              }
+              if (mounted) setUserProfile(profile);
             } catch (error) {
-              console.error('Error fetching user profile:', error);
-              if (mounted) {
-                setUserProfile(null);
-              }
+              if (mounted) setUserProfile(null);
             }
           }, 0);
         } else {
           setUserProfile(null);
         }
-        
+
         setIsLoading(false);
       }
     );
 
-    // Check for existing session on mount
     const checkSession = async () => {
       try {
         const session = await authService.getCurrentSession();
         if (mounted) {
           const pendingMFA = isMFAPending();
+          setMfaPending(pendingMFA);
           if (pendingMFA) {
-            // If MFA is pending, block "restoring" any session
             setUser(null);
             setSession(null);
             setUserProfile(null);
@@ -109,18 +97,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
           if (session?.user) {
-            console.log('✅ Found existing session:', session.user.id);
             setUser(session.user);
             setSession(session);
           } else {
-            console.log('❌ No valid session found');
             setUser(null);
             setSession(null);
           }
           setIsLoading(false);
         }
       } catch (error) {
-        console.error('Session check error:', error);
         if (mounted) {
           setUser(null);
           setSession(null);
@@ -134,6 +119,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      window.removeEventListener('mfa-session-stored', handleMFAStored);
+      window.removeEventListener('mfa-session-cleared', handleMFACleared);
     };
   }, []);
 
@@ -151,28 +138,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log('🔐 Starting sign in process with MFA enforcement');
       
-      // Clear any existing MFA session first
       mfaAuthService.clearMFASession();
       
-      // ALWAYS use MFA flow - no fallback to regular signin
       console.log('🔒 Initiating MFA signin (required for all users)');
       const mfaResult = await mfaAuthService.initiateSignIn({ email, password });
       
       console.log('🎯 MFA signin result:', mfaResult);
       
-      // MFA should always be required now
       if (mfaResult.mfaRequired) {
         console.log('✅ MFA flow initiated successfully');
         return { mfaRequired: true };
       }
       
-      // This should not happen - log error if we get here
       console.error('❌ Unexpected: MFA not required when it should be');
       throw new Error('Authentication system error - MFA expected');
       
     } catch (error) {
       console.error('❌ Sign in error:', error);
-      // Clear any MFA session on error
       mfaAuthService.clearMFASession();
       throw error;
     }
@@ -180,13 +162,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Clear MFA session first
       mfaAuthService.clearMFASession();
       
-      // Then sign out from Supabase
       await authService.signOut();
       
-      // Clear local state immediately
       setUser(null);
       setSession(null);
       setUserProfile(null);
@@ -228,6 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
     resetPassword,
     updateProfile,
+    mfaPending,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -240,5 +220,3 @@ export function useAuth() {
   }
   return context;
 }
-
-// ... END OF FILE

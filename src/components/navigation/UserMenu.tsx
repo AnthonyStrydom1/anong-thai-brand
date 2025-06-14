@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   DropdownMenu,
@@ -9,6 +8,7 @@ import UserMenuDropdown from './UserMenuDropdown';
 import AuthModal from './AuthModal';
 import { useAuthModal } from '@/hooks/useAuthModal';
 import { mfaAuthService } from '@/services/mfaAuthService';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UserMenuProps {
   isLoggedIn: boolean;
@@ -24,7 +24,7 @@ interface UserMenuProps {
 }
 
 const UserMenu = ({
-  isLoggedIn,
+  isLoggedIn: isLoggedInProp,
   onLogout,
   translations
 }: UserMenuProps) => {
@@ -51,6 +51,11 @@ const UserMenu = ({
     setFirstName,
     setLastName,
   } = useAuthModal();
+
+  const { mfaPending } = useAuth();
+
+  // "isLoggedIn" should not be true if MFA is pending
+  const isLoggedIn = isLoggedInProp && !mfaPending;
 
   // Clear MFA state when user logs in successfully
   useEffect(() => {
@@ -192,7 +197,7 @@ const UserMenu = ({
       </DropdownMenu>
 
       {/* Auth Modal - only show if not on auth page and no pending MFA */}
-      {!window.location.pathname.includes('/auth') && !hasPendingMFA && (
+      {!window.location.pathname.includes('/auth') && !mfaPending && (
         <AuthModal
           showModal={showLoginModal}
           isSignUp={isSignUp}

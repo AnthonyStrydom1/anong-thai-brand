@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -14,7 +13,7 @@ const AuthPage = () => {
   const [mfaEmail, setMfaEmail] = useState<string>('');
   const [isCheckingMFA, setIsCheckingMFA] = useState(true);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, mfaPending } = useAuth();
 
   const {
     isLogin,
@@ -30,13 +29,36 @@ const AuthPage = () => {
     switchToSignUp
   } = useAuthForm();
 
-  // Redirect if already logged in
+  // Redirect if already logged in (NO mfa pending)
   useEffect(() => {
-    if (user) {
-      console.log('✅ User already logged in, redirecting to home');
+    if (user && !mfaPending) {
       navigate('/');
     }
-  }, [user, navigate]);
+  }, [user, mfaPending, navigate]);
+
+  // If MFA is pending, always render the OTP screen
+  if (mfaPending) {
+    // Get the most up-to-date pending MFA email
+    const pendingEmail = mfaAuthService.getPendingMFAEmail() || '';
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <NavigationBanner />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <MfaVerification
+            email={pendingEmail}
+            onSuccess={() => {
+              mfaAuthService.clearMFASession();
+              navigate('/');
+            }}
+            onCancel={() => {
+              mfaAuthService.clearMFASession();
+              navigate('/auth');
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   // Check for existing MFA session on mount
   useEffect(() => {
