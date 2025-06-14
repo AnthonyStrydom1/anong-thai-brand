@@ -53,14 +53,14 @@ const UserMenu = ({
     setLastName,
   } = useAuthModal();
 
-  const { mfaPending, user } = useAuth();
+  const { user, session } = useAuth();
 
-  // Use auth hook directly for more reliable state
-  const isLoggedIn = !!user && !mfaPending;
+  // Use session and user for more reliable auth state - ignore mfaPending after successful login
+  const isLoggedIn = !!(user && session);
 
   console.log('🎯 UserMenu: Auth state check:', { 
     user: !!user, 
-    mfaPending,
+    session: !!session,
     isLoggedInProp,
     finalIsLoggedIn: isLoggedIn,
     currentPath: window.location.pathname
@@ -203,7 +203,7 @@ const UserMenu = ({
       </DropdownMenu>
 
       {/* Auth Modal - only show if not on auth page and no pending MFA */}
-      {!window.location.pathname.includes('/auth') && !mfaPending && (
+      {!window.location.pathname.includes('/auth') && !hasPendingMFA && (
         <AuthModal
           showModal={showLoginModal}
           isSignUp={isSignUp}
