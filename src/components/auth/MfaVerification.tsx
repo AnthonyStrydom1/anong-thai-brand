@@ -110,7 +110,13 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  console.log('🔐 MfaVerification render:', { email, code: code.length, isVerifying });
+  const handleCodeChange = (value: string) => {
+    console.log('🔢 MfaVerification: OTP code changed:', value, 'length:', value.length);
+    setCode(value);
+    setHasError(false); // Clear error when user starts typing
+  };
+
+  console.log('🔐 MfaVerification render:', { email, code: code.length, isVerifying, hasError });
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -137,27 +143,46 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
         )}
 
         <div className="space-y-4">
-          <div className="flex justify-center">
-            <InputOTP
-              maxLength={6}
-              value={code}
-              onChange={(value) => {
-                console.log('OTP input changed:', value);
-                setCode(value);
-              }}
-              disabled={isVerifying}
-              className="flex justify-center"
-            >
-              <InputOTPGroup className="flex space-x-2">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">
+              Enter verification code
+            </label>
+            <div className="flex justify-center">
+              <div className="flex space-x-2">
                 {[0, 1, 2, 3, 4, 5].map((index) => (
-                  <InputOTPSlot 
-                    key={index} 
-                    index={index} 
-                    className="w-12 h-12 text-lg font-semibold border-2 rounded-md"
+                  <input
+                    key={index}
+                    type="text"
+                    maxLength={1}
+                    value={code[index] || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value.length <= 1 && /^[0-9]*$/.test(value)) {
+                        const newCode = code.split('');
+                        newCode[index] = value;
+                        const updatedCode = newCode.join('').slice(0, 6);
+                        handleCodeChange(updatedCode);
+                        
+                        // Auto-focus next input
+                        if (value && index < 5) {
+                          const nextInput = e.target.parentElement?.children[index + 1] as HTMLInputElement;
+                          nextInput?.focus();
+                        }
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      // Handle backspace
+                      if (e.key === 'Backspace' && !code[index] && index > 0) {
+                        const prevInput = e.target.parentElement?.children[index - 1] as HTMLInputElement;
+                        prevInput?.focus();
+                      }
+                    }}
+                    className="w-12 h-12 text-center text-lg font-semibold border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none"
+                    disabled={isVerifying}
                   />
                 ))}
-              </InputOTPGroup>
-            </InputOTP>
+              </div>
+            </div>
           </div>
 
           <Button 
