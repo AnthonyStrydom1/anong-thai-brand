@@ -1,21 +1,24 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { orderService, CreateOrderData } from "@/services/orderService";
-import { ShippingRate } from "@/services/shippingService";
-import { useCart } from "@/contexts/CartContext";
-import { VATCalculator } from "@/utils/vatCalculator";
+import { useState } from 'react';
+import { useCart } from '@/contexts/CartContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { orderService } from '@/services/orderService';
+import { supabaseService } from '@/services/supabaseService';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
+import { ShippingRate } from '@/services/shippingService';
+import { VATCalculator } from '@/utils/vatCalculator';
+import { enhancedSecurityService } from '@/services/enhancedSecurityService';
+import { useSecurityAudit } from '@/hooks/useSecurityAudit';
 
 export const useCheckoutForm = () => {
-  const { items, clearCart } = useCart();
-  const [orderSubmitted, setOrderSubmitted] = useState(false);
-  const [orderData, setOrderData] = useState<any>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
-  const [selectedShippingRate, setSelectedShippingRate] = useState<ShippingRate | null>(null);
-  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
-  
+  const { items, getTotalPrice, clearCart } = useCart();
+  const { user } = useAuth();
+  const { language } = useLanguage();
+  const navigate = useNavigate();
+  const { logSecurityEvent } = useSecurityAudit();
+
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -26,114 +29,155 @@ export const useCheckoutForm = () => {
     phone: ''
   });
 
-  // Calculate shipping when address changes
-  useEffect(() => {
-    if (formData.city && formData.postalCode && items.length > 0) {
+  const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
+  const [selectedShippingRate, setSelectedShippingRate] = useState<ShippingRate | null>(null);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string>('');
+  const [csrfToken] = useState(() => enhancedSecurityService.generateCSRFToken());
+
+  // Rate limiting for form submissions
+  const checkRateLimit = () => {
+    return enhancedSecurityService.checkRateLimit('checkout_form', {
+      maxRequests: 3,
+      windowMs: 300000 // 5 minutes
+    });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    // Log input change for security monitoring
+    logSecurityEvent('form_input_change', 'checkout', undefined, {
+      field: name,
+      length: value.length
+    });
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    // Auto-calculate shipping when address fields change
+    if ((name === 'city' || name === 'postalCode') && formData.city && formData.postalCode) {
       calculateShipping();
     }
-  }, [formData.city, formData.postalCode, items]);
+  };
 
   const calculateShipping = async () => {
-    if (!formData.city || !formData.postalCode) return;
-    
+    if (!formData.city || !formData.postalCode || items.length === 0) return;
+
     setIsCalculatingShipping(true);
     try {
-      const rates = await orderService.calculateShipping(formData, items);
+      const rates = await orderService.calculateShipping(
+        { city: formData.city, postalCode: formData.postalCode },
+        items
+      );
       setShippingRates(rates);
-      if (rates.length > 0 && !selectedShippingRate) {
+      if (rates.length > 0) {
         setSelectedShippingRate(rates[0]);
       }
+
+      await logSecurityEvent('shipping_calculation', 'checkout', undefined, {
+        city: formData.city,
+        postalCode: formData.postalCode,
+        ratesFound: rates.length
+      });
     } catch (error) {
       console.error('Error calculating shipping:', error);
+      await logSecurityEvent('shipping_calculation_failed', 'checkout', undefined, {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }, false);
+      
       toast({
-        title: "Shipping Error",
-        description: "Could not calculate shipping rates. Please try again.",
-        variant: "destructive"
+        title: 'Shipping Error',
+        description: 'Unable to calculate shipping rates. Please try again.',
+        variant: 'destructive'
       });
     } finally {
       setIsCalculatingShipping(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent, t: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Rate limiting check
+    if (!checkRateLimit()) {
+      toast({
+        title: 'Too Many Requests',
+        description: 'Please wait before submitting again.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!user) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to complete your order.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!selectedShippingRate) {
+      toast({
+        title: 'Shipping Required',
+        description: 'Please select a shipping method.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setIsProcessing(true);
-    
+
     try {
-      // Check if user is authenticated
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        toast({
-          title: "Authentication Required",
-          description: t.authRequired,
-          variant: "destructive"
-        });
-        setIsProcessing(false);
-        return;
+      // Validate all form data
+      const emailValidation = enhancedSecurityService.validateEmail(formData.email);
+      if (!emailValidation.isValid) {
+        throw new Error('Invalid email address');
       }
 
-      // Validate form data
-      const requiredFields = ['email', 'firstName', 'lastName', 'address', 'city', 'postalCode', 'phone'];
-      const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+      // Check for SQL injection in all fields
+      for (const [key, value] of Object.entries(formData)) {
+        const sqlCheck = enhancedSecurityService.containsSqlInjection(value);
+        if (!sqlCheck.isValid) {
+          await logSecurityEvent('sql_injection_attempt', 'checkout', undefined, {
+            field: key,
+            value: value.substring(0, 50) // Log first 50 chars only
+          }, false);
+          throw new Error('Invalid input detected');
+        }
+      }
+
+      // Get or create customer
+      let customer = await supabaseService.getCustomerByUserId(user.id);
       
-      if (missingFields.length > 0) {
-        toast({
-          title: "Missing Information",
-          description: "Please fill in all required fields.",
-          variant: "destructive"
-        });
-        setIsProcessing(false);
-        return;
+      if (!customer) {
+        const customerData = {
+          user_id: user.id,
+          fullname: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone
+        };
+        customer = await supabaseService.createCustomer(customerData);
       }
 
-      if (!selectedShippingRate) {
-        toast({
-          title: "Shipping Required",
-          description: "Please select a shipping method.",
-          variant: "destructive"
-        });
-        setIsProcessing(false);
-        return;
-      }
+      // Calculate order totals
+      const orderTotals = VATCalculator.calculateOrderTotals(
+        items.map(item => ({
+          price: item.product.price,
+          quantity: item.quantity
+        })),
+        selectedShippingRate.cost
+      );
 
-      // Get customer ID from the customers table
-      const { data: customerData, error: customerError } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (customerError || !customerData) {
-        toast({
-          title: "Customer Error",
-          description: "Could not find customer information. Please try again.",
-          variant: "destructive"
-        });
-        setIsProcessing(false);
-        return;
-      }
-
-      // Format shipping and billing addresses
-      const shippingAddress = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        address: formData.address,
-        city: formData.city,
-        postalCode: formData.postalCode,
-        phone: formData.phone
-      };
-
-      // Create order data in the correct format
-      const orderDataForSubmission: CreateOrderData = {
-        customer_id: customerData.id,
+      // Create order
+      const orderData = {
+        customer_id: customer.id,
         items: items.map(item => ({
           product_id: item.product.id,
           product_name: item.product.name,
@@ -142,59 +186,90 @@ export const useCheckoutForm = () => {
           unit_price: item.product.price,
           total_price: item.product.price * item.quantity
         })),
-        shipping_address: shippingAddress,
-        billing_address: shippingAddress,
+        shipping_address: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode,
+          phone: formData.phone
+        },
+        billing_address: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode,
+          phone: formData.phone
+        },
         shipping_amount: selectedShippingRate.cost,
-        shipping_method: selectedShippingRate.description,
-        notes: `Payment method: EFT Bank Transfer`
+        shipping_method: selectedShippingRate.description
       };
 
-      const order = await orderService.createOrder(orderDataForSubmission);
-      
-      const orderTotals = VATCalculator.calculateOrderTotals(
-        items.map(item => ({ price: item.product.price, quantity: item.quantity })),
-        selectedShippingRate.cost
-      );
+      const createdOrder = await orderService.createOrder(orderData);
+      setOrderNumber(createdOrder.order_number);
 
-      const orderResult = {
-        orderNumber: order.order_number,
-        items: items,
-        total: orderTotals.totalAmount,
-        customerInfo: formData,
-        shippingCost: selectedShippingRate.cost,
-        vatAmount: orderTotals.vatAmount
-      };
+      // Log successful order creation
+      await logSecurityEvent('order_created', 'order', createdOrder.id, {
+        orderNumber: createdOrder.order_number,
+        totalAmount: orderTotals.totalAmount,
+        itemCount: items.length
+      });
 
-      setOrderData(orderResult);
-      setOrderSubmitted(true);
       clearCart();
-      
+      navigate('/checkout/success');
+
       toast({
-        title: "Order Created Successfully!",
-        description: `Your order #${order.order_number} has been created. Please proceed with EFT payment.`,
+        title: 'Order Placed Successfully',
+        description: `Your order ${createdOrder.order_number} has been placed.`
       });
 
     } catch (error) {
-      console.error('Error creating order:', error);
+      console.error('Checkout error:', error);
+      
+      await logSecurityEvent('checkout_failed', 'order', undefined, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        formData: {
+          email: formData.email,
+          hasFirstName: !!formData.firstName,
+          hasLastName: !!formData.lastName,
+          hasAddress: !!formData.address
+        }
+      }, false);
+
       toast({
-        title: "Error",
-        description: "Failed to create order. Please try again.",
-        variant: "destructive"
+        title: 'Order Failed',
+        description: error instanceof Error ? error.message : 'Something went wrong. Please try again.',
+        variant: 'destructive'
       });
+    } finally {
       setIsProcessing(false);
     }
   };
 
   return {
     formData,
-    orderSubmitted,
-    orderData,
-    isProcessing,
     shippingRates,
     selectedShippingRate,
-    setSelectedShippingRate,
     isCalculatingShipping,
+    isProcessing,
+    orderNumber,
     handleInputChange,
-    handleSubmit
+    setSelectedShippingRate,
+    handleSubmit,
+    calculateShipping,
+    orderTotals: selectedShippingRate ? VATCalculator.calculateOrderTotals(
+      items.map(item => ({
+        price: item.product.price,
+        quantity: item.quantity
+      })),
+      selectedShippingRate.cost
+    ) : VATCalculator.calculateOrderTotals(
+      items.map(item => ({
+        price: item.product.price,
+        quantity: item.quantity
+      })),
+      0
+    )
   };
 };

@@ -2,6 +2,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { enhancedSecurityService } from "@/services/enhancedSecurityService";
+import { useState } from "react";
 
 interface ContactInfoFormProps {
   formData: {
@@ -28,6 +30,49 @@ interface ContactInfoFormProps {
 }
 
 export const ContactInfoForm = ({ formData, onInputChange, translations }: ContactInfoFormProps) => {
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const handleSecureInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    // Clear previous validation error
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: '' }));
+    }
+
+    // Sanitize input
+    const sanitizedValue = enhancedSecurityService.sanitizeInput(value, {
+      maxLength: name === 'address' ? 200 : 100,
+      stripScripts: true
+    });
+
+    // Validate specific fields
+    if (name === 'email') {
+      const emailValidation = enhancedSecurityService.validateEmail(sanitizedValue);
+      if (!emailValidation.isValid) {
+        setValidationErrors(prev => ({ ...prev, email: emailValidation.message }));
+      }
+    }
+
+    // Check for SQL injection patterns
+    const sqlValidation = enhancedSecurityService.containsSqlInjection(sanitizedValue);
+    if (!sqlValidation.isValid) {
+      setValidationErrors(prev => ({ ...prev, [name]: 'Invalid characters detected' }));
+      return; // Don't update if contains suspicious content
+    }
+
+    // Create sanitized event
+    const sanitizedEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        value: sanitizedValue
+      }
+    };
+
+    onInputChange(sanitizedEvent as React.ChangeEvent<HTMLInputElement>);
+  };
+
   return (
     <>
       {/* Contact Information */}
@@ -48,9 +93,13 @@ export const ContactInfoForm = ({ formData, onInputChange, translations }: Conta
               type="email"
               required
               value={formData.email}
-              onChange={onInputChange}
-              className="anong-input"
+              onChange={handleSecureInputChange}
+              className={`anong-input ${validationErrors.email ? 'border-red-500' : ''}`}
+              maxLength={254}
             />
+            {validationErrors.email && (
+              <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -73,9 +122,13 @@ export const ContactInfoForm = ({ formData, onInputChange, translations }: Conta
                 name="firstName"
                 required
                 value={formData.firstName}
-                onChange={onInputChange}
-                className="anong-input"
+                onChange={handleSecureInputChange}
+                className={`anong-input ${validationErrors.firstName ? 'border-red-500' : ''}`}
+                maxLength={50}
               />
+              {validationErrors.firstName && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.firstName}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="lastName" className="anong-body text-anong-black">
@@ -86,9 +139,13 @@ export const ContactInfoForm = ({ formData, onInputChange, translations }: Conta
                 name="lastName"
                 required
                 value={formData.lastName}
-                onChange={onInputChange}
-                className="anong-input"
+                onChange={handleSecureInputChange}
+                className={`anong-input ${validationErrors.lastName ? 'border-red-500' : ''}`}
+                maxLength={50}
               />
+              {validationErrors.lastName && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.lastName}</p>
+              )}
             </div>
           </div>
           
@@ -101,9 +158,13 @@ export const ContactInfoForm = ({ formData, onInputChange, translations }: Conta
               name="address"
               required
               value={formData.address}
-              onChange={onInputChange}
-              className="anong-input"
+              onChange={handleSecureInputChange}
+              className={`anong-input ${validationErrors.address ? 'border-red-500' : ''}`}
+              maxLength={200}
             />
+            {validationErrors.address && (
+              <p className="text-red-500 text-sm mt-1">{validationErrors.address}</p>
+            )}
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -116,9 +177,13 @@ export const ContactInfoForm = ({ formData, onInputChange, translations }: Conta
                 name="city"
                 required
                 value={formData.city}
-                onChange={onInputChange}
-                className="anong-input"
+                onChange={handleSecureInputChange}
+                className={`anong-input ${validationErrors.city ? 'border-red-500' : ''}`}
+                maxLength={100}
               />
+              {validationErrors.city && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.city}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="postalCode" className="anong-body text-anong-black">
@@ -129,9 +194,13 @@ export const ContactInfoForm = ({ formData, onInputChange, translations }: Conta
                 name="postalCode"
                 required
                 value={formData.postalCode}
-                onChange={onInputChange}
-                className="anong-input"
+                onChange={handleSecureInputChange}
+                className={`anong-input ${validationErrors.postalCode ? 'border-red-500' : ''}`}
+                maxLength={20}
               />
+              {validationErrors.postalCode && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.postalCode}</p>
+              )}
             </div>
           </div>
           
@@ -145,9 +214,13 @@ export const ContactInfoForm = ({ formData, onInputChange, translations }: Conta
               type="tel"
               required
               value={formData.phone}
-              onChange={onInputChange}
-              className="anong-input"
+              onChange={handleSecureInputChange}
+              className={`anong-input ${validationErrors.phone ? 'border-red-500' : ''}`}
+              maxLength={20}
             />
+            {validationErrors.phone && (
+              <p className="text-red-500 text-sm mt-1">{validationErrors.phone}</p>
+            )}
           </div>
         </CardContent>
       </Card>
