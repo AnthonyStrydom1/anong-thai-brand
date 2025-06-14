@@ -28,10 +28,18 @@ export class OrderService {
     try {
       console.log('Creating order with data:', orderData);
       
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('Auth error:', userError);
+        throw new Error('User not authenticated');
+      }
+
       // Get or create customer
       let customer = await supabaseService.getCurrentUserCustomer();
       
       if (!customer) {
+        console.log('Creating new customer for user:', user?.id);
         // Create customer if doesn't exist
         customer = await supabaseService.createCustomer({
           fullname: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
@@ -42,8 +50,9 @@ export class OrderService {
           total_orders: 0,
           total_spent: 0,
           is_active: true,
-          user_id: (await supabase.auth.getUser()).data.user?.id || null
+          user_id: user?.id || null
         });
+        console.log('Customer created:', customer);
       }
 
       // Calculate totals
@@ -83,10 +92,11 @@ export class OrderService {
         }
       });
 
-      console.log('Order created:', order);
+      console.log('Order created successfully:', order);
 
       // Create order items
       for (const item of orderData.items) {
+        console.log('Creating order item:', item);
         const orderItem = await supabaseService.createOrderItem({
           order_id: order.id,
           product_id: item.product.id,
@@ -102,6 +112,29 @@ export class OrderService {
       return order;
     } catch (error) {
       console.error('Error creating order:', error);
+      throw error;
+    }
+  }
+
+  async getOrderById(orderId: string) {
+    try {
+      const order = await supabaseService.getOrder(orderId);
+      return order;
+    } catch (error) {
+      console.error('Error fetching order:', error);
+      throw error;
+    }
+  }
+
+  async getUserOrders() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const orders = await supabaseService.getCustomerOrdersByUserId(user.id);
+      return orders;
+    } catch (error) {
+      console.error('Error fetching user orders:', error);
       throw error;
     }
   }

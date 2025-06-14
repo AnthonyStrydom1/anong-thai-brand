@@ -1,253 +1,178 @@
-import React, { useState, useEffect } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/hooks/useAuth';
-import NavigationBanner from '@/components/NavigationBanner';
-import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { supabaseService } from '@/services/supabaseService';
-import { toast } from '@/hooks/use-toast';
 
-interface CustomerOrder {
-  id: string;
-  order_number: string;
-  status: string;
-  payment_status: string;
-  total_amount: number;
-  created_at: string;
-}
+import { useEffect, useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import NavigationBanner from "@/components/NavigationBanner";
+import Footer from "@/components/Footer";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { orderService } from "@/services/orderService";
+import { toast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom";
+import { ShoppingBag, Package } from "lucide-react";
 
 const Orders = () => {
   const { language } = useLanguage();
-  const { user } = useAuth();
-  const [orders, setOrders] = useState<CustomerOrder[]>([]);
+  const { formatPrice } = useCurrency();
+  const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Scroll to top when component mounts
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-  
+
   const translations = {
     en: {
-      title: 'My Orders',
-      noOrders: 'You have no orders yet.',
-      order: 'Order',
-      date: 'Date',
-      status: 'Status',
-      total: 'Total',
-      viewDetails: 'View Details',
-      processing: 'Processing',
-      shipped: 'Shipped',
-      delivered: 'Delivered',
-      pending: 'Pending',
-      cancelled: 'Cancelled',
-      paid: 'Paid',
-      failed: 'Failed',
-      refunded: 'Refunded',
-      loading: 'Loading your orders...',
-      pleaseLogin: 'Please log in to view your orders.'
+      title: "My Orders",
+      noOrders: "You haven't placed any orders yet",
+      startShopping: "Start Shopping",
+      order: "Order",
+      date: "Date",
+      status: "Status",
+      total: "Total",
+      items: "items",
+      viewDetails: "View Details"
     },
     th: {
-      title: 'คำสั่งซื้อของฉัน',
-      noOrders: 'คุณยังไม่มีคำสั่งซื้อ',
-      order: 'คำสั่งซื้อ',
-      date: 'วันที่',
-      status: 'สถานะ',
-      total: 'ยอดรวม',
-      viewDetails: 'ดูรายละเอียด',
-      processing: 'กำลังดำเนินการ',
-      shipped: 'จัดส่งแล้ว',
-      delivered: 'จัดส่งถึงแล้ว',
-      pending: 'รอดำเนินการ',
-      cancelled: 'ยกเลิก',
-      paid: 'ชำระแล้ว',
-      failed: 'ชำระไม่สำเร็จ',
-      refunded: 'คืนเงินแล้ว',
-      loading: 'กำลังโหลดคำสั่งซื้อ...',
-      pleaseLogin: 'กรุณาเข้าสู่ระบบเพื่อดูคำสั่งซื้อ'
+      title: "คำสั่งซื้อของฉัน",
+      noOrders: "คุณยังไม่มีคำสั่งซื้อ",
+      startShopping: "เริ่มซื้อสินค้า",
+      order: "คำสั่งซื้อ",
+      date: "วันที่",
+      status: "สถานะ",
+      total: "ยอดรวม",
+      items: "รายการ",
+      viewDetails: "ดูรายละเอียด"
     }
   };
 
   const t = translations[language];
 
   useEffect(() => {
-    if (user?.id) {
-      loadOrders();
-      
-      // Set up real-time subscription for order updates
-      const channel = supabaseService.supabase
-        .channel('order-updates')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'orders'
-          },
-          (payload) => {
-            console.log('Order update received:', payload);
-            loadOrders(); // Reload orders when there's an update
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabaseService.supabase.removeChannel(channel);
-      };
-    }
-  }, [user?.id]);
+    loadOrders();
+  }, []);
 
   const loadOrders = async () => {
-    if (!user?.id) return;
-    
     try {
       setIsLoading(true);
-      const { data, error } = await supabaseService.supabase
-        .rpc('get_customer_orders', { user_uuid: user.id });
-      
-      if (error) throw error;
-      setOrders(data || []);
+      const userOrders = await orderService.getUserOrders();
+      console.log('Loaded orders:', userOrders);
+      setOrders(userOrders || []);
     } catch (error) {
       console.error('Error loading orders:', error);
       toast({
         title: "Error",
-        description: "Failed to load orders",
+        description: "Failed to load orders. Please try again.",
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const getStatusClass = (status: string) => {
-    switch(status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'processing':
-        return 'bg-blue-100 text-blue-800';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800';
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'paid':
       case 'delivered':
         return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
       case 'cancelled':
         return 'bg-red-100 text-red-800';
-      case 'paid':
-        return 'bg-green-100 text-green-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      case 'refunded':
-        return 'bg-gray-100 text-gray-800';
+      case 'shipped':
+        return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
-  
-  const getStatusLabel = (status: string) => {
-    const statusMap: { [key: string]: string } = {
-      'processing': t.processing,
-      'shipped': t.shipped,
-      'delivered': t.delivered,
-      'pending': t.pending,
-      'cancelled': t.cancelled,
-      'paid': t.paid,
-      'failed': t.failed,
-      'refunded': t.refunded
-    };
-    return statusMap[status] || status;
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
-  if (!user) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-anong-ivory">
         <NavigationBanner />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <p className="text-center text-gray-500">{t.pleaseLogin}</p>
-            </CardContent>
-          </Card>
+        <main className="flex-grow container mx-auto px-4 py-12">
+          <div className="text-center">
+            <Package className="w-8 h-8 animate-spin mx-auto mb-4 text-anong-black/50" />
+            <p className="anong-body text-anong-black/70">Loading orders...</p>
+          </div>
         </main>
         <Footer />
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen flex flex-col">
-      <NavigationBanner />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6 text-thai-purple">{t.title}</h1>
+  if (orders.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col bg-anong-ivory">
+        <NavigationBanner />
         
-        {isLoading ? (
-          <Card>
-            <CardContent className="flex justify-center py-8">
-              <p className="text-gray-500">{t.loading}</p>
-            </CardContent>
-          </Card>
-        ) : orders.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <p className="text-center text-gray-500">{t.noOrders}</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t.order}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t.date}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t.status}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t.total}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {orders.map((order) => (
-                  <tr key={order.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{order.order_number}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(order.created_at).toLocaleDateString(language === 'en' ? 'en-US' : 'th-TH')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="flex flex-col space-y-1">
-                        <Badge className={getStatusClass(order.status)}>
-                          {getStatusLabel(order.status)}
-                        </Badge>
-                        <Badge className={getStatusClass(order.payment_status)}>
-                          {getStatusLabel(order.payment_status)}
-                        </Badge>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      ${order.total_amount.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Button variant="ghost" size="sm" className="text-thai-purple hover:text-thai-purple-dark">
-                        {t.viewDetails}
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <main className="flex-grow container mx-auto px-4 py-12">
+          <div className="text-center max-w-md mx-auto">
+            <ShoppingBag className="w-16 h-16 mx-auto mb-6 text-anong-black/50" />
+            <h1 className="anong-heading text-3xl mb-4 text-anong-black">{t.title}</h1>
+            <p className="anong-body text-anong-black/80 mb-8">{t.noOrders}</p>
+            <Button asChild className="anong-btn-primary">
+              <Link to="/shop">{t.startShopping}</Link>
+            </Button>
           </div>
-        )}
+        </main>
+        
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col bg-anong-ivory">
+      <NavigationBanner />
+      
+      <main className="flex-grow container mx-auto px-4 py-12">
+        <h1 className="anong-heading text-4xl mb-8 text-anong-black">{t.title}</h1>
+        
+        <div className="space-y-4">
+          {orders.map((order) => (
+            <Card key={order.id} className="anong-card">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="anong-subheading text-lg text-anong-black">
+                      {t.order} #{order.order_number}
+                    </CardTitle>
+                    <p className="anong-body-light text-sm text-anong-black/70 mt-1">
+                      {formatDate(order.created_at)}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <Badge className={getStatusColor(order.status)}>
+                      {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                    </Badge>
+                    <p className="anong-subheading text-lg text-anong-black">
+                      {formatPrice(order.total_amount)}
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-center">
+                  <div className="anong-body text-anong-black/80">
+                    {/* You can add order items count here if needed */}
+                    {t.status}: <span className="font-medium">{order.payment_status}</span>
+                  </div>
+                  <Button variant="outline" className="anong-btn-secondary" size="sm">
+                    {t.viewDetails}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </main>
+      
       <Footer />
     </div>
   );

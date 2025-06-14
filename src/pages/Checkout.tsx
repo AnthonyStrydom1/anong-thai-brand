@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -71,7 +70,8 @@ const Checkout = () => {
       total: "Total",
       placeOrder: "Pay with Stripe",
       free: "Free",
-      processing: "Processing..."
+      processing: "Processing...",
+      authRequired: "Please sign in to complete your order"
     },
     th: {
       title: "ชำระเงิน",
@@ -92,7 +92,8 @@ const Checkout = () => {
       total: "ราคารวมทั้งสิ้น",
       placeOrder: "ชำระเงินด้วย Stripe",
       free: "ฟรี",
-      processing: "กำลังดำเนินการ..."
+      processing: "กำลังดำเนินการ...",
+      authRequired: "กรุณาเข้าสู่ระบบเพื่อทำการสั่งซื้อ"
     }
   };
 
@@ -110,13 +111,22 @@ const Checkout = () => {
     try {
       console.log('Handling payment success for session:', sessionId);
       
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase.functions.invoke('handle-payment-success', {
-        body: { sessionId }
+        body: { sessionId },
+        headers: user ? {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        } : {}
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Payment success handler error:', error);
+        throw error;
+      }
 
       if (data.success) {
+        console.log('Payment processed successfully:', data);
         setOrderData(data.order);
         setOrderSubmitted(true);
         clearCart();
@@ -124,6 +134,8 @@ const Checkout = () => {
           title: "Payment Successful!",
           description: "Your order has been created successfully.",
         });
+      } else {
+        throw new Error(data.error || 'Payment processing failed');
       }
     } catch (error) {
       console.error('Error handling payment success:', error);
@@ -140,6 +152,32 @@ const Checkout = () => {
     setIsProcessing(true);
     
     try {
+      // Check if user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        toast({
+          title: "Authentication Required",
+          description: t.authRequired,
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+        return;
+      }
+
+      // Validate form data
+      const requiredFields = ['email', 'firstName', 'lastName', 'address', 'city', 'postalCode', 'phone'];
+      const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+      
+      if (missingFields.length > 0) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in all required fields.",
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+        return;
+      }
+
       // Prepare order data
       const orderDataForPayment = {
         items: items,
@@ -151,16 +189,23 @@ const Checkout = () => {
 
       // Create Stripe checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { orderData: orderDataForPayment }
+        body: { orderData: orderDataForPayment },
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Checkout creation error:', error);
+        throw error;
+      }
 
-      if (data.url) {
+      if (data?.url) {
+        console.log('Redirecting to Stripe checkout:', data.url);
         // Redirect to Stripe checkout
         window.location.href = data.url;
       } else {
-        throw new Error('No checkout URL received');
+        throw new Error('No checkout URL received from server');
       }
     } catch (error) {
       console.error('Error creating checkout session:', error);
