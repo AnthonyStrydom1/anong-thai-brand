@@ -79,7 +79,12 @@ export const useSecurityAudit = () => {
         setError(error.message);
         setLogs([]);
       } else {
-        setLogs(data || []);
+        // Transform the data to match our interface, handling the ip_address type conversion
+        const transformedLogs: SecurityAuditLog[] = (data || []).map(log => ({
+          ...log,
+          ip_address: log.ip_address ? String(log.ip_address) : null
+        }));
+        setLogs(transformedLogs);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch security logs';
@@ -109,7 +114,13 @@ export const useSecurityAudit = () => {
         return [];
       }
       
-      return data || [];
+      // Transform the data to match our interface, handling the ip_address type conversion
+      const transformedLogs: SecurityAuditLog[] = (data || []).map(log => ({
+        ...log,
+        ip_address: log.ip_address ? String(log.ip_address) : null
+      }));
+      
+      return transformedLogs;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch user security logs';
       setError(errorMessage);
