@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { fetchExchangeRates } from '@/services/currencyService';
 
@@ -34,8 +33,11 @@ const CURRENCY_CONFIG = [
 ];
 
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currencies, setCurrencies] = useState<Currency[]>([]);
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null);
+  // Always start with ZAR as default, override with saved preference later
+  const zarCurrency = { code: 'ZAR', symbol: 'R', name: 'South African Rand', rate: 1 };
+  
+  const [currencies, setCurrencies] = useState<Currency[]>([zarCurrency]);
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(zarCurrency);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
@@ -44,7 +46,9 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const loadExchangeRates = async () => {
       setIsLoading(true);
       try {
+        console.log('Loading exchange rates...');
         const rates = await fetchExchangeRates('ZAR');
+        console.log('Exchange rates loaded:', rates);
         
         const updatedCurrencies = CURRENCY_CONFIG.map(config => ({
           ...config,
@@ -54,22 +58,26 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setCurrencies(updatedCurrencies);
         setLastUpdated(new Date());
         
-        // Set default currency if none selected
-        if (!selectedCurrency) {
-          const saved = localStorage.getItem('anong-currency');
-          const defaultCurrency = saved 
-            ? updatedCurrencies.find(c => c.code === saved) || updatedCurrencies[0]
-            : updatedCurrencies[0];
-          setSelectedCurrency(defaultCurrency);
+        // Check for saved currency preference
+        const saved = localStorage.getItem('anong-currency');
+        if (saved) {
+          const savedCurrency = updatedCurrencies.find(c => c.code === saved);
+          if (savedCurrency) {
+            console.log('Setting saved currency:', savedCurrency);
+            setSelectedCurrency(savedCurrency);
+          }
         } else {
-          // Update the selected currency with new rate
-          const updatedSelected = updatedCurrencies.find(c => c.code === selectedCurrency.code);
-          if (updatedSelected) {
-            setSelectedCurrency(updatedSelected);
+          // Ensure ZAR is selected by default
+          const zarCurrency = updatedCurrencies.find(c => c.code === 'ZAR');
+          if (zarCurrency) {
+            console.log('Setting default ZAR currency:', zarCurrency);
+            setSelectedCurrency(zarCurrency);
           }
         }
       } catch (error) {
         console.error('Failed to load exchange rates:', error);
+        // Keep ZAR as default even if rates fail to load
+        setSelectedCurrency(zarCurrency);
       } finally {
         setIsLoading(false);
       }
@@ -84,6 +92,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   const handleSetCurrency = (currency: Currency) => {
+    console.log('Currency changed to:', currency);
     setSelectedCurrency(currency);
     localStorage.setItem('anong-currency', currency.code);
   };
@@ -108,13 +117,10 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return `${selectedCurrency.symbol}${convertedPrice.toFixed(2)}`;
   };
 
-  // Provide default values while loading
-  const defaultCurrency = { code: 'ZAR', symbol: 'R', name: 'South African Rand', rate: 1 };
-
   return (
     <CurrencyContext.Provider value={{
       currencies,
-      selectedCurrency: selectedCurrency || defaultCurrency,
+      selectedCurrency,
       setSelectedCurrency: handleSetCurrency,
       convertPrice,
       formatPrice,

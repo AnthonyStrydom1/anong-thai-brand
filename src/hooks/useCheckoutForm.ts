@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -49,19 +48,29 @@ export const useCheckoutForm = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
+    console.log('📝 Form input change:', { name, value: value.substring(0, 20) + '...', length: value.length });
+    
     // Log input change for security monitoring
     logSecurityEvent('form_input_change', 'checkout', undefined, {
       field: name,
       length: value.length
     });
 
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [name]: value
+      };
+      console.log('📋 Updated form data:', Object.keys(updated).reduce((acc, key) => {
+        acc[key] = updated[key as keyof typeof updated] ? 'has_value' : 'empty';
+        return acc;
+      }, {} as Record<string, string>));
+      return updated;
+    });
 
     // Auto-calculate shipping when address fields change
     if ((name === 'city' || name === 'postalCode') && formData.city && formData.postalCode) {
+      console.log('🚚 Triggering shipping calculation...');
       calculateShipping();
     }
   };

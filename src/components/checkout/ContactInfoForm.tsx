@@ -40,37 +40,23 @@ export const ContactInfoForm = ({ formData, onInputChange, translations }: Conta
       setValidationErrors(prev => ({ ...prev, [name]: '' }));
     }
 
-    // Sanitize input
-    const sanitizedValue = enhancedSecurityService.sanitizeInput(value, {
-      maxLength: name === 'address' ? 200 : 100,
-      stripScripts: true
-    });
-
-    // Validate specific fields
-    if (name === 'email') {
-      const emailValidation = enhancedSecurityService.validateEmail(sanitizedValue);
+    // Basic validation for specific fields
+    if (name === 'email' && value) {
+      const emailValidation = enhancedSecurityService.validateEmail(value);
       if (!emailValidation.isValid) {
         setValidationErrors(prev => ({ ...prev, email: emailValidation.message }));
       }
     }
 
-    // Check for SQL injection patterns
-    const sqlValidation = enhancedSecurityService.containsSqlInjection(sanitizedValue);
+    // Check for suspicious content
+    const sqlValidation = enhancedSecurityService.containsSqlInjection(value);
     if (!sqlValidation.isValid) {
       setValidationErrors(prev => ({ ...prev, [name]: 'Invalid characters detected' }));
-      return; // Don't update if contains suspicious content
+      return;
     }
 
-    // Create sanitized event
-    const sanitizedEvent = {
-      ...e,
-      target: {
-        ...e.target,
-        value: sanitizedValue
-      }
-    };
-
-    onInputChange(sanitizedEvent as React.ChangeEvent<HTMLInputElement>);
+    // Pass the original event to parent - no need to sanitize here as it's handled elsewhere
+    onInputChange(e);
   };
 
   return (
