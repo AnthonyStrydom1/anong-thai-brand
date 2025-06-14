@@ -13,30 +13,50 @@ export interface ShippingAddress {
 }
 
 export class ShippingService {
-  // Courier Guy rate calculator (simplified - in production you'd use their API)
+  // Courier Guy rate calculator with multiple service options
   calculateShipping(address: ShippingAddress, totalWeight: number = 1): ShippingRate[] {
     const { city, postalCode } = address;
     
-    // Basic shipping rates based on location (these would come from Courier Guy API)
-    const baseRates = {
-      local: { cost: 65, days: 1, description: "Overnight Express" },
-      regional: { cost: 85, days: 2, description: "2-Day Express" },
-      national: { cost: 120, days: 3, description: "3-Day Standard" }
-    };
-
-    // Determine shipping zone based on postal code (simplified logic)
+    // Determine shipping zone based on postal code
     const zone = this.determineShippingZone(postalCode);
-    const rate = baseRates[zone];
+    
+    // Base rates for different Courier Guy services
+    const services = [
+      {
+        service: 'courier_guy_overnight',
+        description: 'Overnight Express',
+        baseCost: { local: 85, regional: 110, national: 150 },
+        days: { local: 1, regional: 1, national: 2 }
+      },
+      {
+        service: 'courier_guy_express',
+        description: 'Express Delivery',
+        baseCost: { local: 65, regional: 85, national: 120 },
+        days: { local: 1, regional: 2, national: 3 }
+      },
+      {
+        service: 'courier_guy_standard',
+        description: 'Standard Delivery',
+        baseCost: { local: 45, regional: 65, national: 95 },
+        days: { local: 2, regional: 3, national: 5 }
+      }
+    ];
 
-    // Add weight-based surcharge for heavier items
-    const weightSurcharge = totalWeight > 2 ? (totalWeight - 2) * 15 : 0;
-
-    return [{
-      service: 'courier_guy',
-      cost: rate.cost + weightSurcharge,
-      estimatedDays: rate.days,
-      description: rate.description
-    }];
+    // Calculate rates for all services
+    return services.map(serviceOption => {
+      const baseCost = serviceOption.baseCost[zone];
+      const estimatedDays = serviceOption.days[zone];
+      
+      // Add weight-based surcharge for heavier items
+      const weightSurcharge = totalWeight > 2 ? (totalWeight - 2) * 15 : 0;
+      
+      return {
+        service: serviceOption.service,
+        cost: baseCost + weightSurcharge,
+        estimatedDays: estimatedDays,
+        description: serviceOption.description
+      };
+    }).sort((a, b) => a.cost - b.cost); // Sort by price, cheapest first
   }
 
   private determineShippingZone(postalCode: string): 'local' | 'regional' | 'national' {
@@ -46,7 +66,7 @@ export class ShippingService {
     if (code >= 2000 && code <= 2199) return 'local'; // Johannesburg
     if (code >= 8000 && code <= 8099) return 'local'; // Cape Town
     if (code >= 4000 && code <= 4099) return 'local'; // Durban
-    if (code >= 1 && code <= 1999) return 'regional'; // Pretoria area (fixed octal literal)
+    if (code >= 1 && code <= 1999) return 'regional'; // Pretoria area
     
     return 'national'; // Other areas
   }
