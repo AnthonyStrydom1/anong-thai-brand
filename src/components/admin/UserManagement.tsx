@@ -11,7 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import CreateAdminUserForm from './CreateAdminUserForm';
 
-interface UserWithProfile {
+interface AdminUser {
   id: string;
   email: string;
   created_at: string;
@@ -29,7 +29,7 @@ interface UserRole {
 }
 
 const UserManagement = () => {
-  const [users, setUsers] = useState<UserWithProfile[]>([]);
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [searchEmail, setSearchEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,39 +38,39 @@ const UserManagement = () => {
 
   useEffect(() => {
     if (isAdmin()) {
-      loadUsers();
+      loadAdminUsers();
       loadUserRoles();
     }
   }, []);
 
-  const loadUsers = async () => {
+  const loadAdminUsers = async () => {
     try {
       setIsLoading(true);
-      console.log('Loading users from users table...');
+      console.log('Loading admin users from users table...');
       
-      // Get users from our users table
+      // Get admin users from our users table (only contains admin users now)
       const { data: usersData, error: usersError } = await supabase
         .from('users')
         .select('*')
         .order('created_at', { ascending: false });
       
       if (usersError) {
-        console.error('Error loading users:', usersError);
+        console.error('Error loading admin users:', usersError);
         throw usersError;
       }
       
-      console.log('Loaded users:', usersData);
-      setUsers(usersData || []);
+      console.log('Loaded admin users:', usersData);
+      setAdminUsers(usersData || []);
       
       toast({
-        title: "Users Loaded",
-        description: `Successfully loaded ${usersData?.length || 0} users.`,
+        title: "Admin Users Loaded",
+        description: `Successfully loaded ${usersData?.length || 0} admin users.`,
       });
     } catch (error: any) {
-      console.error('Error loading users:', error);
+      console.error('Error loading admin users:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to load users. Make sure you have admin privileges.",
+        description: error.message || "Failed to load admin users. Make sure you have admin privileges.",
         variant: "destructive"
       });
     } finally {
@@ -141,7 +141,7 @@ const UserManagement = () => {
     return getUserRoles(userId).some(role => role.role === 'admin');
   };
 
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = adminUsers.filter(user => {
     const searchTerm = searchEmail.toLowerCase();
     const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim().toLowerCase();
     
@@ -169,12 +169,12 @@ const UserManagement = () => {
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-6">
         <UserPlus className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">User Management</h1>
+        <h1 className="text-2xl font-bold">Admin User Management</h1>
       </div>
 
       {/* Create Admin User Form */}
       <CreateAdminUserForm onUserCreated={() => {
-        loadUsers();
+        loadAdminUsers();
         loadUserRoles();
       }} />
 
@@ -183,7 +183,7 @@ const UserManagement = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Search Users
+            Search Admin Users
             {isLoading && <RefreshCw className="h-4 w-4 animate-spin" />}
           </CardTitle>
         </CardHeader>
@@ -203,7 +203,7 @@ const UserManagement = () => {
             <div className="flex items-end">
               <Button 
                 onClick={() => {
-                  loadUsers();
+                  loadAdminUsers();
                   loadUserRoles();
                 }}
                 disabled={isLoading}
@@ -218,27 +218,27 @@ const UserManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Users List */}
+      {/* Admin Users List */}
       <Card>
         <CardHeader>
-          <CardTitle>All Users ({filteredUsers.length})</CardTitle>
+          <CardTitle>Admin Users ({filteredUsers.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="text-center py-8">
               <RefreshCw className="w-8 h-8 mx-auto mb-4 text-gray-400 animate-spin" />
-              <p className="text-gray-600">Loading users...</p>
+              <p className="text-gray-600">Loading admin users...</p>
             </div>
           ) : filteredUsers.length === 0 ? (
             <div className="text-center py-8">
               <User className="w-12 h-12 mx-auto mb-4 text-gray-400" />
               <p className="text-gray-500 mb-2">
-                {searchEmail ? "No users found matching your search." : "No users found."}
+                {searchEmail ? "No admin users found matching your search." : "No admin users found."}
               </p>
               {!searchEmail && (
                 <Button 
                   onClick={() => {
-                    loadUsers();
+                    loadAdminUsers();
                     loadUserRoles();
                   }}
                   variant="outline"
@@ -262,7 +262,7 @@ const UserManagement = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-gray-600" />
+                          <Shield className="w-5 h-5 text-blue-600" />
                         </div>
                         <div>
                           <h3 className="font-medium">{displayName || 'No email'}</h3>
@@ -333,8 +333,8 @@ const UserManagement = () => {
             <div className="text-sm text-blue-800">
               <p className="font-medium mb-1">Admin User Management</p>
               <p>
-                You can create new admin users directly from this interface, search existing users by name or email, 
-                and assign admin roles to existing users. The system now uses a dedicated users table that you can fully manage.
+                This interface manages admin users only. Regular customers are managed separately in the customers table.
+                Admin users have elevated privileges and can access the admin dashboard and management features.
               </p>
             </div>
           </div>

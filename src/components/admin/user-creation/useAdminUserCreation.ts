@@ -21,7 +21,7 @@ export const useAdminUserCreation = (onUserCreated: () => void) => {
     try {
       console.log('Creating admin user:', formData.email);
 
-      // First, check if a user already exists in our users table
+      // First, check if a user already exists in our users table (admin users only)
       const { data: existingUser } = await supabase
         .from('users')
         .select('id, email')
@@ -29,7 +29,7 @@ export const useAdminUserCreation = (onUserCreated: () => void) => {
         .maybeSingle();
 
       if (existingUser) {
-        console.log('User already exists in users table, assigning admin role');
+        console.log('Admin user already exists in users table, assigning admin role');
         
         // User already exists, just assign admin role
         const { error: roleError } = await supabase.rpc('assign_admin_role', {
@@ -54,7 +54,7 @@ export const useAdminUserCreation = (onUserCreated: () => void) => {
       }
 
       // Create the user in Supabase Auth first
-      console.log('Creating new user in auth system');
+      console.log('Creating new admin user in auth system');
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -77,9 +77,25 @@ export const useAdminUserCreation = (onUserCreated: () => void) => {
       }
 
       if (authData.user) {
-        console.log('Auth user created, now creating user record');
+        console.log('Auth user created, now creating admin user record');
         
-        // Create user record in our users table
+        // First assign admin role - this must happen before creating the user record
+        // because the link_auth_user trigger only creates user records for admin users
+        const { error: roleError } = await supabase.rpc('assign_admin_role', {
+          _user_id: authData.user.id
+        });
+
+        if (roleError) {
+          console.error('Role assignment error:', roleError);
+          toast({
+            title: "Error",
+            description: `Failed to assign admin role: ${roleError.message}`,
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // Create admin user record in our users table
         const { data: newUser, error: userError } = await supabase
           .from('users')
           .insert({
@@ -93,35 +109,21 @@ export const useAdminUserCreation = (onUserCreated: () => void) => {
           .single();
 
         if (userError) {
-          console.error('User creation error:', userError);
+          console.error('Admin user creation error:', userError);
           toast({
             title: "Partial Success",
-            description: `Auth account created but user record failed: ${userError.message}`,
+            description: `Auth account and admin role created but user record failed: ${userError.message}`,
             variant: "destructive"
           });
           return;
         }
 
-        console.log('User record created, assigning admin role');
+        console.log('Admin user record created successfully');
 
-        // Assign admin role
-        const { error: roleError } = await supabase.rpc('assign_admin_role', {
-          _user_id: newUser.id
+        toast({
+          title: "Success!",
+          description: `Admin user ${formData.email} created successfully.`,
         });
-
-        if (roleError) {
-          console.error('Role assignment error:', roleError);
-          toast({
-            title: "Partial Success",
-            description: `User created but admin role assignment failed: ${roleError.message}`,
-            variant: "destructive"
-          });
-        } else {
-          toast({
-            title: "Success!",
-            description: `Admin user ${formData.email} created successfully.`,
-          });
-        }
 
         onUserCreated();
       }
