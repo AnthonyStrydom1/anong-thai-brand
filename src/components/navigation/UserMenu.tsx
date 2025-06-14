@@ -52,22 +52,28 @@ const UserMenu = ({
     setLastName,
   } = useAuthModal();
 
-  const { user, session, mfaPending } = useAuth();
+  const { user, session, mfaPending, isLoading: authLoading } = useAuth();
 
-  // Simplified authentication state - use the auth context directly
-  const isLoggedIn = !!(user && session && !mfaPending);
+  // Enhanced authentication state detection with more logging
+  const isLoggedIn = !!(user && session && !mfaPending && !authLoading);
 
-  console.log('🎯 UserMenu: Auth state:', { 
+  console.log('🎯 UserMenu: Detailed Auth state:', { 
     user: !!user, 
     session: !!session,
     mfaPending,
+    authLoading,
+    isLoggedInProp,
     finalIsLoggedIn: isLoggedIn,
-    currentPath: window.location.pathname
+    userEmail: user?.email,
+    sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'none',
+    currentPath: window.location.pathname,
+    timestamp: new Date().toISOString()
   });
 
   // Auto-open login modal on mobile when not logged in (only for /account route)
   useEffect(() => {
     if (isMobile && !isLoggedIn && window.location.pathname === '/account') {
+      console.log('📱 UserMenu: Auto-opening login modal for mobile /account access');
       setShowLoginModal(true);
     }
   }, [isMobile, isLoggedIn, setShowLoginModal]);
@@ -76,14 +82,21 @@ const UserMenu = ({
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🖱️ UserMenu: Button clicked', { 
-      isLoggedIn, 
-      mfaPending, 
-      currentPath: window.location.pathname 
+    console.log('🖱️ UserMenu: Button clicked - DETAILED STATE:', { 
+      isLoggedIn,
+      user: !!user,
+      session: !!session,
+      mfaPending,
+      authLoading,
+      userEmail: user?.email,
+      sessionValid: session ? 'yes' : 'no',
+      currentPath: window.location.pathname,
+      clickTimestamp: new Date().toISOString()
     });
     
     // If user is logged in, show dropdown menu
     if (isLoggedIn) {
+      console.log('✅ UserMenu: User is logged in, toggling dropdown');
       setIsDropdownOpen(!isDropdownOpen);
       return;
     }
@@ -94,26 +107,33 @@ const UserMenu = ({
       return;
     }
     
+    console.log('❌ UserMenu: User not logged in, handling navigation');
+    
     // If not logged in and not on auth page, handle navigation
     if (isMobile) {
+      console.log('📱 UserMenu: Mobile - redirecting to /auth');
       window.location.href = '/auth';
     } else {
+      console.log('💻 UserMenu: Desktop - showing login modal');
       setShowLoginModal(true);
     }
   };
 
   const handleLogout = () => {
+    console.log('🚪 UserMenu: Logout initiated');
     setIsDropdownOpen(false);
     // Clear any MFA session on logout
     mfaAuthService.clearMFASession();
     onLogout();
   };
 
-  console.log('🎯 UserMenu render state:', { 
+  console.log('🎯 UserMenu render decision:', { 
     isLoggedIn, 
-    mfaPending, 
+    mfaPending,
+    authLoading,
     shouldShowDropdown: isLoggedIn,
-    currentPath: window.location.pathname
+    currentPath: window.location.pathname,
+    renderTimestamp: new Date().toISOString()
   });
 
   return (
