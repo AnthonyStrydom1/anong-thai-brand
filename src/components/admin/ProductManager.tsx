@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,20 @@ import { toast } from "@/hooks/use-toast";
 import { useAdminSecurity } from "@/hooks/useAdminSecurity";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
+// Extended product type to include all the properties we need
+interface ExtendedProduct extends SupabaseProduct {
+  compare_price?: number;
+  cost_price?: number;
+  low_stock_threshold?: number;
+  manage_stock?: boolean;
+  allow_backorders?: boolean;
+  weight?: number;
+}
+
 const ProductManager = () => {
-  const [products, setProducts] = useState<SupabaseProduct[]>([]);
+  const [products, setProducts] = useState<ExtendedProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedProduct, setSelectedProduct] = useState<SupabaseProduct | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ExtendedProduct | null>(null);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const { logAdminAction } = useAdminSecurity();
@@ -51,7 +62,7 @@ const ProductManager = () => {
       
       const fetchedProducts = await supabaseService.getProducts();
       console.log('Loaded products:', fetchedProducts);
-      setProducts(fetchedProducts);
+      setProducts(fetchedProducts as ExtendedProduct[]);
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -187,7 +198,7 @@ const ProductManager = () => {
     }
   };
 
-  const editProduct = (product: SupabaseProduct) => {
+  const editProduct = (product: ExtendedProduct) => {
     setSelectedProduct(product);
     setFormData({
       name: product.name,
@@ -199,8 +210,8 @@ const ProductManager = () => {
       cost_price: product.cost_price?.toString() || '',
       stock_quantity: product.stock_quantity.toString(),
       low_stock_threshold: product.low_stock_threshold?.toString() || '5',
-      manage_stock: product.manage_stock,
-      allow_backorders: product.allow_backorders,
+      manage_stock: product.manage_stock ?? true,
+      allow_backorders: product.allow_backorders ?? false,
       is_active: product.is_active,
       is_featured: product.is_featured,
       weight: product.weight?.toString() || '',
@@ -250,7 +261,7 @@ const ProductManager = () => {
     }
   };
 
-  const getStockStatus = (product: SupabaseProduct) => {
+  const getStockStatus = (product: ExtendedProduct) => {
     if (product.stock_quantity === 0) return { status: 'Out of Stock', variant: 'destructive' as const };
     if (product.stock_quantity <= (product.low_stock_threshold || 5)) return { status: 'Low Stock', variant: 'secondary' as const };
     return { status: 'In Stock', variant: 'default' as const };
