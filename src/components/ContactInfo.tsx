@@ -56,7 +56,7 @@ const ContactInfo = () => {
   };
   
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-anong-ivory/50">
       <div className="container mx-auto px-4">
         <motion.div 
           className="text-center mb-16"
@@ -65,8 +65,8 @@ const ContactInfo = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-[#520F7A] mb-3 font-display">{t.title}</h2>
-          <div className="w-24 h-1 bg-thai-gold mx-auto mb-4"></div>
+          <h2 className="text-3xl md:text-5xl font-bold text-anong-black mb-3 font-heading">{t.title}</h2>
+          <div className="w-24 h-1 bg-anong-gold mx-auto mb-4"></div>
         </motion.div>
         
         <motion.div 
@@ -77,47 +77,47 @@ const ContactInfo = () => {
           variants={containerVariants}
         >
           <motion.div 
-            className="text-center bg-white p-10 rounded-xl shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] transition-shadow duration-500 border border-gray-100/60 backdrop-blur-sm"
+            className="anong-card text-center p-10 hover:shadow-xl transition-all duration-500"
             variants={itemVariants}
           >
             <motion.div 
-              className="w-20 h-20 bg-[#f8f4ff] rounded-full flex items-center justify-center mx-auto mb-6"
+              className="w-20 h-20 bg-anong-gold/10 rounded-full flex items-center justify-center mx-auto mb-6"
               variants={iconVariants}
             >
-              <MapPin className="h-9 w-9 text-[#520F7A]" />
+              <MapPin className="h-9 w-9 text-anong-deep-green" />
             </motion.div>
-            <h3 className="font-display text-2xl text-[#520F7A] mb-4">{t.address}</h3>
-            <p className="text-gray-700 text-lg">20 Hettie Street, Cyrildene</p>
-            <p className="text-gray-700 text-lg">Johannesburg, 2198</p>
+            <h3 className="font-heading text-2xl text-anong-black mb-4">{t.address}</h3>
+            <p className="text-anong-black/80 text-lg">20 Hettie Street, Cyrildene</p>
+            <p className="text-anong-black/80 text-lg">Johannesburg, 2198</p>
           </motion.div>
           
           <motion.div 
-            className="text-center bg-white p-10 rounded-xl shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] transition-shadow duration-500 border border-gray-100/60 backdrop-blur-sm"
+            className="anong-card text-center p-10 hover:shadow-xl transition-all duration-500"
             variants={itemVariants}
           >
             <motion.div 
-              className="w-20 h-20 bg-[#f8f4ff] rounded-full flex items-center justify-center mx-auto mb-6"
+              className="w-20 h-20 bg-anong-gold/10 rounded-full flex items-center justify-center mx-auto mb-6"
               variants={iconVariants}
             >
-              <Phone className="h-9 w-9 text-[#520F7A]" />
+              <Phone className="h-9 w-9 text-anong-deep-green" />
             </motion.div>
-            <h3 className="font-display text-2xl text-[#520F7A] mb-4">{t.phone}</h3>
-            <p className="text-gray-700 text-lg">Anong: 076 505 9941</p>
-            <p className="text-gray-700 text-lg">Howard: 074 240 6712</p>
-            <p className="text-gray-700 text-lg">Justin: 072 102 0284</p>
+            <h3 className="font-heading text-2xl text-anong-black mb-4">{t.phone}</h3>
+            <p className="text-anong-black/80 text-lg">Anong: 076 505 9941</p>
+            <p className="text-anong-black/80 text-lg">Howard: 074 240 6712</p>
+            <p className="text-anong-black/80 text-lg">Justin: 072 102 0284</p>
           </motion.div>
           
           <motion.div 
-            className="text-center bg-white p-10 rounded-xl shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] transition-shadow duration-500 border border-gray-100/60 backdrop-blur-sm"
+            className="anong-card text-center p-10 hover:shadow-xl transition-all duration-500"
             variants={itemVariants}
           >
             <motion.div 
-              className="w-20 h-20 bg-[#f8f4ff] rounded-full flex items-center justify-center mx-auto mb-6"
+              className="w-20 h-20 bg-anong-gold/10 rounded-full flex items-center justify-center mx-auto mb-6"
               variants={iconVariants}
             >
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
-                className="h-9 w-9 text-[#520F7A]" 
+                className="h-9 w-9 text-anong-deep-green" 
                 width="24" 
                 height="24" 
                 viewBox="0 0 24 24" 
@@ -131,8 +131,8 @@ const ContactInfo = () => {
                 <polyline points="12 6 12 12 16 14" />
               </svg>
             </motion.div>
-            <h3 className="font-display text-2xl text-[#520F7A] mb-4">{t.operatingHours}</h3>
-            <p className="text-gray-700 text-lg">{t.hoursContent}</p>
+            <h3 className="font-heading text-2xl text-anong-black mb-4">{t.operatingHours}</h3>
+            <p className="text-anong-black/80 text-lg">{t.hoursContent}</p>
           </motion.div>
         </motion.div>
       </div>

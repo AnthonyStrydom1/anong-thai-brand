@@ -19,7 +19,7 @@ const Shop = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-anong-ivory">
-      <main className="flex-grow">
+      <main className="flex-grow thai-pattern-bg">
         <ProductGrid initialCategory={categoryFromUrl} />
       </main>
       

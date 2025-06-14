@@ -16,10 +16,10 @@ const ProductDetailPage = () => {
   }, []);
   
   return (
-    <div className="min-h-screen flex flex-col bg-anong-cream">
+    <div className="min-h-screen flex flex-col bg-anong-ivory">
       <NavigationBanner />
       
-      <main className="flex-grow watercolor-bg">
+      <main className="flex-grow thai-pattern-bg">
         <ProductDetail />
       </main>
       
