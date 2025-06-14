@@ -14,7 +14,7 @@ const AboutPreview = () => {
     },
     th: {
       title: "รู้จักกับอนงค์",
-      description: "ตลอดสามรุ่น ครอบครัวของเราได้สร้างสรรค์พริกแกงและซอสไทยแท้ด้วยสูตรที่สืบทอดมาจากคุณยายของฉัน แต่ละขวดบรรจุรสชาติ ความรัก และมรดกทางวัฒนธรรมของประเทศไทย สร้างขึ้นด้วยส่วนผสมที่คัดสรรอย่างพิถีพิถันและวิธีการแบบดั้งเดิม",
+      description: "เป็นเวลาสามรุ่น ครอบครัวของเราได้สร้างสรรค์พริกแกงและซอสไทยแท้ด้วยสูตรที่สืบทอดมาจากคุณยายของฉัน แต่ละขวดบรรจุรสชาติ ความรัก และมรดกทางวัฒนธรรมของประเทศไทย สร้างขึ้นด้วยส่วนผสมที่คัดสรรอย่างพิถีพิถันและวิธีการแบบดั้งเดิม",
       cta: "อ่านเรื่องราวของเรา"
     }
   };
@@ -22,7 +22,7 @@ const AboutPreview = () => {
   const t = translations[language];
 
   return (
-    <section className="bg-thai-ivory py-16">
+    <section className="bg-anong-ivory py-16">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div>
@@ -39,7 +39,7 @@ const AboutPreview = () => {
             </p>
             <Button 
               asChild
-              className="bg-thai-purple hover:bg-thai-purple-dark"
+              className="bg-anong-deep-green hover:bg-anong-deep-green/90"
             >
               <Link to="/about">{t.cta}</Link>
             </Button>

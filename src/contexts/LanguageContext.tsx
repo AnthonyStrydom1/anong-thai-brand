@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 type Language = 'en' | 'th';
 
@@ -11,7 +11,16 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  // Initialize language from localStorage or default to 'en'
+  const [language, setLanguage] = useState<Language>(() => {
+    const saved = localStorage.getItem('anong-language');
+    return (saved === 'th' || saved === 'en') ? saved : 'en';
+  });
+
+  // Save language preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('anong-language', language);
+  }, [language]);
 
   const toggleLanguage = () => {
     setLanguage(prevLang => prevLang === 'en' ? 'th' : 'en');

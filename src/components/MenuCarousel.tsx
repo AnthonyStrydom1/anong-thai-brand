@@ -77,6 +77,17 @@ const MenuCarousel = () => {
   const { language } = useLanguage();
   const [currentPage, setCurrentPage] = useState(0);
   
+  const translations = {
+    en: {
+      pageCounter: "Page"
+    },
+    th: {
+      pageCounter: "หน้า"
+    }
+  };
+  
+  const t = translations[language];
+  
   return (
     <div className="relative">
       <Carousel
@@ -86,9 +97,6 @@ const MenuCarousel = () => {
         }}
         className="mx-auto max-w-3xl"
         onSelect={(api) => {
-          // The onSelect callback from Carousel provides the api object
-          // We need to explicitly handle it as an api object or index
-          // Use type assertion to resolve the TypeScript error
           if (typeof api === 'number') {
             setCurrentPage(api);
           }
@@ -109,8 +117,8 @@ const MenuCarousel = () => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="absolute -left-2 md:-left-8 border border-thai-gold text-thai-gold hover:text-white hover:bg-thai-gold focus:bg-thai-gold" />
-        <CarouselNext className="absolute -right-2 md:-right-8 border border-thai-gold text-thai-gold hover:text-white hover:bg-thai-gold focus:bg-thai-gold" />
+        <CarouselPrevious className="absolute -left-2 md:-left-8 border border-anong-gold text-anong-gold hover:text-white hover:bg-anong-gold focus:bg-anong-gold" />
+        <CarouselNext className="absolute -right-2 md:-right-8 border border-anong-gold text-anong-gold hover:text-white hover:bg-anong-gold focus:bg-anong-gold" />
       </Carousel>
       
       <div className="flex justify-center mt-4">
