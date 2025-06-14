@@ -57,6 +57,9 @@ verify_jwt = false
 [functions.handle-payment-success]
 verify_jwt = false
 
+[functions.send-mfa-email]
+verify_jwt = false
+
 [analytics]
 enabled = false
 port = 54327
