@@ -115,7 +115,7 @@ serve(async (req: Request) => {
     // Send email using Resend
     console.log('📤 Sending email via Resend API...');
     const emailPayload = {
-      from: 'AnongThaiBrand <onboarding@resend.dev>',
+      from: 'Anong Thai Brand <hello@anonghthaibrand.com>',
       to: [email],
       subject: 'Your Verification Code - Anong Thai Brand',
       html: `
