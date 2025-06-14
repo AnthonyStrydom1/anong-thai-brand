@@ -9,13 +9,7 @@ import { Search, Shield, User, UserPlus, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useUserRoles } from '@/hooks/useUserRoles';
-
-interface AuthUser {
-  id: string;
-  email: string;
-  created_at: string;
-  last_sign_in_at?: string;
-}
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface UserRole {
   id: string;
@@ -25,7 +19,7 @@ interface UserRole {
 }
 
 const UserManagement = () => {
-  const [users, setUsers] = useState<AuthUser[]>([]);
+  const [users, setUsers] = useState<SupabaseUser[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [searchEmail, setSearchEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -76,7 +70,7 @@ const UserManagement = () => {
     }
   };
 
-  const assignAdminRole = async (userId: string, userEmail: string) => {
+  const assignAdminRole = async (userId: string, userEmail: string | undefined) => {
     if (!userId) return;
     
     setAssigningUserId(userId);
@@ -89,7 +83,7 @@ const UserManagement = () => {
       
       toast({
         title: "Success!",
-        description: `Admin role assigned to ${userEmail}`,
+        description: `Admin role assigned to ${userEmail || 'user'}`,
       });
       
       // Reload user roles to reflect changes
@@ -115,7 +109,7 @@ const UserManagement = () => {
   };
 
   const filteredUsers = users.filter(user => 
-    user.email.toLowerCase().includes(searchEmail.toLowerCase())
+    user.email?.toLowerCase().includes(searchEmail.toLowerCase()) || false
   );
 
   if (!isAdmin()) {
@@ -198,7 +192,7 @@ const UserManagement = () => {
                           <User className="w-5 h-5 text-gray-600" />
                         </div>
                         <div>
-                          <h3 className="font-medium">{user.email}</h3>
+                          <h3 className="font-medium">{user.email || 'No email'}</h3>
                           <p className="text-sm text-gray-500">
                             Joined: {new Date(user.created_at).toLocaleDateString()}
                           </p>
