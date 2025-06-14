@@ -9,7 +9,15 @@ import { Search, Shield, User, UserPlus, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useUserRoles } from '@/hooks/useUserRoles';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
+
+interface UserWithProfile {
+  id: string;
+  email: string;
+  created_at: string;
+  last_sign_in_at?: string;
+  first_name?: string;
+  last_name?: string;
+}
 
 interface UserRole {
   id: string;
@@ -19,14 +27,14 @@ interface UserRole {
 }
 
 const UserManagement = () => {
-  const [users, setUsers] = useState<SupabaseUser[]>([]);
+  const [users, setUsers] = useState<UserWithProfile[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [searchEmail, setSearchEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
   const { isAdmin } = useUserRoles();
 
-  // Load all users and their roles
+  // Load users from profiles table instead of auth.users
   useEffect(() => {
     if (isAdmin()) {
       loadUsers();
@@ -38,12 +46,15 @@ const UserManagement = () => {
     try {
       setIsLoading(true);
       
-      // Get users from auth.users via admin API
-      const { data, error } = await supabase.auth.admin.listUsers();
+      // Get users from profiles table which should be accessible to admins
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       
-      setUsers(data.users || []);
+      setUsers(data || []);
     } catch (error) {
       console.error('Error loading users:', error);
       toast({
@@ -183,6 +194,9 @@ const UserManagement = () => {
               {filteredUsers.map((user) => {
                 const roles = getUserRoles(user.id);
                 const isUserAdmin = hasAdminRole(user.id);
+                const displayName = user.first_name && user.last_name 
+                  ? `${user.first_name} ${user.last_name}` 
+                  : user.email;
                 
                 return (
                   <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
@@ -192,7 +206,10 @@ const UserManagement = () => {
                           <User className="w-5 h-5 text-gray-600" />
                         </div>
                         <div>
-                          <h3 className="font-medium">{user.email || 'No email'}</h3>
+                          <h3 className="font-medium">{displayName || 'No email'}</h3>
+                          {user.email && displayName !== user.email && (
+                            <p className="text-sm text-gray-500">{user.email}</p>
+                          )}
                           <p className="text-sm text-gray-500">
                             Joined: {new Date(user.created_at).toLocaleDateString()}
                           </p>
