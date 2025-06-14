@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -5,7 +6,7 @@ import { orderService } from '@/services/orderService';
 import { supabaseService } from '@/services/supabaseService';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { ShippingRate } from '@/services/shippingService';
 import { VATCalculator } from '@/utils/vatCalculator';
 import { enhancedSecurityService } from '@/services/enhancedSecurityService';
@@ -69,24 +70,37 @@ export const useCheckoutForm = () => {
     });
 
     // Auto-calculate shipping when address fields change
-    if ((name === 'city' || name === 'postalCode') && formData.city && formData.postalCode) {
+    if ((name === 'city' || name === 'postalCode') && value.trim() && formData.city && formData.postalCode) {
       console.log('🚚 Triggering shipping calculation...');
-      calculateShipping();
+      setTimeout(() => calculateShipping(), 500); // Debounce
     }
   };
 
   const calculateShipping = async () => {
-    if (!formData.city || !formData.postalCode || items.length === 0) return;
+    if (!formData.city || !formData.postalCode || items.length === 0) {
+      console.log('⚠️ Missing shipping calculation requirements:', { 
+        city: formData.city, 
+        postalCode: formData.postalCode, 
+        itemsCount: items.length 
+      });
+      return;
+    }
 
     setIsCalculatingShipping(true);
     try {
+      console.log('🚚 Calculating shipping for:', { city: formData.city, postalCode: formData.postalCode });
+      
       const rates = await orderService.calculateShipping(
         { city: formData.city, postalCode: formData.postalCode },
         items
       );
+      
+      console.log('📦 Shipping rates received:', rates);
       setShippingRates(rates);
+      
       if (rates.length > 0) {
         setSelectedShippingRate(rates[0]);
+        console.log('✅ Auto-selected shipping rate:', rates[0]);
       }
 
       await logSecurityEvent('shipping_calculation', 'checkout', undefined, {
@@ -95,7 +109,7 @@ export const useCheckoutForm = () => {
         ratesFound: rates.length
       });
     } catch (error) {
-      console.error('Error calculating shipping:', error);
+      console.error('❌ Error calculating shipping:', error);
       await logSecurityEvent('shipping_calculation_failed', 'checkout', undefined, {
         error: error instanceof Error ? error.message : 'Unknown error'
       }, false);
@@ -110,8 +124,33 @@ export const useCheckoutForm = () => {
     }
   };
 
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    if (!formData.email) errors.push('Email is required');
+    if (!formData.firstName) errors.push('First name is required');
+    if (!formData.lastName) errors.push('Last name is required');
+    if (!formData.address) errors.push('Address is required');
+    if (!formData.city) errors.push('City is required');
+    if (!formData.postalCode) errors.push('Postal code is required');
+    if (!formData.phone) errors.push('Phone number is required');
+
+    if (errors.length > 0) {
+      toast({
+        title: 'Form Validation Error',
+        description: errors.join(', '),
+        variant: 'destructive'
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    console.log('🛒 Starting order submission...');
 
     // Rate limiting check
     if (!checkRateLimit()) {
@@ -120,6 +159,11 @@ export const useCheckoutForm = () => {
         description: 'Please wait before submitting again.',
         variant: 'destructive'
       });
+      return;
+    }
+
+    // Validate form
+    if (!validateForm()) {
       return;
     }
 
@@ -141,7 +185,25 @@ export const useCheckoutForm = () => {
       return;
     }
 
+    if (items.length === 0) {
+      toast({
+        title: 'Empty Cart',
+        description: 'Your cart is empty. Please add items before checking out.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setIsProcessing(true);
+    console.log('⏳ Processing order with data:', {
+      userEmail: user.email,
+      itemCount: items.length,
+      shippingCost: selectedShippingRate.cost,
+      formData: Object.keys(formData).reduce((acc, key) => {
+        acc[key] = formData[key as keyof typeof formData] ? 'filled' : 'empty';
+        return acc;
+      }, {} as Record<string, string>)
+    });
 
     try {
       // Validate all form data
@@ -156,7 +218,7 @@ export const useCheckoutForm = () => {
         if (!sqlCheck.isValid) {
           await logSecurityEvent('sql_injection_attempt', 'checkout', undefined, {
             field: key,
-            value: value.substring(0, 50) // Log first 50 chars only
+            value: value.substring(0, 50)
           }, false);
           throw new Error('Invalid input detected');
         }
@@ -164,8 +226,10 @@ export const useCheckoutForm = () => {
 
       // Get or create customer
       let customer = await supabaseService.getCurrentUserCustomer();
+      console.log('👤 Customer lookup result:', customer ? 'found' : 'not found');
       
       if (!customer) {
+        console.log('👤 Creating new customer...');
         const customerData = {
           user_id: user.id,
           fullname: `${formData.firstName} ${formData.lastName}`,
@@ -178,6 +242,7 @@ export const useCheckoutForm = () => {
           total_spent: 0
         };
         customer = await supabaseService.createCustomer(customerData);
+        console.log('✅ Customer created:', customer.id);
       }
 
       // Calculate order totals
@@ -188,6 +253,8 @@ export const useCheckoutForm = () => {
         })),
         selectedShippingRate.cost
       );
+
+      console.log('💰 Order totals calculated:', orderTotals);
 
       // Create order
       const orderData = {
@@ -220,7 +287,15 @@ export const useCheckoutForm = () => {
         shipping_method: selectedShippingRate.description
       };
 
+      console.log('📝 Creating order with data:', {
+        customerId: customer.id,
+        itemCount: orderData.items.length,
+        totalAmount: orderTotals.totalAmount
+      });
+
       const createdOrder = await orderService.createOrder(orderData);
+      console.log('✅ Order created successfully:', createdOrder.order_number);
+
       setOrderNumber(createdOrder.order_number);
 
       // Log successful order creation
@@ -236,10 +311,12 @@ export const useCheckoutForm = () => {
         orderNumber: createdOrder.order_number,
         total: orderTotals.totalAmount,
         email: formData.email,
-        shippingAddress: orderData.shipping_address
+        shippingAddress: orderData.shipping_address,
+        items: items
       });
 
       clearCart();
+      console.log('🛒 Cart cleared');
 
       toast({
         title: 'Order Placed Successfully',
@@ -247,7 +324,7 @@ export const useCheckoutForm = () => {
       });
 
     } catch (error) {
-      console.error('Checkout error:', error);
+      console.error('❌ Checkout error:', error);
       
       await logSecurityEvent('checkout_failed', 'order', undefined, {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -269,6 +346,21 @@ export const useCheckoutForm = () => {
     }
   };
 
+  // Calculate order totals for display
+  const orderTotals = selectedShippingRate ? VATCalculator.calculateOrderTotals(
+    items.map(item => ({
+      price: item.product.price,
+      quantity: item.quantity
+    })),
+    selectedShippingRate.cost
+  ) : VATCalculator.calculateOrderTotals(
+    items.map(item => ({
+      price: item.product.price,
+      quantity: item.quantity
+    })),
+    0
+  );
+
   return {
     formData,
     shippingRates,
@@ -282,18 +374,6 @@ export const useCheckoutForm = () => {
     setSelectedShippingRate,
     handleSubmit,
     calculateShipping,
-    orderTotals: selectedShippingRate ? VATCalculator.calculateOrderTotals(
-      items.map(item => ({
-        price: item.product.price,
-        quantity: item.quantity
-      })),
-      selectedShippingRate.cost
-    ) : VATCalculator.calculateOrderTotals(
-      items.map(item => ({
-        price: item.product.price,
-        quantity: item.quantity
-      })),
-      0
-    )
+    orderTotals
   };
 };
