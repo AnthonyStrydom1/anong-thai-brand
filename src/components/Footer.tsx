@@ -85,7 +85,8 @@ const Footer = ({ className }: FooterProps) => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      // First, add to newsletter subscriptions
+      const { error: newsletterError } = await supabase
         .from('newsletter_subscriptions')
         .insert([
           {
@@ -94,24 +95,50 @@ const Footer = ({ className }: FooterProps) => {
           }
         ]);
 
-      if (error) {
-        // Check if error is due to duplicate email
-        if (error.code === '23505') {
-          toast({
-            title: t.alreadySubscribed,
-            description: t.alreadySubscribedDesc,
-          });
-        } else {
-          throw error;
-        }
-      } else {
+      // Check if error is due to duplicate email
+      if (newsletterError && newsletterError.code === '23505') {
         toast({
-          title: t.subscribeSuccess,
-          description: t.subscribeSuccessDesc,
+          title: t.alreadySubscribed,
+          description: t.alreadySubscribedDesc,
         });
+        setEmail('');
+        return;
+      } else if (newsletterError) {
+        throw newsletterError;
       }
+
+      // If newsletter subscription was successful, also update customer marketing consent
+      // Check if there's a customer record with this email
+      const { data: customer, error: customerError } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('email', email.trim())
+        .maybeSingle();
+
+      if (customerError) {
+        console.error('Error checking customer:', customerError);
+        // Don't throw here - newsletter subscription was successful
+      }
+
+      // If customer exists, update their marketing consent
+      if (customer) {
+        const { error: updateError } = await supabase
+          .from('customers')
+          .update({ marketing_consent: true })
+          .eq('id', customer.id);
+
+        if (updateError) {
+          console.error('Error updating customer marketing consent:', updateError);
+          // Don't throw here - newsletter subscription was successful
+        }
+      }
+
+      toast({
+        title: t.subscribeSuccess,
+        description: t.subscribeSuccessDesc,
+      });
       
-      // Clear the input field on success or if already subscribed
+      // Clear the input field on success
       setEmail('');
     } catch (error) {
       console.error('Newsletter subscription error:', error);
