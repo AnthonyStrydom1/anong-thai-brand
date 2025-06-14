@@ -7,7 +7,7 @@ import type { MFASignInData, MFASessionData, MFAAuthResult, MFAResendResult } fr
 
 class MFAAuthService {
   async initiateSignIn({ email, password }: MFASignInData): Promise<MFAAuthResult> {
-    console.log('🔑 MFA Service: Starting sign in for', email);
+    console.log('🔑 MFA Service: Starting MANDATORY MFA sign in for', email);
     
     try {
       // Clear any existing MFA session first
@@ -45,11 +45,11 @@ class MFAAuthService {
         userId: userId
       };
       
-      console.log('💾 MFA Service: Storing session data for MFA flow');
+      console.log('💾 MFA Service: Storing session data for MANDATORY MFA flow');
       mfaSessionManager.storeSessionData(sessionData);
 
       // Send MFA email and wait for it to complete
-      console.log('📧 MFA Service: Sending MFA email...');
+      console.log('📧 MFA Service: Sending MANDATORY MFA email...');
       const emailResult = await mfaEmailService.sendMFAEmail(email);
       console.log('✅ MFA Service: MFA email sent successfully:', emailResult);
 
@@ -59,13 +59,14 @@ class MFAAuthService {
         window.dispatchEvent(new CustomEvent('mfa-session-stored', { 
           detail: { email, challengeId: emailResult.challengeId } 
         }));
-        console.log('🎯 MFA Service: MFA flow initiated successfully');
+        console.log('🎯 MFA Service: MANDATORY MFA flow initiated successfully');
       } else {
         // If email failed, clear the session
         mfaSessionManager.clearSession();
         throw new Error('Failed to send MFA email');
       }
 
+      // ALWAYS return MFA required - no bypassing
       return { mfaRequired: true };
     } catch (error: any) {
       console.error('❌ MFA Service: Sign in initiation failed:', error);

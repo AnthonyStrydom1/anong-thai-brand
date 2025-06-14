@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { authService, type AuthUser } from '@/services/authService';
@@ -111,23 +110,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('🔐 Starting sign in process');
+      console.log('🔐 Starting sign in process with MFA enforcement');
       
       // Clear any existing MFA session first
       mfaAuthService.clearMFASession();
       
-      // Try MFA signin first (which validates credentials and starts MFA flow)
+      // ALWAYS use MFA flow - no fallback to regular signin
+      console.log('🔒 Initiating MFA signin (required for all users)');
       const mfaResult = await mfaAuthService.initiateSignIn({ email, password });
       
+      console.log('🎯 MFA signin result:', mfaResult);
+      
+      // MFA should always be required now
       if (mfaResult.mfaRequired) {
-        console.log('🔒 MFA required, returning mfaRequired flag');
+        console.log('✅ MFA flow initiated successfully');
         return { mfaRequired: true };
       }
       
-      // If no MFA required, proceed with regular signin
-      const result = await authService.signIn({ email, password });
-      console.log('✅ Regular sign in completed:', result);
-      return result;
+      // This should not happen - log error if we get here
+      console.error('❌ Unexpected: MFA not required when it should be');
+      throw new Error('Authentication system error - MFA expected');
+      
     } catch (error) {
       console.error('❌ Sign in error:', error);
       // Clear any MFA session on error
