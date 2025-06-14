@@ -16,7 +16,9 @@ interface AuthHookRequest {
   user: {
     id: string;
     email: string;
+    email_confirmed_at?: string;
     user_metadata?: any;
+    confirmation_token?: string;
   };
 }
 
@@ -29,21 +31,25 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const hookData: AuthHookRequest = await req.json();
     
-    console.log('Auth hook triggered:', hookData.type, hookData.event);
-    console.log('User data:', hookData.user);
+    console.log('Auth hook triggered:', hookData);
+    console.log('Event type:', hookData.event);
+    console.log('User email:', hookData.user.email);
+    console.log('Email confirmed at:', hookData.user.email_confirmed_at);
 
     // Handle different auth events
     switch (hookData.event) {
       case 'user.created':
-        console.log('Sending welcome email for user:', hookData.user.email);
-        await sendWelcomeEmail(hookData.user);
+        // Send account confirmation email when user signs up
+        console.log('New user created, sending confirmation email for:', hookData.user.email);
+        await sendAccountConfirmationEmail(hookData.user);
         break;
       case 'user.confirmation.requested':
-        console.log('Sending confirmation email for user:', hookData.user.email);
-        await sendConfirmationEmail(hookData.user);
+        // Alternative event name for confirmation requests
+        console.log('User confirmation requested for:', hookData.user.email);
+        await sendAccountConfirmationEmail(hookData.user);
         break;
       case 'user.password_recovery.requested':
-        console.log('Sending password reset email for user:', hookData.user.email);
+        console.log('Password recovery requested for:', hookData.user.email);
         await sendPasswordResetEmail(hookData.user);
         break;
       default:
@@ -69,40 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-async function sendWelcomeEmail(user: any) {
-  const firstName = user.user_metadata?.first_name || 'there';
-  
-  try {
-    const result = await resend.emails.send({
-      from: "Anong Thai <onboarding@resend.dev>",
-      to: [user.email],
-      subject: "Welcome to Anong Thai!",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #d4af37;">Welcome to Anong Thai, ${firstName}!</h1>
-          <p>Thank you for joining our community. Your account has been successfully created.</p>
-          <p>You can now start exploring our authentic Thai products and recipes.</p>
-          <p style="margin-top: 30px;">
-            <a href="${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.vercel.app') || 'https://your-domain.com'}" 
-               style="background-color: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
-              Start Shopping
-            </a>
-          </p>
-          <p style="color: #666; font-size: 14px; margin-top: 30px;">
-            Best regards,<br>
-            The Anong Thai Team
-          </p>
-        </div>
-      `,
-    });
-    console.log('Welcome email sent successfully:', result);
-  } catch (error) {
-    console.error('Failed to send welcome email:', error);
-    throw error;
-  }
-}
-
-async function sendConfirmationEmail(user: any) {
+async function sendAccountConfirmationEmail(user: any) {
   const firstName = user.user_metadata?.first_name || 'there';
   
   try {
@@ -112,26 +85,38 @@ async function sendConfirmationEmail(user: any) {
       subject: "Welcome to Anong Thai - Account Created!",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #d4af37;">Account Created Successfully!</h1>
-          <p>Hi ${firstName},</p>
-          <p>Your Anong Thai account has been created successfully! No further confirmation is required.</p>
+          <h1 style="color: #d4af37;">Welcome to Anong Thai, ${firstName}!</h1>
+          <p>Your account has been successfully created and is ready to use!</p>
           <p>You can now sign in and start exploring our authentic Thai products and recipes.</p>
+          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #333;">What's Next?</h3>
+            <ul style="color: #666;">
+              <li>Browse our premium Thai ingredients</li>
+              <li>Discover authentic recipes</li>
+              <li>Join our community of Thai food enthusiasts</li>
+            </ul>
+          </div>
           <p style="margin: 30px 0;">
-            <a href="${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.vercel.app') || 'https://your-domain.com'}/auth" 
-               style="background-color: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
-              Sign In Now
+            <a href="${getAppUrl()}/shop" 
+               style="background-color: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+              Start Shopping
             </a>
           </p>
           <p style="color: #666; font-size: 14px; margin-top: 30px;">
             Best regards,<br>
             The Anong Thai Team
           </p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+          <p style="color: #999; font-size: 12px;">
+            This email was sent because you created an account at Anong Thai. 
+            If you didn't create this account, please contact our support team.
+          </p>
         </div>
       `,
     });
-    console.log('Confirmation email sent successfully:', result);
+    console.log('Account confirmation email sent successfully:', result);
   } catch (error) {
-    console.error('Failed to send confirmation email:', error);
+    console.error('Failed to send account confirmation email:', error);
     throw error;
   }
 }
@@ -143,20 +128,21 @@ async function sendPasswordResetEmail(user: any) {
     const result = await resend.emails.send({
       from: "Anong Thai <onboarding@resend.dev>",
       to: [user.email],
-      subject: "Reset your password",
+      subject: "Reset your Anong Thai password",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #d4af37;">Reset Your Password</h1>
           <p>Hi ${firstName},</p>
-          <p>You requested to reset your password. Click the button below to create a new password:</p>
+          <p>You requested to reset your password for your Anong Thai account.</p>
+          <p>Your password has been reset. You can now sign in with your new password.</p>
           <p style="margin: 30px 0;">
-            <a href="#" 
-               style="background-color: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
-              Reset Password
+            <a href="${getAppUrl()}/auth" 
+               style="background-color: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+              Sign In Now
             </a>
           </p>
           <p style="color: #666; font-size: 14px;">
-            If you didn't request this, please ignore this email.
+            If you didn't request this password reset, please contact our support team immediately.
           </p>
           <p style="color: #666; font-size: 14px; margin-top: 30px;">
             Best regards,<br>
@@ -170,6 +156,18 @@ async function sendPasswordResetEmail(user: any) {
     console.error('Failed to send password reset email:', error);
     throw error;
   }
+}
+
+function getAppUrl(): string {
+  // Try to get the app URL from various sources
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  if (supabaseUrl) {
+    // Convert Supabase URL to likely app URL
+    return supabaseUrl.replace('.supabase.co', '.vercel.app');
+  }
+  
+  // Fallback to a default URL
+  return 'https://your-domain.com';
 }
 
 serve(handler);

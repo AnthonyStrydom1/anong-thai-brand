@@ -58,10 +58,6 @@ enable_phone_change_confirmations = false
 [auth.email]
 enable_signup = true
 enable_confirmations = false
-template = { }
-
-[functions.send-mfa-email]
-verify_jwt = false
 
 [functions.auth-hook]
 verify_jwt = false
