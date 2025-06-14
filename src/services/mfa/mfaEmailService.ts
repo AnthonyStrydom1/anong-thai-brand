@@ -5,29 +5,41 @@ import type { MFAResendResult } from './mfaTypes';
 
 export class MFAEmailService {
   async sendMFAEmail(email: string): Promise<{ challengeId?: string }> {
-    console.log('📧 MFA Email Service: Sending MFA email to:', email);
+    console.log('📧 MFA Email Service: Starting email send for:', email);
     
     try {
+      console.log('🔄 MFA Email Service: Invoking send-mfa-email function...');
+      
       const { data: emailData, error: emailError } = await supabase.functions.invoke('send-mfa-email', {
         body: { email }
       });
 
-      console.log('📧 MFA Email Service: Function response:', { emailData, emailError });
+      console.log('📧 MFA Email Service: Function response received:', { 
+        emailData, 
+        emailError,
+        hasData: !!emailData,
+        hasError: !!emailError 
+      });
 
       if (emailError) {
         console.error('❌ MFA Email Service: Function error:', emailError);
         throw new Error(`Failed to send verification email: ${emailError.message}`);
       }
 
-      if (!emailData?.success) {
+      if (!emailData) {
+        console.error('❌ MFA Email Service: No data returned from function');
+        throw new Error('No response from email service');
+      }
+
+      if (!emailData.success) {
         console.error('❌ MFA Email Service: Function returned error:', emailData);
-        throw new Error(emailData?.error || 'Failed to send verification email');
+        throw new Error(emailData.error || 'Failed to send verification email');
       }
 
       console.log('✅ MFA Email Service: Email sent successfully, challenge ID:', emailData.challengeId);
 
       // Store the challenge ID returned from the edge function
-      if (emailData?.challengeId) {
+      if (emailData.challengeId) {
         mfaSessionManager.storeChallengeId(emailData.challengeId);
         console.log('💾 MFA Email Service: Challenge ID stored');
       } else {
@@ -36,7 +48,11 @@ export class MFAEmailService {
 
       return emailData;
     } catch (error: any) {
-      console.error('❌ MFA Email Service: Unexpected error:', error);
+      console.error('❌ MFA Email Service: Critical error:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       throw new Error(error.message || 'Failed to send verification email');
     }
   }
