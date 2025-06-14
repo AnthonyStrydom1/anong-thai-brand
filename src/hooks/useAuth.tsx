@@ -27,12 +27,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Set up auth state listener
+    // Core helper: should we block any login if MFA is pending in this browser?
+    const isMFAPending = () => {
+      const pending = mfaAuthService.hasPendingMFA();
+      if (pending) {
+        console.log('🛑 [useAuth] Pending MFA detected, blocking login UI/session until OTP is complete');
+      }
+      return pending;
+    };
+
+    // Setup auth state listener
     const { data: { subscription } } = authService.onAuthStateChange(
       (user, session) => {
         if (!mounted) return;
-        
-        console.log('🔄 Auth state changed:', { 
+
+        const pendingMFA = isMFAPending();
+
+        if (pendingMFA) {
+          // If MFA is pending, don't set user/session (block UI as "not logged in")
+          console.log('🔒 [useAuth] Auth state changed, but MFA required -- session/user not set');
+          setUser(null);
+          setSession(null);
+          setUserProfile(null);
+          setIsLoading(false);
+          return;
+        }
+
+        console.log('🔄 [useAuth] Auth state changed:', { 
           userId: user?.id, 
           hasSession: !!session,
           sessionExpiry: session?.expires_at 
@@ -78,6 +99,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const session = await authService.getCurrentSession();
         if (mounted) {
+          const pendingMFA = isMFAPending();
+          if (pendingMFA) {
+            // If MFA is pending, block "restoring" any session
+            setUser(null);
+            setSession(null);
+            setUserProfile(null);
+            setIsLoading(false);
+            return;
+          }
           if (session?.user) {
             console.log('✅ Found existing session:', session.user.id);
             setUser(session.user);
@@ -210,3 +240,5 @@ export function useAuth() {
   }
   return context;
 }
+
+// ... END OF FILE
