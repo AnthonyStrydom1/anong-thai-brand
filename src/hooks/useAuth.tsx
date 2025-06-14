@@ -28,7 +28,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Refined: only true if session data and challenge are present and not expired
+    // Clear any stale MFA state on app start
+    console.log('🧹 Auth: Clearing any stale MFA state on initialization');
+    
+    // Only keep MFA state if it's actually valid
+    const currentMFAState = mfaAuthService.hasPendingMFA();
+    if (!currentMFAState) {
+      mfaAuthService.clearMFASession();
+    }
+
     const isMFAPending = () => {
       const mfaPendingRaw = mfaAuthService.hasPendingMFA();
       console.log(
@@ -54,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const pendingMFA = isMFAPending();
         setMfaPending(pendingMFA);
 
-        // (unchanged) If there's a pending MFA, block session/user/profile
+        // If there's a pending MFA, block session/user/profile
         if (pendingMFA) {
           setUser(null);
           setSession(null);

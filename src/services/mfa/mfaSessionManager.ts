@@ -99,14 +99,28 @@ export class MFASessionManager {
   hasPendingMFA(): boolean {
     const sessionData = this.getSessionData();
     const hasChallenge = !!this.getChallengeId();
-    const isValid = sessionData && !this.isSessionExpired(sessionData);
-    const result = !!sessionData && hasChallenge && isValid;
+    
+    // If no session data, definitely no pending MFA
+    if (!sessionData) {
+      console.log('❓ MFA Session Manager: No session data - no pending MFA');
+      return false;
+    }
+    
+    // If session is expired, no pending MFA
+    if (this.isSessionExpired(sessionData)) {
+      console.log('❓ MFA Session Manager: Session expired - no pending MFA');
+      this.clearSession(); // Clean up expired session
+      return false;
+    }
+    
+    // Must have both session data AND challenge ID for pending MFA
+    const result = hasChallenge;
     
     console.log('❓ MFA Session Manager: Has pending MFA:', result, { 
-      hasSessionData: !!sessionData, 
+      hasSessionData: true, 
       hasChallenge,
-      isExpired: sessionData ? this.isSessionExpired(sessionData) : false,
-      isValid
+      email: sessionData.email,
+      timestamp: sessionData.timestamp
     });
     
     return result;
