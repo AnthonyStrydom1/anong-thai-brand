@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -43,19 +41,29 @@ const NavigationBanner = () => {
       console.log('🔄 NavigationBanner: Starting logout process');
       await signOut();
       console.log('✅ NavigationBanner: Logout successful');
+      
       toast({
         title: t.logoutSuccess || 'Successfully logged out',
       });
+      
       // Navigate to home after successful logout
       navigate('/');
+      
     } catch (error: any) {
-      console.error('❌ NavigationBanner: Logout error:', error);
-      // Show success message anyway since local state is cleared
+      console.error('❌ NavigationBanner: Logout error details:', {
+        message: error?.message,
+        code: error?.code,
+        status: error?.status,
+        error: error
+      });
+      
+      // Since we handle logout errors in useAuth, we should always show success
       toast({
         title: 'Logged out successfully',
         description: 'You have been logged out of your account',
       });
-      // Navigate to home regardless of error
+      
+      // Navigate to home regardless
       navigate('/');
     }
   };

@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { authService, type AuthUser } from '@/services/authService';
@@ -59,7 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (user, session) => {
         if (!mounted) return;
 
-        console.log('🔄 Auth: State change event:', { user: !!user, session: !!session });
+        console.log('🔄 Auth: State change event:', { 
+          user: !!user, 
+          session: !!session,
+          sessionId: session?.access_token ? 'present' : 'missing'
+        });
 
         const pendingMFA = isMFAPending();
         setMfaPending(pendingMFA);
@@ -108,6 +111,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         console.log('🔍 Auth: Checking existing session');
         const session = await authService.getCurrentSession();
+        console.log('📊 Auth: Session check result:', { 
+          hasSession: !!session, 
+          hasUser: !!session?.user,
+          sessionId: session?.access_token ? 'present' : 'missing'
+        });
+        
         if (mounted) {
           const pendingMFA = isMFAPending();
           setMfaPending(pendingMFA);
@@ -187,38 +196,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    console.log('🔄 Auth: Starting logout process');
+    
     try {
-      console.log('🔄 Auth: Starting logout process');
-      
-      // Clear MFA session first
+      // First, clear MFA session and local state immediately
+      console.log('🧹 Auth: Clearing MFA session and local state');
       mfaAuthService.clearMFASession();
       setMfaPending(false);
       
-      // Clear local state immediately to prevent UI issues
+      // Clear local state first to prevent UI issues
       setUser(null);
       setSession(null);
       setUserProfile(null);
       
-      // Then attempt to sign out from Supabase
-      // If this fails, the local state is already cleared
-      try {
-        await authService.signOut();
-        console.log('✅ Auth: Supabase logout successful');
-      } catch (supabaseError) {
-        console.warn('⚠️ Auth: Supabase logout failed, but local state cleared:', supabaseError);
-        // Don't throw here - the user is effectively logged out locally
-      }
+      console.log('✅ Auth: Local state cleared successfully');
       
-      console.log('✅ Auth: Logout process completed');
-    } catch (error) {
-      console.error('❌ Auth: Logout error:', error);
-      // Even if logout fails, clear local state
+      // Then attempt to sign out from Supabase (this might fail due to session mismatch)
+      console.log('🔄 Auth: Attempting Supabase logout');
+      await authService.signOut();
+      console.log('✅ Auth: Supabase logout successful');
+      
+    } catch (error: any) {
+      console.error('❌ Auth: Supabase logout failed:', error);
+      console.log('ℹ️ Auth: This is expected if session was already invalid');
+      
+      // Don't throw the error - the user is effectively logged out locally
+      // Just ensure everything is clean
       mfaAuthService.clearMFASession();
       setUser(null);
       setSession(null);
       setUserProfile(null);
       setMfaPending(false);
-      throw error;
+      
+      console.log('✅ Auth: Logout completed despite Supabase error');
     }
   };
 
