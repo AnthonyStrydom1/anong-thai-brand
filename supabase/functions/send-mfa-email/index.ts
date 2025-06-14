@@ -161,20 +161,28 @@ serve(async (req: Request) => {
 
     console.log('📧 Resend API response status:', emailResponse.status, emailResponse.statusText);
 
+    const responseText = await emailResponse.text();
+    console.log('📧 Resend API response body:', responseText);
+
     if (!emailResponse.ok) {
-      const errorText = await emailResponse.text();
       console.error('❌ Resend API error details:', {
         status: emailResponse.status,
         statusText: emailResponse.statusText,
         headers: Object.fromEntries(emailResponse.headers.entries()),
-        errorBody: errorText
+        errorBody: responseText
       });
       
-      throw new Error(`Failed to send email: ${emailResponse.status} - ${errorText}`);
+      throw new Error(`Failed to send email: ${emailResponse.status} - ${responseText}`);
     }
 
-    const emailResult = await emailResponse.json();
-    console.log('✅ Email sent successfully via Resend:', emailResult);
+    let emailResult;
+    try {
+      emailResult = JSON.parse(responseText);
+      console.log('✅ Email sent successfully via Resend:', emailResult);
+    } catch (parseError) {
+      console.log('✅ Email sent successfully (non-JSON response):', responseText);
+      emailResult = { id: 'unknown', status: 'sent' };
+    }
 
     const response = {
       success: true,
@@ -182,7 +190,7 @@ serve(async (req: Request) => {
       message: 'Verification code sent successfully',
       debug: {
         emailSent: true,
-        emailId: emailResult.id,
+        emailId: emailResult.id || 'unknown',
         challengeCreated: true
       }
     };
