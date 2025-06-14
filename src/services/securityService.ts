@@ -1,103 +1,69 @@
 
 import { supabaseService } from './supabaseService';
+import { enhancedSecurityService } from './enhancedSecurityService';
 
 class SecurityService {
   private rateLimitCache = new Map<string, { count: number; resetTime: number }>();
 
-  // Input sanitization
+  // Delegate to enhanced security service for most operations
   sanitizeInput(input: string): string {
-    return input
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/javascript:/gi, '')
-      .replace(/on\w+=/gi, '')
-      .trim();
+    return enhancedSecurityService.sanitizeInput(input);
   }
 
-  // Email validation
   isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    const result = enhancedSecurityService.validateEmail(email);
+    return result.isValid;
   }
 
-  // Strong password validation
   isStrongPassword(password: string): { isStrong: boolean; message: string } {
-    if (password.length < 8) {
-      return { isStrong: false, message: 'Password must be at least 8 characters long' };
-    }
-    
-    if (!/(?=.*[a-z])/.test(password)) {
-      return { isStrong: false, message: 'Password must contain at least one lowercase letter' };
-    }
-    
-    if (!/(?=.*[A-Z])/.test(password)) {
-      return { isStrong: false, message: 'Password must contain at least one uppercase letter' };
-    }
-    
-    if (!/(?=.*\d)/.test(password)) {
-      return { isStrong: false, message: 'Password must contain at least one number' };
-    }
-    
-    if (!/(?=.*[@$!%*?&])/.test(password)) {
-      return { isStrong: false, message: 'Password must contain at least one special character' };
-    }
-    
-    return { isStrong: true, message: 'Password is strong' };
+    const result = enhancedSecurityService.validatePassword(password);
+    return { isStrong: result.isValid, message: result.message };
   }
 
-  // Rate limiting
   checkRateLimit(key: string, maxRequests: number, windowMs: number): boolean {
-    const now = Date.now();
-    const rateLimitData = this.rateLimitCache.get(key);
-    
-    if (!rateLimitData || now > rateLimitData.resetTime) {
-      this.rateLimitCache.set(key, { count: 1, resetTime: now + windowMs });
-      return true;
-    }
-    
-    if (rateLimitData.count >= maxRequests) {
-      return false;
-    }
-    
-    rateLimitData.count++;
-    return true;
+    return enhancedSecurityService.checkRateLimit(key, { maxRequests, windowMs });
   }
 
-  // Security event logging with fallback
   async logSecurityEvent(
     action: string,
     resourceType: string,
     resourceId?: string,
     details?: any
   ): Promise<void> {
-    try {
-      // For now, just log to console until the database function is properly set up
-      console.log('Security Event:', {
-        action,
-        resourceType,
-        resourceId,
-        details,
-        timestamp: new Date().toISOString(),
-        userId: 'current-user' // Would get from auth context
-      });
-    } catch (error) {
-      console.error('Failed to log security event:', error);
+    await enhancedSecurityService.logSecurityEvent(action, resourceType, resourceId, details);
+  }
+
+  escapeHtml(unsafe: string): string {
+    return enhancedSecurityService.escapeHtml(unsafe);
+  }
+
+  containsSqlInjection(input: string): boolean {
+    const result = enhancedSecurityService.containsSqlInjection(input);
+    return !result.isValid;
+  }
+
+  // Additional security methods
+  validateInput(input: string, type: 'email' | 'password' | 'general' = 'general') {
+    switch (type) {
+      case 'email':
+        return enhancedSecurityService.validateEmail(input);
+      case 'password':
+        return enhancedSecurityService.validatePassword(input);
+      default:
+        const sqlCheck = enhancedSecurityService.containsSqlInjection(input);
+        if (!sqlCheck.isValid) return sqlCheck;
+        
+        return { isValid: true, message: 'Input is valid', severity: 'low' as const };
     }
   }
 
-  // XSS protection
-  escapeHtml(unsafe: string): string {
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+  getSecurityMetrics() {
+    return enhancedSecurityService.getSecurityMetrics();
   }
 
-  // SQL injection prevention (basic check)
-  containsSqlInjection(input: string): boolean {
-    const sqlKeywords = /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|SCRIPT)\b)/i;
-    return sqlKeywords.test(input);
+  clearSecurityCaches(): void {
+    this.rateLimitCache.clear();
+    enhancedSecurityService.clearSecurityCaches();
   }
 }
 
