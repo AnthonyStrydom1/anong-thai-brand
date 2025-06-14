@@ -17,7 +17,32 @@ const RecipeDetail = () => {
   const { language } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
   
-  const recipe = useMemo(() => recipes.find(r => r.id === id), [id]);
+  // More robust recipe lookup with case-insensitive matching and URL decoding
+  const recipe = useMemo(() => {
+    if (!id) return null;
+    
+    // First try exact match
+    let foundRecipe = recipes.find(r => r.id === id);
+    
+    // If no exact match, try case-insensitive match
+    if (!foundRecipe) {
+      foundRecipe = recipes.find(r => r.id.toLowerCase() === id.toLowerCase());
+    }
+    
+    // If still no match, try with URL decoding
+    if (!foundRecipe) {
+      const decodedId = decodeURIComponent(id);
+      foundRecipe = recipes.find(r => r.id === decodedId || r.id.toLowerCase() === decodedId.toLowerCase());
+    }
+    
+    // Log for debugging
+    if (!foundRecipe) {
+      console.log('Recipe not found for ID:', id);
+      console.log('Available recipe IDs:', recipes.map(r => r.id));
+    }
+    
+    return foundRecipe;
+  }, [id]);
   
   useEffect(() => {
     // Scroll to top when component mounts or recipe changes
@@ -69,6 +94,12 @@ const RecipeDetail = () => {
             <h2 className="anong-heading text-2xl mb-4 text-anong-black">
               {language === 'en' ? 'Recipe not found' : 'ไม่พบสูตรอาหาร'}
             </h2>
+            <p className="anong-body text-anong-black/70 mb-6">
+              {language === 'en' 
+                ? `The recipe with ID "${id}" could not be found.` 
+                : `ไม่พบสูตรอาหารที่มี ID "${id}"`
+              }
+            </p>
             <Link to="/recipes" className="anong-btn-primary">
               {language === 'en' ? 'Browse all recipes' : 'ดูสูตรอาหารทั้งหมด'}
             </Link>
