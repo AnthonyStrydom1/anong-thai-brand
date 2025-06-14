@@ -3,7 +3,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import NavigationBanner from "@/components/NavigationBanner";
 import Footer from "@/components/Footer";
 import MenuCarousel from "@/components/MenuCarousel";
-import MenuGrid from "@/components/MenuGrid";
 import { useEffect } from "react";
 
 const Menu = () => {
@@ -18,14 +17,12 @@ const Menu = () => {
     en: {
       title: "Our Menu",
       description: "Explore our authentic Thai dishes made with fresh ingredients and traditional recipes.",
-      menuPages: "Menu Pages",
-      ourProducts: "Our Products"
+      menuPages: "Menu Pages"
     },
     th: {
       title: "เมนูของเรา",
       description: "สำรวจอาหารไทยแท้ของเราที่ทำจากวัตถุดิบสดและสูตรดั้งเดิม",
-      menuPages: "หน้าเมนู",
-      ourProducts: "ผลิตภัณฑ์ของเรา"
+      menuPages: "หน้าเมนู"
     }
   };
 
@@ -47,19 +44,11 @@ const Menu = () => {
           </div>
 
           {/* Menu Pages Carousel */}
-          <div className="mb-16">
+          <div>
             <h2 className="text-2xl md:text-3xl font-bold text-anong-black mb-8 text-center font-serif">
               {t.menuPages}
             </h2>
             <MenuCarousel />
-          </div>
-
-          {/* Products Grid */}
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-anong-black mb-8 text-center font-serif">
-              {t.ourProducts}
-            </h2>
-            <MenuGrid />
           </div>
         </div>
       </main>
