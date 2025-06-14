@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import ProductManager from '@/components/admin/ProductManager';
 import OrderManager from '@/components/admin/OrderManager';
 import CustomerManager from '@/components/admin/CustomerManager';
@@ -11,9 +10,11 @@ import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import UserManagement from '@/components/admin/UserManagement';
 import MobileAdminLayout from '@/components/admin/MobileAdminLayout';
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
-import { Package, ShoppingCart, Users, BarChart3, Warehouse, Shield, UserPlus } from 'lucide-react';
+import AdminHeader from '@/components/admin/AdminHeader';
+import AdminTabs from '@/components/admin/AdminTabs';
+import AdminOverview from '@/components/admin/AdminOverview';
+import AdminMobileOverview from '@/components/admin/AdminMobileOverview';
 import { supabaseService } from '@/services/supabaseService';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import { useIsMobile } from '@/hooks/useIsMobile';
 
 const AdminPage = () => {
@@ -26,7 +27,6 @@ const AdminPage = () => {
     lowStockItems: 0,
     outOfStockItems: 0
   });
-  const { formatPrice } = useCurrency();
   const isMobile = useIsMobile();
 
   // Scroll to top when component mounts
@@ -75,62 +75,10 @@ const AdminPage = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-3">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center">
-                    <Package className="h-4 w-4 mr-2" />
-                    Products
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="text-2xl font-bold">{stats.totalProducts}</div>
-                  <p className="text-xs text-muted-foreground">In catalog</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center">
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Orders
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="text-2xl font-bold">{stats.totalOrders}</div>
-                  <p className="text-xs text-muted-foreground">Total orders</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center">
-                    <Users className="h-4 w-4 mr-2" />
-                    Customers
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="text-2xl font-bold">{stats.totalCustomers}</div>
-                  <p className="text-xs text-muted-foreground">Registered</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Revenue
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="text-xl font-bold">{formatPrice(stats.totalRevenue)}</div>
-                  <p className="text-xs text-muted-foreground">Completed orders</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+        return isMobile ? (
+          <AdminMobileOverview stats={stats} />
+        ) : (
+          <AdminOverview stats={stats} onTabChange={setActiveTab} />
         );
       case 'products':
         return <ProductManager />;
@@ -169,161 +117,13 @@ const AdminPage = () => {
     <ProtectedAdminRoute>
       <div className="min-h-screen flex flex-col bg-gray-50">
         <div className="flex-1 container mx-auto py-4 px-4 md:py-8">
-          <div className="mb-6 md:mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-1 md:mt-2">Manage your e-commerce store</p>
-          </div>
+          <AdminHeader />
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="mb-6">
-              <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 h-auto p-1 bg-white border">
-                <TabsTrigger value="overview" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger value="products" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  Products
-                </TabsTrigger>
-                <TabsTrigger value="stock" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  Stock
-                </TabsTrigger>
-                <TabsTrigger value="orders" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  Orders
-                </TabsTrigger>
-                <TabsTrigger value="customers" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  Customers
-                </TabsTrigger>
-                <TabsTrigger value="users" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  Users
-                </TabsTrigger>
-                <TabsTrigger value="security" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  Security
-                </TabsTrigger>
-                <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  Analytics
-                </TabsTrigger>
-              </TabsList>
-            </div>
+            <AdminTabs activeTab={activeTab} />
 
-            <TabsContent value="overview" className="space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-xs md:text-sm font-medium">Products</CardTitle>
-                    <Package className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="text-lg md:text-2xl font-bold">{stats.totalProducts}</div>
-                    <p className="text-xs text-muted-foreground">In catalog</p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-xs md:text-sm font-medium">Orders</CardTitle>
-                    <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="text-lg md:text-2xl font-bold">{stats.totalOrders}</div>
-                    <p className="text-xs text-muted-foreground">Total orders</p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-xs md:text-sm font-medium">Customers</CardTitle>
-                    <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="text-lg md:text-2xl font-bold">{stats.totalCustomers}</div>
-                    <p className="text-xs text-muted-foreground">Registered</p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-xs md:text-sm font-medium">Revenue</CardTitle>
-                    <BarChart3 className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="text-lg md:text-2xl font-bold">{formatPrice(stats.totalRevenue)}</div>
-                    <p className="text-xs text-muted-foreground">From completed orders</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg md:text-xl">Stock Alerts</CardTitle>
-                    <CardDescription>Items requiring attention</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between p-3 md:p-4 border rounded-lg bg-yellow-50">
-                      <div className="flex items-center space-x-3">
-                        <Warehouse className="h-6 w-6 md:h-8 md:w-8 text-yellow-600" />
-                        <div>
-                          <h3 className="text-sm md:text-base font-semibold">Low Stock Items</h3>
-                          <p className="text-xs md:text-sm text-gray-600">Items with 5 or fewer units</p>
-                        </div>
-                      </div>
-                      <div className="text-xl md:text-2xl font-bold text-yellow-600">{stats.lowStockItems}</div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 md:p-4 border rounded-lg bg-red-50">
-                      <div className="flex items-center space-x-3">
-                        <Package className="h-6 w-6 md:h-8 md:w-8 text-red-600" />
-                        <div>
-                          <h3 className="text-sm md:text-base font-semibold">Out of Stock</h3>
-                          <p className="text-xs md:text-sm text-gray-600">Items completely out of stock</p>
-                        </div>
-                      </div>
-                      <div className="text-xl md:text-2xl font-bold text-red-600">{stats.outOfStockItems}</div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg md:text-xl">Quick Actions</CardTitle>
-                    <CardDescription>Common administrative tasks</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3 md:gap-4">
-                      <button 
-                        onClick={() => setActiveTab('products')}
-                        className="flex flex-col items-center p-3 md:p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <Package className="h-6 w-6 md:h-8 md:w-8 text-blue-500 mb-2" />
-                        <span className="text-xs md:text-sm font-medium text-center">Add Product</span>
-                      </button>
-                      
-                      <button 
-                        onClick={() => setActiveTab('stock')}
-                        className="flex flex-col items-center p-3 md:p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <Warehouse className="h-6 w-6 md:h-8 md:w-8 text-green-500 mb-2" />
-                        <span className="text-xs md:text-sm font-medium text-center">Manage Stock</span>
-                      </button>
-                      
-                      <button 
-                        onClick={() => setActiveTab('orders')}
-                        className="flex flex-col items-center p-3 md:p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <ShoppingCart className="h-6 w-6 md:h-8 md:w-8 text-purple-500 mb-2" />
-                        <span className="text-xs md:text-sm font-medium text-center">View Orders</span>
-                      </button>
-                      
-                      <button 
-                        onClick={() => setActiveTab('customers')}
-                        className="flex flex-col items-center p-3 md:p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <Users className="h-6 w-6 md:h-8 md:w-8 text-orange-500 mb-2" />
-                        <span className="text-xs md:text-sm font-medium text-center">View Customers</span>
-                      </button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+            <TabsContent value="overview">
+              <AdminOverview stats={stats} onTabChange={setActiveTab} />
             </TabsContent>
 
             <TabsContent value="products">
