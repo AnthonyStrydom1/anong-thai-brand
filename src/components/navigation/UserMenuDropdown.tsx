@@ -7,6 +7,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import AdminLink from './AdminLink';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 interface UserMenuDropdownProps {
   onLogout: () => void;
@@ -20,6 +21,8 @@ interface UserMenuDropdownProps {
 }
 
 const UserMenuDropdown = ({ onLogout, translations }: UserMenuDropdownProps) => {
+  const { isAdmin, isLoading } = useUserRoles();
+
   return (
     <DropdownMenuContent align="end" className="w-48">
       <DropdownMenuItem asChild>
@@ -46,7 +49,11 @@ const UserMenuDropdown = ({ onLogout, translations }: UserMenuDropdownProps) => 
         </Link>
       </DropdownMenuItem>
       
-      <AdminLink />
+      {!isLoading && isAdmin() && (
+        <DropdownMenuItem asChild>
+          <AdminLink />
+        </DropdownMenuItem>
+      )}
       
       <DropdownMenuSeparator />
       
