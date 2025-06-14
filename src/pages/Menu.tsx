@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import NavigationBanner from "@/components/NavigationBanner";
 import Footer from "@/components/Footer";
@@ -8,9 +7,15 @@ import { useEffect } from "react";
 const Menu = () => {
   const { language } = useLanguage();
   
-  // Scroll to top when component mounts
+  // Scroll to top when component mounts - with timeout to ensure it works
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    // Backup scroll in case the first one doesn't work
+    const timer = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const translations = {
