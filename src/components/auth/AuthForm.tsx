@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-import { mfaAuthService } from '@/services/mfaAuthService';
 
 interface AuthFormProps {
   isLogin: boolean;
@@ -36,32 +36,6 @@ const AuthForm = ({
   onForgotPassword,
   onSwitchMode
 }: AuthFormProps) => {
-  // Check for pending MFA for debug purposes
-  const hasPendingMFA = mfaAuthService.hasPendingMFA();
-  const pendingEmail = mfaAuthService.getPendingMFAEmail();
-
-  const handleCheckMFA = () => {
-    console.log('=== MFA Debug Check ===');
-    console.log('Has pending MFA:', mfaAuthService.hasPendingMFA());
-    console.log('Pending email:', mfaAuthService.getPendingMFAEmail());
-    console.log('Session storage MFA key:', sessionStorage.getItem('mfa_session_data'));
-    console.log('Session storage challenge key:', sessionStorage.getItem('mfa_challenge_id'));
-    
-    // Parse and display session data if it exists
-    const sessionData = sessionStorage.getItem('mfa_session_data');
-    if (sessionData) {
-      try {
-        const parsed = JSON.parse(sessionData);
-        console.log('Parsed session data:', parsed);
-      } catch (e) {
-        console.log('Failed to parse session data:', e);
-      }
-    }
-    
-    // Force reload the page to trigger MFA check
-    window.location.reload();
-  };
-
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
@@ -76,30 +50,6 @@ const AuthForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Enhanced debug section for MFA */}
-        {(hasPendingMFA || pendingEmail || sessionStorage.getItem('mfa_session_data')) && (
-          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800 mb-2">
-              <strong>🔍 MFA Debug Info:</strong>
-            </p>
-            <div className="text-xs text-yellow-700 mb-2 space-y-1">
-              <div>Has pending MFA: {hasPendingMFA ? '✅ Yes' : '❌ No'}</div>
-              <div>Email: {pendingEmail || '❌ No email found'}</div>
-              <div>Session data: {sessionStorage.getItem('mfa_session_data') ? '✅ Present' : '❌ Missing'}</div>
-              <div>Challenge ID: {sessionStorage.getItem('mfa_challenge_id') ? '✅ Present' : '❌ Missing'}</div>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleCheckMFA}
-              className="w-full"
-            >
-              🔄 Check MFA Status & Reload
-            </Button>
-          </div>
-        )}
-
         <form onSubmit={onSubmit} className="space-y-4">
           {!isLogin && (
             <div className="grid grid-cols-2 gap-4">
