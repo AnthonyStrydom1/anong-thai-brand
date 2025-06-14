@@ -62,9 +62,14 @@ const UserMenu = ({
       }
       
       const pendingMFA = mfaAuthService.hasPendingMFA();
-      setHasPendingMFA(pendingMFA);
-      
       console.log('🔍 UserMenu: MFA Status Check:', { pendingMFA, isLoggedIn });
+      
+      // Only set pending MFA if we're on the auth page or have valid MFA session
+      if (pendingMFA && (window.location.pathname === '/auth' || window.location.pathname.includes('/auth'))) {
+        setHasPendingMFA(true);
+      } else {
+        setHasPendingMFA(false);
+      }
     };
 
     // Check immediately and on auth state changes
@@ -103,7 +108,7 @@ const UserMenu = ({
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🖱️ UserMenu: Button clicked', { isLoggedIn, hasPendingMFA });
+    console.log('🖱️ UserMenu: Button clicked', { isLoggedIn, hasPendingMFA, currentPath: window.location.pathname });
     
     // If user is logged in, show dropdown menu
     if (isLoggedIn) {
@@ -111,8 +116,14 @@ const UserMenu = ({
       return;
     }
     
-    // If we have pending MFA, redirect to auth page
-    if (hasPendingMFA) {
+    // If we have pending MFA AND we're on the auth page, do nothing (let auth page handle it)
+    if (hasPendingMFA && window.location.pathname === '/auth') {
+      console.log('🔄 UserMenu: MFA pending on auth page, staying put');
+      return;
+    }
+    
+    // If we have pending MFA and we're NOT on auth page, redirect to auth page
+    if (hasPendingMFA && window.location.pathname !== '/auth') {
       console.log('🔄 UserMenu: Redirecting to auth page for MFA');
       window.location.href = '/auth';
       return;
@@ -139,7 +150,8 @@ const UserMenu = ({
   console.log('🎯 UserMenu render state:', { 
     isLoggedIn, 
     hasPendingMFA, 
-    shouldShowDropdown 
+    shouldShowDropdown,
+    currentPath: window.location.pathname
   });
 
   return (

@@ -113,7 +113,7 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
   console.log('🔐 MfaVerification render:', { email, code: code.length, isVerifying });
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
           <Shield className="h-12 w-12 text-blue-600" />
@@ -141,16 +141,21 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
             <InputOTP
               maxLength={6}
               value={code}
-              onChange={setCode}
+              onChange={(value) => {
+                console.log('OTP input changed:', value);
+                setCode(value);
+              }}
               disabled={isVerifying}
+              className="flex justify-center"
             >
-              <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
+              <InputOTPGroup className="flex space-x-2">
+                {[0, 1, 2, 3, 4, 5].map((index) => (
+                  <InputOTPSlot 
+                    key={index} 
+                    index={index} 
+                    className="w-12 h-12 text-lg font-semibold border-2 rounded-md"
+                  />
+                ))}
               </InputOTPGroup>
             </InputOTP>
           </div>
