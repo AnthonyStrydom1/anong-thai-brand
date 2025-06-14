@@ -22,6 +22,7 @@ import Events from "./pages/Events";
 import Account from "./pages/Account";
 import Profile from "./pages/Profile";
 import Orders from "./pages/Orders";
+import OrderDetailsPage from "./pages/OrderDetailsPage";
 import Settings from "./pages/Settings";
 import AdminPage from "./pages/AdminPage";
 import AdminSetupPage from "./pages/AdminSetupPage";
@@ -61,6 +62,7 @@ function App() {
                     <Route path="/account" element={<Account />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/orders" element={<Orders />} />
+                    <Route path="/orders/:id" element={<OrderDetailsPage />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/admin-setup" element={<AdminSetupPage />} />

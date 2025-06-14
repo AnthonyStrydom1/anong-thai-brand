@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -10,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabaseService } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, Package, Eye } from "lucide-react";
 import OrderTracking from "@/components/OrderTracking";
 
@@ -18,6 +17,7 @@ const Orders = () => {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -106,13 +106,7 @@ const Orders = () => {
   };
 
   const handleViewDetails = (order: any) => {
-    // For now, show order details in a toast or console
-    // In the future, this could navigate to a detailed order page
-    console.log('Order details:', order);
-    toast({
-      title: `Order #${order.order_number}`,
-      description: `Status: ${order.status} | Total: ${formatPrice(order.total_amount)}`,
-    });
+    navigate(`/orders/${order.id}`);
   };
 
   if (isLoading) {
