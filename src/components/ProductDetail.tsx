@@ -12,6 +12,7 @@ import { ProductDetailSkeleton } from './product/ProductDetailSkeleton';
 import { BackToShopButton } from './product/BackToShopButton';
 import { getProductImage, getProductData, getRelatedRecipes } from './product/ProductDataMapper';
 import ProductRatings from './product/ProductRatings';
+import { useProductTranslations } from './product/useProductTranslations';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
 import { recipes } from '@/data/recipes';
@@ -19,6 +20,7 @@ import { recipes } from '@/data/recipes';
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
+  const t = useProductTranslations(language);
   
   // Scroll to top when component mounts
   useEffect(() => {
@@ -90,9 +92,9 @@ const ProductDetail = () => {
             product={convertedProduct} 
             language={language} 
             translations={{
-              addToCart: language === 'en' ? 'Add to Cart' : 'เพิ่มลงตะกร้า',
-              quantity: language === 'en' ? 'Quantity' : 'จำนวน',
-              addedToCart: language === 'en' ? 'Added to cart!' : 'เพิ่มลงตะกร้าแล้ว!'
+              addToCart: t.addToCart,
+              quantity: t.quantity,
+              addedToCart: t.addedToCart
             }} 
           />
           
@@ -100,9 +102,9 @@ const ProductDetail = () => {
             product={convertedProduct} 
             language={language} 
             translations={{
-              description: language === 'en' ? 'Description' : 'รายละเอียด',
-              ingredients: language === 'en' ? 'Ingredients' : 'ส่วนผสม',
-              howToUse: language === 'en' ? 'How to Use' : 'วิธีใช้'
+              description: t.description,
+              ingredients: t.ingredients,
+              howToUse: t.howToUse
             }} 
           />
         </motion.div>
@@ -117,9 +119,9 @@ const ProductDetail = () => {
           recipes={relatedRecipes}
           language={language}
           translations={{
-            relatedRecipes: language === 'en' ? 'Related Recipes' : 'สูตรอาหารที่เกี่ยวข้อง',
-            viewRecipe: language === 'en' ? 'View Recipe' : 'ดูสูตรอาหาร',
-            noRecipes: language === 'en' ? 'No related recipes available' : 'ไม่มีสูตรอาหารที่เกี่ยวข้อง'
+            relatedRecipes: t.relatedRecipes,
+            viewRecipe: t.viewRecipe,
+            noRecipes: t.noRelatedRecipes
           }}
         />
       )}
