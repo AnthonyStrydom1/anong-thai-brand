@@ -18,7 +18,7 @@ const Recipes = () => {
   
   // Scroll to top when component mounts
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, []);
   
   const translations = useMemo(() => ({
@@ -115,9 +115,13 @@ const Recipes = () => {
               {categories.map((category) => (
                 <Button
                   key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
+                  variant={selectedCategory === category ? "gold" : "ghost"}
+                  size="default"
                   onClick={() => setSelectedCategory(category)}
-                  className={selectedCategory === category ? "anong-btn-primary" : "anong-btn-secondary"}
+                  className={selectedCategory === category ? 
+                    "bg-anong-gold text-anong-black hover:bg-anong-warm-yellow font-medium" : 
+                    "text-anong-black hover:bg-anong-gold/10 border border-anong-gold/20"
+                  }
                 >
                   {t.categories[category as keyof typeof t.categories]}
                 </Button>
@@ -146,7 +150,7 @@ const Recipes = () => {
                       {recipe.description[language]}
                     </p>
                     
-                    <div className="flex items-center justify-between text-sm text-anong-black/60">
+                    <div className="flex items-center justify-between text-sm text-anong-black/60 mb-4">
                       <div className="flex items-center">
                         <Clock className="h-4 w-4 mr-1 text-anong-gold" />
                         <span>{recipe.time} {t.minutes}</span>
@@ -156,6 +160,14 @@ const Recipes = () => {
                         <span>{recipe.servings} {t.servings}</span>
                       </div>
                     </div>
+                    
+                    <Button 
+                      variant="gold" 
+                      size="sm" 
+                      className="w-full bg-anong-gold text-anong-black hover:bg-anong-warm-yellow font-medium"
+                    >
+                      {t.viewRecipe}
+                    </Button>
                   </div>
                 </Link>
               </Card>
