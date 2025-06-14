@@ -23,20 +23,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
+    // Set up auth state listener first
     const { data: { subscription } } = authService.onAuthStateChange(
-      async (user, session) => {
+      (user, session) => {
+        console.log('Auth state changed:', { user: user?.id, session: !!session });
         setUser(user);
         setSession(session);
         
-        if (user) {
-          // Fetch user profile
+        if (user && session) {
+          // Defer profile loading to prevent auth deadlock
           setTimeout(async () => {
             try {
               const profile = await authService.getUserProfile(user.id);
               setUserProfile(profile);
             } catch (error) {
               console.error('Error fetching user profile:', error);
+              setUserProfile(null);
             }
           }, 0);
         } else {
@@ -47,12 +49,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // Check for existing session - Fix the destructuring error
+    // Check for existing session with proper validation
     authService.getCurrentSession().then((session) => {
-      if (session) {
+      if (session?.user) {
+        console.log('Found existing session:', session.user.id);
         setUser(session.user);
         setSession(session);
+      } else {
+        console.log('No valid session found');
+        setUser(null);
+        setSession(null);
       }
+      setIsLoading(false);
+    }).catch((error) => {
+      console.error('Session check error:', error);
+      setUser(null);
+      setSession(null);
       setIsLoading(false);
     });
 
@@ -80,6 +92,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       await authService.signOut();
+      // Clear local state immediately
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
     } catch (error) {
       console.error('Sign out error:', error);
       throw error;

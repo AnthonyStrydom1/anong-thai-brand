@@ -64,6 +64,19 @@ class AuthService {
   async getCurrentSession(): Promise<Session | null> {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error) throw error;
+    
+    // Validate session is not expired and belongs to current domain
+    if (session && session.expires_at) {
+      const expiresAt = new Date(session.expires_at * 1000);
+      const now = new Date();
+      
+      if (expiresAt <= now) {
+        // Session expired, sign out
+        await this.signOut();
+        return null;
+      }
+    }
+    
     return session;
   }
 
@@ -106,7 +119,12 @@ class AuthService {
 
   onAuthStateChange(callback: (user: User | null, session: Session | null) => void) {
     return supabase.auth.onAuthStateChange((event, session) => {
-      callback(session?.user ?? null, session);
+      // Only process valid sessions
+      if (session && session.user) {
+        callback(session.user, session);
+      } else {
+        callback(null, null);
+      }
     });
   }
 }

@@ -1,3 +1,4 @@
+
 User-agent: Googlebot
 Allow: /
 
@@ -12,3 +13,10 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Prevent crawling of staging URLs
+User-agent: *
+Disallow: /*.lovable.app/
+
+# Sitemap location
+Sitemap: https://anongthaibrand.com/sitemap.xml
