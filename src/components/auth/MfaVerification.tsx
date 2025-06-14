@@ -13,7 +13,7 @@ interface MfaVerificationProps {
 }
 
 const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) => {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
@@ -38,7 +38,8 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
   }, []);
 
   const handleVerify = async () => {
-    if (code.length !== 6) {
+    const fullCode = code.join('');
+    if (fullCode.length !== 6) {
       toast({
         title: "Invalid Code",
         description: "Please enter a 6-digit verification code.",
@@ -51,8 +52,8 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
     setHasError(false);
     
     try {
-      console.log('🔍 MfaVerification: Attempting verification with code:', code);
-      await mfaAuthService.verifyAndSignIn(code);
+      console.log('🔍 MfaVerification: Attempting verification with code:', fullCode);
+      await mfaAuthService.verifyAndSignIn(fullCode);
       
       toast({
         title: "Verification Successful!",
@@ -68,7 +69,7 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
         description: error.message || "Invalid or expired verification code.",
         variant: "destructive"
       });
-      setCode('');
+      setCode(['', '', '', '', '', '']);
     } finally {
       setIsVerifying(false);
     }
@@ -109,13 +110,33 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleCodeChange = (value: string) => {
-    console.log('🔢 MfaVerification: OTP code changed:', value, 'length:', value.length);
-    setCode(value);
+  const handleCodeChange = (index: number, value: string) => {
+    if (value.length > 1) return; // Prevent multiple characters
+    if (!/^\d*$/.test(value)) return; // Only allow digits
+    
+    const newCode = [...code];
+    newCode[index] = value;
+    setCode(newCode);
     setHasError(false); // Clear error when user starts typing
+    
+    console.log('🔢 MfaVerification: OTP code changed:', newCode.join(''), 'length:', newCode.join('').length);
+    
+    // Auto-focus next input
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`) as HTMLInputElement;
+      nextInput?.focus();
+    }
   };
 
-  console.log('🔐 MfaVerification render:', { email, code: code.length, isVerifying, hasError });
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Handle backspace
+    if (e.key === 'Backspace' && !code[index] && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`) as HTMLInputElement;
+      prevInput?.focus();
+    }
+  };
+
+  console.log('🔐 MfaVerification render:', { email, code: code.join('').length, isVerifying, hasError });
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -146,49 +167,27 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
             <label className="text-sm font-medium text-gray-700">
               Enter verification code
             </label>
-            <div className="flex justify-center">
-              <div className="flex space-x-2">
-                {[0, 1, 2, 3, 4, 5].map((index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    maxLength={1}
-                    value={code[index] || ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value.length <= 1 && /^[0-9]*$/.test(value)) {
-                        const newCode = code.split('');
-                        newCode[index] = value;
-                        const updatedCode = newCode.join('').slice(0, 6);
-                        handleCodeChange(updatedCode);
-                        
-                        // Auto-focus next input
-                        if (value && index < 5) {
-                          const inputElement = e.target as HTMLInputElement;
-                          const nextInput = inputElement.parentElement?.children[index + 1] as HTMLInputElement;
-                          nextInput?.focus();
-                        }
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      // Handle backspace
-                      if (e.key === 'Backspace' && !code[index] && index > 0) {
-                        const inputElement = e.target as HTMLInputElement;
-                        const prevInput = inputElement.parentElement?.children[index - 1] as HTMLInputElement;
-                        prevInput?.focus();
-                      }
-                    }}
-                    className="w-12 h-12 text-center text-lg font-semibold border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none"
-                    disabled={isVerifying}
-                  />
-                ))}
-              </div>
+            <div className="flex justify-center gap-2">
+              {code.map((digit, index) => (
+                <input
+                  key={index}
+                  id={`otp-${index}`}
+                  type="text"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleCodeChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  className="w-12 h-12 text-center text-lg font-semibold border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  disabled={isVerifying}
+                  autoFocus={index === 0}
+                />
+              ))}
             </div>
           </div>
 
           <Button 
             onClick={handleVerify}
-            disabled={code.length !== 6 || isVerifying}
+            disabled={code.join('').length !== 6 || isVerifying}
             className="w-full"
           >
             {isVerifying ? "Verifying..." : "Verify Code"}
