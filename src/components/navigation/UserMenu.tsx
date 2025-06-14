@@ -52,16 +52,22 @@ const UserMenu = ({
     setLastName,
   } = useAuthModal();
 
-  // Check for pending MFA status with stricter conditions
+  // Clear MFA state when user logs in successfully
+  useEffect(() => {
+    if (isLoggedIn) {
+      console.log('🧹 UserMenu: User logged in, clearing any MFA state');
+      if (hasPendingMFA) {
+        setHasPendingMFA(false);
+        mfaAuthService.clearMFASession();
+      }
+    }
+  }, [isLoggedIn, hasPendingMFA]);
+
+  // Check for pending MFA status only when needed
   useEffect(() => {
     const checkMFAStatus = () => {
       // If user is logged in, no MFA should be pending
       if (isLoggedIn) {
-        if (hasPendingMFA) {
-          console.log('🧹 UserMenu: User logged in, clearing MFA state');
-          setHasPendingMFA(false);
-          mfaAuthService.clearMFASession();
-        }
         return;
       }
       
@@ -88,7 +94,7 @@ const UserMenu = ({
       }
     };
 
-    // Check immediately and on auth state changes
+    // Check immediately
     checkMFAStatus();
     
     // Listen for MFA session events
@@ -158,8 +164,8 @@ const UserMenu = ({
     onLogout();
   };
 
-  // Show dropdown only if logged in and no pending MFA
-  const shouldShowDropdown = isLoggedIn && !hasPendingMFA;
+  // Show dropdown only if logged in
+  const shouldShowDropdown = isLoggedIn;
 
   console.log('🎯 UserMenu render state:', { 
     isLoggedIn, 

@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { authService, type AuthUser } from '@/services/authService';
@@ -41,6 +42,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         
         if (user && session) {
+          // Clear any pending MFA on successful auth
+          setTimeout(() => {
+            if (mounted) {
+              console.log('🧹 Auth: Clearing MFA session after successful login');
+              mfaAuthService.clearMFASession();
+            }
+          }, 100);
+          
           // Load user profile after successful auth
           setTimeout(async () => {
             if (!mounted) return;

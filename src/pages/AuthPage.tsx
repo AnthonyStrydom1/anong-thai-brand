@@ -114,10 +114,21 @@ const AuthPage = () => {
       const result = await handleSubmit(e);
       console.log('📝 AuthPage: Form submission result:', result);
       
+      // Force MFA check after successful form submission
       if (result?.mfaRequired) {
-        console.log('🔐 AuthPage: MFA required! Waiting for MFA setup...');
-        // The MFA event will be triggered automatically from the service
-        // No need to manually set state here as the event listener will handle it
+        console.log('🔐 AuthPage: MFA required! Checking for MFA session...');
+        // Wait a bit for the MFA session to be stored
+        setTimeout(() => {
+          const hasPending = mfaAuthService.hasPendingMFA();
+          const pendingEmail = mfaAuthService.getPendingMFAEmail();
+          console.log('🔍 AuthPage: Post-submit MFA check:', { hasPending, pendingEmail });
+          
+          if (hasPending && pendingEmail) {
+            console.log('✅ AuthPage: MFA session found, showing OTP screen');
+            setShowMFA(true);
+            setMfaEmail(pendingEmail);
+          }
+        }, 500);
       }
     } catch (error) {
       console.error('❌ AuthPage: Form submission error:', error);
