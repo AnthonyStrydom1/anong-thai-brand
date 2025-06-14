@@ -17,6 +17,8 @@ interface UserWithProfile {
   created_at: string;
   first_name?: string;
   last_name?: string;
+  is_active?: boolean;
+  auth_user_id?: string;
 }
 
 interface UserRole {
@@ -44,80 +46,26 @@ const UserManagement = () => {
   const loadUsers = async () => {
     try {
       setIsLoading(true);
-      console.log('Loading users from profiles table...');
+      console.log('Loading users from users table...');
       
-      // Get users from profiles table
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
+      // Get users from our users table
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (profilesError) {
-        console.error('Error loading profiles:', profilesError);
-        
-        // If profiles query fails, try to get users from auth (requires service role)
-        console.log('Trying alternative method to load users...');
-        
-        try {
-          // This might not work depending on RLS policies, but let's try
-          const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-          
-          if (authError) {
-            console.error('Auth users error:', authError);
-            throw new Error('Unable to load users. Make sure you have admin privileges and the profiles table is accessible.');
-          }
-          
-          // Convert auth users to our format and create missing profiles
-          const convertedUsers = await Promise.all(
-            authUsers.users.map(async (authUser) => {
-              // Check if profile exists
-              const { data: existingProfile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', authUser.id)
-                .maybeSingle();
-              
-              if (!existingProfile && authUser.email) {
-                // Create missing profile
-                console.log(`Creating missing profile for user: ${authUser.email}`);
-                const { error: insertError } = await supabase
-                  .from('profiles')
-                  .insert({
-                    id: authUser.id,
-                    email: authUser.email,
-                    first_name: authUser.user_metadata?.first_name,
-                    last_name: authUser.user_metadata?.last_name,
-                    created_at: authUser.created_at
-                  });
-                
-                if (insertError) {
-                  console.error('Error creating profile:', insertError);
-                }
-              }
-              
-              return {
-                id: authUser.id,
-                email: authUser.email || '',
-                created_at: authUser.created_at,
-                first_name: authUser.user_metadata?.first_name || existingProfile?.first_name,
-                last_name: authUser.user_metadata?.last_name || existingProfile?.last_name
-              };
-            })
-          );
-          
-          setUsers(convertedUsers);
-          toast({
-            title: "Users Loaded",
-            description: "Users loaded from auth system and profiles synchronized.",
-          });
-        } catch (authError) {
-          console.error('Alternative loading method failed:', authError);
-          throw new Error('Unable to load users. Please ensure you have proper admin permissions.');
-        }
-      } else {
-        console.log('Loaded users from profiles:', profilesData);
-        setUsers(profilesData || []);
+      if (usersError) {
+        console.error('Error loading users:', usersError);
+        throw usersError;
       }
+      
+      console.log('Loaded users:', usersData);
+      setUsers(usersData || []);
+      
+      toast({
+        title: "Users Loaded",
+        description: `Successfully loaded ${usersData?.length || 0} users.`,
+      });
     } catch (error: any) {
       console.error('Error loading users:', error);
       toast({
@@ -324,6 +272,9 @@ const UserManagement = () => {
                           <p className="text-sm text-gray-500">
                             Joined: {new Date(user.created_at).toLocaleDateString()}
                           </p>
+                          {!user.is_active && (
+                            <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                          )}
                           <p className="text-xs text-gray-400">ID: {user.id}</p>
                         </div>
                       </div>
@@ -383,8 +334,7 @@ const UserManagement = () => {
               <p className="font-medium mb-1">Admin User Management</p>
               <p>
                 You can create new admin users directly from this interface, search existing users by name or email, 
-                and assign admin roles to existing users. If you don't see users, try refreshing - the system will 
-                synchronize profiles automatically.
+                and assign admin roles to existing users. The system now uses a dedicated users table that you can fully manage.
               </p>
             </div>
           </div>
