@@ -53,7 +53,7 @@ const ProductGrid = ({ initialCategory }: ProductGridProps) => {
     if (initialCategory && initialCategory !== activeCategory) {
       setActiveCategory(initialCategory);
     }
-  }, [initialCategory]);
+  }, [initialCategory, activeCategory]);
 
   // Filter products based on search and category
   const filteredProducts = products.filter(product => {
@@ -61,11 +61,21 @@ const ProductGrid = ({ initialCategory }: ProductGridProps) => {
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
     
+    // For now, show all products since we need to map category_id to category names
+    // This will be improved once we have proper category mapping
     const matchesCategory = activeCategory === 'all' || 
-      product.category === activeCategory ||
-      (activeCategory === 'curry-pastes' && product.category === 'curry-pastes') ||
-      (activeCategory === 'stir-fry-sauces' && product.category === 'stir-fry-sauces') ||
-      (activeCategory === 'dipping-sauces' && product.category === 'dipping-sauces');
+      (activeCategory === 'curry-pastes' && (
+        product.name.toLowerCase().includes('curry') || 
+        product.name.toLowerCase().includes('paste')
+      )) ||
+      (activeCategory === 'stir-fry-sauces' && (
+        product.name.toLowerCase().includes('pad thai') ||
+        product.name.toLowerCase().includes('stir')
+      )) ||
+      (activeCategory === 'dipping-sauces' && (
+        product.name.toLowerCase().includes('sukiyaki') ||
+        product.name.toLowerCase().includes('dipping')
+      ));
     
     return matchesSearch && matchesCategory;
   });
