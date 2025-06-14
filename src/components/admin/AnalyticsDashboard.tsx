@@ -9,6 +9,24 @@ import { supabaseService } from '@/services/supabaseService';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 
+interface ProductSales {
+  name: string;
+  quantity: number;
+  revenue: number;
+}
+
+interface RevenueByDay {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+interface OrdersByStatus {
+  status: string;
+  count: number;
+  percentage: number;
+}
+
 const AnalyticsDashboard = () => {
   const { formatPrice } = useCurrency();
   const [dateRange, setDateRange] = useState('7d');
@@ -20,9 +38,9 @@ const AnalyticsDashboard = () => {
     revenueGrowth: 0,
     orderGrowth: 0,
     customerGrowth: 0,
-    topProducts: [],
-    revenueByDay: [],
-    ordersByStatus: [],
+    topProducts: [] as ProductSales[],
+    revenueByDay: [] as RevenueByDay[],
+    ordersByStatus: [] as OrdersByStatus[],
     customersByMonth: [],
     categoryPerformance: []
   });
@@ -56,7 +74,7 @@ const AnalyticsDashboard = () => {
         (order.payment_status === 'paid' && order.status !== 'cancelled')
       );
 
-      const totalRevenue = completedOrders.reduce((sum, order) => sum + order.total_amount, 0);
+      const totalRevenue = completedOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
       const totalOrders = ordersInRange.length;
       const totalCustomers = customers.data?.length || 0;
       const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
@@ -75,12 +93,12 @@ const AnalyticsDashboard = () => {
         (order.payment_status === 'paid' && order.status !== 'cancelled')
       );
 
-      const previousRevenue = previousCompletedOrders.reduce((sum, order) => sum + order.total_amount, 0);
+      const previousRevenue = previousCompletedOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
       const revenueGrowth = previousRevenue > 0 ? ((totalRevenue - previousRevenue) / previousRevenue) * 100 : 0;
       const orderGrowth = previousOrders.length > 0 ? ((totalOrders - previousOrders.length) / previousOrders.length) * 100 : 0;
 
       // Revenue by day
-      const revenueByDay = [];
+      const revenueByDay: RevenueByDay[] = [];
       for (let i = days - 1; i >= 0; i--) {
         const date = subDays(new Date(), i);
         const dayOrders = completedOrders.filter(order => {
@@ -90,58 +108,47 @@ const AnalyticsDashboard = () => {
         
         revenueByDay.push({
           date: format(date, 'MMM dd'),
-          revenue: dayOrders.reduce((sum, order) => sum + order.total_amount, 0),
+          revenue: dayOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0),
           orders: dayOrders.length
         });
       }
 
       // Orders by status
-      const statusCounts = {};
+      const statusCounts: Record<string, number> = {};
       ordersInRange.forEach(order => {
-        statusCounts[order.status] = (statusCounts[order.status] || 0) + 1;
+        const status = order.status || 'unknown';
+        statusCounts[status] = (statusCounts[status] || 0) + 1;
       });
 
-      const ordersByStatus = Object.entries(statusCounts).map(([status, count]) => ({
+      const ordersByStatus: OrdersByStatus[] = Object.entries(statusCounts).map(([status, count]) => ({
         status: status.charAt(0).toUpperCase() + status.slice(1),
         count,
         percentage: (count / totalOrders) * 100
       }));
 
+      // Get order items for top products calculation
+      const { data: orderItems } = await supabaseService.supabase
+        .from('order_items')
+        .select('*')
+        .in('order_id', ordersInRange.map(order => order.id));
+
       // Top products
-      const productSales = {};
-      ordersInRange.forEach(order => {
-        order.order_items?.forEach(item => {
-          if (!productSales[item.product_id]) {
-            productSales[item.product_id] = {
-              name: item.product_name,
-              quantity: 0,
-              revenue: 0
-            };
-          }
-          productSales[item.product_id].quantity += item.quantity;
-          productSales[item.product_id].revenue += item.total_price;
-        });
+      const productSales: Record<string, ProductSales> = {};
+      orderItems?.forEach(item => {
+        if (!productSales[item.product_id || '']) {
+          productSales[item.product_id || ''] = {
+            name: item.product_name || 'Unknown Product',
+            quantity: 0,
+            revenue: 0
+          };
+        }
+        productSales[item.product_id || ''].quantity += item.quantity || 0;
+        productSales[item.product_id || ''].revenue += item.total_price || 0;
       });
 
       const topProducts = Object.values(productSales)
         .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 5);
-
-      // Category performance
-      const categoryPerformance = [];
-      const categoryMap = {};
-      
-      products.forEach(product => {
-        if (product.category_id) {
-          if (!categoryMap[product.category_id]) {
-            categoryMap[product.category_id] = {
-              name: 'Category', // You might want to join with categories table
-              revenue: 0,
-              orders: 0
-            };
-          }
-        }
-      });
 
       setAnalytics({
         totalRevenue,
@@ -155,7 +162,7 @@ const AnalyticsDashboard = () => {
         revenueByDay,
         ordersByStatus,
         customersByMonth: [], // Would need more complex date grouping
-        categoryPerformance
+        categoryPerformance: []
       });
 
     } catch (error) {
@@ -176,7 +183,7 @@ const AnalyticsDashboard = () => {
     },
   };
 
-  const statusColors = {
+  const statusColors: Record<string, string> = {
     Pending: '#f59e0b',
     Processing: '#3b82f6',
     Shipped: '#8b5cf6',
