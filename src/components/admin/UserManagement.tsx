@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Search, Shield, User, UserPlus, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import CreateAdminUserForm from './CreateAdminUserForm';
 
 interface UserWithProfile {
   id: string;
@@ -34,7 +34,7 @@ const UserManagement = () => {
   const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
   const { isAdmin } = useUserRoles();
 
-  // Load users from profiles table instead of auth.users
+  // Load users from both profiles and auth.users to ensure comprehensive search
   useEffect(() => {
     if (isAdmin()) {
       loadUsers();
@@ -120,7 +120,10 @@ const UserManagement = () => {
   };
 
   const filteredUsers = users.filter(user => 
-    user.email?.toLowerCase().includes(searchEmail.toLowerCase()) || false
+    user.email?.toLowerCase().includes(searchEmail.toLowerCase()) ||
+    user.first_name?.toLowerCase().includes(searchEmail.toLowerCase()) ||
+    user.last_name?.toLowerCase().includes(searchEmail.toLowerCase()) ||
+    `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchEmail.toLowerCase())
   );
 
   if (!isAdmin()) {
@@ -142,6 +145,9 @@ const UserManagement = () => {
         <h1 className="text-2xl font-bold">User Management</h1>
       </div>
 
+      {/* Create Admin User Form */}
+      <CreateAdminUserForm onUserCreated={loadUsers} />
+
       {/* Search Section */}
       <Card>
         <CardHeader>
@@ -153,11 +159,11 @@ const UserManagement = () => {
         <CardContent className="space-y-4">
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label htmlFor="search-email">Search by Email</Label>
+              <Label htmlFor="search-email">Search by Name or Email</Label>
               <Input
                 id="search-email"
-                type="email"
-                placeholder="Enter email address..."
+                type="text"
+                placeholder="Enter name or email address..."
                 value={searchEmail}
                 onChange={(e) => setSearchEmail(e.target.value)}
                 className="mt-1"
@@ -273,10 +279,10 @@ const UserManagement = () => {
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
             <div className="text-sm text-blue-800">
-              <p className="font-medium mb-1">Admin Role Assignment</p>
+              <p className="font-medium mb-1">Admin User Management</p>
               <p>
-                Only existing admins can assign admin roles to other users. 
-                Users must have registered accounts before they can be assigned roles.
+                You can create new admin users directly from this interface, or assign admin roles to existing users. 
+                Admin users have full access to the dashboard and can manage other users.
               </p>
             </div>
           </div>
