@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Package, Truck } from "lucide-react";
+import { ExternalLink, Package, Truck, XCircle } from "lucide-react";
 import { shippingService } from "@/services/shippingService";
 
 interface OrderTrackingProps {
@@ -37,13 +37,75 @@ const OrderTracking = ({ order }: OrderTrackingProps) => {
   };
 
   const getEstimatedDelivery = () => {
-    if (!order.estimated_delivery_days) return null;
+    if (!order.estimated_delivery_days || order.status === 'cancelled') return null;
     
     const orderDate = new Date(order.created_at);
     const estimatedDate = new Date(orderDate);
     estimatedDate.setDate(orderDate.getDate() + order.estimated_delivery_days);
     
     return estimatedDate.toLocaleDateString();
+  };
+
+  const renderTrackingContent = () => {
+    // Show cancelled message for cancelled orders
+    if (order.status === 'cancelled') {
+      return (
+        <div className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg border border-red-200">
+          <XCircle className="w-5 h-5 text-red-500" />
+          <div>
+            <p className="anong-body font-semibold text-red-700">
+              Order Cancelled
+            </p>
+            <p className="anong-body-light text-sm text-red-600">
+              This order has been cancelled and will not be shipped
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // Show tracking info if available
+    if (order.tracking_number) {
+      return (
+        <div className="flex items-center justify-between p-3 bg-anong-gold/5 rounded-lg border border-anong-gold/30">
+          <div className="flex items-center space-x-3">
+            <Truck className="w-5 h-5 text-anong-gold" />
+            <div>
+              <p className="anong-body font-semibold text-anong-black">
+                Tracking Number: {order.tracking_number}
+              </p>
+              <p className="anong-body-light text-sm text-anong-black/70">
+                Courier: The Courier Guy
+              </p>
+            </div>
+          </div>
+          <Button 
+            onClick={handleTrackOrder}
+            variant="outline"
+            size="sm"
+            className="anong-btn-secondary"
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Track Package
+          </Button>
+        </div>
+      );
+    }
+
+    // Show preparing for shipment for active orders
+    return (
+      <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+        <Package className="w-5 h-5 text-gray-500" />
+        <div>
+          <p className="anong-body font-semibold text-anong-black">
+            Preparing for shipment
+          </p>
+          <p className="anong-body-light text-sm text-anong-black/70">
+            We'll email you the tracking number once your order ships
+          </p>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -64,42 +126,7 @@ const OrderTracking = ({ order }: OrderTrackingProps) => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {order.tracking_number ? (
-          <div className="flex items-center justify-between p-3 bg-anong-gold/5 rounded-lg border border-anong-gold/30">
-            <div className="flex items-center space-x-3">
-              <Truck className="w-5 h-5 text-anong-gold" />
-              <div>
-                <p className="anong-body font-semibold text-anong-black">
-                  Tracking Number: {order.tracking_number}
-                </p>
-                <p className="anong-body-light text-sm text-anong-black/70">
-                  Courier: The Courier Guy
-                </p>
-              </div>
-            </div>
-            <Button 
-              onClick={handleTrackOrder}
-              variant="outline"
-              size="sm"
-              className="anong-btn-secondary"
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Track Package
-            </Button>
-          </div>
-        ) : (
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-            <Package className="w-5 h-5 text-gray-500" />
-            <div>
-              <p className="anong-body font-semibold text-anong-black">
-                Preparing for shipment
-              </p>
-              <p className="anong-body-light text-sm text-anong-black/70">
-                We'll email you the tracking number once your order ships
-              </p>
-            </div>
-          </div>
-        )}
+        {renderTrackingContent()}
 
         {getEstimatedDelivery() && (
           <div className="text-center p-2 bg-blue-50 rounded-lg">
