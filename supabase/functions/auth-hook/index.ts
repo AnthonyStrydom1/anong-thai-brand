@@ -22,6 +22,46 @@ interface AuthHookRequest {
   };
 }
 
+// Simple in-memory rate limiting
+const emailQueue: Array<() => Promise<void>> = [];
+let isProcessingQueue = false;
+
+const processEmailQueue = async () => {
+  if (isProcessingQueue || emailQueue.length === 0) return;
+  
+  isProcessingQueue = true;
+  console.log(`📬 Processing email queue with ${emailQueue.length} emails`);
+  
+  while (emailQueue.length > 0) {
+    const emailTask = emailQueue.shift();
+    if (emailTask) {
+      try {
+        await emailTask();
+        console.log('✅ Email sent from queue');
+        // Wait 600ms between emails to respect 2/second limit with buffer
+        await new Promise(resolve => setTimeout(resolve, 600));
+      } catch (error: any) {
+        console.error('❌ Queue email failed:', error);
+        // If rate limited, wait longer before next attempt
+        if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+          console.log('⏱️ Rate limited, waiting 2 seconds');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+    }
+  }
+  
+  isProcessingQueue = false;
+  console.log('📭 Email queue processing complete');
+};
+
+const queueEmail = (emailTask: () => Promise<void>) => {
+  emailQueue.push(emailTask);
+  console.log(`📨 Email queued. Queue length: ${emailQueue.length}`);
+  // Start processing if not already running
+  setTimeout(processEmailQueue, 100);
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -38,21 +78,26 @@ const handler = async (req: Request): Promise<Response> => {
     switch (hookData.event) {
       case 'user.created':
         console.log('Handling user.created event for:', hookData.user.email);
-        await sendWelcomeEmailWithRetry(hookData.user);
+        queueEmail(() => sendWelcomeEmail(hookData.user));
         break;
       case 'user.confirmation.requested':
         console.log('Handling user.confirmation.requested event for:', hookData.user.email);
-        await sendWelcomeEmailWithRetry(hookData.user);
+        queueEmail(() => sendWelcomeEmail(hookData.user));
         break;
       case 'user.password_recovery.requested':
         console.log('Handling password recovery for:', hookData.user.email);
-        await sendPasswordResetEmailWithRetry(hookData.user);
+        queueEmail(() => sendPasswordResetEmail(hookData.user));
         break;
       default:
         console.log('Unhandled auth event:', hookData.event);
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    // Always return success immediately - don't wait for email
+    return new Response(JSON.stringify({ 
+      success: true,
+      message: "Authentication processed successfully",
+      email_status: "queued"
+    }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -63,26 +108,11 @@ const handler = async (req: Request): Promise<Response> => {
     console.error("Error in auth hook:", error);
     console.error("Error stack:", error.stack);
     
-    // Don't fail the auth process if email sending fails
-    // Just log the error and return success
-    if (error.message?.includes('rate limit') || error.message?.includes('429')) {
-      console.log("Rate limit hit - auth process continues without email");
-      return new Response(JSON.stringify({ 
-        success: true, 
-        warning: "Email delivery delayed due to rate limits" 
-      }), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      });
-    }
-    
+    // Never fail the auth process
     return new Response(
       JSON.stringify({ 
         success: true, 
-        warning: "Authentication successful, email delivery failed" 
+        warning: "Authentication successful, email processing encountered an issue" 
       }),
       {
         status: 200,
@@ -92,44 +122,10 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-async function sendWelcomeEmailWithRetry(user: any, retries = 0) {
-  try {
-    await sendWelcomeEmail(user);
-  } catch (error: any) {
-    console.error(`Welcome email attempt ${retries + 1} failed:`, error);
-    
-    if (retries < 2 && !error.message?.includes('rate limit')) {
-      console.log(`Retrying welcome email in 2 seconds... (attempt ${retries + 2})`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      return sendWelcomeEmailWithRetry(user, retries + 1);
-    }
-    
-    // Don't throw error to avoid blocking auth process
-    console.log('Welcome email failed after retries, continuing with auth process');
-  }
-}
-
-async function sendPasswordResetEmailWithRetry(user: any, retries = 0) {
-  try {
-    await sendPasswordResetEmail(user);
-  } catch (error: any) {
-    console.error(`Password reset email attempt ${retries + 1} failed:`, error);
-    
-    if (retries < 2 && !error.message?.includes('rate limit')) {
-      console.log(`Retrying password reset email in 2 seconds... (attempt ${retries + 2})`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      return sendPasswordResetEmailWithRetry(user, retries + 1);
-    }
-    
-    console.log('Password reset email failed after retries, continuing with auth process');
-  }
-}
-
 async function sendWelcomeEmail(user: any) {
   const firstName = user.user_metadata?.first_name || 'there';
   
   console.log('Attempting to send welcome email to:', user.email);
-  console.log('Using Resend API key:', Deno.env.get("RESEND_API_KEY") ? 'Present' : 'Missing');
   
   try {
     const result = await resend.emails.send({
@@ -150,9 +146,9 @@ async function sendWelcomeEmail(user: any) {
             </ul>
           </div>
           <p style="margin: 30px 0;">
-            <a href="https://nyadgiutmweuyxqetfuh.supabase.co/auth" 
+            <a href="https://anongthaibrand.com" 
                style="background-color: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
-              Sign In Now
+              Visit Our Store
             </a>
           </p>
           <p style="color: #666; font-size: 14px; margin-top: 30px;">
@@ -168,9 +164,8 @@ async function sendWelcomeEmail(user: any) {
       `,
     });
     console.log('Welcome email sent successfully:', result);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to send welcome email:', error);
-    console.error('Resend error details:', JSON.stringify(error, null, 2));
     throw error;
   }
 }
@@ -190,7 +185,7 @@ async function sendPasswordResetEmail(user: any) {
           <p>You requested to reset your password for your Anong Thai account.</p>
           <p>Your password has been reset. You can now sign in with your new password.</p>
           <p style="margin: 30px 0;">
-            <a href="https://nyadgiutmweuyxqetfuh.supabase.co/auth" 
+            <a href="https://anongthaibrand.com/auth" 
                style="background-color: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
               Sign In Now
             </a>
@@ -206,7 +201,7 @@ async function sendPasswordResetEmail(user: any) {
       `,
     });
     console.log('Password reset email sent successfully:', result);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to send password reset email:', error);
     throw error;
   }
