@@ -7,10 +7,12 @@ import CustomerManager from '@/components/admin/CustomerManager';
 import StockManager from '@/components/admin/StockManager';
 import SecurityDashboard from '@/components/admin/SecurityDashboard';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+import MobileAdminLayout from '@/components/admin/MobileAdminLayout';
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
 import { Package, ShoppingCart, Users, BarChart3, Warehouse, Shield } from 'lucide-react';
 import { supabaseService } from '@/services/supabaseService';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -23,6 +25,7 @@ const AdminPage = () => {
     outOfStockItems: 0
   });
   const { formatPrice } = useCurrency();
+  const isMobile = useIsMobile();
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -66,6 +69,97 @@ const AdminPage = () => {
       console.error('Failed to load stats:', error);
     }
   };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-3">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center">
+                    <Package className="h-4 w-4 mr-2" />
+                    Products
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <div className="text-2xl font-bold">{stats.totalProducts}</div>
+                  <p className="text-xs text-muted-foreground">In catalog</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center">
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Orders
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <div className="text-2xl font-bold">{stats.totalOrders}</div>
+                  <p className="text-xs text-muted-foreground">Total orders</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center">
+                    <Users className="h-4 w-4 mr-2" />
+                    Customers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <div className="text-2xl font-bold">{stats.totalCustomers}</div>
+                  <p className="text-xs text-muted-foreground">Registered</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Revenue
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <div className="text-xl font-bold">{formatPrice(stats.totalRevenue)}</div>
+                  <p className="text-xs text-muted-foreground">Completed orders</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        );
+      case 'products':
+        return <ProductManager />;
+      case 'stock':
+        return <StockManager />;
+      case 'orders':
+        return <OrderManager />;
+      case 'customers':
+        return <CustomerManager />;
+      case 'security':
+        return <SecurityDashboard />;
+      case 'analytics':
+        return <AnalyticsDashboard />;
+      default:
+        return null;
+    }
+  };
+
+  if (isMobile) {
+    return (
+      <ProtectedAdminRoute>
+        <MobileAdminLayout
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          stats={stats}
+        >
+          {renderTabContent()}
+        </MobileAdminLayout>
+      </ProtectedAdminRoute>
+    );
+  }
 
   return (
     <ProtectedAdminRoute>
