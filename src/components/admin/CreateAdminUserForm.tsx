@@ -12,6 +12,16 @@ interface CreateAdminUserFormProps {
   onUserCreated: () => void;
 }
 
+interface AuthUser {
+  id: string;
+  email?: string;
+  user_metadata?: {
+    first_name?: string;
+    last_name?: string;
+  };
+  created_at: string;
+}
+
 const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
   const [formData, setFormData] = useState({
     email: '',
@@ -97,7 +107,7 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
             return;
           }
 
-          const existingAuthUser = users?.find(u => u.email === formData.email);
+          const existingAuthUser = users?.find((u: AuthUser) => u.email === formData.email);
           
           if (existingAuthUser) {
             // Create the missing profile
