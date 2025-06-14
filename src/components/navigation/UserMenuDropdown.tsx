@@ -49,11 +49,10 @@ const UserMenuDropdown = ({ onLogout, translations }: UserMenuDropdownProps) => 
         </Link>
       </DropdownMenuItem>
       
-      {!isLoading && isAdmin() && (
-        <DropdownMenuItem asChild>
-          <AdminLink />
-        </DropdownMenuItem>
-      )}
+      {/* Always show AdminLink - it handles its own visibility logic */}
+      <DropdownMenuItem asChild>
+        <AdminLink />
+      </DropdownMenuItem>
       
       <DropdownMenuSeparator />
       

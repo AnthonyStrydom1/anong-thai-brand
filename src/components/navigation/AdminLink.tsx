@@ -9,32 +9,41 @@ const AdminLink = () => {
   const { user } = useAuth();
   const { isAdmin, isLoading } = useUserRoles();
 
+  console.log('🔍 AdminLink: Debug info', { 
+    hasUser: !!user, 
+    isLoading, 
+    isAdminResult: isAdmin(),
+    userId: user?.id 
+  });
+
   // Don't show anything while loading or if user is not authenticated
   if (isLoading || !user) {
     return null;
   }
 
-  // Show admin setup link if user exists but is not admin
-  if (!isAdmin()) {
+  // Show admin dashboard link if user is admin
+  if (isAdmin()) {
+    console.log('✅ AdminLink: Showing admin dashboard link');
     return (
       <Link 
-        to="/admin-setup" 
-        className="flex items-center space-x-1 text-white hover:text-anong-gold transition-colors"
+        to="/admin" 
+        className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors w-full"
       >
         <Shield className="w-4 h-4" />
-        <span>Admin Setup</span>
+        <span>Admin Dashboard</span>
       </Link>
     );
   }
 
-  // Show admin dashboard link if user is admin
+  // Show admin setup link if user exists but is not admin
+  console.log('ℹ️ AdminLink: Showing admin setup link');
   return (
     <Link 
-      to="/admin" 
-      className="flex items-center space-x-1 text-white hover:text-anong-gold transition-colors"
+      to="/admin-setup" 
+      className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors w-full"
     >
       <Shield className="w-4 h-4" />
-      <span>Admin</span>
+      <span>Admin Setup</span>
     </Link>
   );
 };
