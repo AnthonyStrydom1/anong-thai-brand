@@ -45,7 +45,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const handleMFAStored = () => { if (mounted) setMfaPending(true); };
-    const handleMFACleared = () => { if (mounted) setMfaPending(false); };
+    const handleMFACleared = () => { 
+      if (mounted) {
+        console.log('📡 Auth: MFA cleared event - setting mfaPending to false');
+        setMfaPending(false);
+      }
+    };
 
     window.addEventListener('mfa-session-stored', handleMFAStored);
     window.addEventListener('mfa-session-cleared', handleMFACleared);
@@ -65,46 +70,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           sessionId: session?.access_token ? 'present' : 'missing'
         });
 
-        const pendingMFA = isMFAPending();
-        setMfaPending(pendingMFA);
+        // CRITICAL FIX: Check MFA status but with a small delay to allow clearing to complete
+        setTimeout(() => {
+          if (!mounted) return;
+          
+          const pendingMFA = isMFAPending();
+          console.log('🔍 Auth: MFA check after delay:', pendingMFA);
+          setMfaPending(pendingMFA);
 
-        // If there's a pending MFA, block session/user/profile
-        if (pendingMFA) {
-          console.log('🔒 Auth: MFA pending, blocking auth state');
-          setUser(null);
-          setSession(null);
-          setUserProfile(null);
+          // If there's a pending MFA, block session/user/profile
+          if (pendingMFA) {
+            console.log('🔒 Auth: MFA pending, blocking auth state');
+            setUser(null);
+            setSession(null);
+            setUserProfile(null);
+            setIsLoading(false);
+            return;
+          }
+
+          // No pending MFA - proceed with normal auth state
+          console.log('✅ Auth: No pending MFA, setting auth state');
+          setUser(user);
+          setSession(session);
+
+          if (user && session) {
+            console.log('✅ Auth: User authenticated, ensuring MFA session is cleared');
+            // Ensure MFA session is cleared for authenticated users
+            setTimeout(() => {
+              if (mounted) {
+                mfaAuthService.clearMFASession();
+              }
+            }, 100);
+
+            setTimeout(async () => {
+              if (!mounted) return;
+              try {
+                const profile = await authService.getUserProfile(user.id);
+                if (mounted) setUserProfile(profile);
+              } catch (error) {
+                console.error('❌ Auth: Failed to load user profile:', error);
+                if (mounted) setUserProfile(null);
+              }
+            }, 0);
+          } else {
+            console.log('❌ Auth: No user/session, clearing profile');
+            setUserProfile(null);
+          }
+
           setIsLoading(false);
-          return;
-        }
-
-        setUser(user);
-        setSession(session);
-
-        if (user && session) {
-          console.log('✅ Auth: User authenticated, clearing MFA session');
-          setTimeout(() => {
-            if (mounted) {
-              mfaAuthService.clearMFASession();
-            }
-          }, 100);
-
-          setTimeout(async () => {
-            if (!mounted) return;
-            try {
-              const profile = await authService.getUserProfile(user.id);
-              if (mounted) setUserProfile(profile);
-            } catch (error) {
-              console.error('❌ Auth: Failed to load user profile:', error);
-              if (mounted) setUserProfile(null);
-            }
-          }, 0);
-        } else {
-          console.log('❌ Auth: No user/session, clearing profile');
-          setUserProfile(null);
-        }
-
-        setIsLoading(false);
+        }, 50); // Small delay to allow MFA clearing to complete
       }
     );
 
@@ -119,26 +133,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         
         if (mounted) {
-          const pendingMFA = isMFAPending();
-          setMfaPending(pendingMFA);
-          if (pendingMFA) {
-            console.log('🔒 Auth: MFA pending during session check');
-            setUser(null);
-            setSession(null);
-            setUserProfile(null);
+          // Small delay for MFA check to ensure any clearing has completed
+          setTimeout(() => {
+            if (!mounted) return;
+            
+            const pendingMFA = isMFAPending();
+            setMfaPending(pendingMFA);
+            if (pendingMFA) {
+              console.log('🔒 Auth: MFA pending during session check');
+              setUser(null);
+              setSession(null);
+              setUserProfile(null);
+              setIsLoading(false);
+              return;
+            }
+            if (session?.user) {
+              console.log('✅ Auth: Found existing session');
+              setUser(session.user);
+              setSession(session);
+            } else {
+              console.log('❌ Auth: No existing session found');
+              setUser(null);
+              setSession(null);
+            }
             setIsLoading(false);
-            return;
-          }
-          if (session?.user) {
-            console.log('✅ Auth: Found existing session');
-            setUser(session.user);
-            setSession(session);
-          } else {
-            console.log('❌ Auth: No existing session found');
-            setUser(null);
-            setSession(null);
-          }
-          setIsLoading(false);
+          }, 50);
         }
       } catch (error) {
         console.error('❌ Auth: Session check failed:', error);
