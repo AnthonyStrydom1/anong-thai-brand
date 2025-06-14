@@ -6,6 +6,7 @@ import OrderManager from '@/components/admin/OrderManager';
 import CustomerManager from '@/components/admin/CustomerManager';
 import StockManager from '@/components/admin/StockManager';
 import SecurityDashboard from '@/components/admin/SecurityDashboard';
+import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
 import { Package, ShoppingCart, Users, BarChart3, Warehouse, Shield } from 'lucide-react';
 import { supabaseService } from '@/services/supabaseService';
@@ -245,17 +246,7 @@ const AdminPage = () => {
             </TabsContent>
 
             <TabsContent value="analytics">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Analytics Dashboard</CardTitle>
-                  <CardDescription>
-                    Sales analytics and performance metrics
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Analytics dashboard coming soon...</p>
-                </CardContent>
-              </Card>
+              <AnalyticsDashboard />
             </TabsContent>
           </Tabs>
         </div>
