@@ -19,7 +19,6 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
   const [isResending, setIsResending] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [canResend, setCanResend] = useState(false);
-  const [testCode, setTestCode] = useState('');
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -29,14 +28,6 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
       setCanResend(true);
     }
   }, [timeLeft]);
-
-  // Get the test code for demo purposes
-  useEffect(() => {
-    const storedCode = mfaAuthService.getCurrentMFACode();
-    if (storedCode) {
-      setTestCode(storedCode);
-    }
-  }, []);
 
   const handleVerify = async () => {
     if (code.length !== 6) {
@@ -76,15 +67,9 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
     try {
       await mfaAuthService.resendCode();
       
-      // Get the new test code
-      const newCode = mfaAuthService.getCurrentMFACode();
-      if (newCode) {
-        setTestCode(newCode);
-      }
-      
       toast({
         title: "Code Resent",
-        description: "A new verification code has been generated.",
+        description: "A new verification code has been sent to your email.",
       });
       setTimeLeft(300); // Reset timer
       setCanResend(false);
@@ -120,18 +105,6 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Demo Code Display */}
-        {testCode && (
-          <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200">
-            <p className="text-sm text-yellow-800 mb-1">
-              <strong>Demo Mode:</strong> Your verification code is:
-            </p>
-            <p className="text-xl font-mono font-bold text-yellow-900 text-center">
-              {testCode}
-            </p>
-          </div>
-        )}
-
         <div className="space-y-4">
           <div className="flex justify-center">
             <InputOTP
@@ -195,8 +168,8 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
 
         <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
           <p className="text-xs text-blue-800">
-            <strong>Demo Notice:</strong> In production, the verification code would be sent via email. 
-            For testing purposes, the code is displayed above and logged to the console.
+            <strong>Check your email:</strong> The verification code has been sent to your email address. 
+            If you don't see it, check your spam folder.
           </p>
         </div>
       </CardContent>

@@ -8,18 +8,15 @@ interface MFASignInData {
 
 class MFAAuthService {
   private readonly MFA_SESSION_KEY = 'mfa_session_data';
-  private readonly MFA_CODE_KEY = 'mfa_code';
-  private readonly MFA_CODE_TIMESTAMP_KEY = 'mfa_code_timestamp';
+  private readonly MFA_CHALLENGE_KEY = 'mfa_challenge_id';
 
   async initiateSignIn({ email, password }: MFASignInData) {
     try {
-      // Clear any existing session first - be more aggressive about this
+      // Clear any existing session first
       await supabase.auth.signOut();
-      
-      // Wait longer to ensure signout completes
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // First, just validate credentials by attempting sign in
+      // First, validate credentials by attempting sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -30,42 +27,41 @@ class MFAAuthService {
       // Get the user ID before signing out
       const userId = data.user?.id;
       
-      // Immediately and aggressively sign out to prevent session persistence
+      // Immediately sign out to prevent session persistence
       await supabase.auth.signOut();
-      
-      // Clear local storage to ensure no session remnants
-      localStorage.removeItem('supabase.auth.token');
-      sessionStorage.removeItem('supabase.auth.token');
-      
-      // Wait longer to ensure signout completes
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Verify we're actually signed out
       const { data: sessionCheck } = await supabase.auth.getSession();
       if (sessionCheck.session) {
-        console.warn('Session still exists after signout attempt');
-        // Force another signout
         await supabase.auth.signOut();
         await new Promise(resolve => setTimeout(resolve, 300));
       }
 
-      // Store the session data temporarily (encrypted in production)
+      // Store the session data temporarily
       const sessionData = {
         email,
-        password, // In production, this should be encrypted
+        password,
         timestamp: Date.now(),
         userId: userId
       };
       
       sessionStorage.setItem(this.MFA_SESSION_KEY, JSON.stringify(sessionData));
 
-      // Generate a simple 6-digit code for demonstration
-      const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log('MFA Code for testing:', mfaCode);
-      
-      // Store the code temporarily
-      sessionStorage.setItem(this.MFA_CODE_KEY, mfaCode);
-      sessionStorage.setItem(this.MFA_CODE_TIMESTAMP_KEY, Date.now().toString());
+      // Call the send-mfa-email edge function to send the actual email
+      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-mfa-email', {
+        body: { email }
+      });
+
+      if (emailError) {
+        console.error('Failed to send MFA email:', emailError);
+        throw new Error('Failed to send verification email');
+      }
+
+      // Store the challenge ID returned from the edge function
+      if (emailData?.challengeId) {
+        sessionStorage.setItem(this.MFA_CHALLENGE_KEY, emailData.challengeId);
+      }
 
       return { mfaRequired: true };
     } catch (error: any) {
@@ -86,43 +82,44 @@ class MFAAuthService {
       throw new Error('MFA session expired');
     }
 
-    // Verify MFA code
-    const storedCode = sessionStorage.getItem(this.MFA_CODE_KEY);
-    const codeTimestamp = sessionStorage.getItem(this.MFA_CODE_TIMESTAMP_KEY);
-    
-    if (!storedCode || !codeTimestamp) {
-      throw new Error('No MFA code available');
+    const challengeId = sessionStorage.getItem(this.MFA_CHALLENGE_KEY);
+    if (!challengeId) {
+      throw new Error('No MFA challenge available');
     }
 
-    // Check if code is expired (5 minutes)
-    if (Date.now() - parseInt(codeTimestamp) > 5 * 60 * 1000) {
+    try {
+      // Verify the MFA code using Supabase RPC function
+      const { data: verifyData, error: verifyError } = await supabase.rpc('verify_mfa_challenge', {
+        challenge_id: challengeId,
+        user_code: code
+      });
+
+      if (verifyError || !verifyData) {
+        throw new Error('Invalid or expired verification code');
+      }
+
+      // Ensure we're signed out before attempting final sign in
+      await supabase.auth.signOut();
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Complete sign in with verified credentials
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: sessionData.email,
+        password: sessionData.password,
+      });
+
+      if (error) {
+        this.clearMFASession();
+        throw error;
+      }
+
+      // Clear MFA session data after successful login
       this.clearMFASession();
-      throw new Error('MFA code expired');
+
+      return data;
+    } catch (error: any) {
+      throw new Error(error.message || 'Verification failed');
     }
-
-    if (code !== storedCode) {
-      throw new Error('Invalid MFA code');
-    }
-
-    // Ensure we're signed out before attempting final sign in
-    await supabase.auth.signOut();
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // Complete sign in with verified credentials
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: sessionData.email,
-      password: sessionData.password,
-    });
-
-    if (error) {
-      this.clearMFASession();
-      throw error;
-    }
-
-    // Clear MFA session data after successful login
-    this.clearMFASession();
-
-    return data;
   }
 
   async resendCode() {
@@ -131,15 +128,26 @@ class MFAAuthService {
       throw new Error('No pending MFA verification');
     }
 
-    // Generate a new code
-    const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log('New MFA Code for testing:', mfaCode);
-    
-    // Store the new code
-    sessionStorage.setItem(this.MFA_CODE_KEY, mfaCode);
-    sessionStorage.setItem(this.MFA_CODE_TIMESTAMP_KEY, Date.now().toString());
+    try {
+      // Call the send-mfa-email edge function to send a new code
+      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-mfa-email', {
+        body: { email: sessionData.email }
+      });
 
-    return { success: true };
+      if (emailError) {
+        console.error('Failed to resend MFA email:', emailError);
+        throw new Error('Failed to send verification email');
+      }
+
+      // Update the challenge ID
+      if (emailData?.challengeId) {
+        sessionStorage.setItem(this.MFA_CHALLENGE_KEY, emailData.challengeId);
+      }
+
+      return { success: true };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to resend code');
+    }
   }
 
   private getMFASessionData() {
@@ -149,8 +157,7 @@ class MFAAuthService {
 
   clearMFASession() {
     sessionStorage.removeItem(this.MFA_SESSION_KEY);
-    sessionStorage.removeItem(this.MFA_CODE_KEY);
-    sessionStorage.removeItem(this.MFA_CODE_TIMESTAMP_KEY);
+    sessionStorage.removeItem(this.MFA_CHALLENGE_KEY);
   }
 
   getPendingMFAEmail(): string | null {
@@ -160,12 +167,13 @@ class MFAAuthService {
 
   hasPendingMFA(): boolean {
     const sessionData = this.getMFASessionData();
-    const hasCode = !!sessionStorage.getItem(this.MFA_CODE_KEY);
-    return !!sessionData && hasCode;
+    const hasChallenge = !!sessionStorage.getItem(this.MFA_CHALLENGE_KEY);
+    return !!sessionData && hasChallenge;
   }
 
   getCurrentMFACode(): string | null {
-    return sessionStorage.getItem(this.MFA_CODE_KEY);
+    // This is for demo purposes - in production, codes are sent via email
+    return null;
   }
 }
 
