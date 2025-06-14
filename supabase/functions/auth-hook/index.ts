@@ -38,15 +38,15 @@ const handler = async (req: Request): Promise<Response> => {
     switch (hookData.event) {
       case 'user.created':
         console.log('Handling user.created event for:', hookData.user.email);
-        await sendWelcomeEmail(hookData.user);
+        await sendWelcomeEmailWithRetry(hookData.user);
         break;
       case 'user.confirmation.requested':
         console.log('Handling user.confirmation.requested event for:', hookData.user.email);
-        await sendWelcomeEmail(hookData.user);
+        await sendWelcomeEmailWithRetry(hookData.user);
         break;
       case 'user.password_recovery.requested':
         console.log('Handling password recovery for:', hookData.user.email);
-        await sendPasswordResetEmail(hookData.user);
+        await sendPasswordResetEmailWithRetry(hookData.user);
         break;
       default:
         console.log('Unhandled auth event:', hookData.event);
@@ -62,15 +62,68 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in auth hook:", error);
     console.error("Error stack:", error.stack);
+    
+    // Don't fail the auth process if email sending fails
+    // Just log the error and return success
+    if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+      console.log("Rate limit hit - auth process continues without email");
+      return new Response(JSON.stringify({ 
+        success: true, 
+        warning: "Email delivery delayed due to rate limits" 
+      }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      });
+    }
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        success: true, 
+        warning: "Authentication successful, email delivery failed" 
+      }),
       {
-        status: 500,
+        status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
   }
 };
+
+async function sendWelcomeEmailWithRetry(user: any, retries = 0) {
+  try {
+    await sendWelcomeEmail(user);
+  } catch (error: any) {
+    console.error(`Welcome email attempt ${retries + 1} failed:`, error);
+    
+    if (retries < 2 && !error.message?.includes('rate limit')) {
+      console.log(`Retrying welcome email in 2 seconds... (attempt ${retries + 2})`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return sendWelcomeEmailWithRetry(user, retries + 1);
+    }
+    
+    // Don't throw error to avoid blocking auth process
+    console.log('Welcome email failed after retries, continuing with auth process');
+  }
+}
+
+async function sendPasswordResetEmailWithRetry(user: any, retries = 0) {
+  try {
+    await sendPasswordResetEmail(user);
+  } catch (error: any) {
+    console.error(`Password reset email attempt ${retries + 1} failed:`, error);
+    
+    if (retries < 2 && !error.message?.includes('rate limit')) {
+      console.log(`Retrying password reset email in 2 seconds... (attempt ${retries + 2})`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return sendPasswordResetEmailWithRetry(user, retries + 1);
+    }
+    
+    console.log('Password reset email failed after retries, continuing with auth process');
+  }
+}
 
 async function sendWelcomeEmail(user: any) {
   const firstName = user.user_metadata?.first_name || 'there';
