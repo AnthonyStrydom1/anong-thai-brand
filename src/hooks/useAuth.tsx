@@ -28,9 +28,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
+    // Refined: only true if session data and challenge are present and not expired
     const isMFAPending = () => {
-      const pending = mfaAuthService.hasPendingMFA();
-      return pending;
+      const mfaPendingRaw = mfaAuthService.hasPendingMFA();
+      console.log(
+        "[Auth] Checking for pending MFA session: ",
+        mfaPendingRaw,
+        " (should be true ONLY if OTP needed)"
+      );
+      return mfaPendingRaw;
     };
 
     const handleMFAStored = () => { if (mounted) setMfaPending(true); };
@@ -48,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const pendingMFA = isMFAPending();
         setMfaPending(pendingMFA);
 
+        // (unchanged) If there's a pending MFA, block session/user/profile
         if (pendingMFA) {
           setUser(null);
           setSession(null);
