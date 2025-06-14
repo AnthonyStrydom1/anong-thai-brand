@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, ShoppingCart, Users, BarChart3, Warehouse, Shield } from 'lucide-react';
+import { Package, ShoppingCart, Users, BarChart3, Warehouse, Shield, UserPlus } from 'lucide-react';
 
 interface MobileAdminLayoutProps {
   children: React.ReactNode;
@@ -23,6 +23,7 @@ const MobileAdminLayout = ({ children, activeTab, onTabChange, stats }: MobileAd
     { id: 'stock', label: 'Stock', icon: Warehouse },
     { id: 'orders', label: 'Orders', icon: ShoppingCart },
     { id: 'customers', label: 'Customers', icon: Users },
+    { id: 'users', label: 'Users', icon: UserPlus },
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   ];
@@ -59,7 +60,7 @@ const MobileAdminLayout = ({ children, activeTab, onTabChange, stats }: MobileAd
           })}
         </div>
         {tabs.length > 4 && (
-          <div className="grid grid-cols-3 gap-1 mt-1">
+          <div className="grid grid-cols-4 gap-1 mt-1">
             {tabs.slice(4).map((tab) => {
               const Icon = tab.icon;
               return (

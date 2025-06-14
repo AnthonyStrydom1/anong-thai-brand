@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,9 +8,10 @@ import CustomerManager from '@/components/admin/CustomerManager';
 import StockManager from '@/components/admin/StockManager';
 import SecurityDashboard from '@/components/admin/SecurityDashboard';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+import UserManagement from '@/components/admin/UserManagement';
 import MobileAdminLayout from '@/components/admin/MobileAdminLayout';
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
-import { Package, ShoppingCart, Users, BarChart3, Warehouse, Shield } from 'lucide-react';
+import { Package, ShoppingCart, Users, BarChart3, Warehouse, Shield, UserPlus } from 'lucide-react';
 import { supabaseService } from '@/services/supabaseService';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -138,6 +140,8 @@ const AdminPage = () => {
         return <OrderManager />;
       case 'customers':
         return <CustomerManager />;
+      case 'users':
+        return <UserManagement />;
       case 'security':
         return <SecurityDashboard />;
       case 'analytics':
@@ -172,7 +176,7 @@ const AdminPage = () => {
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <div className="mb-6">
-              <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 h-auto p-1 bg-white border">
+              <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 h-auto p-1 bg-white border">
                 <TabsTrigger value="overview" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   Overview
                 </TabsTrigger>
@@ -185,13 +189,16 @@ const AdminPage = () => {
                 <TabsTrigger value="orders" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   Orders
                 </TabsTrigger>
-                <TabsTrigger value="customers" className="text-xs md:text-sm px-2 md:px-4 py-2 md:col-span-1 col-span-2">
+                <TabsTrigger value="customers" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   Customers
                 </TabsTrigger>
-                <TabsTrigger value="security" className="text-xs md:text-sm px-2 md:px-4 py-2 md:col-span-1 col-span-1">
+                <TabsTrigger value="users" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  Users
+                </TabsTrigger>
+                <TabsTrigger value="security" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   Security
                 </TabsTrigger>
-                <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 md:px-4 py-2 md:col-span-1 col-span-1">
+                <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   Analytics
                 </TabsTrigger>
               </TabsList>
@@ -333,6 +340,10 @@ const AdminPage = () => {
 
             <TabsContent value="customers">
               <CustomerManager />
+            </TabsContent>
+
+            <TabsContent value="users">
+              <UserManagement />
             </TabsContent>
 
             <TabsContent value="security">
