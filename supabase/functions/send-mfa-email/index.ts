@@ -112,10 +112,10 @@ serve(async (req: Request) => {
       throw new Error('Failed to generate verification code');
     }
 
-    // Send email using Resend with verified domain
+    // Send email using Resend with your validated domain
     console.log('📤 Sending email via Resend API...');
     const emailPayload = {
-      from: 'Anong Thai Brand <onboarding@resend.dev>',
+      from: 'Anong Thai Brand <hello@anonghthaibrand.com>',
       to: [email],
       subject: 'Your Verification Code - Anong Thai Brand',
       html: `
