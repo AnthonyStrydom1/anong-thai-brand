@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -51,11 +52,11 @@ class AuthService {
 
     this.clearCrossDomainSessions();
 
+    // Sign up without email confirmation required
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `https://${this.TARGET_DOMAIN}/`,
         data: {
           first_name: firstName,
           last_name: lastName,

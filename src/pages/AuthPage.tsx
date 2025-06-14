@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,12 +61,22 @@ const AuthPage = () => {
           });
         }
       } else {
+        // For sign-up, create account and then trigger MFA flow
         await signUp(formData.email, formData.password, formData.firstName, formData.lastName);
-        toast({
-          title: "Account Created!",
-          description: "Please check your email to verify your account.",
+        
+        // After successful sign-up, initiate MFA flow
+        const mfaResult = await mfaAuthService.initiateSignIn({
+          email: formData.email,
+          password: formData.password
         });
-        setIsLogin(true);
+
+        if (mfaResult.mfaRequired) {
+          setShowMFA(true);
+          toast({
+            title: "Account Created!",
+            description: "Please check your email for the verification code to complete your registration.",
+          });
+        }
       }
       setShowForgotPassword(false);
     } catch (error: any) {
@@ -98,7 +107,7 @@ const AuthPage = () => {
 
   const handleMFACancel = () => {
     setShowMFA(false);
-    mfaAuthService.clearMFASession?.();
+    mfaAuthService.clearMFASession();
   };
 
   const handleForgotPassword = async () => {
