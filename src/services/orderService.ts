@@ -1,4 +1,3 @@
-
 import { supabaseService } from './supabaseService';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -34,9 +33,11 @@ export class OrderService {
 
   async createOrder(orderData: CreateOrderData) {
     try {
-      console.log('Creating order with data:', orderData);
+      console.log('Starting order creation process...');
+      console.log('Order data received:', orderData);
       
       // Get current user
+      console.log('Getting current user...');
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) {
         console.error('Auth error:', userError);
@@ -44,39 +45,55 @@ export class OrderService {
       }
 
       if (!user) {
+        console.error('No user found');
         throw new Error('User not authenticated');
       }
+      console.log('User authenticated:', user.id);
 
       // Get or create customer
+      console.log('Getting or creating customer...');
       let customer = await supabaseService.getCurrentUserCustomer();
       
       if (!customer) {
-        console.log('Creating new customer for user:', user.id);
-        // Create customer if doesn't exist
-        customer = await supabaseService.createCustomer({
-          fullname: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
-          email: orderData.customerInfo.email,
-          first_name: orderData.customerInfo.firstName,
-          last_name: orderData.customerInfo.lastName,
-          phone: orderData.customerInfo.phone,
-          total_orders: 0,
-          total_spent: 0,
-          is_active: true,
-          user_id: user.id
-        });
-        console.log('Customer created:', customer);
+        console.log('Customer not found, creating new customer...');
+        try {
+          customer = await supabaseService.createCustomer({
+            fullname: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
+            email: orderData.customerInfo.email,
+            first_name: orderData.customerInfo.firstName,
+            last_name: orderData.customerInfo.lastName,
+            phone: orderData.customerInfo.phone,
+            total_orders: 0,
+            total_spent: 0,
+            is_active: true,
+            user_id: user.id
+          });
+          console.log('Customer created successfully:', customer);
+        } catch (customerError) {
+          console.error('Failed to create customer:', customerError);
+          throw new Error('Failed to create customer profile');
+        }
+      } else {
+        console.log('Existing customer found:', customer.id);
       }
 
       // Calculate totals
       const subtotal = orderData.total;
-      const shipping_amount = 0; // Free shipping
-      const tax_amount = 0; // No tax for now
+      const shipping_amount = 0;
+      const tax_amount = 0;
       const total_amount = subtotal + shipping_amount + tax_amount;
-
-      // Generate order number since the DB function doesn't exist
       const order_number = this.generateOrderNumber();
 
-      // Create order directly using supabase client
+      console.log('Order calculations:', {
+        subtotal,
+        shipping_amount,
+        tax_amount,
+        total_amount,
+        order_number
+      });
+
+      // Create order
+      console.log('Creating order...');
       const orderInsertData = {
         customer_id: customer.id,
         status: 'pending',
@@ -116,15 +133,22 @@ export class OrderService {
         .single();
 
       if (orderError) {
-        console.error('Order creation error:', orderError);
-        throw new Error(`Failed to create order: ${orderError.message}`);
+        console.error('Order creation error details:', {
+          error: orderError,
+          code: orderError.code,
+          message: orderError.message,
+          details: orderError.details,
+          hint: orderError.hint
+        });
+        throw new Error(`Database error: ${orderError.message}`);
       }
 
       console.log('Order created successfully:', order);
 
       // Create order items
-      for (const item of orderData.items) {
-        console.log('Creating order item:', item);
+      console.log('Creating order items...');
+      for (const [index, item] of orderData.items.entries()) {
+        console.log(`Creating order item ${index + 1}:`, item);
         
         const orderItemData = {
           order_id: order.id,
@@ -143,17 +167,21 @@ export class OrderService {
           .single();
 
         if (itemError) {
-          console.error('Order item creation error:', itemError);
+          console.error(`Order item ${index + 1} creation error:`, itemError);
           throw new Error(`Failed to create order item: ${itemError.message}`);
         }
 
-        console.log('Order item created:', orderItem);
+        console.log(`Order item ${index + 1} created:`, orderItem);
       }
 
+      console.log('Order creation completed successfully');
       return order;
     } catch (error) {
-      console.error('Error creating order:', error);
-      throw error;
+      console.error('Order creation failed:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred while creating the order');
     }
   }
 
