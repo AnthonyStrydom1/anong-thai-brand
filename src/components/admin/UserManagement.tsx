@@ -1,15 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Search, Shield, User, UserPlus, AlertCircle, RefreshCw } from 'lucide-react';
+import { Search, Shield, User, UserPlus, AlertCircle, RefreshCw, UserMinus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import CreateAdminUserForm from './CreateAdminUserForm';
+import { useAdminUserDeletion } from './user-creation/useAdminUserDeletion';
 
 interface AdminUser {
   id: string;
@@ -35,6 +35,10 @@ const UserManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
   const { isAdmin } = useUserRoles();
+  const { deleteAdminUser, deletingUserId } = useAdminUserDeletion(() => {
+    loadAdminUsers();
+    loadUserRoles();
+  });
 
   useEffect(() => {
     if (isAdmin()) {
@@ -311,9 +315,23 @@ const UserManagement = () => {
                       )}
                       
                       {isUserAdmin && (
-                        <div className="flex items-center gap-2 text-green-600">
-                          <Shield className="w-4 h-4" />
-                          <span className="text-sm font-medium">Admin</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 text-green-600">
+                            <Shield className="w-4 h-4" />
+                            <span className="text-sm font-medium">Admin</span>
+                          </div>
+                          
+                          {/* Remove Admin Button */}
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => deleteAdminUser(user.id, user.email)}
+                            disabled={deletingUserId === user.id}
+                            className="flex items-center gap-2"
+                          >
+                            <UserMinus className="w-4 h-4" />
+                            {deletingUserId === user.id ? "Removing..." : "Remove"}
+                          </Button>
                         </div>
                       )}
                     </div>
