@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -51,11 +50,12 @@ class AuthService {
 
     this.clearCrossDomainSessions();
 
-    // Sign up without email confirmation required
+    // Sign up without email confirmation and without automatic sign-in
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: undefined, // Disable email confirmation
         data: {
           first_name: firstName,
           last_name: lastName,
@@ -64,6 +64,12 @@ class AuthService {
     });
 
     if (error) throw error;
+
+    // Immediately sign out to prevent auto-login
+    if (data.session) {
+      await supabase.auth.signOut();
+    }
+
     return data;
   }
 

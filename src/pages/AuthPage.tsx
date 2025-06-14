@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import NavigationBanner from '@/components/NavigationBanner';
 import { mfaAuthService } from '@/services/mfaAuthService';
+import { authService } from '@/services/authService';
 import MfaVerification from '@/components/auth/MfaVerification';
 
 const AuthPage = () => {
@@ -25,7 +26,7 @@ const AuthPage = () => {
     lastName: ''
   });
 
-  const { signUp, resetPassword } = useAuth();
+  const { resetPassword } = useAuth();
   const navigate = useNavigate();
 
   // Check for pending MFA on component mount
@@ -61,8 +62,13 @@ const AuthPage = () => {
           });
         }
       } else {
-        // For sign-up, create account and then trigger MFA flow
-        await signUp(formData.email, formData.password, formData.firstName, formData.lastName);
+        // For sign-up, create account directly without email confirmation
+        await authService.signUp({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName
+        });
         
         // After successful sign-up, initiate MFA flow
         const mfaResult = await mfaAuthService.initiateSignIn({
