@@ -31,7 +31,9 @@ const ProductGrid = ({ initialCategory }: ProductGridProps) => {
       stirFrySauces: "Stir-Fry Sauces",
       dippingSauces: "Dipping Sauces",
       noProducts: "No products found matching your criteria.",
-      craftedWith: "Crafted with tradition, delivered with love"
+      craftedWith: "Crafted with tradition, delivered with love",
+      loading: "Loading products...",
+      errorTitle: "Unable to load products. Please try again later."
     },
     th: {
       title: "คอลเลคชั่นพรีเมียมของเรา",
@@ -42,7 +44,9 @@ const ProductGrid = ({ initialCategory }: ProductGridProps) => {
       stirFrySauces: "ซอสผัด",
       dippingSauces: "น้ำจิ้ม",
       noProducts: "ไม่พบสินค้าที่ตรงกับเงื่อนไขของคุณ",
-      craftedWith: "สร้างด้วยประเพณี ส่งมอบด้วยความรัก"
+      craftedWith: "สร้างด้วยประเพณี ส่งมอบด้วยความรัก",
+      loading: "กำลังโหลดสินค้า...",
+      errorTitle: "ไม่สามารถโหลดสินค้าได้ กรุณาลองใหม่อีกครั้ง"
     }
   };
 
@@ -105,7 +109,7 @@ const ProductGrid = ({ initialCategory }: ProductGridProps) => {
         <section className="anong-section px-4 md:px-6 bg-anong-ivory thai-pattern-bg">
           <div className="container mx-auto max-w-7xl">
             <div className="text-center py-16">
-              <p className="text-lg">Loading products...</p>
+              <p className="text-lg">{t.loading}</p>
             </div>
           </div>
         </section>
@@ -120,7 +124,7 @@ const ProductGrid = ({ initialCategory }: ProductGridProps) => {
         <section className="anong-section px-4 md:px-6 bg-anong-ivory thai-pattern-bg">
           <div className="container mx-auto max-w-7xl">
             <div className="text-center py-16">
-              <p className="text-red-600 mb-4">Unable to load products. Please try again later.</p>
+              <p className="text-red-600 mb-4">{t.errorTitle}</p>
               <p className="text-gray-600">{error}</p>
             </div>
           </div>

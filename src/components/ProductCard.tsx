@@ -8,7 +8,9 @@ import { Link } from 'react-router-dom';
 import { SupabaseProduct } from '@/services/supabaseService';
 import { useCart } from '@/contexts/CartContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
+import { getProductData } from './product/ProductDataMapper';
 
 interface ProductCardProps {
   product: SupabaseProduct;
@@ -17,14 +19,15 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addItem } = useCart();
   const { formatPrice } = useCurrency();
+  const { language } = useLanguage();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addItem(product, 1);
     toast({
-      title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
+      title: language === 'en' ? "Added to cart" : "เพิ่มลงตะกร้าแล้ว",
+      description: `${getDisplayName()} ${language === 'en' ? 'has been added to your cart' : 'ถูกเพิ่มลงตะกร้าแล้ว'}.`,
     });
   };
 
@@ -44,7 +47,28 @@ const ProductCard = ({ product }: ProductCardProps) => {
     return imageMap[product.name] || '/placeholder.svg';
   };
 
+  // Get translated product data
+  const getDisplayName = () => {
+    try {
+      const productData = getProductData(product.name);
+      return productData.name[language];
+    } catch {
+      return product.name;
+    }
+  };
+
+  const getDisplayDescription = () => {
+    try {
+      const productData = getProductData(product.name);
+      return productData.shortDescription[language];
+    } catch {
+      return product.short_description || product.description || '';
+    }
+  };
+
   const productImage = getProductImage();
+  const displayName = getDisplayName();
+  const displayDescription = getDisplayDescription();
 
   return (
     <Card className="group hover:shadow-lg transition-shadow duration-200 overflow-hidden">
@@ -53,7 +77,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <div className="w-full h-64 bg-gradient-to-b from-anong-cream to-anong-ivory flex items-center justify-center p-8">
             <img
               src={productImage}
-              alt={product.name}
+              alt={displayName}
               className="max-w-[160px] max-h-[160px] w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-200"
               loading="lazy"
               decoding="async"
@@ -64,26 +88,26 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
           {product.is_featured && (
             <Badge className="absolute top-3 left-3 bg-red-500 hover:bg-red-600">
-              Featured
+              {language === 'en' ? 'Featured' : 'แนะนำ'}
             </Badge>
           )}
           {product.stock_quantity <= 5 && product.stock_quantity > 0 && (
             <Badge variant="destructive" className="absolute top-3 right-3">
-              Low Stock
+              {language === 'en' ? 'Low Stock' : 'สินค้าเหลือน้อย'}
             </Badge>
           )}
           {product.stock_quantity === 0 && (
             <Badge variant="secondary" className="absolute top-3 right-3">
-              Out of Stock
+              {language === 'en' ? 'Out of Stock' : 'สินค้าหมด'}
             </Badge>
           )}
         </div>
         
         <CardContent className="p-6">
           <h3 className="text-xl font-semibold mb-2 line-clamp-2 hover:text-anong-deep-green transition-colors">
-            {product.name}
+            {displayName}
           </h3>
-          <p className="text-gray-600 mb-4 line-clamp-2">{product.short_description}</p>
+          <p className="text-gray-600 mb-4 line-clamp-2">{displayDescription}</p>
           
           <div className="flex items-center justify-between mb-4">
             <span className="text-2xl font-bold text-anong-deep-green">
@@ -104,7 +128,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
           disabled={product.stock_quantity === 0}
         >
           <ShoppingCart className="w-4 h-4 mr-2" />
-          {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+          {product.stock_quantity === 0 
+            ? (language === 'en' ? 'Out of Stock' : 'สินค้าหมด')
+            : (language === 'en' ? 'Add to Cart' : 'เพิ่มลงตะกร้า')
+          }
         </Button>
       </div>
     </Card>
