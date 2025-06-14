@@ -133,14 +133,21 @@ export const useAuthPageLogic = () => {
 
   const handleMFASuccess = () => {
     console.log('✅ AuthPage: MFA verification successful');
+    
+    // Clear MFA state immediately
     setShowMFA(false);
     setMfaEmail('');
     mfaAuthService.clearMFASession();
+    
     toast({
       title: "Success!",
       description: "You have been logged in successfully.",
     });
-    navigate('/');
+    
+    // Add a small delay to ensure auth state is properly updated before navigation
+    setTimeout(() => {
+      navigate('/', { replace: true });
+    }, 100);
   };
 
   const handleMFACancel = () => {

@@ -54,21 +54,25 @@ const UserMenu = ({
 
   const { user, session, mfaPending, isLoading: authLoading } = useAuth();
 
-  // Enhanced authentication state detection with more logging
+  // Enhanced authentication state detection with more stable logic
   const isLoggedIn = !!(user && session && !mfaPending && !authLoading);
 
-  console.log('🎯 UserMenu: Detailed Auth state:', { 
+  console.log('🎯 UserMenu: Auth state check:', { 
     user: !!user, 
     session: !!session,
     mfaPending,
     authLoading,
-    isLoggedInProp,
     finalIsLoggedIn: isLoggedIn,
-    userEmail: user?.email,
-    sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'none',
-    currentPath: window.location.pathname,
-    timestamp: new Date().toISOString()
+    currentPath: window.location.pathname
   });
+
+  // Auto-close dropdown when auth state changes
+  useEffect(() => {
+    if (!isLoggedIn && isDropdownOpen) {
+      console.log('🔒 UserMenu: Closing dropdown due to auth state change');
+      setIsDropdownOpen(false);
+    }
+  }, [isLoggedIn, isDropdownOpen]);
 
   // Auto-open login modal on mobile when not logged in (only for /account route)
   useEffect(() => {
@@ -82,16 +86,13 @@ const UserMenu = ({
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🖱️ UserMenu: Button clicked - DETAILED STATE:', { 
+    console.log('🖱️ UserMenu: Button clicked - Auth state:', { 
       isLoggedIn,
       user: !!user,
       session: !!session,
       mfaPending,
       authLoading,
-      userEmail: user?.email,
-      sessionValid: session ? 'yes' : 'no',
-      currentPath: window.location.pathname,
-      clickTimestamp: new Date().toISOString()
+      currentPath: window.location.pathname
     });
     
     // If user is logged in, show dropdown menu
@@ -127,18 +128,28 @@ const UserMenu = ({
     onLogout();
   };
 
+  // Prevent dropdown from opening when not authenticated
+  const shouldShowDropdown = isLoggedIn && isDropdownOpen;
+
   console.log('🎯 UserMenu render decision:', { 
     isLoggedIn, 
+    isDropdownOpen,
+    shouldShowDropdown,
     mfaPending,
     authLoading,
-    shouldShowDropdown: isLoggedIn,
-    currentPath: window.location.pathname,
-    renderTimestamp: new Date().toISOString()
+    currentPath: window.location.pathname
   });
 
   return (
     <>
-      <DropdownMenu open={isLoggedIn ? isDropdownOpen : false} onOpenChange={setIsDropdownOpen}>
+      <DropdownMenu open={shouldShowDropdown} onOpenChange={(open) => {
+        // Only allow opening if user is authenticated
+        if (isLoggedIn) {
+          setIsDropdownOpen(open);
+        } else {
+          setIsDropdownOpen(false);
+        }
+      }}>
         <UserMenuButton 
           isLoggedIn={isLoggedIn}
           onClick={handleTriggerClick}
