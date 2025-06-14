@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,8 +79,7 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
           .maybeSingle();
 
         if (!profile) {
-          console.log('Profile not found, creating manually...');
-          // Create profile manually if trigger didn't work
+          console.log('Profile not found after 2s, attempting manual insert...');
           const { error: profileError } = await supabase
             .from('profiles')
             .insert({
@@ -90,16 +88,31 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
               first_name: formData.firstName,
               last_name: formData.lastName
             });
-
           if (profileError) {
+            // NEW: Wait and try to fetch as sometimes profile appears late
             console.error('Manual profile creation error:', profileError);
-            toast({
-              title: "Warning",
-              description: "User created but profile setup failed. Please contact support.",
-              variant: "destructive"
-            });
-            onUserCreated();
-            return;
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Try one last fetch
+            const { data: finalProfile, error: fetchErr } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('id', authData.user.id)
+              .maybeSingle();
+
+            if (finalProfile) {
+              // Great, now proceed
+              profile = finalProfile;
+            } else {
+              toast({
+                title: "Warning",
+                description: `User created but profile setup failed: ${
+                  profileError.message || fetchErr?.message || "unknown error"
+                }. Check Supabase 'profiles' table for RLS or permission errors.`,
+                variant: "destructive"
+              });
+              onUserCreated();
+              return;
+            }
           }
         }
 
