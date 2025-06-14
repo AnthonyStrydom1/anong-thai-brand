@@ -27,12 +27,12 @@ export class AuthOperationsService {
     // Clear any existing session
     await supabase.auth.signOut();
 
-    // Sign up without email confirmation and without automatic sign-in
+    // Sign up without email confirmation - user account is immediately active
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: undefined, // Disable email confirmation
+        emailRedirectTo: undefined, // No email confirmation needed
         data: {
           first_name: firstName,
           last_name: lastName,
@@ -42,13 +42,9 @@ export class AuthOperationsService {
 
     if (error) throw error;
 
-    // Immediately sign out to prevent auto-login and force MFA flow
-    if (data.session) {
-      await supabase.auth.signOut();
-    }
-
-    // Return indication that MFA is required for new accounts
-    return { ...data, mfaRequired: true };
+    // The account is now created and active, no email confirmation needed
+    // User can immediately proceed to sign in with MFA
+    return { ...data, accountCreated: true };
   }
 
   async signIn({ email, password }: SignInData) {

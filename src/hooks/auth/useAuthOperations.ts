@@ -12,7 +12,11 @@ export function useAuthOperations(
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
     try {
       const result = await authService.signUp({ email, password, firstName, lastName });
-      return result;
+      
+      // Account is created immediately, no email confirmation needed
+      console.log('✅ Account created successfully - no confirmation email sent');
+      
+      return { ...result, accountCreated: true };
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
