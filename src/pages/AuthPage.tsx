@@ -10,6 +10,7 @@ import { useAuthForm } from '@/hooks/useAuthForm';
 
 const AuthPage = () => {
   const [showMFA, setShowMFA] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
   const navigate = useNavigate();
 
   const {
@@ -26,17 +27,40 @@ const AuthPage = () => {
     switchToSignUp
   } = useAuthForm();
 
-  // Check for pending MFA on component mount and when URL changes
-  useEffect(() => {
-    console.log('Checking for pending MFA...');
+  // Function to check MFA status and update state
+  const checkMFAStatus = () => {
     const hasPending = mfaAuthService.hasPendingMFA();
     const pendingEmail = mfaAuthService.getPendingMFAEmail();
-    console.log('Has pending MFA:', hasPending, 'Email:', pendingEmail);
+    const sessionData = sessionStorage.getItem('mfa_session_data');
+    const challengeId = sessionStorage.getItem('mfa_challenge_id');
+    
+    const debug = `MFA Check - Has pending: ${hasPending}, Email: ${pendingEmail || 'none'}, Session data: ${!!sessionData}, Challenge: ${!!challengeId}`;
+    console.log(debug);
+    setDebugInfo(debug);
     
     if (hasPending && pendingEmail) {
       console.log('Setting showMFA to true');
       setShowMFA(true);
+    } else {
+      setShowMFA(false);
     }
+  };
+
+  // Check for pending MFA on component mount and periodically
+  useEffect(() => {
+    console.log('AuthPage mounted, checking for pending MFA...');
+    checkMFAStatus();
+    
+    // Check again after a short delay in case data was just set
+    const timeoutId = setTimeout(checkMFAStatus, 100);
+    
+    // Set up an interval to check periodically
+    const intervalId = setInterval(checkMFAStatus, 1000);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
   }, []);
 
   // Scroll to top when component mounts
@@ -51,8 +75,10 @@ const AuthPage = () => {
       console.log('Auth result:', result);
       
       if (result?.mfaRequired) {
-        console.log('MFA required, showing verification UI');
-        setShowMFA(true);
+        console.log('MFA required, checking status after delay...');
+        // Check MFA status after a short delay to allow session storage to be set
+        setTimeout(checkMFAStatus, 500);
+        
         toast({
           title: isLogin ? "MFA Required" : "Account Created!",
           description: isLogin 
@@ -80,6 +106,7 @@ const AuthPage = () => {
     console.log('MFA verification cancelled');
     setShowMFA(false);
     mfaAuthService.clearMFASession();
+    checkMFAStatus();
   };
 
   const handleSwitchMode = () => {
@@ -117,6 +144,19 @@ const AuthPage = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <NavigationBanner />
       <div className="flex-1 flex items-center justify-center p-4">
+        {/* Debug info display */}
+        {debugInfo && (
+          <div className="fixed top-4 left-4 bg-blue-100 p-2 rounded text-xs z-50 max-w-md">
+            <strong>Debug:</strong> {debugInfo}
+            <button 
+              onClick={checkMFAStatus}
+              className="ml-2 bg-blue-500 text-white px-2 py-1 rounded text-xs"
+            >
+              Refresh
+            </button>
+          </div>
+        )}
+        
         <AuthForm
           isLogin={isLogin}
           isLoading={isLoading}
