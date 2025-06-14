@@ -31,7 +31,6 @@ const UserMenu = ({
 }: UserMenuProps) => {
   const isMobile = useIsMobile();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const [hasPendingMFA, setHasPendingMFA] = useState(false);
   
   const {
     showLoginModal,
@@ -53,92 +52,25 @@ const UserMenu = ({
     setLastName,
   } = useAuthModal();
 
-  const { user, session } = useAuth();
+  const { user, session, mfaPending } = useAuth();
 
-  // Use session and user for more reliable auth state - ignore mfaPending after successful login
-  const isLoggedIn = !!(user && session);
+  // Simplified authentication state - use the auth context directly
+  const isLoggedIn = !!(user && session && !mfaPending);
 
-  console.log('🎯 UserMenu: Auth state check:', { 
+  console.log('🎯 UserMenu: Auth state:', { 
     user: !!user, 
     session: !!session,
-    isLoggedInProp,
+    mfaPending,
     finalIsLoggedIn: isLoggedIn,
     currentPath: window.location.pathname
   });
 
-  // Clear MFA state when user logs in successfully
-  useEffect(() => {
-    if (isLoggedIn) {
-      console.log('🧹 UserMenu: User logged in, clearing any MFA state');
-      if (hasPendingMFA) {
-        setHasPendingMFA(false);
-        mfaAuthService.clearMFASession();
-      }
-    }
-  }, [isLoggedIn, hasPendingMFA]);
-
-  // Check for pending MFA status only when needed
-  useEffect(() => {
-    const checkMFAStatus = () => {
-      // If user is logged in, no MFA should be pending
-      if (isLoggedIn) {
-        return;
-      }
-      
-      // Only check MFA if we're on the auth page
-      if (window.location.pathname !== '/auth') {
-        if (hasPendingMFA) {
-          console.log('🧹 UserMenu: Not on auth page, clearing MFA state');
-          setHasPendingMFA(false);
-        }
-        return;
-      }
-      
-      const pendingMFA = mfaAuthService.hasPendingMFA();
-      console.log('🔍 UserMenu: MFA Status Check:', { 
-        pendingMFA, 
-        isLoggedIn, 
-        currentPath: window.location.pathname,
-        currentState: hasPendingMFA
-      });
-      
-      // Only update state if it actually changed
-      if (pendingMFA !== hasPendingMFA) {
-        setHasPendingMFA(pendingMFA);
-      }
-    };
-
-    // Check immediately
-    checkMFAStatus();
-    
-    // Listen for MFA session events
-    const handleMFAStored = () => {
-      console.log('📧 UserMenu: MFA session stored');
-      if (!isLoggedIn && window.location.pathname === '/auth') {
-        setHasPendingMFA(true);
-      }
-    };
-
-    const handleMFACleared = () => {
-      console.log('🧹 UserMenu: MFA session cleared');
-      setHasPendingMFA(false);
-    };
-
-    window.addEventListener('mfa-session-stored', handleMFAStored);
-    window.addEventListener('mfa-session-cleared', handleMFACleared);
-
-    return () => {
-      window.removeEventListener('mfa-session-stored', handleMFAStored);
-      window.removeEventListener('mfa-session-cleared', handleMFACleared);
-    };
-  }, [isLoggedIn, hasPendingMFA]);
-
   // Auto-open login modal on mobile when not logged in (only for /account route)
   useEffect(() => {
-    if (isMobile && !isLoggedIn && !hasPendingMFA && window.location.pathname === '/account') {
+    if (isMobile && !isLoggedIn && window.location.pathname === '/account') {
       setShowLoginModal(true);
     }
-  }, [isMobile, isLoggedIn, hasPendingMFA, setShowLoginModal]);
+  }, [isMobile, isLoggedIn, setShowLoginModal]);
 
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -146,7 +78,7 @@ const UserMenu = ({
     
     console.log('🖱️ UserMenu: Button clicked', { 
       isLoggedIn, 
-      hasPendingMFA, 
+      mfaPending, 
       currentPath: window.location.pathname 
     });
     
@@ -174,13 +106,12 @@ const UserMenu = ({
     setIsDropdownOpen(false);
     // Clear any MFA session on logout
     mfaAuthService.clearMFASession();
-    setHasPendingMFA(false);
     onLogout();
   };
 
   console.log('🎯 UserMenu render state:', { 
     isLoggedIn, 
-    hasPendingMFA, 
+    mfaPending, 
     shouldShowDropdown: isLoggedIn,
     currentPath: window.location.pathname
   });
@@ -203,7 +134,7 @@ const UserMenu = ({
       </DropdownMenu>
 
       {/* Auth Modal - only show if not on auth page and no pending MFA */}
-      {!window.location.pathname.includes('/auth') && !hasPendingMFA && (
+      {!window.location.pathname.includes('/auth') && !mfaPending && (
         <AuthModal
           showModal={showLoginModal}
           isSignUp={isSignUp}
