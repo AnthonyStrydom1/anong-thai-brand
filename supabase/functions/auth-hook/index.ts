@@ -22,93 +22,132 @@ interface AuthHookRequest {
   };
 }
 
-// Global email queue with persistent tracking
+// Circuit breaker state - stops all email sending when rate limited
+let isCircuitBreakerOpen = false;
+let circuitBreakerResetTime = 0;
+const CIRCUIT_BREAKER_TIMEOUT = 60000; // 1 minute
+
+// Much more conservative rate limiting
+let lastEmailSent = 0;
+const MIN_EMAIL_INTERVAL = 3000; // 3 seconds between emails (very conservative)
+
+// Simple email queue
 const emailQueue: Array<{
   id: string;
   email: string;
   type: 'welcome' | 'reset';
   userData: any;
   timestamp: number;
-  attempts: number;
 }> = [];
 
-let isProcessingQueue = false;
-let lastEmailSent = 0;
-const MIN_EMAIL_INTERVAL = 1500; // 1.5 seconds between emails (well under Resend's limit)
+let isProcessing = false;
 
-// Process email queue with guaranteed rate limiting
+// Check and reset circuit breaker if timeout has passed
+function checkCircuitBreaker() {
+  if (isCircuitBreakerOpen && Date.now() > circuitBreakerResetTime) {
+    console.log('🔄 Circuit breaker reset - resuming email sending');
+    isCircuitBreakerOpen = false;
+  }
+}
+
+// Process email queue with very conservative rate limiting
 async function processEmailQueue() {
-  if (isProcessingQueue || emailQueue.length === 0) {
+  if (isProcessing || emailQueue.length === 0) {
     return;
   }
 
-  isProcessingQueue = true;
+  checkCircuitBreaker();
+  
+  if (isCircuitBreakerOpen) {
+    console.log('⚡ Circuit breaker open - skipping email processing');
+    return;
+  }
+
+  isProcessing = true;
   console.log(`📧 Processing email queue: ${emailQueue.length} emails pending`);
 
-  while (emailQueue.length > 0) {
-    const emailTask = emailQueue.shift();
-    if (!emailTask) break;
+  // Process only ONE email at a time
+  const emailTask = emailQueue.shift();
+  if (!emailTask) {
+    isProcessing = false;
+    return;
+  }
 
-    // Ensure minimum interval between emails
+  try {
     const now = Date.now();
     const timeSinceLastEmail = now - lastEmailSent;
     
+    // Ensure minimum 3 second interval
     if (timeSinceLastEmail < MIN_EMAIL_INTERVAL) {
       const delayNeeded = MIN_EMAIL_INTERVAL - timeSinceLastEmail;
-      console.log(`⏱️ Waiting ${delayNeeded}ms before sending next email`);
+      console.log(`⏱️ Rate limiting: waiting ${delayNeeded}ms before sending email`);
       await new Promise(resolve => setTimeout(resolve, delayNeeded));
     }
 
-    try {
-      console.log(`📤 Sending ${emailTask.type} email to: ${emailTask.email}`);
-      
-      if (emailTask.type === 'welcome') {
-        await sendWelcomeEmailDirect(emailTask.userData);
-      } else if (emailTask.type === 'reset') {
-        await sendPasswordResetEmailDirect(emailTask.userData);
-      }
-      
-      lastEmailSent = Date.now();
-      console.log(`✅ Email sent successfully to: ${emailTask.email}`);
-      
-    } catch (error: any) {
-      console.error(`❌ Failed to send email to ${emailTask.email}:`, error.message);
-      
-      // Retry logic for failed emails
-      if (emailTask.attempts < 3 && !error.message?.includes('rate limit')) {
-        emailTask.attempts++;
-        emailTask.timestamp = Date.now();
-        emailQueue.push(emailTask); // Re-queue for retry
-        console.log(`🔄 Re-queued email for retry (attempt ${emailTask.attempts})`);
-      } else {
-        console.log(`💀 Permanently failed email to: ${emailTask.email}`);
-      }
+    console.log(`📤 Sending ${emailTask.type} email to: ${emailTask.email}`);
+    
+    if (emailTask.type === 'welcome') {
+      await sendWelcomeEmailDirect(emailTask.userData);
+    } else if (emailTask.type === 'reset') {
+      await sendPasswordResetEmailDirect(emailTask.userData);
     }
-
-    // Small delay between iterations to prevent overwhelming
-    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    lastEmailSent = Date.now();
+    console.log(`✅ Email sent successfully to: ${emailTask.email}`);
+    
+  } catch (error: any) {
+    console.error(`❌ Failed to send email to ${emailTask.email}:`, error.message);
+    
+    // Check if this is a rate limit error
+    if (error.message?.toLowerCase().includes('rate limit') || 
+        error.message?.toLowerCase().includes('too many requests')) {
+      console.log('🚨 Rate limit detected - opening circuit breaker');
+      isCircuitBreakerOpen = true;
+      circuitBreakerResetTime = Date.now() + CIRCUIT_BREAKER_TIMEOUT;
+      
+      // Put the email back in queue for later
+      emailQueue.unshift(emailTask);
+    } else {
+      console.log(`💀 Email permanently failed for: ${emailTask.email}`);
+    }
   }
 
-  isProcessingQueue = false;
-  console.log('📪 Email queue processing completed');
+  isProcessing = false;
+  
+  // Schedule next processing if queue has more items
+  if (emailQueue.length > 0) {
+    console.log(`📮 Scheduling next email processing in ${MIN_EMAIL_INTERVAL}ms`);
+    setTimeout(() => processEmailQueue(), MIN_EMAIL_INTERVAL);
+  } else {
+    console.log('📪 Email queue processing completed');
+  }
 }
 
-// Queue email for later processing
+// Queue email with deduplication
 function queueEmail(email: string, type: 'welcome' | 'reset', userData: any) {
+  // Simple deduplication - don't queue same email+type combination
+  const existingEmail = emailQueue.find(item => 
+    item.email === email && item.type === type
+  );
+  
+  if (existingEmail) {
+    console.log(`📮 Email already queued for: ${email} (${type})`);
+    return;
+  }
+  
   const emailTask = {
     id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     email,
     type,
     userData,
-    timestamp: Date.now(),
-    attempts: 0
+    timestamp: Date.now()
   };
   
   emailQueue.push(emailTask);
   console.log(`📮 Queued ${type} email for: ${email} (Queue size: ${emailQueue.length})`);
   
-  // Start processing if not already running
-  setTimeout(() => processEmailQueue(), 0);
+  // Start processing with delay to avoid immediate execution
+  setTimeout(() => processEmailQueue(), 1000);
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -123,7 +162,9 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('🔔 Auth hook triggered:', {
       event: hookData.event,
       email: hookData.user.email,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      circuitBreakerOpen: isCircuitBreakerOpen,
+      queueSize: emailQueue.length
     });
 
     // Handle different auth events by queuing emails
@@ -151,7 +192,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({ 
       success: true,
       message: "Authentication processed successfully",
-      email_status: "queued",
+      email_status: isCircuitBreakerOpen ? "circuit_breaker_open" : "queued",
       queue_size: emailQueue.length
     }), {
       status: 200,
@@ -179,7 +220,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-// Direct email sending functions (no rate limiting here - handled by queue)
+// Direct email sending functions
 async function sendWelcomeEmailDirect(user: any) {
   const firstName = user.user_metadata?.first_name || 'there';
   
