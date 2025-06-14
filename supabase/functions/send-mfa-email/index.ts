@@ -30,7 +30,8 @@ serve(async (req: Request) => {
       hasSupabaseKey: !!supabaseKey,
       hasResendKey: !!resendApiKey,
       supabaseUrl: supabaseUrl ? supabaseUrl.substring(0, 20) + '...' : 'missing',
-      resendKeyLength: resendApiKey ? resendApiKey.length : 0
+      resendKeyLength: resendApiKey ? resendApiKey.length : 0,
+      resendKeyStart: resendApiKey ? resendApiKey.substring(0, 8) + '...' : 'missing'
     });
 
     if (!supabaseUrl || !supabaseKey) {
@@ -113,7 +114,7 @@ serve(async (req: Request) => {
     }
 
     // Send email using Resend API directly
-    console.log('📤 Sending email via Resend API...');
+    console.log('📤 Preparing to send email via Resend API...');
     
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -144,35 +145,61 @@ serve(async (req: Request) => {
       </div>
     `;
 
+    const emailPayload = {
+      from: 'Anong Thai Brand <hello@anonghthaibrand.com>',
+      to: [email],
+      subject: 'Your Verification Code - Anong Thai Brand',
+      html: emailHtml,
+    };
+
+    console.log('📧 Email payload prepared:', {
+      from: emailPayload.from,
+      to: emailPayload.to,
+      subject: emailPayload.subject,
+      htmlLength: emailPayload.html.length
+    });
+
     try {
+      console.log('🌐 Making Resend API request...');
+      console.log('🔑 Using API key (first 8 chars):', resendApiKey.substring(0, 8) + '...');
+      
       const emailResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${resendApiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          from: 'Anong Thai Brand <hello@anonghthaibrand.com>',
-          to: [email],
-          subject: 'Your Verification Code - Anong Thai Brand',
-          html: emailHtml,
-        }),
+        body: JSON.stringify(emailPayload),
       });
 
-      console.log('📧 Resend API response status:', emailResponse.status, emailResponse.statusText);
+      console.log('📧 Resend API response received:', {
+        status: emailResponse.status,
+        statusText: emailResponse.statusText,
+        ok: emailResponse.ok,
+        headers: Object.fromEntries(emailResponse.headers.entries())
+      });
+
+      const responseText = await emailResponse.text();
+      console.log('📧 Resend API raw response:', responseText);
 
       if (!emailResponse.ok) {
-        const errorText = await emailResponse.text();
-        console.error('❌ Resend API error:', {
+        console.error('❌ Resend API error response:', {
           status: emailResponse.status,
           statusText: emailResponse.statusText,
-          error: errorText
+          body: responseText
         });
-        throw new Error(`Email service error: ${emailResponse.status}`);
+        throw new Error(`Resend API error (${emailResponse.status}): ${responseText}`);
       }
 
-      const emailResult = await emailResponse.json();
-      console.log('✅ Email sent successfully:', emailResult);
+      let emailResult;
+      try {
+        emailResult = JSON.parse(responseText);
+        console.log('✅ Email sent successfully:', emailResult);
+      } catch (parseError) {
+        console.error('❌ Failed to parse Resend response as JSON:', parseError);
+        console.log('📄 Raw response text:', responseText);
+        throw new Error('Invalid response from email service');
+      }
 
       const response = {
         success: true,
@@ -181,7 +208,8 @@ serve(async (req: Request) => {
         debug: {
           emailSent: true,
           emailId: emailResult.id,
-          challengeCreated: true
+          challengeCreated: true,
+          resendResponse: emailResult
         }
       };
 
@@ -196,7 +224,12 @@ serve(async (req: Request) => {
       );
 
     } catch (emailError) {
-      console.error('❌ Email sending failed:', emailError);
+      console.error('❌ Email sending failed with detailed error:', {
+        message: emailError.message,
+        stack: emailError.stack,
+        name: emailError.name,
+        cause: emailError.cause
+      });
       throw new Error(`Failed to send verification email: ${emailError.message}`);
     }
 
@@ -205,7 +238,8 @@ serve(async (req: Request) => {
       message: error.message,
       stack: error.stack,
       name: error.name,
-      cause: error.cause
+      cause: error.cause,
+      fullError: error
     });
     
     return new Response(
@@ -214,7 +248,8 @@ serve(async (req: Request) => {
         details: 'Check edge function logs for more information',
         debug: {
           timestamp: new Date().toISOString(),
-          errorType: error.name
+          errorType: error.name,
+          errorMessage: error.message
         }
       }),
       {
