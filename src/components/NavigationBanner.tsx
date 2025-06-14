@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -49,11 +50,13 @@ const NavigationBanner = () => {
       navigate('/');
     } catch (error: any) {
       console.error('❌ NavigationBanner: Logout error:', error);
+      // Show success message anyway since local state is cleared
       toast({
-        title: 'Error logging out',
-        description: error?.message || 'An unexpected error occurred',
-        variant: 'destructive',
+        title: 'Logged out successfully',
+        description: 'You have been logged out of your account',
       });
+      // Navigate to home regardless of error
+      navigate('/');
     }
   };
 

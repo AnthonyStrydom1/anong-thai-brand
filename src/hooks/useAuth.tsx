@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { authService, type AuthUser } from '@/services/authService';
@@ -58,11 +59,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (user, session) => {
         if (!mounted) return;
 
+        console.log('🔄 Auth: State change event:', { user: !!user, session: !!session });
+
         const pendingMFA = isMFAPending();
         setMfaPending(pendingMFA);
 
         // If there's a pending MFA, block session/user/profile
         if (pendingMFA) {
+          console.log('🔒 Auth: MFA pending, blocking auth state');
           setUser(null);
           setSession(null);
           setUserProfile(null);
@@ -74,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
 
         if (user && session) {
+          console.log('✅ Auth: User authenticated, clearing MFA session');
           setTimeout(() => {
             if (mounted) {
               mfaAuthService.clearMFASession();
@@ -86,10 +91,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               const profile = await authService.getUserProfile(user.id);
               if (mounted) setUserProfile(profile);
             } catch (error) {
+              console.error('❌ Auth: Failed to load user profile:', error);
               if (mounted) setUserProfile(null);
             }
           }, 0);
         } else {
+          console.log('❌ Auth: No user/session, clearing profile');
           setUserProfile(null);
         }
 
@@ -99,11 +106,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const checkSession = async () => {
       try {
+        console.log('🔍 Auth: Checking existing session');
         const session = await authService.getCurrentSession();
         if (mounted) {
           const pendingMFA = isMFAPending();
           setMfaPending(pendingMFA);
           if (pendingMFA) {
+            console.log('🔒 Auth: MFA pending during session check');
             setUser(null);
             setSession(null);
             setUserProfile(null);
@@ -111,15 +120,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
           if (session?.user) {
+            console.log('✅ Auth: Found existing session');
             setUser(session.user);
             setSession(session);
           } else {
+            console.log('❌ Auth: No existing session found');
             setUser(null);
             setSession(null);
           }
           setIsLoading(false);
         }
       } catch (error) {
+        console.error('❌ Auth: Session check failed:', error);
         if (mounted) {
           setUser(null);
           setSession(null);
@@ -176,15 +188,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
+      console.log('🔄 Auth: Starting logout process');
+      
+      // Clear MFA session first
       mfaAuthService.clearMFASession();
+      setMfaPending(false);
       
-      await authService.signOut();
-      
+      // Clear local state immediately to prevent UI issues
       setUser(null);
       setSession(null);
       setUserProfile(null);
+      
+      // Then attempt to sign out from Supabase
+      // If this fails, the local state is already cleared
+      try {
+        await authService.signOut();
+        console.log('✅ Auth: Supabase logout successful');
+      } catch (supabaseError) {
+        console.warn('⚠️ Auth: Supabase logout failed, but local state cleared:', supabaseError);
+        // Don't throw here - the user is effectively logged out locally
+      }
+      
+      console.log('✅ Auth: Logout process completed');
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error('❌ Auth: Logout error:', error);
+      // Even if logout fails, clear local state
+      mfaAuthService.clearMFASession();
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
+      setMfaPending(false);
       throw error;
     }
   };
