@@ -7,8 +7,8 @@ export interface AuthContextType {
   session: Session | null;
   userProfile: AuthUser | null;
   isLoading: boolean;
-  signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ mfaRequired?: boolean }>;
-  signIn: (email: string, password: string) => Promise<{ mfaRequired?: boolean }>;
+  signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ accountCreated: boolean; user?: User | null; session?: Session | null; }>;
+  signIn: (email: string, password: string) => Promise<{ mfaRequired?: boolean; }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updateProfile: (updates: Partial<Omit<AuthUser, 'id' | 'email'>>) => Promise<void>;

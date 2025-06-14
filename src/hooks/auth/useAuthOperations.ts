@@ -16,7 +16,11 @@ export function useAuthOperations(
       // Account is created immediately, no email confirmation needed
       console.log('✅ Account created successfully - no confirmation email sent');
       
-      return { ...result, accountCreated: true };
+      return { 
+        accountCreated: true, 
+        user: result.user,
+        session: result.session
+      };
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
