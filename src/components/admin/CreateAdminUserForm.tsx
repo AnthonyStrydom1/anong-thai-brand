@@ -37,23 +37,37 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
 
     setIsCreating(true);
     try {
-      // First, check if user already exists
-      const { data: existingUser } = await supabase
+      // First check if user already exists in our profiles table
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .select('email')
+        .select('email, id')
         .eq('email', formData.email)
         .maybeSingle();
 
-      if (existingUser) {
-        toast({
-          title: "Error",
-          description: "A user with this email already exists.",
-          variant: "destructive"
+      if (existingProfile) {
+        // User exists in profiles, try to assign admin role
+        const { error: roleError } = await supabase.rpc('assign_admin_role', {
+          _user_id: existingProfile.id
         });
+
+        if (roleError) {
+          console.error('Role assignment error:', roleError);
+          toast({
+            title: "Info",
+            description: `User ${formData.email} already exists. Attempted to assign admin role but failed: ${roleError.message}`,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Success!",
+            description: `User ${formData.email} already exists. Admin role assigned successfully.`,
+          });
+          onUserCreated();
+        }
         return;
       }
 
-      // Create user using the sign up method - the trigger will handle profile creation
+      // Try to create new user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -65,38 +79,83 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        if (authError.message.includes('User already registered')) {
+          // User exists in auth but not in profiles - this is the issue we're fixing
+          console.log('User exists in auth but not in profiles, trying to create profile manually');
+          
+          // Get the user from auth
+          const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
+          
+          if (listError) {
+            console.error('Error listing users:', listError);
+            toast({
+              title: "Error",
+              description: "User exists but we couldn't access their information. Please contact support.",
+              variant: "destructive"
+            });
+            return;
+          }
+
+          const existingAuthUser = users?.find(u => u.email === formData.email);
+          
+          if (existingAuthUser) {
+            // Create the missing profile
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .insert({
+                id: existingAuthUser.id,
+                email: formData.email,
+                first_name: formData.firstName || existingAuthUser.user_metadata?.first_name,
+                last_name: formData.lastName || existingAuthUser.user_metadata?.last_name
+              });
+
+            if (profileError) {
+              console.error('Profile creation error:', profileError);
+              toast({
+                title: "Error",
+                description: `Failed to create user profile: ${profileError.message}`,
+                variant: "destructive"
+              });
+              return;
+            }
+
+            // Assign admin role
+            const { error: roleError } = await supabase.rpc('assign_admin_role', {
+              _user_id: existingAuthUser.id
+            });
+
+            if (roleError) {
+              console.error('Role assignment error:', roleError);
+              toast({
+                title: "Warning",
+                description: `User profile created but admin role assignment failed: ${roleError.message}`,
+                variant: "destructive"
+              });
+            } else {
+              toast({
+                title: "Success!",
+                description: `User profile created and admin role assigned for ${formData.email}.`,
+              });
+            }
+
+            setFormData({ email: '', password: '', firstName: '', lastName: '' });
+            onUserCreated();
+            return;
+          }
+        }
+        
+        throw authError;
+      }
 
       if (authData.user) {
+        // New user created successfully
+        console.log('New user created successfully');
+        
         // Wait for the database trigger to create the profile
-        console.log('User created, waiting for profile creation by trigger...');
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Verify profile was created by trigger
-        const { data: profile, error: profileCheckError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', authData.user.id)
-          .maybeSingle();
-
-        if (profileCheckError) {
-          console.error('Error checking profile:', profileCheckError);
-          toast({
-            title: "Warning",
-            description: `User created but profile verification failed: ${profileCheckError.message}`,
-            variant: "destructive"
-          });
-        } else if (!profile) {
-          toast({
-            title: "Warning", 
-            description: "User created but profile was not found. The trigger may have failed.",
-            variant: "destructive"
-          });
-        } else {
-          console.log('Profile created successfully by trigger');
-        }
-
-        // Now assign admin role
+        // Assign admin role
         const { error: roleError } = await supabase.rpc('assign_admin_role', {
           _user_id: authData.user.id
         });
@@ -105,17 +164,16 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
           console.error('Role assignment error:', roleError);
           toast({
             title: "Warning",
-            description: `User created but admin role assignment failed: ${roleError.message}. You can assign the role manually later.`,
+            description: `User created but admin role assignment failed: ${roleError.message}`,
             variant: "destructive"
           });
         } else {
           toast({
             title: "Success!",
-            description: `Admin user ${formData.email} created successfully with admin role assigned.`,
+            description: `Admin user ${formData.email} created successfully.`,
           });
         }
 
-        // Clear form
         setFormData({ email: '', password: '', firstName: '', lastName: '' });
         onUserCreated();
       }

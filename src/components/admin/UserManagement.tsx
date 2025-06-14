@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Search, Shield, User, UserPlus, AlertCircle } from 'lucide-react';
+import { Search, Shield, User, UserPlus, AlertCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -44,25 +44,85 @@ const UserManagement = () => {
   const loadUsers = async () => {
     try {
       setIsLoading(true);
+      console.log('Loading users from profiles table...');
       
-      // Get users from profiles table which should be accessible to admins
-      const { data, error } = await supabase
+      // Get users from profiles table
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) {
-        console.error('Error loading users:', error);
-        throw error;
+      if (profilesError) {
+        console.error('Error loading profiles:', profilesError);
+        
+        // If profiles query fails, try to get users from auth (requires service role)
+        console.log('Trying alternative method to load users...');
+        
+        try {
+          // This might not work depending on RLS policies, but let's try
+          const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+          
+          if (authError) {
+            console.error('Auth users error:', authError);
+            throw new Error('Unable to load users. Make sure you have admin privileges and the profiles table is accessible.');
+          }
+          
+          // Convert auth users to our format and create missing profiles
+          const convertedUsers = await Promise.all(
+            authUsers.users.map(async (authUser) => {
+              // Check if profile exists
+              const { data: existingProfile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', authUser.id)
+                .maybeSingle();
+              
+              if (!existingProfile && authUser.email) {
+                // Create missing profile
+                console.log(`Creating missing profile for user: ${authUser.email}`);
+                const { error: insertError } = await supabase
+                  .from('profiles')
+                  .insert({
+                    id: authUser.id,
+                    email: authUser.email,
+                    first_name: authUser.user_metadata?.first_name,
+                    last_name: authUser.user_metadata?.last_name,
+                    created_at: authUser.created_at
+                  });
+                
+                if (insertError) {
+                  console.error('Error creating profile:', insertError);
+                }
+              }
+              
+              return {
+                id: authUser.id,
+                email: authUser.email || '',
+                created_at: authUser.created_at,
+                first_name: authUser.user_metadata?.first_name || existingProfile?.first_name,
+                last_name: authUser.user_metadata?.last_name || existingProfile?.last_name
+              };
+            })
+          );
+          
+          setUsers(convertedUsers);
+          toast({
+            title: "Users Loaded",
+            description: "Users loaded from auth system and profiles synchronized.",
+          });
+        } catch (authError) {
+          console.error('Alternative loading method failed:', authError);
+          throw new Error('Unable to load users. Please ensure you have proper admin permissions.');
+        }
+      } else {
+        console.log('Loaded users from profiles:', profilesData);
+        setUsers(profilesData || []);
       }
-      
-      console.log('Loaded users:', data);
-      setUsers(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading users:', error);
       toast({
         title: "Error",
-        description: "Failed to load users. Make sure you have admin privileges.",
+        description: error.message || "Failed to load users. Make sure you have admin privileges.",
         variant: "destructive"
       });
     } finally {
@@ -72,15 +132,25 @@ const UserManagement = () => {
 
   const loadUserRoles = async () => {
     try {
+      console.log('Loading user roles...');
       const { data, error } = await supabase
         .from('user_roles')
         .select('*');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading user roles:', error);
+        throw error;
+      }
       
+      console.log('Loaded user roles:', data);
       setUserRoles(data || []);
     } catch (error) {
       console.error('Error loading user roles:', error);
+      toast({
+        title: "Warning",
+        description: "Failed to load user roles. Role information may be incomplete.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -89,6 +159,7 @@ const UserManagement = () => {
     
     setAssigningUserId(userId);
     try {
+      console.log('Assigning admin role to user:', userId);
       const { error } = await supabase.rpc('assign_admin_role', {
         _user_id: userId
       });
@@ -154,7 +225,10 @@ const UserManagement = () => {
       </div>
 
       {/* Create Admin User Form */}
-      <CreateAdminUserForm onUserCreated={loadUsers} />
+      <CreateAdminUserForm onUserCreated={() => {
+        loadUsers();
+        loadUserRoles();
+      }} />
 
       {/* Search Section */}
       <Card>
@@ -162,6 +236,7 @@ const UserManagement = () => {
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
             Search Users
+            {isLoading && <RefreshCw className="h-4 w-4 animate-spin" />}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -179,10 +254,15 @@ const UserManagement = () => {
             </div>
             <div className="flex items-end">
               <Button 
-                onClick={loadUsers}
+                onClick={() => {
+                  loadUsers();
+                  loadUserRoles();
+                }}
                 disabled={isLoading}
                 variant="outline"
+                className="flex items-center gap-2"
               >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 {isLoading ? "Loading..." : "Refresh"}
               </Button>
             </div>
@@ -196,12 +276,29 @@ const UserManagement = () => {
           <CardTitle>All Users ({filteredUsers.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredUsers.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-8">
+              <RefreshCw className="w-8 h-8 mx-auto mb-4 text-gray-400 animate-spin" />
+              <p className="text-gray-600">Loading users...</p>
+            </div>
+          ) : filteredUsers.length === 0 ? (
             <div className="text-center py-8">
               <User className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500">
+              <p className="text-gray-500 mb-2">
                 {searchEmail ? "No users found matching your search." : "No users found."}
               </p>
+              {!searchEmail && (
+                <Button 
+                  onClick={() => {
+                    loadUsers();
+                    loadUserRoles();
+                  }}
+                  variant="outline"
+                  className="mt-2"
+                >
+                  Try Loading Again
+                </Button>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -227,6 +324,7 @@ const UserManagement = () => {
                           <p className="text-sm text-gray-500">
                             Joined: {new Date(user.created_at).toLocaleDateString()}
                           </p>
+                          <p className="text-xs text-gray-400">ID: {user.id}</p>
                         </div>
                       </div>
                     </div>
@@ -285,7 +383,8 @@ const UserManagement = () => {
               <p className="font-medium mb-1">Admin User Management</p>
               <p>
                 You can create new admin users directly from this interface, search existing users by name or email, 
-                and assign admin roles to existing users. Admin users have full access to the dashboard.
+                and assign admin roles to existing users. If you don't see users, try refreshing - the system will 
+                synchronize profiles automatically.
               </p>
             </div>
           </div>
