@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from '@/hooks/useAuth';
+import { supabaseService } from '@/services/supabaseService';
 import { toast } from '@/hooks/use-toast';
 
 interface EditProfileFormProps {
@@ -12,7 +13,7 @@ interface EditProfileFormProps {
 }
 
 const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) => {
-  const { userProfile, updateProfile, isLoading } = useAuth();
+  const { userProfile, updateProfile, isLoading, user } = useAuth();
   const [firstName, setFirstName] = useState(userProfile?.firstName || '');
   const [lastName, setLastName] = useState(userProfile?.lastName || '');
   const [phone, setPhone] = useState(userProfile?.phone || '');
@@ -26,11 +27,29 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
     setIsSubmitting(true);
     
     try {
+      console.log('📝 Updating profile with data:', { firstName, lastName, phone });
+      
+      // Update the auth profile first
       await updateProfile({
         firstName,
         lastName,
         phone,
       });
+      
+      // Also update the customer record if it exists
+      if (user) {
+        const customer = await supabaseService.getCurrentUserCustomer();
+        if (customer) {
+          console.log('👤 Updating customer record:', customer.id);
+          await supabaseService.updateCustomer(customer.id, {
+            first_name: firstName,
+            last_name: lastName,
+            fullname: `${firstName} ${lastName}`,
+            phone: phone,
+          });
+          console.log('✅ Customer record updated successfully');
+        }
+      }
       
       toast({
         title: 'Profile updated successfully!',
@@ -39,7 +58,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
       
       onSave();
     } catch (error: any) {
-      console.error('Profile update error:', error);
+      console.error('❌ Profile update error:', error);
       toast({
         title: 'Update failed',
         description: error.message || 'Failed to update profile',

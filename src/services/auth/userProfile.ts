@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { supabaseService } from "@/services/supabaseService";
 
 export interface AuthUser {
   id: string;
@@ -31,7 +32,10 @@ export class UserProfileService {
   }
 
   async updateUserProfile(userId: string, updates: Partial<Omit<AuthUser, 'id' | 'email'>>) {
-    const { data, error } = await supabase
+    console.log('🔄 Updating user profile:', { userId, updates });
+    
+    // Update profiles table
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .update({
         first_name: updates.firstName,
@@ -43,8 +47,32 @@ export class UserProfileService {
       .select()
       .single();
 
-    if (error) throw error;
-    return data;
+    if (profileError) {
+      console.error('❌ Profile update error:', profileError);
+      throw profileError;
+    }
+
+    console.log('✅ Profile updated:', profileData);
+
+    // Also update customer record if it exists
+    try {
+      const customer = await supabaseService.getCustomerByUserId(userId);
+      if (customer) {
+        console.log('👤 Updating linked customer record:', customer.id);
+        await supabaseService.updateCustomer(customer.id, {
+          first_name: updates.firstName,
+          last_name: updates.lastName,
+          fullname: updates.firstName && updates.lastName ? `${updates.firstName} ${updates.lastName}` : customer.fullname,
+          phone: updates.phone,
+        });
+        console.log('✅ Customer record synced');
+      }
+    } catch (customerError) {
+      console.warn('⚠️ Could not sync customer record:', customerError);
+      // Don't throw error for customer sync failure
+    }
+
+    return profileData;
   }
 }
 
