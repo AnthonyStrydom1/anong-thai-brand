@@ -27,6 +27,10 @@ import AdminPage from "./pages/AdminPage";
 import AdminSetupPage from "./pages/AdminSetupPage";
 import AuthPage from "./pages/AuthPage";
 import CreateCustomerPage from "./pages/CreateCustomerPage";
+import Shipping from "./pages/Shipping";
+import Returns from "./pages/Returns";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +66,10 @@ function App() {
                     <Route path="/admin-setup" element={<AdminSetupPage />} />
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/create-customer" element={<CreateCustomerPage />} />
+                    <Route path="/shipping" element={<Shipping />} />
+                    <Route path="/returns" element={<Returns />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/terms" element={<Terms />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </BrowserRouter>

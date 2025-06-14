@@ -1,16 +1,25 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { useSupabaseProducts } from '@/hooks/useSupabaseProducts';
 import ProductList from './product/ProductList';
 import NavigationBanner from './NavigationBanner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
-const ProductGrid = () => {
+interface ProductGridProps {
+  initialCategory?: string | null;
+}
+
+const ProductGrid = ({ initialCategory }: ProductGridProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { language } = useLanguage();
   const { products, isLoading, error } = useSupabaseProducts();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategory, setActiveCategory] = useState(initialCategory || 'all');
   
   const translations = {
     en: {
@@ -38,6 +47,46 @@ const ProductGrid = () => {
   };
 
   const t = translations[language];
+
+  // Update category when URL parameter changes
+  useEffect(() => {
+    if (initialCategory && initialCategory !== activeCategory) {
+      setActiveCategory(initialCategory);
+    }
+  }, [initialCategory]);
+
+  // Filter products based on search and category
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = !searchTerm || 
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesCategory = activeCategory === 'all' || 
+      product.category === activeCategory ||
+      (activeCategory === 'curry-pastes' && product.category === 'curry-pastes') ||
+      (activeCategory === 'stir-fry-sauces' && product.category === 'stir-fry-sauces') ||
+      (activeCategory === 'dipping-sauces' && product.category === 'dipping-sauces');
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const categories = [
+    { id: 'all', label: t.all },
+    { id: 'curry-pastes', label: t.curryPastes },
+    { id: 'stir-fry-sauces', label: t.stirFrySauces },
+    { id: 'dipping-sauces', label: t.dippingSauces }
+  ];
+
+  const handleCategoryChange = (categoryId: string) => {
+    setActiveCategory(categoryId);
+    // Update URL parameter
+    if (categoryId === 'all') {
+      searchParams.delete('category');
+    } else {
+      searchParams.set('category', categoryId);
+    }
+    setSearchParams(searchParams, { replace: true });
+  };
 
   if (isLoading) {
     return (
@@ -108,9 +157,43 @@ const ProductGrid = () => {
             </p>
           </motion.div>
           
+          {/* Search and Filter Controls */}
+          <div className="mb-8 md:mb-12">
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-anong-black/60 h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder={t.search}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 anong-input"
+                />
+              </div>
+            </div>
+            
+            {/* Category Filter */}
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <Button
+                  key={category.id}
+                  variant={activeCategory === category.id ? "gold" : "ghost"}
+                  size="default"
+                  onClick={() => handleCategoryChange(category.id)}
+                  className={activeCategory === category.id ? 
+                    "bg-anong-gold text-anong-black hover:bg-anong-warm-yellow font-medium" : 
+                    "text-anong-black hover:bg-anong-gold/10 border border-anong-gold/20"
+                  }
+                >
+                  {category.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+          
           {/* Products List */}
           <ProductList
-            products={products}
+            products={filteredProducts}
             noProductsMessage={t.noProducts}
           />
         </div>
