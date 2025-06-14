@@ -205,12 +205,49 @@ const Checkout = () => {
         return;
       }
 
-      // Create order using EFT payment method
-      const orderDataForSubmission = {
-        items: items,
-        total: total,
-        customerInfo: formData,
-        selectedShipping: selectedShippingRate
+      // Get customer ID from the customers table
+      const { data: customerData, error: customerError } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (customerError || !customerData) {
+        toast({
+          title: "Customer Error",
+          description: "Could not find customer information. Please try again.",
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+        return;
+      }
+
+      // Format shipping and billing addresses
+      const shippingAddress = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        address: formData.address,
+        city: formData.city,
+        postalCode: formData.postalCode,
+        phone: formData.phone
+      };
+
+      // Create order data in the correct format
+      const orderDataForSubmission: CreateOrderData = {
+        customer_id: customerData.id,
+        items: items.map(item => ({
+          product_id: item.product.id,
+          product_name: item.product.name,
+          product_sku: item.product.sku,
+          quantity: item.quantity,
+          unit_price: item.product.price,
+          total_price: item.product.price * item.quantity
+        })),
+        shipping_address: shippingAddress,
+        billing_address: shippingAddress, // Use same as shipping for now
+        shipping_amount: selectedShippingRate.cost,
+        shipping_method: selectedShippingRate.description,
+        notes: `Payment method: EFT Bank Transfer`
       };
 
       console.log('Creating EFT order with data:', orderDataForSubmission);
