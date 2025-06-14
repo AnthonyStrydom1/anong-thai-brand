@@ -37,12 +37,15 @@ const AboutPreview = () => {
             <p className="text-gray-700 mb-8 text-lg leading-relaxed">
               {t.description}
             </p>
-            <Button 
-              asChild
-              className="bg-anong-deep-green hover:bg-anong-deep-green/90"
-            >
-              <Link to="/about">{t.cta}</Link>
-            </Button>
+            <Link to="/about">
+              <Button 
+                variant="default"
+                size="lg"
+                className="bg-anong-black text-anong-ivory hover:bg-anong-deep-green transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                {t.cta}
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
