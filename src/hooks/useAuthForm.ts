@@ -1,106 +1,49 @@
 
 import { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
-import { mfaAuthService } from '@/services/mfaAuthService';
-import { authService } from '@/services/authService';
-import { useAuth } from '@/hooks/useAuth';
-
-interface FormData {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-}
+import { useAuth } from './useAuth';
+import { toast } from './use-toast';
 
 export const useAuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [loginAttempted, setLoginAttempted] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
     firstName: '',
     lastName: ''
   });
 
-  const { resetPassword } = useAuth();
+  const { signUp, signIn, resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.email || !formData.password) return;
+
     setIsLoading(true);
-    setLoginAttempted(true);
-
     try {
+      let result;
       if (isLogin) {
-        // For login, ALWAYS use MFA - never allow direct login
-        try {
-          await mfaAuthService.initiateSignIn({
-            email: formData.email,
-            password: formData.password
-          });
-
-          // If we get here, credentials are valid and MFA is initiated
-          return { mfaRequired: true };
-        } catch (error: any) {
-          // If initiation fails, it means invalid credentials
-          throw error;
-        }
+        result = await signIn(formData.email, formData.password);
       } else {
-        // For sign-up, create account without auto-login
-        await authService.signUp({
-          email: formData.email,
-          password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName
-        });
-        
-        // Wait longer to ensure signup completes and any auto-login is cleared
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // After successful sign-up, initiate MFA flow (no auto-login allowed)
-        try {
-          await mfaAuthService.initiateSignIn({
-            email: formData.email,
-            password: formData.password
-          });
-
-          // Always require MFA for new accounts
-          return { mfaRequired: true };
-        } catch (mfaError) {
-          console.error('MFA initiation failed after signup:', mfaError);
-          toast({
-            title: "Account Created!",
-            description: "Your account has been created. Please try signing in with MFA verification.",
-          });
-          setIsLogin(true); // Switch to login mode
-          return { mfaRequired: false };
-        }
+        result = await signUp(formData.email, formData.password, formData.firstName, formData.lastName);
       }
+      
+      // Both login and signup now return MFA indication
+      return result;
     } catch (error: any) {
       console.error('Auth error:', error);
-      
-      let errorMessage = error.message || "An error occurred during authentication.";
-      
-      // Handle specific error cases
-      if (error.message?.includes('Invalid login credentials')) {
-        errorMessage = "Invalid email or password. Please check your credentials.";
-        if (isLogin) {
-          setShowForgotPassword(true);
-        }
-      } else if (error.message?.includes('Email not confirmed')) {
-        errorMessage = "Please check your email and confirm your account before signing in.";
-      } else if (error.message?.includes('User already registered')) {
-        errorMessage = "An account with this email already exists. Please sign in instead.";
-        setIsLogin(true);
-      }
-      
       toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive"
+        title: isLogin ? 'Sign in failed' : 'Sign up failed',
+        description: error.message || 'An error occurred',
+        variant: 'destructive',
       });
+      
+      // Show forgot password option for login failures
+      if (isLogin && error.message?.includes('Invalid login credentials')) {
+        setShowForgotPassword(true);
+      }
       
       throw error;
     } finally {
@@ -137,28 +80,19 @@ export const useAuthForm = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-    
-    // Hide forgot password when user starts typing again
-    if (e.target.name === 'password' && showForgotPassword) {
-      setShowForgotPassword(false);
-    }
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (showForgotPassword) setShowForgotPassword(false);
   };
 
   const switchToLogin = () => {
     setIsLogin(true);
     setShowForgotPassword(false);
-    setLoginAttempted(false);
   };
 
   const switchToSignUp = () => {
     setIsLogin(false);
     setShowForgotPassword(false);
-    setLoginAttempted(false);
   };
 
   return {
@@ -166,7 +100,6 @@ export const useAuthForm = () => {
     isLoading,
     showPassword,
     showForgotPassword,
-    loginAttempted,
     formData,
     setShowPassword,
     handleSubmit,

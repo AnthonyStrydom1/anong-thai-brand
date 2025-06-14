@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 import { domainValidationService } from './domainValidation';
+import { mfaAuthService } from '../mfaAuthService';
 
 export interface SignUpData {
   email: string;
@@ -46,7 +47,8 @@ export class AuthOperationsService {
       await supabase.auth.signOut();
     }
 
-    return data;
+    // Return indication that MFA is required for new accounts
+    return { ...data, mfaRequired: true };
   }
 
   async signIn({ email, password }: SignInData) {
@@ -56,18 +58,14 @@ export class AuthOperationsService {
 
     domainValidationService.clearCrossDomainSessions();
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-    return data;
+    // Always use MFA flow for sign-in
+    return mfaAuthService.initiateSignIn({ email, password });
   }
 
   async signOut() {
     const { error } = await supabase.auth.signOut();
     domainValidationService.clearDomainKey();
+    mfaAuthService.clearMFASession();
     if (error) throw error;
   }
 

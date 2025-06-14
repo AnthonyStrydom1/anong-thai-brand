@@ -8,8 +8,8 @@ interface AuthContextType {
   session: Session | null;
   userProfile: AuthUser | null;
   isLoading: boolean;
-  signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ mfaRequired?: boolean }>;
+  signIn: (email: string, password: string) => Promise<{ mfaRequired?: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updateProfile: (updates: Partial<Omit<AuthUser, 'id' | 'email'>>) => Promise<void>;
@@ -74,7 +74,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
     try {
-      await authService.signUp({ email, password, firstName, lastName });
+      const result = await authService.signUp({ email, password, firstName, lastName });
+      return result;
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
@@ -83,7 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      await authService.signIn({ email, password });
+      const result = await authService.signIn({ email, password });
+      return result;
     } catch (error) {
       console.error('Sign in error:', error);
       throw error;
