@@ -68,10 +68,40 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
       if (authError) throw authError;
 
       if (authData.user) {
-        // Wait a moment for the user to be created
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Wait longer for the user profile to be created by the trigger
+        await new Promise(resolve => setTimeout(resolve, 3000));
 
-        // Assign admin role using the RPC function
+        // Verify the profile was created before assigning role
+        let profileExists = false;
+        let attempts = 0;
+        const maxAttempts = 5;
+
+        while (!profileExists && attempts < maxAttempts) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', authData.user.id)
+            .maybeSingle();
+
+          if (profile) {
+            profileExists = true;
+          } else {
+            attempts++;
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+
+        if (!profileExists) {
+          toast({
+            title: "Warning",
+            description: "User created but profile setup is still in progress. Please try assigning admin role manually later.",
+            variant: "destructive"
+          });
+          onUserCreated();
+          return;
+        }
+
+        // Now assign admin role
         const { error: roleError } = await supabase.rpc('assign_admin_role', {
           _user_id: authData.user.id
         });
@@ -80,13 +110,13 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
           console.error('Role assignment error:', roleError);
           toast({
             title: "Warning",
-            description: `User created but admin role assignment failed: ${roleError.message}`,
+            description: `User created but admin role assignment failed: ${roleError.message}. You can assign the role manually later.`,
             variant: "destructive"
           });
         } else {
           toast({
             title: "Success!",
-            description: `Admin user ${formData.email} created successfully.`,
+            description: `Admin user ${formData.email} created successfully with admin role assigned.`,
           });
         }
 
