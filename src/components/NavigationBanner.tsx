@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -38,14 +39,19 @@ const NavigationBanner = () => {
 
   const handleLogout = async () => {
     try {
+      console.log('🔄 NavigationBanner: Starting logout process');
       await signOut();
+      console.log('✅ NavigationBanner: Logout successful');
       toast({
         title: t.logoutSuccess || 'Successfully logged out',
       });
-    } catch (error) {
-      console.error('Logout error:', error);
+      // Navigate to home after successful logout
+      navigate('/');
+    } catch (error: any) {
+      console.error('❌ NavigationBanner: Logout error:', error);
       toast({
         title: 'Error logging out',
+        description: error?.message || 'An unexpected error occurred',
         variant: 'destructive',
       });
     }
