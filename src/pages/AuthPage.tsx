@@ -27,61 +27,28 @@ const AuthPage = () => {
     switchToSignUp
   } = useAuthForm();
 
-  // Enhanced MFA detection function
-  const checkAndSetMFA = () => {
-    const hasPending = mfaAuthService.hasPendingMFA();
-    const pendingEmail = mfaAuthService.getPendingMFAEmail();
-    const sessionData = sessionStorage.getItem('mfa_session_data');
-    const challengeId = sessionStorage.getItem('mfa_challenge_id');
-    
-    console.log('🔍 Enhanced MFA Check:', {
-      hasPending,
-      pendingEmail,
-      hasSessionData: !!sessionData,
-      hasChallengeId: !!challengeId,
-      currentShowMFA: showMFA,
-      currentMfaEmail: mfaEmail
-    });
-    
-    if (sessionData && pendingEmail) {
-      console.log('✅ Setting MFA state - Email:', pendingEmail);
-      setShowMFA(true);
-      setMfaEmail(pendingEmail);
-      return true;
-    }
-    
-    return false;
-  };
-
-  // Check for MFA status on mount and set up monitoring
+  // Check for MFA status on mount
   useEffect(() => {
     console.log('📱 AuthPage mounted, checking initial MFA state');
     
-    // Initial check
-    checkAndSetMFA();
-    
-    // Set up interval to check for MFA state changes
-    const mfaCheckInterval = setInterval(() => {
-      if (!showMFA) { // Only check if not already showing MFA
-        checkAndSetMFA();
-      }
-    }, 500);
-    
-    // Monitor session storage changes
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'mfa_session_data' || e.key === 'mfa_challenge_id') {
-        console.log('📦 Session storage changed:', e.key, e.newValue);
-        setTimeout(checkAndSetMFA, 100);
+    const checkMFA = () => {
+      const sessionData = sessionStorage.getItem('mfa_session_data');
+      const pendingEmail = mfaAuthService.getPendingMFAEmail();
+      
+      console.log('🔍 Initial MFA Check:', {
+        hasSessionData: !!sessionData,
+        pendingEmail,
+      });
+      
+      if (sessionData && pendingEmail) {
+        console.log('✅ Found pending MFA, showing verification');
+        setShowMFA(true);
+        setMfaEmail(pendingEmail);
       }
     };
     
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      clearInterval(mfaCheckInterval);
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [showMFA]);
+    checkMFA();
+  }, []);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -97,30 +64,49 @@ const AuthPage = () => {
       console.log('📝 Form submission result:', result);
       
       if (result?.mfaRequired) {
-        console.log('🔐 MFA required! Starting enhanced detection...');
+        console.log('🔐 MFA required! Checking for session data...');
         
-        // Force check after a short delay
-        setTimeout(() => {
-          const detected = checkAndSetMFA();
-          if (detected) {
+        // Poll for MFA session data with exponential backoff
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        const pollForMFA = () => {
+          attempts++;
+          const sessionData = sessionStorage.getItem('mfa_session_data');
+          const pendingEmail = mfaAuthService.getPendingMFAEmail();
+          
+          console.log(`🔄 MFA Poll attempt ${attempts}:`, {
+            hasSessionData: !!sessionData,
+            pendingEmail,
+          });
+          
+          if (sessionData && pendingEmail) {
+            console.log('✅ MFA session found, showing verification');
+            setShowMFA(true);
+            setMfaEmail(pendingEmail);
+            
             toast({
               title: isLogin ? "MFA Required" : "Account Created!",
               description: isLogin 
                 ? "Please check your email for the verification code."
                 : "Please check your email for the verification code to complete your registration.",
             });
+          } else if (attempts < maxAttempts) {
+            // Exponential backoff: 100ms, 200ms, 400ms, 800ms, etc.
+            const delay = Math.min(100 * Math.pow(2, attempts - 1), 2000);
+            setTimeout(pollForMFA, delay);
           } else {
-            console.log('⚠️ MFA not detected immediately, will retry...');
+            console.log('⚠️ MFA session not found after maximum attempts');
+            toast({
+              title: "Error",
+              description: "Failed to initialize MFA verification. Please try again.",
+              variant: "destructive"
+            });
           }
-        }, 1000);
+        };
         
-        // Backup check after longer delay
-        setTimeout(() => {
-          if (!showMFA) {
-            console.log('🔄 Backup MFA check...');
-            checkAndSetMFA();
-          }
-        }, 3000);
+        // Start polling immediately
+        pollForMFA();
       }
     } catch (error) {
       console.error('❌ Form submission error:', error);
@@ -164,7 +150,6 @@ const AuthPage = () => {
     mfaEmail, 
     isLogin,
     sessionData: !!sessionStorage.getItem('mfa_session_data'),
-    challengeId: !!sessionStorage.getItem('mfa_challenge_id')
   });
 
   // Show MFA verification if needed
@@ -202,16 +187,6 @@ const AuthPage = () => {
           onSwitchMode={handleSwitchMode}
         />
       </div>
-      
-      {/* Debug panel - remove this after testing */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-4 right-4 bg-black text-white p-4 rounded text-xs max-w-sm">
-          <div>Show MFA: {showMFA.toString()}</div>
-          <div>MFA Email: {mfaEmail || 'none'}</div>
-          <div>Session Data: {!!sessionStorage.getItem('mfa_session_data') ? 'yes' : 'no'}</div>
-          <div>Challenge ID: {!!sessionStorage.getItem('mfa_challenge_id') ? 'yes' : 'no'}</div>
-        </div>
-      )}
     </div>
   );
 };
