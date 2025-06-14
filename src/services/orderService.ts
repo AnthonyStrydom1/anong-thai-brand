@@ -1,0 +1,110 @@
+
+import { supabaseService } from './supabaseService';
+import { supabase } from '@/integrations/supabase/client';
+
+interface CreateOrderData {
+  customerInfo: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    address: string;
+    city: string;
+    postalCode: string;
+    phone: string;
+  };
+  items: Array<{
+    product: {
+      id: string;
+      name: string;
+      price: number;
+    };
+    quantity: number;
+  }>;
+  total: number;
+}
+
+export class OrderService {
+  async createOrder(orderData: CreateOrderData) {
+    try {
+      console.log('Creating order with data:', orderData);
+      
+      // Get or create customer
+      let customer = await supabaseService.getCurrentUserCustomer();
+      
+      if (!customer) {
+        // Create customer if doesn't exist
+        customer = await supabaseService.createCustomer({
+          fullname: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
+          email: orderData.customerInfo.email,
+          first_name: orderData.customerInfo.firstName,
+          last_name: orderData.customerInfo.lastName,
+          phone: orderData.customerInfo.phone,
+          total_orders: 0,
+          total_spent: 0,
+          is_active: true,
+          marketing_consent: false,
+          user_id: (await supabase.auth.getUser()).data.user?.id || null
+        });
+      }
+
+      // Calculate totals
+      const subtotal = orderData.total;
+      const shipping_amount = 0; // Free shipping
+      const tax_amount = 0; // No tax for now
+      const total_amount = subtotal + shipping_amount + tax_amount;
+
+      // Create order
+      const order = await supabaseService.createOrder({
+        customer_id: customer.id,
+        status: 'pending',
+        payment_status: 'pending',
+        fulfillment_status: 'unfulfilled',
+        subtotal: subtotal,
+        shipping_amount: shipping_amount,
+        tax_amount: tax_amount,
+        discount_amount: 0,
+        total_amount: total_amount,
+        currency: 'USD',
+        billing_address: {
+          first_name: orderData.customerInfo.firstName,
+          last_name: orderData.customerInfo.lastName,
+          address: orderData.customerInfo.address,
+          city: orderData.customerInfo.city,
+          postal_code: orderData.customerInfo.postalCode,
+          phone: orderData.customerInfo.phone
+        },
+        shipping_address: {
+          first_name: orderData.customerInfo.firstName,
+          last_name: orderData.customerInfo.lastName,
+          address: orderData.customerInfo.address,
+          city: orderData.customerInfo.city,
+          postal_code: orderData.customerInfo.postalCode,
+          phone: orderData.customerInfo.phone
+        }
+      });
+
+      console.log('Order created:', order);
+
+      // Create order items
+      for (const item of orderData.items) {
+        const orderItem = await supabaseService.createOrderItem({
+          order_id: order.id,
+          product_id: item.product.id,
+          product_name: item.product.name,
+          product_sku: item.product.id, // Using ID as SKU for now
+          quantity: item.quantity,
+          unit_price: item.product.price,
+          total_price: item.product.price * item.quantity
+        });
+        console.log('Order item created:', orderItem);
+      }
+
+      return order;
+    } catch (error) {
+      console.error('Error creating order:', error);
+      throw error;
+    }
+  }
+}
+
+export const orderService = new OrderService();

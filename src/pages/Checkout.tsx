@@ -12,15 +12,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingBag } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 const Checkout = () => {
   const { language } = useLanguage();
   const { items, total, clearCart } = useCart();
   const { formatPrice } = useCurrency();
+  const [searchParams] = useSearchParams();
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [orderData, setOrderData] = useState<any>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Check for successful payment
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const sessionId = searchParams.get('session_id');
+    
+    if (success && sessionId) {
+      handlePaymentSuccess(sessionId);
+    }
+  }, [searchParams]);
   
   // Scroll to top when component mounts
   useEffect(() => {
@@ -55,8 +69,9 @@ const Checkout = () => {
       subtotal: "Subtotal",
       shipping: "Shipping",
       total: "Total",
-      placeOrder: "Place Order",
-      free: "Free"
+      placeOrder: "Pay with Stripe",
+      free: "Free",
+      processing: "Processing..."
     },
     th: {
       title: "ชำระเงิน",
@@ -75,8 +90,9 @@ const Checkout = () => {
       subtotal: "ราคารวม",
       shipping: "ค่าจัดส่ง",
       total: "ราคารวมทั้งสิ้น",
-      placeOrder: "สั่งซื้อ",
-      free: "ฟรี"
+      placeOrder: "ชำระเงินด้วย Stripe",
+      free: "ฟรี",
+      processing: "กำลังดำเนินการ..."
     }
   };
 
@@ -90,34 +106,71 @@ const Checkout = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Generate order number
-    const orderNumber = `ORD-${Date.now()}`;
-    
-    // Store order data for success page
-    const orderInfo = {
-      orderNumber,
-      items: items,
-      total: total,
-      customerInfo: {
-        email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName
+  const handlePaymentSuccess = async (sessionId: string) => {
+    try {
+      console.log('Handling payment success for session:', sessionId);
+      
+      const { data, error } = await supabase.functions.invoke('handle-payment-success', {
+        body: { sessionId }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setOrderData(data.order);
+        setOrderSubmitted(true);
+        clearCart();
+        toast({
+          title: "Payment Successful!",
+          description: "Your order has been created successfully.",
+        });
       }
-    };
+    } catch (error) {
+      console.error('Error handling payment success:', error);
+      toast({
+        title: "Error",
+        description: "There was an issue processing your payment. Please contact support.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
     
-    setOrderData(orderInfo);
-    
-    // Clear cart after successful order
-    clearCart();
-    
-    // Show success page
-    setOrderSubmitted(true);
-    
-    // Log order for debugging
-    console.log('Order submitted:', { formData, items, total });
+    try {
+      // Prepare order data
+      const orderDataForPayment = {
+        items: items,
+        total: total,
+        customerInfo: formData
+      };
+
+      console.log('Creating checkout session with data:', orderDataForPayment);
+
+      // Create Stripe checkout session
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { orderData: orderDataForPayment }
+      });
+
+      if (error) throw error;
+
+      if (data.url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create checkout session. Please try again.",
+        variant: "destructive"
+      });
+      setIsProcessing(false);
+    }
   };
 
   if (items.length === 0 && !orderSubmitted) {
@@ -335,8 +388,12 @@ const Checkout = () => {
                     <span className="text-anong-black">{formatPrice(total)}</span>
                   </div>
                   
-                  <Button type="submit" className="w-full anong-btn-primary mt-6">
-                    {t.placeOrder}
+                  <Button 
+                    type="submit" 
+                    className="w-full anong-btn-primary mt-6"
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? t.processing : t.placeOrder}
                   </Button>
                 </CardContent>
               </Card>
