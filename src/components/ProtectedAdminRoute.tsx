@@ -14,6 +14,13 @@ const ProtectedAdminRoute = ({ children }: ProtectedAdminRouteProps) => {
   const { user, isLoading: authLoading } = useAuth();
   const { isAdmin, isLoading: rolesLoading } = useUserRoles();
 
+  console.log('🔐 ProtectedAdminRoute: Auth state check', { 
+    user: !!user, 
+    authLoading, 
+    rolesLoading, 
+    isAdminResult: user ? isAdmin() : false 
+  });
+
   // Show loading state while checking authentication and roles
   if (authLoading || rolesLoading) {
     return (
@@ -30,11 +37,13 @@ const ProtectedAdminRoute = ({ children }: ProtectedAdminRouteProps) => {
 
   // Redirect to login if not authenticated
   if (!user) {
+    console.log('🚪 ProtectedAdminRoute: No user found, redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
 
   // Show access denied if not admin
   if (!isAdmin()) {
+    console.log('❌ ProtectedAdminRoute: User is not admin, showing access denied');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -56,6 +65,7 @@ const ProtectedAdminRoute = ({ children }: ProtectedAdminRouteProps) => {
     );
   }
 
+  console.log('✅ ProtectedAdminRoute: User is authenticated admin, allowing access');
   // Render protected content if user is authenticated and admin
   return <>{children}</>;
 };
