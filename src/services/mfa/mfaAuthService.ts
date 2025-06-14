@@ -53,12 +53,19 @@ class MFAAuthService {
       const emailResult = await mfaEmailService.sendMFAEmail(email);
       console.log('✅ MFA Service: MFA email sent successfully:', emailResult);
 
-      // Trigger MFA session stored event to update UI
-      window.dispatchEvent(new CustomEvent('mfa-session-stored', { 
-        detail: { email, challengeId: emailResult.challengeId } 
-      }));
+      // Only trigger MFA session stored event after successful email sending
+      if (emailResult.success) {
+        // Trigger MFA session stored event to update UI
+        window.dispatchEvent(new CustomEvent('mfa-session-stored', { 
+          detail: { email, challengeId: emailResult.challengeId } 
+        }));
+        console.log('🎯 MFA Service: MFA flow initiated successfully');
+      } else {
+        // If email failed, clear the session
+        mfaSessionManager.clearSession();
+        throw new Error('Failed to send MFA email');
+      }
 
-      console.log('🎯 MFA Service: MFA flow initiated successfully');
       return { mfaRequired: true };
     } catch (error: any) {
       console.error('❌ MFA Service: Sign in initiation failed:', error);

@@ -55,6 +55,12 @@ const UserMenu = ({
   // Check for pending MFA status
   useEffect(() => {
     const checkMFAStatus = () => {
+      // Only check MFA status if user is not logged in
+      if (isLoggedIn) {
+        setHasPendingMFA(false);
+        return;
+      }
+      
       const pendingMFA = mfaAuthService.hasPendingMFA();
       setHasPendingMFA(pendingMFA);
       
@@ -67,7 +73,9 @@ const UserMenu = ({
     // Listen for MFA session events
     const handleMFAStored = () => {
       console.log('📧 UserMenu: MFA session stored');
-      setHasPendingMFA(true);
+      if (!isLoggedIn) {
+        setHasPendingMFA(true);
+      }
     };
 
     const handleMFACleared = () => {
@@ -97,6 +105,12 @@ const UserMenu = ({
     
     console.log('🖱️ UserMenu: Button clicked', { isLoggedIn, hasPendingMFA });
     
+    // If user is logged in, show dropdown menu
+    if (isLoggedIn) {
+      setIsDropdownOpen(!isDropdownOpen);
+      return;
+    }
+    
     // If we have pending MFA, redirect to auth page
     if (hasPendingMFA) {
       console.log('🔄 UserMenu: Redirecting to auth page for MFA');
@@ -104,32 +118,27 @@ const UserMenu = ({
       return;
     }
     
-    if (!isLoggedIn) {
-      // If not logged in, show login modal or redirect to auth page
-      if (isMobile) {
-        window.location.href = '/auth';
-      } else {
-        setShowLoginModal(true);
-      }
+    // If not logged in and no MFA, show login modal or redirect to auth page
+    if (isMobile) {
+      window.location.href = '/auth';
     } else {
-      // If logged in, show dropdown menu
-      setIsDropdownOpen(!isDropdownOpen);
+      setShowLoginModal(true);
     }
   };
 
   const handleLogout = () => {
     setIsDropdownOpen(false);
+    // Clear any MFA session on logout
+    mfaAuthService.clearMFASession();
     onLogout();
   };
 
-  // Show different states based on auth and MFA status
-  const shouldShowAsLoggedOut = !isLoggedIn;
+  // Show dropdown only if logged in and no pending MFA
   const shouldShowDropdown = isLoggedIn && !hasPendingMFA;
 
   console.log('🎯 UserMenu render state:', { 
     isLoggedIn, 
     hasPendingMFA, 
-    shouldShowAsLoggedOut, 
     shouldShowDropdown 
   });
 
@@ -137,7 +146,7 @@ const UserMenu = ({
     <>
       <DropdownMenu open={shouldShowDropdown ? isDropdownOpen : false} onOpenChange={setIsDropdownOpen}>
         <UserMenuButton 
-          isLoggedIn={!shouldShowAsLoggedOut}
+          isLoggedIn={isLoggedIn}
           onClick={handleTriggerClick}
           translations={translations}
         />

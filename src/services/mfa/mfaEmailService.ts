@@ -4,7 +4,7 @@ import { mfaSessionManager } from './mfaSessionManager';
 import type { MFAResendResult } from './mfaTypes';
 
 export class MFAEmailService {
-  async sendMFAEmail(email: string): Promise<{ challengeId?: string }> {
+  async sendMFAEmail(email: string): Promise<{ challengeId?: string; success?: boolean }> {
     console.log('📧 MFA Email Service: Starting email send for:', email);
     
     try {
@@ -46,7 +46,7 @@ export class MFAEmailService {
         console.warn('⚠️ MFA Email Service: No challenge ID returned');
       }
 
-      return emailData;
+      return { ...emailData, success: true };
     } catch (error: any) {
       console.error('❌ MFA Email Service: Critical error:', {
         message: error.message,

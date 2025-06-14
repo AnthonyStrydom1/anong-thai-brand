@@ -18,10 +18,7 @@ export class MFASessionManager {
       sessionStorage.setItem(this.MFA_SESSION_KEY, dataStr);
       localStorage.setItem(this.MFA_SESSION_KEY, dataStr);
       
-      // Dispatch a custom event to notify listeners
-      window.dispatchEvent(new CustomEvent('mfa-session-stored', { detail: sessionData }));
-      
-      console.log('📡 MFA Session Manager: Session data stored and event dispatched');
+      console.log('📡 MFA Session Manager: Session data stored');
     } catch (error) {
       console.error('❌ MFA Session Manager: Failed to store session data:', error);
     }
@@ -102,12 +99,16 @@ export class MFASessionManager {
   hasPendingMFA(): boolean {
     const sessionData = this.getSessionData();
     const hasChallenge = !!this.getChallengeId();
-    const result = !!sessionData && hasChallenge && !this.isSessionExpired(sessionData);
+    const isValid = sessionData && !this.isSessionExpired(sessionData);
+    const result = !!sessionData && hasChallenge && isValid;
+    
     console.log('❓ MFA Session Manager: Has pending MFA:', result, { 
       hasSessionData: !!sessionData, 
       hasChallenge,
-      isExpired: sessionData ? this.isSessionExpired(sessionData) : false
+      isExpired: sessionData ? this.isSessionExpired(sessionData) : false,
+      isValid
     });
+    
     return result;
   }
 }
