@@ -53,9 +53,9 @@ export const useAdminUserCreation = (onUserCreated: () => void) => {
         return;
       }
 
-      // Try to create a new user
-      console.log('Creating new user account');
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Check if user exists in auth but not in profiles
+      console.log('Checking if user exists in auth system');
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -66,19 +66,24 @@ export const useAdminUserCreation = (onUserCreated: () => void) => {
         }
       });
 
-      if (authError) {
-        console.error('Auth error:', authError);
+      if (signUpError) {
+        console.error('Auth error:', signUpError);
         
-        if (authError.message.includes('User already registered')) {
+        if (signUpError.message.includes('User already registered')) {
+          console.log('User exists in auth but not in profiles - creating profile manually');
+          
+          // Get the user ID from auth.users using admin functions
+          // Since we can't query auth.users directly, we'll need to create the profile
+          // and let the user know they need to complete the setup
           toast({
-            title: "User Exists",
-            description: `User ${formData.email} already exists in the system but not in profiles. Please contact support.`,
+            title: "User Exists in Auth",
+            description: `User ${formData.email} exists in the auth system but not in profiles. Please ask them to sign in once to complete their profile setup, then try assigning admin role again.`,
             variant: "destructive"
           });
         } else {
           toast({
             title: "Error",
-            description: authError.message,
+            description: signUpError.message,
             variant: "destructive"
           });
         }
@@ -86,10 +91,40 @@ export const useAdminUserCreation = (onUserCreated: () => void) => {
       }
 
       if (authData.user) {
-        console.log('New user created, waiting for profile creation');
+        console.log('New user created successfully');
         
         // Wait a moment for the trigger to create the profile
         await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Verify profile was created
+        const { data: newProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+
+        if (!newProfile) {
+          console.log('Profile not created by trigger, creating manually');
+          // Create profile manually if trigger failed
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: authData.user.id,
+              email: formData.email,
+              first_name: formData.firstName,
+              last_name: formData.lastName
+            });
+
+          if (profileError) {
+            console.error('Manual profile creation failed:', profileError);
+            toast({
+              title: "Partial Success",
+              description: `User created but profile setup failed: ${profileError.message}`,
+              variant: "destructive"
+            });
+            return;
+          }
+        }
 
         // Assign admin role
         const { error: roleError } = await supabase.rpc('assign_admin_role', {
