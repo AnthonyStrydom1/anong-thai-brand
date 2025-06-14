@@ -7,12 +7,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ShoppingCart, Eye, Package2, Truck, CheckCircle } from "lucide-react";
 import { supabaseService, SupabaseOrder } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
+import { useAdminSecurity } from "@/hooks/useAdminSecurity";
 
 const OrderManager = () => {
   const [orders, setOrders] = useState<SupabaseOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
+  const { logAdminAction } = useAdminSecurity();
 
   useEffect(() => {
     loadOrders();
@@ -21,6 +23,8 @@ const OrderManager = () => {
   const loadOrders = async () => {
     try {
       console.log('Loading orders...');
+      await logAdminAction('view', 'orders_list', undefined, { action: 'load_orders_for_management' });
+      
       const { data, error } = await supabaseService.supabase
         .from('orders')
         .select('*')
@@ -28,6 +32,7 @@ const OrderManager = () => {
 
       if (error) {
         console.error('Orders error:', error);
+        await logAdminAction('view', 'orders_list', undefined, { error: error.message }, false);
         throw error;
       }
 
@@ -46,6 +51,9 @@ const OrderManager = () => {
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const order = orders.find(o => o.id === orderId);
+    const oldStatus = order?.status;
+    
     try {
       console.log('Updating order status:', orderId, newStatus);
       
@@ -63,6 +71,15 @@ const OrderManager = () => {
 
       console.log('Update successful:', data);
 
+      // Log the security event
+      await logAdminAction('update', 'order_status', orderId, {
+        order_number: order?.order_number,
+        old_status: oldStatus,
+        new_status: newStatus,
+        customer_id: order?.customer_id,
+        total_amount: order?.total_amount
+      });
+
       // Update the local state
       setOrders(orders.map(order => 
         order.id === orderId ? { ...order, status: newStatus } : order
@@ -78,6 +95,12 @@ const OrderManager = () => {
       }
     } catch (error) {
       console.error('Failed to update order status:', error);
+      await logAdminAction('update', 'order_status', orderId, {
+        error: error.message,
+        attempted_status: newStatus,
+        order_number: order?.order_number
+      }, false);
+      
       toast({
         title: "Error",
         description: "Failed to update order status",
@@ -87,6 +110,9 @@ const OrderManager = () => {
   };
 
   const updatePaymentStatus = async (orderId: string, newPaymentStatus: string) => {
+    const order = orders.find(o => o.id === orderId);
+    const oldPaymentStatus = order?.payment_status;
+    
     try {
       console.log('Updating payment status:', orderId, newPaymentStatus);
       
@@ -104,6 +130,15 @@ const OrderManager = () => {
 
       console.log('Payment update successful:', data);
 
+      // Log the security event
+      await logAdminAction('update', 'order_payment_status', orderId, {
+        order_number: order?.order_number,
+        old_payment_status: oldPaymentStatus,
+        new_payment_status: newPaymentStatus,
+        customer_id: order?.customer_id,
+        total_amount: order?.total_amount
+      });
+
       setOrders(orders.map(order => 
         order.id === orderId ? { ...order, payment_status: newPaymentStatus } : order
       ));
@@ -118,6 +153,12 @@ const OrderManager = () => {
       }
     } catch (error) {
       console.error('Failed to update payment status:', error);
+      await logAdminAction('update', 'order_payment_status', orderId, {
+        error: error.message,
+        attempted_payment_status: newPaymentStatus,
+        order_number: order?.order_number
+      }, false);
+      
       toast({
         title: "Error",
         description: "Failed to update payment status",
@@ -129,6 +170,8 @@ const OrderManager = () => {
   const viewOrderDetails = async (orderId: string) => {
     try {
       console.log('Loading order details for:', orderId);
+      
+      await logAdminAction('view', 'order_details', orderId, { action: 'view_order_details' });
       
       const { data, error } = await supabaseService.supabase
         .from('orders')
@@ -144,6 +187,7 @@ const OrderManager = () => {
 
       if (error) {
         console.error('Order details error:', error);
+        await logAdminAction('view', 'order_details', orderId, { error: error.message }, false);
         throw error;
       }
 

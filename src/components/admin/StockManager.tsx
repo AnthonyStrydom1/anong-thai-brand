@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,12 +7,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Package, AlertTriangle, Plus, Minus, Edit } from "lucide-react";
 import { supabaseService, SupabaseProduct } from "@/services/supabaseService";
 import { toast } from "@/components/ui/use-toast";
+import { useAdminSecurity } from "@/hooks/useAdminSecurity";
 
 const StockManager = () => {
   const [products, setProducts] = useState<SupabaseProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingStock, setEditingStock] = useState<string | null>(null);
   const [newQuantity, setNewQuantity] = useState<number>(0);
+  const { logAdminAction } = useAdminSecurity();
 
   useEffect(() => {
     loadProducts();
@@ -21,9 +22,11 @@ const StockManager = () => {
 
   const loadProducts = async () => {
     try {
+      await logAdminAction('view', 'products_list', undefined, { action: 'load_products_for_stock_management' });
       const data = await supabaseService.getProducts();
       setProducts(data);
     } catch (error) {
+      await logAdminAction('view', 'products_list', undefined, { error: error.message }, false);
       toast({
         title: "Error",
         description: "Failed to load products",
@@ -35,6 +38,9 @@ const StockManager = () => {
   };
 
   const updateStock = async (productId: string, quantity: number) => {
+    const oldQuantity = products.find(p => p.id === productId)?.stock_quantity || 0;
+    const product = products.find(p => p.id === productId);
+    
     try {
       await supabaseService.updateProductStock(productId, quantity);
       
@@ -42,9 +48,19 @@ const StockManager = () => {
       await supabaseService.createInventoryMovement({
         product_id: productId,
         movement_type: 'adjustment',
-        quantity: quantity - (products.find(p => p.id === productId)?.stock_quantity || 0),
+        quantity: quantity - oldQuantity,
         reference_type: 'adjustment',
         notes: 'Manual stock adjustment via admin portal'
+      });
+
+      // Log the security event
+      await logAdminAction('update', 'product_stock', productId, {
+        product_name: product?.name,
+        product_sku: product?.sku,
+        old_quantity: oldQuantity,
+        new_quantity: quantity,
+        quantity_change: quantity - oldQuantity,
+        method: 'manual_adjustment'
       });
 
       await loadProducts();
@@ -55,6 +71,12 @@ const StockManager = () => {
         description: "Stock updated successfully"
       });
     } catch (error) {
+      await logAdminAction('update', 'product_stock', productId, {
+        product_name: product?.name,
+        error: error.message,
+        attempted_quantity: quantity
+      }, false);
+      
       toast({
         title: "Error",
         description: "Failed to update stock",
