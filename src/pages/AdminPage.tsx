@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +10,7 @@ import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
 import NavigationBanner from '@/components/NavigationBanner';
 import { Package, ShoppingCart, Users, BarChart3, Warehouse, Shield } from 'lucide-react';
 import { supabaseService } from '@/services/supabaseService';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -22,6 +22,7 @@ const AdminPage = () => {
     lowStockItems: 0,
     outOfStockItems: 0
   });
+  const { formatPrice } = useCurrency();
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -40,7 +41,16 @@ const AdminPage = () => {
         supabaseService.supabase.from('customers').select('*')
       ]);
 
-      const revenue = orders.reduce((sum, order) => sum + order.total_amount, 0);
+      // Only count revenue from completed orders (delivered or paid status)
+      // Exclude cancelled, pending, and failed orders
+      const completedOrders = orders.filter(order => 
+        order.status === 'delivered' || 
+        (order.payment_status === 'paid' && order.status !== 'cancelled')
+      );
+      
+      // Calculate revenue in ZAR (base currency) from completed orders only
+      const revenue = completedOrders.reduce((sum, order) => sum + order.total_amount, 0);
+      
       const lowStock = products.filter(p => p.stock_quantity <= 5 && p.stock_quantity > 0).length;
       const outOfStock = products.filter(p => p.stock_quantity === 0).length;
 
@@ -48,7 +58,7 @@ const AdminPage = () => {
         totalProducts: products.length,
         totalOrders: orders.length,
         totalCustomers: customers.data?.length || 0,
-        totalRevenue: revenue,
+        totalRevenue: revenue, // This is now in ZAR and excludes cancelled orders
         lowStockItems: lowStock,
         outOfStockItems: outOfStock
       });
@@ -135,8 +145,8 @@ const AdminPage = () => {
                     <BarChart3 className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent className="pb-2">
-                    <div className="text-lg md:text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</div>
-                    <p className="text-xs text-muted-foreground">Total revenue</p>
+                    <div className="text-lg md:text-2xl font-bold">{formatPrice(stats.totalRevenue)}</div>
+                    <p className="text-xs text-muted-foreground">From completed orders</p>
                   </CardContent>
                 </Card>
               </div>
