@@ -2,19 +2,22 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useAuth } from "@/hooks/useAuth";
 import NavigationBanner from "@/components/NavigationBanner";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { orderService } from "@/services/orderService";
-import { toast } from "@/components/ui/use-toast";
+import { supabaseService } from "@/services/supabaseService";
+import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { ShoppingBag, Package } from "lucide-react";
+import OrderTracking from "@/components/OrderTracking";
 
 const Orders = () => {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { user } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -46,13 +49,23 @@ const Orders = () => {
   const t = translations[language];
 
   useEffect(() => {
-    loadOrders();
-  }, []);
+    if (user) {
+      loadOrders();
+    }
+  }, [user]);
 
   const loadOrders = async () => {
     try {
       setIsLoading(true);
-      const userOrders = await orderService.getUserOrders();
+      console.log('Loading orders for user:', user?.id);
+      
+      if (!user) {
+        console.error('No user found');
+        setOrders([]);
+        return;
+      }
+
+      const userOrders = await supabaseService.getCustomerOrdersByUserId(user.id);
       console.log('Loaded orders:', userOrders);
       setOrders(userOrders || []);
     } catch (error) {
@@ -62,6 +75,7 @@ const Orders = () => {
         description: "Failed to load orders. Please try again.",
         variant: "destructive"
       });
+      setOrders([]);
     } finally {
       setIsLoading(false);
     }
@@ -71,15 +85,15 @@ const Orders = () => {
     switch (status?.toLowerCase()) {
       case 'paid':
       case 'delivered':
-        return 'bg-green-100 text-green-800';
+        return 'default';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'secondary';
       case 'cancelled':
-        return 'bg-red-100 text-red-800';
+        return 'destructive';
       case 'shipped':
-        return 'bg-blue-100 text-blue-800';
+        return 'outline';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'secondary';
     }
   };
 
@@ -98,7 +112,7 @@ const Orders = () => {
         <main className="flex-grow container mx-auto px-4 py-12">
           <div className="text-center">
             <Package className="w-8 h-8 animate-spin mx-auto mb-4 text-anong-black/50" />
-            <p className="anong-body text-anong-black/70">Loading orders...</p>
+            <p className="text-anong-black/70">Loading orders...</p>
           </div>
         </main>
         <Footer />
@@ -114,9 +128,9 @@ const Orders = () => {
         <main className="flex-grow container mx-auto px-4 py-12">
           <div className="text-center max-w-md mx-auto">
             <ShoppingBag className="w-16 h-16 mx-auto mb-6 text-anong-black/50" />
-            <h1 className="anong-heading text-3xl mb-4 text-anong-black">{t.title}</h1>
-            <p className="anong-body text-anong-black/80 mb-8">{t.noOrders}</p>
-            <Button asChild className="anong-btn-primary">
+            <h1 className="text-3xl font-bold mb-4 text-anong-black">{t.title}</h1>
+            <p className="text-anong-black/80 mb-8">{t.noOrders}</p>
+            <Button asChild>
               <Link to="/shop">{t.startShopping}</Link>
             </Button>
           </div>
@@ -132,43 +146,47 @@ const Orders = () => {
       <NavigationBanner />
       
       <main className="flex-grow container mx-auto px-4 py-12">
-        <h1 className="anong-heading text-4xl mb-8 text-anong-black">{t.title}</h1>
+        <h1 className="text-4xl font-bold mb-8 text-anong-black">{t.title}</h1>
         
-        <div className="space-y-4">
+        <div className="space-y-6">
           {orders.map((order) => (
-            <Card key={order.id} className="anong-card">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="anong-subheading text-lg text-anong-black">
-                      {t.order} #{order.order_number}
-                    </CardTitle>
-                    <p className="anong-body-light text-sm text-anong-black/70 mt-1">
-                      {formatDate(order.created_at)}
-                    </p>
+            <div key={order.id} className="space-y-4">
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-lg text-anong-black">
+                        {t.order} #{order.order_number}
+                      </CardTitle>
+                      <p className="text-sm text-anong-black/70 mt-1">
+                        {formatDate(order.created_at)}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Badge variant={getStatusColor(order.status)}>
+                        {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                      </Badge>
+                      <p className="text-lg font-semibold text-anong-black">
+                        {formatPrice(order.total_amount)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <Badge className={getStatusColor(order.status)}>
-                      {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
-                    </Badge>
-                    <p className="anong-subheading text-lg text-anong-black">
-                      {formatPrice(order.total_amount)}
-                    </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div className="text-anong-black/80">
+                      {t.status}: <span className="font-medium">{order.payment_status}</span>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      {t.viewDetails}
+                    </Button>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center">
-                  <div className="anong-body text-anong-black/80">
-                    {/* You can add order items count here if needed */}
-                    {t.status}: <span className="font-medium">{order.payment_status}</span>
-                  </div>
-                  <Button variant="outline" className="anong-btn-secondary" size="sm">
-                    {t.viewDetails}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+              
+              {/* Add order tracking component */}
+              <OrderTracking order={order} />
+            </div>
           ))}
         </div>
       </main>

@@ -216,13 +216,34 @@ export class OrderService {
 
   async getUserOrders() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      console.log('Getting user orders...');
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Auth error:', userError);
+        throw new Error('User not authenticated');
+      }
 
-      const orders = await supabaseService.getCustomerOrdersByUserId(user.id);
-      return orders;
+      if (!user) {
+        console.error('No user found');
+        throw new Error('User not authenticated');
+      }
+
+      console.log('Fetching orders for user:', user.id);
+      
+      // Use the Supabase function to get customer orders
+      const { data: orders, error } = await supabase
+        .rpc('get_customer_orders', { user_uuid: user.id });
+
+      if (error) {
+        console.error('Error fetching orders:', error);
+        throw error;
+      }
+
+      console.log('Fetched orders:', orders);
+      return orders || [];
     } catch (error) {
-      console.error('Error fetching user orders:', error);
+      console.error('Error in getUserOrders:', error);
       throw error;
     }
   }
