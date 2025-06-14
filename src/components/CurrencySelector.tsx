@@ -5,34 +5,21 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Loader2 } from "lucide-react";
 
 const CurrencySelector = () => {
-  const { currencies, selectedCurrency, setSelectedCurrency, isLoading, lastUpdated } = useCurrency();
+  const { currencies, selectedCurrency, setSelectedCurrency, isLoading } = useCurrency();
   const { language } = useLanguage();
 
   const translations = {
     en: {
       currency: "Currency",
-      loading: "Loading rates...",
-      updated: "Updated"
+      loading: "Loading rates..."
     },
     th: {
       currency: "สกุลเงิน",
-      loading: "กำลังโหลดอัตราแลกเปลี่ยน...",
-      updated: "อัปเดตแล้ว"
+      loading: "กำลังโหลดอัตราแลกเปลี่ยน..."
     }
   };
 
   const t = translations[language];
-
-  const formatLastUpdated = (date: Date) => {
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return "just now";
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    return date.toLocaleDateString();
-  };
 
   return (
     <div className="flex items-center space-x-2">

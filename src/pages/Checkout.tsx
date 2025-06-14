@@ -1,3 +1,4 @@
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -10,11 +11,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, CreditCard, Building2 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { orderService } from "@/services/orderService";
 
 const Checkout = () => {
   const { language } = useLanguage();
@@ -24,16 +26,6 @@ const Checkout = () => {
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [orderData, setOrderData] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  // Check for successful payment
-  useEffect(() => {
-    const success = searchParams.get('success');
-    const sessionId = searchParams.get('session_id');
-    
-    if (success && sessionId) {
-      handlePaymentSuccess(sessionId);
-    }
-  }, [searchParams]);
   
   // Scroll to top when component mounts
   useEffect(() => {
@@ -68,10 +60,19 @@ const Checkout = () => {
       subtotal: "Subtotal",
       shipping: "Shipping",
       total: "Total",
-      placeOrder: "Pay with Stripe",
+      placeOrder: "Place Order (EFT Payment)",
       free: "Free",
       processing: "Processing...",
-      authRequired: "Please sign in to complete your order"
+      authRequired: "Please sign in to complete your order",
+      paymentMethod: "Payment Method",
+      eftPayment: "EFT Bank Deposit",
+      bankDetails: "Bank Details for Payment",
+      bankName: "Bank Name",
+      accountName: "Account Name",
+      accountNumber: "Account Number",
+      branchCode: "Branch Code",
+      paymentInstructions: "Payment Instructions",
+      paymentNote: "Please use your order number as the payment reference and email proof of payment to orders@anong.com"
     },
     th: {
       title: "ชำระเงิน",
@@ -90,10 +91,19 @@ const Checkout = () => {
       subtotal: "ราคารวม",
       shipping: "ค่าจัดส่ง",
       total: "ราคารวมทั้งสิ้น",
-      placeOrder: "ชำระเงินด้วย Stripe",
+      placeOrder: "สั่งซื้อ (โอนเงินผ่านธนาคาร)",
       free: "ฟรี",
       processing: "กำลังดำเนินการ...",
-      authRequired: "กรุณาเข้าสู่ระบบเพื่อทำการสั่งซื้อ"
+      authRequired: "กรุณาเข้าสู่ระบบเพื่อทำการสั่งซื้อ",
+      paymentMethod: "วิธีการชำระเงิน",
+      eftPayment: "โอนเงินผ่านธนาคาร",
+      bankDetails: "รายละเอียดบัญชีธนาคารสำหรับการชำระเงิน",
+      bankName: "ธนาคาร",
+      accountName: "ชื่อบัญชี",
+      accountNumber: "เลขที่บัญชี",
+      branchCode: "รหัสสาขา",
+      paymentInstructions: "คำแนะนำการชำระเงิน",
+      paymentNote: "กรุณาใช้หมายเลขคำสั่งซื้อเป็นข้อมูลอ้างอิงและส่งหลักฐานการชำระเงินไปที่ orders@anong.com"
     }
   };
 
@@ -105,46 +115,6 @@ const Checkout = () => {
       ...prev,
       [name]: value
     }));
-  };
-
-  const handlePaymentSuccess = async (sessionId: string) => {
-    try {
-      console.log('Handling payment success for session:', sessionId);
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      const { data, error } = await supabase.functions.invoke('handle-payment-success', {
-        body: { sessionId },
-        headers: user ? {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        } : {}
-      });
-
-      if (error) {
-        console.error('Payment success handler error:', error);
-        throw error;
-      }
-
-      if (data.success) {
-        console.log('Payment processed successfully:', data);
-        setOrderData(data.order);
-        setOrderSubmitted(true);
-        clearCart();
-        toast({
-          title: "Payment Successful!",
-          description: "Your order has been created successfully.",
-        });
-      } else {
-        throw new Error(data.error || 'Payment processing failed');
-      }
-    } catch (error) {
-      console.error('Error handling payment success:', error);
-      toast({
-        title: "Error",
-        description: "There was an issue processing your payment. Please contact support.",
-        variant: "destructive"
-      });
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -178,40 +148,38 @@ const Checkout = () => {
         return;
       }
 
-      // Prepare order data
-      const orderDataForPayment = {
+      // Create order using EFT payment method
+      const orderDataForSubmission = {
         items: items,
         total: total,
         customerInfo: formData
       };
 
-      console.log('Creating checkout session with data:', orderDataForPayment);
+      console.log('Creating EFT order with data:', orderDataForSubmission);
 
-      // Create Stripe checkout session
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { orderData: orderDataForPayment },
-        headers: {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        }
+      const order = await orderService.createOrder(orderDataForSubmission);
+      
+      const orderResult = {
+        orderNumber: order.order_number,
+        items: items,
+        total: total,
+        customerInfo: formData
+      };
+
+      setOrderData(orderResult);
+      setOrderSubmitted(true);
+      clearCart();
+      
+      toast({
+        title: "Order Created Successfully!",
+        description: `Your order #${order.order_number} has been created. Please proceed with EFT payment.`,
       });
 
-      if (error) {
-        console.error('Checkout creation error:', error);
-        throw error;
-      }
-
-      if (data?.url) {
-        console.log('Redirecting to Stripe checkout:', data.url);
-        // Redirect to Stripe checkout
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL received from server');
-      }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      console.error('Error creating order:', error);
       toast({
         title: "Error",
-        description: "Failed to create checkout session. Please try again.",
+        description: "Failed to create order. Please try again.",
         variant: "destructive"
       });
       setIsProcessing(false);
@@ -239,14 +207,70 @@ const Checkout = () => {
     );
   }
 
-  // Show order success page
+  // Show order success page with EFT payment details
   if (orderSubmitted && orderData) {
     return (
       <div className="min-h-screen flex flex-col bg-anong-ivory">
         <NavigationBanner />
         
         <main className="flex-grow container mx-auto px-4 py-12">
-          <OrderSuccess {...orderData} />
+          <div className="max-w-2xl mx-auto">
+            <Card className="anong-card mb-6">
+              <CardHeader className="text-center">
+                <CardTitle className="anong-heading text-2xl text-anong-black mb-2">
+                  Order Confirmation
+                </CardTitle>
+                <p className="anong-body text-anong-black/80">
+                  Order #{orderData.orderNumber} has been created successfully
+                </p>
+              </CardHeader>
+            </Card>
+
+            {/* Bank Details for EFT Payment */}
+            <Card className="anong-card mb-6">
+              <CardHeader>
+                <CardTitle className="anong-subheading text-xl text-anong-black flex items-center">
+                  <Building2 className="w-5 h-5 mr-2" />
+                  {t.bankDetails}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="anong-body text-anong-black font-semibold">{t.bankName}</Label>
+                    <p className="anong-body text-anong-black">First National Bank</p>
+                  </div>
+                  <div>
+                    <Label className="anong-body text-anong-black font-semibold">{t.accountName}</Label>
+                    <p className="anong-body text-anong-black">Anong Restaurant</p>
+                  </div>
+                  <div>
+                    <Label className="anong-body text-anong-black font-semibold">{t.accountNumber}</Label>
+                    <p className="anong-body text-anong-black font-mono">1234567890</p>
+                  </div>
+                  <div>
+                    <Label className="anong-body text-anong-black font-semibold">{t.branchCode}</Label>
+                    <p className="anong-body text-anong-black font-mono">250655</p>
+                  </div>
+                </div>
+                
+                <div className="mt-6 p-4 bg-anong-gold/10 rounded-lg border border-anong-gold/30">
+                  <h4 className="anong-subheading text-anong-black font-semibold mb-2">{t.paymentInstructions}</h4>
+                  <p className="anong-body text-anong-black/80 text-sm">
+                    {t.paymentNote}
+                  </p>
+                  <p className="anong-body text-anong-black font-semibold mt-2">
+                    Reference: {orderData.orderNumber}
+                  </p>
+                  <p className="anong-body text-anong-black font-semibold">
+                    Amount: {formatPrice(orderData.total)}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <OrderSuccess {...orderData} />
+          </div>
         </main>
         
         <Footer />
@@ -385,6 +409,24 @@ const Checkout = () => {
                     onChange={handleInputChange}
                     className="anong-input"
                   />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Payment Method */}
+            <Card className="anong-card">
+              <CardHeader>
+                <CardTitle className="anong-subheading text-xl text-anong-black">
+                  {t.paymentMethod}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center space-x-3 p-4 border rounded-lg bg-anong-gold/5 border-anong-gold/30">
+                  <Building2 className="w-5 h-5 text-anong-gold" />
+                  <div>
+                    <p className="anong-body text-anong-black font-semibold">{t.eftPayment}</p>
+                    <p className="anong-body text-anong-black/70 text-sm">Bank transfer payment method</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

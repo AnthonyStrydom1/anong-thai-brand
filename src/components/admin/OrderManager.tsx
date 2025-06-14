@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { ShoppingCart, Eye, Package2, Truck, CheckCircle } from "lucide-react";
 import { supabaseService, SupabaseOrder } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
 import { useAdminSecurity } from "@/hooks/useAdminSecurity";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const OrderManager = () => {
   const [orders, setOrders] = useState<SupabaseOrder[]>([]);
@@ -15,6 +17,7 @@ const OrderManager = () => {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
   const { logAdminAction } = useAdminSecurity();
+  const { formatPrice, selectedCurrency } = useCurrency();
 
   useEffect(() => {
     loadOrders();
@@ -241,7 +244,12 @@ const OrderManager = () => {
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Order Manager</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Order Manager</h1>
+          <p className="text-gray-600 text-sm mt-1">
+            All amounts displayed in {selectedCurrency.name} ({selectedCurrency.symbol})
+          </p>
+        </div>
         <Button onClick={loadOrders} variant="outline">
           Refresh Orders
         </Button>
@@ -277,7 +285,7 @@ const OrderManager = () => {
                 
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
-                    <p className="font-semibold">${order.total_amount.toFixed(2)}</p>
+                    <p className="font-semibold">{formatPrice(order.total_amount)}</p>
                     <div className="flex space-x-2 mt-1">
                       <Badge variant={getStatusBadgeVariant(order.status)}>
                         {order.status}
@@ -347,7 +355,7 @@ const OrderManager = () => {
                             </div>
                             <div>
                               <p className="font-semibold">Total Amount:</p>
-                              <p>${selectedOrder.total_amount?.toFixed(2)}</p>
+                              <p>{formatPrice(selectedOrder.total_amount)}</p>
                             </div>
                             <div>
                               <p className="font-semibold">Created:</p>
@@ -367,7 +375,7 @@ const OrderManager = () => {
                                     </div>
                                     <div className="text-right">
                                       <p>Qty: {item.quantity}</p>
-                                      <p>${item.total_price.toFixed(2)}</p>
+                                      <p>{formatPrice(item.total_price)}</p>
                                     </div>
                                   </div>
                                 ))}
