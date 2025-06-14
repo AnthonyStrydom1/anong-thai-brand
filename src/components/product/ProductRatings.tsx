@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Star, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabaseService } from '@/services/supabaseService';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 interface Review {
   id: string;
@@ -48,6 +47,8 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
   const loadReviews = async () => {
     try {
       setIsLoading(true);
+      console.log('Loading reviews for product:', productId);
+      
       const { data, error } = await supabaseService.supabase
         .from('product_reviews')
         .select(`
@@ -62,7 +63,12 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
         .eq('is_approved', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Reviews query error:', error);
+        throw error;
+      }
+      
+      console.log('Reviews loaded:', data);
       setReviews(data || []);
     } catch (error) {
       console.error('Error loading reviews:', error);
