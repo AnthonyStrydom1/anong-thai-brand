@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { toast } from '@/hooks/use-toast';
 import { mfaAuthService } from '@/services/mfaAuthService';
-import { Shield, RefreshCw } from 'lucide-react';
+import { Shield, RefreshCw, AlertCircle } from 'lucide-react';
 
 interface MfaVerificationProps {
   email: string;
@@ -19,6 +19,7 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
   const [isResending, setIsResending] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [canResend, setCanResend] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -40,7 +41,10 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
     }
 
     setIsVerifying(true);
+    setHasError(false);
+    
     try {
+      console.log('🔍 MfaVerification: Attempting verification with code:', code);
       await mfaAuthService.verifyAndSignIn(code);
       
       toast({
@@ -50,7 +54,8 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
       
       onSuccess();
     } catch (error: any) {
-      console.error('MFA verification error:', error);
+      console.error('❌ MfaVerification: Verification error:', error);
+      setHasError(true);
       toast({
         title: "Verification Failed",
         description: error.message || "Invalid or expired verification code.",
@@ -64,7 +69,10 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
 
   const handleResend = async () => {
     setIsResending(true);
+    setHasError(false);
+    
     try {
+      console.log('🔄 MfaVerification: Resending verification code');
       await mfaAuthService.resendCode();
       
       toast({
@@ -74,6 +82,8 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
       setTimeLeft(300); // Reset timer
       setCanResend(false);
     } catch (error: any) {
+      console.error('❌ MfaVerification: Resend error:', error);
+      setHasError(true);
       toast({
         title: "Resend Failed",
         description: error.message || "Failed to resend verification code.",
@@ -165,6 +175,20 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
             </Button>
           </div>
         </div>
+
+        {hasError && (
+          <div className="bg-red-50 p-3 rounded-md border border-red-200 flex items-start space-x-2">
+            <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm text-red-800 font-medium">
+                Having trouble receiving the code?
+              </p>
+              <p className="text-xs text-red-700 mt-1">
+                Check your spam folder or try resending the code.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
           <p className="text-xs text-blue-800">
