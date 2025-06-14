@@ -372,11 +372,22 @@ class SupabaseService {
 
       // Restore stock for each product in the order
       for (const item of orderItems) {
-        // Update product stock
-        const { error: stockError } = await supabase.rpc('restore_product_stock', {
-          product_id: item.product_id,
-          quantity_to_restore: item.quantity
-        });
+        // Update product stock manually since we don't have the RPC function yet
+        const { data: product, error: productError } = await supabase
+          .from('products')
+          .select('stock_quantity')
+          .eq('id', item.product_id)
+          .single();
+
+        if (productError) {
+          console.error('Error fetching product:', item.product_id, productError);
+          continue;
+        }
+
+        const { error: stockError } = await supabase
+          .from('products')
+          .update({ stock_quantity: product.stock_quantity + item.quantity })
+          .eq('id', item.product_id);
 
         if (stockError) {
           console.error('Error restoring stock for product:', item.product_id, stockError);

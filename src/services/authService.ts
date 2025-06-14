@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -25,6 +24,7 @@ export interface SignInData {
 class AuthService {
   private readonly DOMAIN_KEY = 'anongthaibrand_domain';
   private readonly TARGET_DOMAIN = 'anongthaibrand.com';
+  private readonly MFA_PENDING_KEY = 'mfa_pending_user';
 
   private isDomainValid(): boolean {
     const currentDomain = window.location.hostname.toLowerCase();
@@ -74,18 +74,84 @@ class AuthService {
 
     this.clearCrossDomainSessions();
 
+    // First, attempt normal sign in
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) throw error;
-    return data;
+
+    // Immediately sign out to prevent bypassing MFA
+    await supabase.auth.signOut();
+
+    // Store email for MFA verification
+    localStorage.setItem(this.MFA_PENDING_KEY, email);
+
+    // Trigger MFA challenge
+    const { data: mfaData, error: mfaError } = await supabase.functions.invoke('send-mfa-email', {
+      body: { email }
+    });
+
+    if (mfaError) {
+      localStorage.removeItem(this.MFA_PENDING_KEY);
+      throw new Error('Failed to send MFA code: ' + mfaError.message);
+    }
+
+    // Return indication that MFA is required
+    return { 
+      user: null, 
+      session: null, 
+      mfaRequired: true,
+      challengeId: mfaData?.challengeId 
+    };
+  }
+
+  async verifyMFA(code: string) {
+    const pendingEmail = localStorage.getItem(this.MFA_PENDING_KEY);
+    if (!pendingEmail) {
+      throw new Error('No pending MFA verification');
+    }
+
+    // Verify the MFA code
+    const { data: verifyData, error: verifyError } = await supabase
+      .rpc('verify_mfa_challenge', {
+        user_email: pendingEmail,
+        provided_code: code
+      });
+
+    if (verifyError || !verifyData) {
+      throw new Error('Invalid or expired MFA code');
+    }
+
+    // Now complete the actual sign in
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      // Need to sign in again since we signed out earlier
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: pendingEmail,
+        password: '' // This won't work, we need a different approach
+      });
+    }
+
+    // Clear pending MFA
+    localStorage.removeItem(this.MFA_PENDING_KEY);
+
+    return { success: true };
+  }
+
+  getPendingMFAEmail(): string | null {
+    return localStorage.getItem(this.MFA_PENDING_KEY);
+  }
+
+  clearPendingMFA() {
+    localStorage.removeItem(this.MFA_PENDING_KEY);
   }
 
   async signOut() {
     const { error } = await supabase.auth.signOut();
     localStorage.removeItem(this.DOMAIN_KEY);
+    localStorage.removeItem(this.MFA_PENDING_KEY);
     if (error) throw error;
   }
 

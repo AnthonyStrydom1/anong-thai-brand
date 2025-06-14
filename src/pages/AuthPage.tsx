@@ -9,12 +9,15 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import NavigationBanner from '@/components/NavigationBanner';
+import { mfaAuthService } from '@/services/mfaAuthService';
+import MfaVerification from '@/components/auth/MfaVerification';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showMFA, setShowMFA] = useState(false);
   const [loginAttempted, setLoginAttempted] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -23,8 +26,15 @@ const AuthPage = () => {
     lastName: ''
   });
 
-  const { signIn, signUp, resetPassword } = useAuth();
+  const { signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
+
+  // Check for pending MFA on component mount
+  useEffect(() => {
+    if (mfaAuthService.hasPendingMFA()) {
+      setShowMFA(true);
+    }
+  }, []);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -38,12 +48,19 @@ const AuthPage = () => {
 
     try {
       if (isLogin) {
-        await signIn(formData.email, formData.password);
-        toast({
-          title: "Success!",
-          description: "You have been logged in successfully.",
+        // Use MFA service for login
+        const result = await mfaAuthService.initiateSignIn({
+          email: formData.email,
+          password: formData.password
         });
-        navigate('/');
+
+        if (result.mfaRequired) {
+          setShowMFA(true);
+          toast({
+            title: "MFA Required",
+            description: "Please check your email for the verification code.",
+          });
+        }
       } else {
         await signUp(formData.email, formData.password, formData.firstName, formData.lastName);
         toast({
@@ -68,6 +85,20 @@ const AuthPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleMFASuccess = () => {
+    setShowMFA(false);
+    toast({
+      title: "Success!",
+      description: "You have been logged in successfully.",
+    });
+    navigate('/');
+  };
+
+  const handleMFACancel = () => {
+    setShowMFA(false);
+    mfaAuthService.clearMFASession?.();
   };
 
   const handleForgotPassword = async () => {
@@ -122,6 +153,22 @@ const AuthPage = () => {
     setShowForgotPassword(false);
     setLoginAttempted(false);
   };
+
+  // Show MFA verification if needed
+  if (showMFA) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <NavigationBanner />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <MfaVerification
+            email={mfaAuthService.getPendingMFAEmail() || ''}
+            onSuccess={handleMFASuccess}
+            onCancel={handleMFACancel}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

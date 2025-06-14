@@ -264,6 +264,42 @@ export type Database = {
           },
         ]
       }
+      mfa_challenges: {
+        Row: {
+          attempts: number
+          challenge_code: string
+          created_at: string
+          expires_at: string
+          id: string
+          max_attempts: number
+          user_id: string
+          verified: boolean
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number
+          challenge_code: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          max_attempts?: number
+          user_id: string
+          verified?: boolean
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number
+          challenge_code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          max_attempts?: number
+          user_id?: string
+          verified?: boolean
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       newsletter_subscriptions: {
         Row: {
           email: string
@@ -707,6 +743,21 @@ export type Database = {
         Args: { total_spent: number }
         Returns: string
       }
+      cleanup_expired_mfa_challenges: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      create_mfa_challenge: {
+        Args: { user_email: string }
+        Returns: {
+          challenge_id: string
+          code: string
+        }[]
+      }
+      generate_mfa_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_order_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -744,9 +795,17 @@ export type Database = {
         }
         Returns: string
       }
+      restore_product_stock: {
+        Args: { product_id: string; quantity_to_restore: number }
+        Returns: undefined
+      }
       setup_first_admin: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      verify_mfa_challenge: {
+        Args: { user_email: string; provided_code: string }
+        Returns: boolean
       }
     }
     Enums: {
