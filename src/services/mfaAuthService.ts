@@ -111,7 +111,8 @@ class MFAAuthService {
     return data ? JSON.parse(data) : null;
   }
 
-  private clearMFASession() {
+  // Made this method public so it can be called from AuthPage
+  clearMFASession() {
     sessionStorage.removeItem(this.MFA_SESSION_KEY);
   }
 
