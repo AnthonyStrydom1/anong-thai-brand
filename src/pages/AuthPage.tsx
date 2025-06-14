@@ -62,7 +62,7 @@ const AuthPage = () => {
     };
 
     // Check MFA status with a small delay to ensure all services are ready
-    const timer = setTimeout(checkMFAStatus, 200);
+    const timer = setTimeout(checkMFAStatus, 100);
     return () => clearTimeout(timer);
   }, []);
 
@@ -72,8 +72,11 @@ const AuthPage = () => {
       console.log('📧 AuthPage: MFA session stored event received:', event.detail);
       const email = event.detail?.email;
       if (email) {
+        console.log('🔄 AuthPage: Switching to MFA verification for:', email);
         setShowMFA(true);
         setMfaEmail(email);
+        setIsCheckingMFA(false);
+        
         toast({
           title: isLogin ? "MFA Required" : "Account Created!",
           description: isLogin 
@@ -112,35 +115,9 @@ const AuthPage = () => {
       console.log('📝 AuthPage: Form submission result:', result);
       
       if (result?.mfaRequired) {
-        console.log('🔐 AuthPage: MFA required! Checking for session setup...');
-        
-        // Wait a bit for MFA service to complete setup
-        setTimeout(() => {
-          const pendingEmail = mfaAuthService.getPendingMFAEmail();
-          const hasPending = mfaAuthService.hasPendingMFA();
-          
-          console.log('🔍 AuthPage: Post-submit MFA check:', { pendingEmail, hasPending });
-          
-          if (hasPending && pendingEmail) {
-            console.log('✅ AuthPage: MFA session confirmed, showing verification');
-            setShowMFA(true);
-            setMfaEmail(pendingEmail);
-            
-            toast({
-              title: isLogin ? "MFA Required" : "Account Created!",
-              description: isLogin 
-                ? "Please check your email for the verification code."
-                : "Please check your email for the verification code to complete your registration.",
-            });
-          } else {
-            console.log('⚠️ AuthPage: MFA required but no session found');
-            toast({
-              title: "Authentication Error",
-              description: "Please try signing in again.",
-              variant: "destructive"
-            });
-          }
-        }, 800);
+        console.log('🔐 AuthPage: MFA required! Waiting for MFA setup...');
+        // The MFA event will be triggered automatically from the service
+        // No need to manually set state here as the event listener will handle it
       }
     } catch (error) {
       console.error('❌ AuthPage: Form submission error:', error);

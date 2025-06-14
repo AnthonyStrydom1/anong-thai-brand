@@ -45,10 +45,18 @@ class MFAAuthService {
         userId: userId
       };
       
+      console.log('💾 MFA Service: Storing session data for MFA flow');
       mfaSessionManager.storeSessionData(sessionData);
 
-      // Send MFA email
-      await mfaEmailService.sendMFAEmail(email);
+      // Send MFA email and wait for it to complete
+      console.log('📧 MFA Service: Sending MFA email...');
+      const emailResult = await mfaEmailService.sendMFAEmail(email);
+      console.log('✅ MFA Service: MFA email sent successfully:', emailResult);
+
+      // Trigger MFA session stored event to update UI
+      window.dispatchEvent(new CustomEvent('mfa-session-stored', { 
+        detail: { email, challengeId: emailResult.challengeId } 
+      }));
 
       console.log('🎯 MFA Service: MFA flow initiated successfully');
       return { mfaRequired: true };

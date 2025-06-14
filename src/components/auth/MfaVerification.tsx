@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { toast } from '@/hooks/use-toast';
 import { mfaAuthService } from '@/services/mfaAuthService';
-import { Shield, RefreshCw, AlertCircle } from 'lucide-react';
+import { Shield, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface MfaVerificationProps {
   email: string;
@@ -20,6 +20,7 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [canResend, setCanResend] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [isEmailConfirmed, setIsEmailConfirmed] = useState(false);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -29,6 +30,13 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
       setCanResend(true);
     }
   }, [timeLeft]);
+
+  // Show email confirmation for first few seconds
+  useEffect(() => {
+    setIsEmailConfirmed(true);
+    const timer = setTimeout(() => setIsEmailConfirmed(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleVerify = async () => {
     if (code.length !== 6) {
@@ -81,6 +89,8 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
       });
       setTimeLeft(300); // Reset timer
       setCanResend(false);
+      setIsEmailConfirmed(true);
+      setTimeout(() => setIsEmailConfirmed(false), 3000);
     } catch (error: any) {
       console.error('❌ MfaVerification: Resend error:', error);
       setHasError(true);
@@ -100,6 +110,8 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  console.log('🔐 MfaVerification render:', { email, code: code.length, isVerifying });
+
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
@@ -115,6 +127,15 @@ const MfaVerification = ({ email, onSuccess, onCancel }: MfaVerificationProps) =
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {isEmailConfirmed && (
+          <div className="bg-green-50 p-3 rounded-md border border-green-200 flex items-center space-x-2">
+            <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+            <p className="text-sm text-green-800">
+              Verification code sent successfully!
+            </p>
+          </div>
+        )}
+
         <div className="space-y-4">
           <div className="flex justify-center">
             <InputOTP

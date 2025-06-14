@@ -123,18 +123,26 @@ const UserMenu = ({
   };
 
   // Show different states based on auth and MFA status
-  const shouldShowAsLoggedOut = !isLoggedIn || hasPendingMFA;
+  const shouldShowAsLoggedOut = !isLoggedIn;
+  const shouldShowDropdown = isLoggedIn && !hasPendingMFA;
+
+  console.log('🎯 UserMenu render state:', { 
+    isLoggedIn, 
+    hasPendingMFA, 
+    shouldShowAsLoggedOut, 
+    shouldShowDropdown 
+  });
 
   return (
     <>
-      <DropdownMenu open={isLoggedIn && !hasPendingMFA ? isDropdownOpen : false} onOpenChange={setIsDropdownOpen}>
+      <DropdownMenu open={shouldShowDropdown ? isDropdownOpen : false} onOpenChange={setIsDropdownOpen}>
         <UserMenuButton 
           isLoggedIn={!shouldShowAsLoggedOut}
           onClick={handleTriggerClick}
           translations={translations}
         />
         
-        {isLoggedIn && !hasPendingMFA && (
+        {shouldShowDropdown && (
           <UserMenuDropdown 
             onLogout={handleLogout}
             translations={translations}
