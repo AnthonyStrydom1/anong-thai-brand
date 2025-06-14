@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 import { domainValidationService } from './domainValidation';
@@ -27,14 +26,14 @@ export class AuthOperationsService {
     // Clear any existing session
     await supabase.auth.signOut();
 
-    console.log('🔄 Auth Operations: Starting sign up without email confirmation');
+    console.log('🔄 Auth Operations: Starting sign up with email confirmation DISABLED');
 
-    // Sign up without email confirmation - account is immediately active
+    // Sign up with email confirmation explicitly disabled
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: undefined, // No email confirmation needed
+        emailRedirectTo: undefined, // Explicitly disable email redirects
         data: {
           first_name: firstName,
           last_name: lastName,
@@ -47,9 +46,14 @@ export class AuthOperationsService {
       throw error;
     }
 
-    console.log('✅ Auth Operations: Sign up successful - account active immediately');
+    console.log('✅ Auth Operations: Sign up successful - account should be active immediately');
+    console.log('📋 Auth Operations: User data:', { 
+      hasUser: !!data.user, 
+      hasSession: !!data.session,
+      userConfirmed: data.user?.email_confirmed_at ? 'confirmed' : 'not confirmed'
+    });
 
-    // The account is now created and active, no email confirmation needed
+    // Return the signup result - account should be active immediately
     return { 
       user: data.user, 
       session: data.session,
