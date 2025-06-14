@@ -30,6 +30,8 @@ const OrderSuccess = ({ orderNumber, items, total, customerInfo }: OrderSuccessP
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
 
+  console.log('OrderSuccess rendering with:', { orderNumber, items, total, customerInfo });
+
   const translations = {
     en: {
       title: "Order Confirmed!",
@@ -54,6 +56,19 @@ const OrderSuccess = ({ orderNumber, items, total, customerInfo }: OrderSuccessP
   };
 
   const t = translations[language];
+
+  if (!orderNumber || !items || !customerInfo) {
+    console.error('OrderSuccess: Missing required props', { orderNumber, items, customerInfo });
+    return (
+      <div className="max-w-2xl mx-auto">
+        <Card className="anong-card text-center">
+          <CardContent className="pt-6">
+            <p className="text-red-600">Error displaying order confirmation. Please contact support.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto">

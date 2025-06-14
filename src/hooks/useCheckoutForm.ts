@@ -282,7 +282,7 @@ export const useCheckoutForm = () => {
       console.log('💰 Order totals calculated:', orderTotals);
 
       // Create order data
-      const orderData = {
+      const orderRequestData = {
         customer_id: customer.id,
         items: items.map(item => ({
           product_id: item.product.id,
@@ -314,14 +314,12 @@ export const useCheckoutForm = () => {
 
       console.log('📝 Creating order with data:', {
         customerId: customer.id,
-        itemCount: orderData.items.length,
+        itemCount: orderRequestData.items.length,
         totalAmount: orderTotals.totalAmount
       });
 
-      const createdOrder = await orderService.createOrder(orderData);
+      const createdOrder = await orderService.createOrder(orderRequestData);
       console.log('✅ Order created successfully:', createdOrder.order_number);
-
-      setOrderNumber(createdOrder.order_number);
 
       // Log successful order creation
       await logSecurityEvent('order_created', 'order', createdOrder.id, {
@@ -330,16 +328,33 @@ export const useCheckoutForm = () => {
         itemCount: items.length
       });
 
-      // Set order submission state
-      setOrderSubmitted(true);
-      setOrderData({
+      // Prepare order success data with proper structure
+      const successOrderData = {
         orderNumber: createdOrder.order_number,
         total: orderTotals.totalAmount,
-        email: formData.email,
-        shippingAddress: orderData.shipping_address,
-        items: items
-      });
+        items: items.map(item => ({
+          product: {
+            id: item.product.id,
+            name: item.product.name,
+            price: item.product.price
+          },
+          quantity: item.quantity
+        })),
+        customerInfo: {
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName
+        }
+      };
 
+      console.log('📄 Setting order success data:', successOrderData);
+
+      // Set order data and mark as submitted
+      setOrderNumber(createdOrder.order_number);
+      setOrderData(successOrderData);
+      setOrderSubmitted(true);
+
+      // Clear cart after successful order
       clearCart();
       console.log('🛒 Cart cleared');
 
