@@ -77,8 +77,17 @@ export class MFASessionManager {
       localStorage.removeItem(this.MFA_SESSION_KEY);
       localStorage.removeItem(this.MFA_CHALLENGE_KEY);
       
+      // Also clear any other potential MFA-related keys that might exist
+      const keysToCheck = ['mfa_session_data', 'mfa_challenge_id', 'mfaSessionData', 'mfaChallengeId'];
+      keysToCheck.forEach(key => {
+        sessionStorage.removeItem(key);
+        localStorage.removeItem(key);
+      });
+      
       // Dispatch event to notify listeners
       window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
+      
+      console.log('✅ MFA Session Manager: All MFA data cleared from storage');
     } catch (error) {
       console.error('❌ MFA Session Manager: Failed to clear session:', error);
     }
@@ -97,33 +106,74 @@ export class MFASessionManager {
   }
 
   hasPendingMFA(): boolean {
+    console.log('🔍 MFA Session Manager: Starting hasPendingMFA check...');
+    
     const sessionData = this.getSessionData();
-    const hasChallenge = !!this.getChallengeId();
+    const challengeId = this.getChallengeId();
+    
+    console.log('📊 MFA Session Manager: Raw data check:', {
+      hasSessionData: !!sessionData,
+      sessionDataEmail: sessionData?.email,
+      sessionDataTimestamp: sessionData?.timestamp,
+      challengeId: challengeId,
+      hasChallengeId: !!challengeId
+    });
     
     // If no session data, definitely no pending MFA
     if (!sessionData) {
-      console.log('❓ MFA Session Manager: No session data - no pending MFA');
+      console.log('❌ MFA Session Manager: No session data - no pending MFA');
       return false;
     }
     
     // If session is expired, no pending MFA
     if (this.isSessionExpired(sessionData)) {
-      console.log('❓ MFA Session Manager: Session expired - no pending MFA');
-      this.clearSession(); // Clean up expired session
+      console.log('⏰ MFA Session Manager: Session expired - clearing and returning false');
+      this.clearSession();
       return false;
     }
     
     // Must have both session data AND challenge ID for pending MFA
-    const result = hasChallenge;
+    const result = !!challengeId;
     
-    console.log('❓ MFA Session Manager: Has pending MFA:', result, { 
-      hasSessionData: true, 
-      hasChallenge,
+    console.log('🎯 MFA Session Manager: Final hasPendingMFA result:', result, {
+      hasSessionData: true,
+      hasChallengeId: !!challengeId,
       email: sessionData.email,
-      timestamp: sessionData.timestamp
+      timestamp: sessionData.timestamp,
+      isExpired: false
     });
     
     return result;
+  }
+
+  // Force clear everything - emergency cleanup
+  forceCleanupAll(): void {
+    console.log('🚨 MFA Session Manager: FORCE CLEANUP - Clearing ALL storage');
+    
+    try {
+      // Clear all localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.toLowerCase().includes('mfa')) {
+          localStorage.removeItem(key);
+          console.log('🗑️ Removed from localStorage:', key);
+        }
+      });
+      
+      // Clear all sessionStorage
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.toLowerCase().includes('mfa')) {
+          sessionStorage.removeItem(key);
+          console.log('🗑️ Removed from sessionStorage:', key);
+        }
+      });
+      
+      // Clear our specific keys
+      this.clearSession();
+      
+      console.log('✅ MFA Session Manager: Force cleanup completed');
+    } catch (error) {
+      console.error('❌ MFA Session Manager: Force cleanup failed:', error);
+    }
   }
 }
 

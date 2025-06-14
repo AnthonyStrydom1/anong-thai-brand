@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { authService, type AuthUser } from '@/services/authService';
 import { mfaAuthService } from '@/services/mfaAuthService';
+import { mfaSessionManager } from '@/services/mfa/mfaSessionManager';
 
 interface AuthContextType {
   user: User | null;
@@ -28,21 +29,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Clear any stale MFA state on app start
-    console.log('🧹 Auth: Clearing any stale MFA state on initialization');
-    
-    // Only keep MFA state if it's actually valid
-    const currentMFAState = mfaAuthService.hasPendingMFA();
-    if (!currentMFAState) {
-      mfaAuthService.clearMFASession();
-    }
+    // FORCE CLEAR ALL MFA DATA ON APP START
+    console.log('🚨 Auth: FORCE CLEARING ALL MFA DATA on app initialization');
+    mfaSessionManager.forceCleanupAll();
 
     const isMFAPending = () => {
       const mfaPendingRaw = mfaAuthService.hasPendingMFA();
       console.log(
-        "[Auth] Checking for pending MFA session: ",
+        "🔍 Auth: Checking for pending MFA session: ",
         mfaPendingRaw,
-        " (should be true ONLY if OTP needed)"
+        " (should be FALSE on fresh app start)"
       );
       return mfaPendingRaw;
     };
@@ -53,7 +49,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener('mfa-session-stored', handleMFAStored);
     window.addEventListener('mfa-session-cleared', handleMFACleared);
 
-    setMfaPending(isMFAPending());
+    // After force cleanup, this should be false
+    const initialMFAState = isMFAPending();
+    setMfaPending(initialMFAState);
+    console.log('🎯 Auth: Initial MFA state after cleanup:', initialMFAState);
 
     const { data: { subscription } } = authService.onAuthStateChange(
       (user, session) => {
