@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,8 +12,17 @@ import { useAdminSecurity } from "@/hooks/useAdminSecurity";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Input } from "@/components/ui/input";
 
+// Extended order type to include new fields
+interface ExtendedOrder extends SupabaseOrder {
+  tracking_number?: string | null;
+  vat_amount?: number | null;
+  shipping_method?: string | null;
+  courier_service?: string | null;
+  estimated_delivery_days?: number | null;
+}
+
 const OrderManager = () => {
-  const [orders, setOrders] = useState<SupabaseOrder[]>([]);
+  const [orders, setOrders] = useState<ExtendedOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
