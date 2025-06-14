@@ -68,37 +68,39 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
       if (authError) throw authError;
 
       if (authData.user) {
-        // Wait longer for the user profile to be created by the trigger
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Wait for the user profile to be created by the trigger
+        console.log('User created, waiting for profile setup...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Verify the profile was created before assigning role
-        let profileExists = false;
-        let attempts = 0;
-        const maxAttempts = 5;
+        // Check if profile exists and create it manually if needed
+        let { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', authData.user.id)
+          .maybeSingle();
 
-        while (!profileExists && attempts < maxAttempts) {
-          const { data: profile } = await supabase
+        if (!profile) {
+          console.log('Profile not found, creating manually...');
+          // Create profile manually if trigger didn't work
+          const { error: profileError } = await supabase
             .from('profiles')
-            .select('id')
-            .eq('id', authData.user.id)
-            .maybeSingle();
+            .insert({
+              id: authData.user.id,
+              email: formData.email,
+              first_name: formData.firstName,
+              last_name: formData.lastName
+            });
 
-          if (profile) {
-            profileExists = true;
-          } else {
-            attempts++;
-            await new Promise(resolve => setTimeout(resolve, 1000));
+          if (profileError) {
+            console.error('Manual profile creation error:', profileError);
+            toast({
+              title: "Warning",
+              description: "User created but profile setup failed. Please contact support.",
+              variant: "destructive"
+            });
+            onUserCreated();
+            return;
           }
-        }
-
-        if (!profileExists) {
-          toast({
-            title: "Warning",
-            description: "User created but profile setup is still in progress. Please try assigning admin role manually later.",
-            variant: "destructive"
-          });
-          onUserCreated();
-          return;
         }
 
         // Now assign admin role
