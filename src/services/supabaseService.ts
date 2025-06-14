@@ -304,15 +304,38 @@ class SupabaseService {
 
   // Admin-only: Order management
   async updateOrderStatus(orderId: string, status: string) {
-    const { data, error } = await supabase
-      .from('orders')
-      .update({ status })
-      .eq('id', orderId)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data as SupabaseOrder;
+    try {
+      // If cancelling an order, restore stock first
+      if (status === 'cancelled') {
+        // Get current order status to check if it was previously active
+        const { data: currentOrder, error: fetchError } = await supabase
+          .from('orders')
+          .select('status')
+          .eq('id', orderId)
+          .single();
+
+        if (fetchError) throw fetchError;
+
+        // Only restore stock if the order was not already cancelled
+        if (currentOrder.status !== 'cancelled') {
+          await this.restoreStockForCancelledOrder(orderId);
+        }
+      }
+
+      // Update the order status
+      const { data, error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', orderId)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data as SupabaseOrder;
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      throw error;
+    }
   }
 
   async updatePaymentStatus(orderId: string, paymentStatus: string) {
@@ -334,6 +357,48 @@ class SupabaseService {
     
     if (error) throw error;
     return data;
+  }
+
+  // Add method to restore stock for cancelled orders
+  async restoreStockForCancelledOrder(orderId: string) {
+    try {
+      // Get all order items for this order
+      const { data: orderItems, error: itemsError } = await supabase
+        .from('order_items')
+        .select('product_id, quantity')
+        .eq('order_id', orderId);
+
+      if (itemsError) throw itemsError;
+
+      // Restore stock for each product in the order
+      for (const item of orderItems) {
+        // Update product stock
+        const { error: stockError } = await supabase.rpc('restore_product_stock', {
+          product_id: item.product_id,
+          quantity_to_restore: item.quantity
+        });
+
+        if (stockError) {
+          console.error('Error restoring stock for product:', item.product_id, stockError);
+          // Continue with other items even if one fails
+        }
+
+        // Create inventory movement record
+        await this.createInventoryMovement({
+          product_id: item.product_id,
+          movement_type: 'in',
+          quantity: item.quantity,
+          reference_type: 'return',
+          reference_id: orderId,
+          notes: 'Stock restored due to order cancellation'
+        });
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error restoring stock for cancelled order:', error);
+      throw error;
+    }
   }
 }
 

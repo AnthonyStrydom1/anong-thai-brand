@@ -8,6 +8,7 @@ import { Package, AlertTriangle, Plus, Minus, Edit } from "lucide-react";
 import { supabaseService, SupabaseProduct } from "@/services/supabaseService";
 import { toast } from "@/components/ui/use-toast";
 import { useAdminSecurity } from "@/hooks/useAdminSecurity";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const StockManager = () => {
   const [products, setProducts] = useState<SupabaseProduct[]>([]);
@@ -15,6 +16,7 @@ const StockManager = () => {
   const [editingStock, setEditingStock] = useState<string | null>(null);
   const [newQuantity, setNewQuantity] = useState<number>(0);
   const { logAdminAction } = useAdminSecurity();
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     loadProducts();
@@ -205,7 +207,7 @@ const StockManager = () => {
                         {stockStatus.label}
                       </Badge>
                     </TableCell>
-                    <TableCell>${product.price.toFixed(2)}</TableCell>
+                    <TableCell>{formatPrice(product.price)}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
                         <Button
