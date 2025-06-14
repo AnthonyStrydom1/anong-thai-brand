@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,7 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
         return;
       }
 
-      // Create user using the sign up method with auto-confirm
+      // Create user using the sign up method - the trigger will handle profile creation
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -67,53 +68,32 @@ const CreateAdminUserForm = ({ onUserCreated }: CreateAdminUserFormProps) => {
       if (authError) throw authError;
 
       if (authData.user) {
-        // Wait for the user profile to be created by the trigger
-        console.log('User created, waiting for profile setup...');
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Wait for the database trigger to create the profile
+        console.log('User created, waiting for profile creation by trigger...');
+        await new Promise(resolve => setTimeout(resolve, 3000));
 
-        // Check if profile exists and create it manually if needed
-        let { data: profile } = await supabase
+        // Verify profile was created by trigger
+        const { data: profile, error: profileCheckError } = await supabase
           .from('profiles')
           .select('id')
           .eq('id', authData.user.id)
           .maybeSingle();
 
-        if (!profile) {
-          console.log('Profile not found after 2s, attempting manual insert...');
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-              id: authData.user.id,
-              email: formData.email,
-              first_name: formData.firstName,
-              last_name: formData.lastName
-            });
-          if (profileError) {
-            // NEW: Wait and try to fetch as sometimes profile appears late
-            console.error('Manual profile creation error:', profileError);
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            // Try one last fetch
-            const { data: finalProfile, error: fetchErr } = await supabase
-              .from('profiles')
-              .select('id')
-              .eq('id', authData.user.id)
-              .maybeSingle();
-
-            if (finalProfile) {
-              // Great, now proceed
-              profile = finalProfile;
-            } else {
-              toast({
-                title: "Warning",
-                description: `User created but profile setup failed: ${
-                  profileError.message || fetchErr?.message || "unknown error"
-                }. Check Supabase 'profiles' table for RLS or permission errors.`,
-                variant: "destructive"
-              });
-              onUserCreated();
-              return;
-            }
-          }
+        if (profileCheckError) {
+          console.error('Error checking profile:', profileCheckError);
+          toast({
+            title: "Warning",
+            description: `User created but profile verification failed: ${profileCheckError.message}`,
+            variant: "destructive"
+          });
+        } else if (!profile) {
+          toast({
+            title: "Warning", 
+            description: "User created but profile was not found. The trigger may have failed.",
+            variant: "destructive"
+          });
+        } else {
+          console.log('Profile created successfully by trigger');
         }
 
         // Now assign admin role
