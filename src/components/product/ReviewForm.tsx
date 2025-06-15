@@ -25,7 +25,7 @@ interface NewReviewData {
 
 const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps) => {
   const [newReview, setNewReview] = useState<NewReviewData>({
-    rating: 5,
+    rating: 0, // Start with 0 so users must select a rating
     title: '',
     content: ''
   });
@@ -41,6 +41,15 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
       toast({
         title: t.authRequired,
         description: t.signInToReview,
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (newReview.rating === 0) {
+      toast({
+        title: t.missingInfo,
+        description: 'Please select a rating',
         variant: 'destructive'
       });
       return;
@@ -86,7 +95,7 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
         description: t.reviewPending,
       });
 
-      setNewReview({ rating: 5, title: '', content: '' });
+      setNewReview({ rating: 0, title: '', content: '' });
       onReviewSubmitted();
     } catch (error: any) {
       console.error('Error submitting review:', error);
@@ -103,18 +112,21 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
   return (
     <form onSubmit={handleSubmitReview} className="space-y-4 p-4 border rounded-lg bg-gray-50 mb-6">
       <div>
-        <Label>{t.rating}</Label>
+        <Label>{t.rating} *</Label>
         <div className="mt-1">
           <StarRating
             rating={newReview.rating}
             interactive={true}
             onRatingChange={(rating) => setNewReview(prev => ({ ...prev, rating }))}
           />
+          {newReview.rating === 0 && (
+            <p className="text-sm text-gray-500 mt-1">Click on a star to rate this product</p>
+          )}
         </div>
       </div>
       
       <div>
-        <Label htmlFor="review-title">{t.reviewTitle}</Label>
+        <Label htmlFor="review-title">{t.reviewTitle} *</Label>
         <Input
           id="review-title"
           value={newReview.title}
@@ -125,7 +137,7 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
       </div>
       
       <div>
-        <Label htmlFor="review-content">{t.yourReview}</Label>
+        <Label htmlFor="review-content">{t.yourReview} *</Label>
         <Textarea
           id="review-content"
           value={newReview.content}
@@ -137,7 +149,7 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
       </div>
       
       <div className="flex space-x-2">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || newReview.rating === 0}>
           {isSubmitting ? t.submitting : t.submitReview}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
