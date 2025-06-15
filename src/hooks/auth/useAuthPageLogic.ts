@@ -1,181 +1,119 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
-import { mfaAuthService } from '@/services/mfaAuthService';
-import { useAuthForm } from '@/hooks/useAuthForm';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
 
-export const useAuthPageLogic = () => {
-  const [showMFA, setShowMFA] = useState(false);
-  const [mfaEmail, setMfaEmail] = useState<string>('');
-  const [isCheckingMFA, setIsCheckingMFA] = useState(true);
+export function useAuthPageLogic() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: ''
+  });
+
+  const { user, signIn, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
-  const { user, mfaPending } = useAuth();
+  const location = useLocation();
 
-  const {
-    isLogin,
-    isLoading,
-    showPassword,
-    showForgotPassword,
-    formData,
-    setShowPassword,
-    handleSubmit,
-    handleForgotPassword,
-    handleInputChange,
-    switchToLogin,
-    switchToSignUp
-  } = useAuthForm();
-
-  // Redirect if already logged in (NO mfa pending)
+  // Redirect authenticated users away from auth page
   useEffect(() => {
-    if (user && !mfaPending) {
-      navigate('/');
+    if (user) {
+      console.log('✅ Auth: User is authenticated, redirecting from auth page');
+      const from = (location.state as any)?.from?.pathname || '/';
+      navigate(from, { replace: true });
     }
-  }, [user, mfaPending, navigate]);
+  }, [user, navigate, location]);
 
-  // Check for existing MFA session on mount
-  useEffect(() => {
-    console.log('🔍 AuthPage: Checking for existing MFA session...');
-    
-    const checkMFAStatus = () => {
-      const hasPending = mfaAuthService.hasPendingMFA();
-      const pendingEmail = mfaAuthService.getPendingMFAEmail();
-      
-      console.log('📊 AuthPage: MFA Status Check:', { hasPending, pendingEmail });
-      
-      if (hasPending && pendingEmail) {
-        console.log('✅ AuthPage: Found existing MFA session for:', pendingEmail);
-        setShowMFA(true);
-        setMfaEmail(pendingEmail);
-      } else {
-        console.log('❌ AuthPage: No existing MFA session found');
-        setShowMFA(false);
-        setMfaEmail('');
-      }
-      
-      setIsCheckingMFA(false);
-    };
-
-    // Check MFA status with a small delay to ensure all services are ready
-    const timer = setTimeout(checkMFAStatus, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Listen for MFA session events
-  useEffect(() => {
-    const handleMFAStored = (event: CustomEvent) => {
-      console.log('📧 AuthPage: MFA session stored event received:', event.detail);
-      const email = event.detail?.email;
-      if (email) {
-        console.log('🔄 AuthPage: Switching to MFA verification for:', email);
-        setShowMFA(true);
-        setMfaEmail(email);
-        setIsCheckingMFA(false);
-        
-        toast({
-          title: isLogin ? "MFA Required" : "Account Created!",
-          description: isLogin 
-            ? "Please check your email for the verification code."
-            : "Please check your email for the verification code to complete your registration.",
-        });
-      }
-    };
-
-    const handleMFACleared = () => {
-      console.log('🧹 AuthPage: MFA session cleared event received');
-      setShowMFA(false);
-      setMfaEmail('');
-    };
-
-    window.addEventListener('mfa-session-stored', handleMFAStored as EventListener);
-    window.addEventListener('mfa-session-cleared', handleMFACleared as EventListener);
-
-    return () => {
-      window.removeEventListener('mfa-session-stored', handleMFAStored as EventListener);
-      window.removeEventListener('mfa-session-cleared', handleMFACleared as EventListener);
-    };
-  }, [isLogin]);
-
-  // Scroll to top when component mounts
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (showForgotPassword) {
+      setShowForgotPassword(false);
+    }
+  };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.email || !formData.password) return;
+
+    setIsLoading(true);
     
     try {
-      console.log('🚀 AuthPage: Starting form submission...');
-      const result = await handleSubmit(e);
-      console.log('📝 AuthPage: Form submission result:', result);
-      
-      // Force MFA check after successful form submission
-      if (result?.mfaRequired) {
-        console.log('🔐 AuthPage: MFA required! Checking for MFA session...');
-        // Wait a bit for the MFA session to be stored
-        setTimeout(() => {
-          const hasPending = mfaAuthService.hasPendingMFA();
-          const pendingEmail = mfaAuthService.getPendingMFAEmail();
-          console.log('🔍 AuthPage: Post-submit MFA check:', { hasPending, pendingEmail });
-          
-          if (hasPending && pendingEmail) {
-            console.log('✅ AuthPage: MFA session found, showing OTP screen');
-            setShowMFA(true);
-            setMfaEmail(pendingEmail);
-          }
-        }, 500);
+      if (isLogin) {
+        console.log('🔐 Auth Page: Attempting direct sign in');
+        await signIn(formData.email, formData.password);
+        
+        toast({
+          title: "Welcome back!",
+          description: "You have been signed in successfully.",
+        });
+        
+        // Navigation will happen automatically via useEffect above
+      } else {
+        console.log('📝 Auth Page: Attempting sign up');
+        await signUp(formData.email, formData.password, formData.firstName, formData.lastName);
+        
+        toast({
+          title: "Account Created!",
+          description: "Welcome to Anong Thai Brand. You have been logged in automatically.",
+        });
+        
+        // Navigation will happen automatically via useEffect above
       }
-    } catch (error) {
-      console.error('❌ AuthPage: Form submission error:', error);
+    } catch (error: any) {
+      console.error('❌ Auth Page: Authentication error:', error);
+      toast({
+        title: isLogin ? "Sign In Failed" : "Sign Up Failed",
+        description: error.message || "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleMFASuccess = () => {
-    console.log('✅ AuthPage: MFA verification successful');
-    
-    // Clear MFA state immediately
-    setShowMFA(false);
-    setMfaEmail('');
-    mfaAuthService.clearMFASession();
-    
-    toast({
-      title: "Success!",
-      description: "You have been logged in successfully.",
-    });
-    
-    // Add a small delay to ensure auth state is properly updated before navigation
-    setTimeout(() => {
-      navigate('/', { replace: true });
-    }, 100);
-  };
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address first.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-  const handleMFACancel = () => {
-    console.log('❌ AuthPage: MFA verification cancelled');
-    setShowMFA(false);
-    setMfaEmail('');
-    mfaAuthService.clearMFASession();
+    setIsLoading(true);
+    try {
+      await resetPassword(formData.email);
+      toast({
+        title: "Reset Email Sent",
+        description: "Check your email for password reset instructions.",
+      });
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      console.error('❌ Auth Page: Password reset error:', error);
+      toast({
+        title: "Reset Failed",
+        description: error.message || "Failed to send reset email. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSwitchMode = () => {
-    // Clear MFA state when switching modes
-    setShowMFA(false);
-    setMfaEmail('');
-    mfaAuthService.clearMFASession();
-    
-    if (isLogin) {
-      switchToSignUp();
-    } else {
-      switchToLogin();
-    }
+    setIsLogin(!isLogin);
+    setShowForgotPassword(false);
+    setFormData(prev => ({ ...prev, firstName: '', lastName: '' }));
   };
 
+  // No MFA-related state or handlers needed
   return {
-    showMFA,
-    mfaEmail,
-    isCheckingMFA,
-    user,
-    mfaPending,
     isLogin,
     isLoading,
     showPassword,
@@ -185,8 +123,13 @@ export const useAuthPageLogic = () => {
     handleFormSubmit,
     handleForgotPassword,
     handleInputChange,
-    handleMFASuccess,
-    handleMFACancel,
-    handleSwitchMode
+    handleSwitchMode,
+    // MFA-related properties set to false/null for compatibility
+    showMFA: false,
+    mfaEmail: null,
+    isCheckingMFA: false,
+    mfaPending: false,
+    handleMFASuccess: () => {},
+    handleMFACancel: () => {}
   };
-};
+}
