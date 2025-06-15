@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { products } from '@/data/products';
@@ -12,6 +13,22 @@ import { RelatedRecipes } from './product/RelatedRecipes';
 import { ProductNotFound } from './product/ProductNotFound';
 import { ProductDetailSkeleton } from './product/ProductDetailSkeleton';
 import { useSupabaseProduct } from '@/hooks/useSupabaseProducts';
+
+// Enhanced image extraction with exact mapping to uploaded images
+const getProductImage = (productName: string) => {
+  const imageMap: { [key: string]: string } = {
+    'Pad Thai Sauce': '/lovable-uploads/5a0dec88-a26c-4e29-bda6-8d921887615e.png',
+    'Sukiyaki Dipping Sauce': '/lovable-uploads/322ef915-5db5-4834-9e45-92a34dc3adb6.png',
+    'Tom Yum Chili Paste': '/lovable-uploads/fc66a288-b44b-4bf4-a82f-a2c844b58979.png',
+    'Red Curry Paste': '/lovable-uploads/dbb561f8-a97a-447c-8946-5a1d279bed05.png',
+    'Panang Curry Paste': '/lovable-uploads/5308a5d2-4f12-42ed-b3f8-f2aa5d7fbac9.png',
+    'Massaman Curry Paste': '/lovable-uploads/c936ed96-2c61-4919-9e6d-14f740c80b80.png',
+    'Green Curry Paste': '/lovable-uploads/1ae4d3c5-e136-4ed4-9a71-f1e9d6123a83.png',
+    'Yellow Curry Paste': '/lovable-uploads/acf32ec1-9435-4a5c-8baf-1943b85b93bf.png'
+  };
+
+  return imageMap[productName] || '/placeholder.svg';
+};
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,14 +46,19 @@ const ProductDetail = () => {
     description: { en: supabaseProduct.description || '', th: supabaseProduct.description || '' },
     price: Number(supabaseProduct.price),
     sku: supabaseProduct.sku,
-    // Keep other properties from local product for UI consistency
-    image: localProduct?.image || '',
+    // Use the image mapping function to get the correct image
+    image: getProductImage(supabaseProduct.name),
     category: localProduct?.category || 'curry-pastes',
     featured: Boolean(supabaseProduct.is_featured),
-    comparePrice: supabaseProduct.price ? Number(supabaseProduct.price) : undefined,
+    // Don't set comparePrice unless it's actually different
+    comparePrice: undefined,
     ingredients: localProduct?.ingredients || { en: [], th: [] },
     useIn: localProduct?.useIn || { en: [], th: [] }
-  } : localProduct;
+  } : localProduct ? {
+    ...localProduct,
+    // Ensure local products also use the correct image mapping
+    image: getProductImage(localProduct.name[language])
+  } : undefined;
 
   const relatedRecipes = recipes.filter(recipe => 
     recipe.relatedProducts?.includes(id || '')
