@@ -4,6 +4,8 @@ import { supabaseService } from '@/services/supabaseService';
 import { toast } from '@/hooks/use-toast';
 import { useAdminSecurity } from '@/hooks/useAdminSecurity';
 
+type UserRole = 'admin' | 'moderator' | 'user';
+
 export const useRoleManagement = (onRoleUpdated: () => void) => {
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const { logAdminAction } = useAdminSecurity();
@@ -18,7 +20,7 @@ export const useRoleManagement = (onRoleUpdated: () => void) => {
         action: 'add_role'
       });
 
-      await supabaseService.addUserRole(userId, role);
+      await supabaseService.addUserRole(userId, role as UserRole);
       
       toast({
         title: "Success",
@@ -55,7 +57,7 @@ export const useRoleManagement = (onRoleUpdated: () => void) => {
         action: 'remove_role'
       });
 
-      await supabaseService.removeUserRole(userId, role);
+      await supabaseService.removeUserRole(userId, role as UserRole);
       
       toast({
         title: "Success",

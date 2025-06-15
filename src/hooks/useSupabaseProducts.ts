@@ -2,22 +2,24 @@
 import { useState, useEffect } from 'react';
 import { supabaseService, type SupabaseProduct } from '@/services/supabaseService';
 
-export const useSupabaseProducts = () => {
+export const useSupabaseProducts = (categoryId?: string) => {
   const [products, setProducts] = useState<SupabaseProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadProducts = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
       const data = await supabaseService.getProducts();
-      setProducts(data);
+      // Filter by category if provided
+      const filteredData = categoryId ? data.filter(p => p.category_id === categoryId) : data;
+      setProducts(filteredData);
     } catch (err) {
       console.error('Error loading products:', err);
-      setError(err as Error);
+      setError(err instanceof Error ? err.message : 'Failed to load products');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -64,16 +66,49 @@ export const useSupabaseProducts = () => {
 
   useEffect(() => {
     loadProducts();
-  }, []);
+  }, [categoryId]);
 
   return {
     products,
-    loading,
+    isLoading,
     error,
     loadProducts,
     loadProduct,
     createProduct,
     updateProduct,
     deleteProduct,
+  };
+};
+
+// Export single product hook
+export const useSupabaseProduct = (id: string) => {
+  const [product, setProduct] = useState<SupabaseProduct | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadProduct = async () => {
+      if (!id) return;
+      
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await supabaseService.getProduct(id);
+        setProduct(data);
+      } catch (err) {
+        console.error('Error loading product:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load product');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProduct();
+  }, [id]);
+
+  return {
+    product,
+    isLoading,
+    error,
   };
 };
