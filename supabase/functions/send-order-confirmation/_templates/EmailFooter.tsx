@@ -9,8 +9,8 @@ interface EmailFooterProps {
 }
 
 export const EmailFooter = ({ orderNumber }: EmailFooterProps) => {
-  // Use localhost for development, production URL for production
-  const baseUrl = Deno.env.get('SITE_URL') || 'http://localhost:8080';
+  // Use localhost with correct port for development, production URL for production
+  const baseUrl = Deno.env.get('SITE_URL') || 'http://localhost:5173';
   
   // Create the correct order tracking URL - points to orders page with search parameter
   const trackingUrl = orderNumber 
