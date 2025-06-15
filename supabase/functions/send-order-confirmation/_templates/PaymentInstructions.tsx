@@ -5,11 +5,10 @@ import {
   paymentSection,
   bankDetailsBox,
   bankDetail,
-  paymentNote,
-  bodyText,
-  h2,
-  link
-} from './styles.ts'
+  paymentNote
+} from './styles/payment.ts'
+import { bodyText, h2 } from './styles/typography.ts'
+import { link } from './styles/base.ts'
 
 interface PaymentInstructionsProps {
   orderNumber: string

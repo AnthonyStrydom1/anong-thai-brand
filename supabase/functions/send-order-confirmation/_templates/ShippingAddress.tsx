@@ -1,7 +1,8 @@
 
 import { Section, Heading, Text } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
-import { shippingSection, addressText, h2 } from './styles.ts'
+import { shippingSection, addressText } from './styles/shipping.ts'
+import { h2 } from './styles/typography.ts'
 
 interface ShippingAddressProps {
   shippingAddress: {

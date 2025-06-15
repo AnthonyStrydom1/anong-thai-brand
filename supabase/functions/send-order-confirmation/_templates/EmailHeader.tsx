@@ -1,7 +1,7 @@
 
 import { Section, Row, Column, Img, Text } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
-import { header, logo, brandColumn, brandName, brandTagline } from './styles.ts'
+import { header, logo, brandName, brandTagline } from './styles/header.ts'
 
 export const EmailHeader = () => {
   return (

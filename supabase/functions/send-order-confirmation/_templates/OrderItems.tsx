@@ -14,9 +14,9 @@ import {
   itemQty,
   itemPrice,
   itemTotal,
-  itemDivider,
-  h2
-} from './styles.ts'
+  itemDivider
+} from './styles/items.ts'
+import { h2 } from './styles/typography.ts'
 
 interface OrderItemsProps {
   orderItems: OrderItem[]

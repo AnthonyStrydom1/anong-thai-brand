@@ -10,7 +10,7 @@ import {
   totalDivider,
   totalLabel,
   totalValue
-} from './styles.ts'
+} from './styles/summary.ts'
 
 interface OrderSummaryProps {
   subtotal: number

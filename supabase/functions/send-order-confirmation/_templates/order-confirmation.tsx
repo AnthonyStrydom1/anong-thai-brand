@@ -18,7 +18,8 @@ import { OrderSummary } from './OrderSummary.tsx'
 import { PaymentInstructions } from './PaymentInstructions.tsx'
 import { ShippingAddress } from './ShippingAddress.tsx'
 import { EmailFooter } from './EmailFooter.tsx'
-import { main, container, content, h1, greeting, bodyText } from './styles.ts'
+import { main, container, content } from './styles/base.ts'
+import { h1, greeting, bodyText } from './styles/typography.ts'
 
 export const OrderConfirmationEmail = ({
   orderNumber,

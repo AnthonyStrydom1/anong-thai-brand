@@ -1,7 +1,8 @@
 
 import { Section, Text, Link, Button } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
-import { ctaSection, button, footerText, signature, link } from './styles.ts'
+import { ctaSection, button, footerText, signature } from './styles/footer.ts'
+import { link } from './styles/base.ts'
 
 interface EmailFooterProps {
   orderNumber?: string;
@@ -10,7 +11,7 @@ interface EmailFooterProps {
 export const EmailFooter = ({ orderNumber }: EmailFooterProps) => {
   // Create the direct order tracking URL
   const trackingUrl = orderNumber 
-    ? `https://anongthaibrand.com/orders?search=${orderNumber}`
+    ? `https://anongthaibrand.com/order-details/${orderNumber}`
     : `https://anongthaibrand.com/orders`;
 
   return (
