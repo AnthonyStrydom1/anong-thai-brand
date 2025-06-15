@@ -15,7 +15,7 @@ interface AuthFormViewProps {
     lastName: string;
   };
   onTogglePassword: () => void;
-  onInputChange: (field: string, value: string) => void;
+  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
   onForgotPassword: () => void;
   onSwitchMode: () => void;
@@ -35,11 +35,6 @@ const AuthFormView = ({
 }: AuthFormViewProps) => {
   console.log('📝 AuthFormView: Rendering auth form');
   
-  // Convert the field-based onChange to the expected event-based onChange
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onInputChange(e.target.name, e.target.value);
-  };
-  
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <NavigationBanner />
@@ -52,7 +47,7 @@ const AuthFormView = ({
             showForgotPassword={showForgotPassword}
             formData={formData}
             onTogglePassword={onTogglePassword}
-            onInputChange={handleInputChange}
+            onInputChange={onInputChange}
             onSubmit={onSubmit}
             onForgotPassword={onForgotPassword}
             onSwitchMode={onSwitchMode}

@@ -1,4 +1,6 @@
+
 import { authService, type AuthUser } from '@/services/authService';
+import { mfaAuthService } from '@/services/mfaAuthService';
 
 export function useAuthOperations(
   user: any,
@@ -27,24 +29,26 @@ export function useAuthOperations(
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('🔐 Starting direct sign in process (MFA disabled)');
+      console.log('🔐 Starting sign in process with MFA enforcement');
       
-      // Clear any pending MFA state
-      setMfaPending(false);
+      mfaAuthService.clearMFASession();
       
-      // Use direct sign in without MFA
-      console.log('🔒 Using direct authentication');
-      const result = await authService.signIn({ email, password });
+      console.log('🔒 Initiating MFA signin (required for all users)');
+      const mfaResult = await mfaAuthService.initiateSignIn({ email, password });
       
-      console.log('✅ Direct sign in successful');
-      return { 
-        user: result.user,
-        session: result.session,
-        mfaRequired: false 
-      };
+      console.log('🎯 MFA signin result:', mfaResult);
+      
+      if (mfaResult.mfaRequired) {
+        console.log('✅ MFA flow initiated successfully');
+        return { mfaRequired: true };
+      }
+      
+      console.error('❌ Unexpected: MFA not required when it should be');
+      throw new Error('Authentication system error - MFA expected');
       
     } catch (error) {
       console.error('❌ Sign in error:', error);
+      mfaAuthService.clearMFASession();
       throw error;
     }
   };
@@ -54,6 +58,7 @@ export function useAuthOperations(
     
     // Always clear local state first, regardless of Supabase session validity
     console.log('🧹 Auth: Clearing local state immediately');
+    mfaAuthService.clearMFASession();
     setMfaPending(false);
     setUser(null);
     setSession(null);
