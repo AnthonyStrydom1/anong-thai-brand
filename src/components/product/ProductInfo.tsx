@@ -39,7 +39,7 @@ const ProductInfo = ({ product, averageRating = 0, reviewCount = 0, isLoadingRev
       price: product.price,
       category_id: null,
       images: product.image ? [product.image] : [],
-      stock_quantity: 100, // Default stock for local products
+      stock_quantity: 100,
       is_active: true,
       is_featured: product.featured || false,
       created_at: new Date().toISOString()
@@ -97,8 +97,9 @@ const ProductInfo = ({ product, averageRating = 0, reviewCount = 0, isLoadingRev
       )}
 
       <div className="flex items-center space-x-4">
-        <span className="text-3xl font-bold text-thai-purple">{formatPrice(product.price)}</span>
-        {product.comparePrice && (
+        <span className="text-3xl font-bold text-anong-deep-green">{formatPrice(product.price)}</span>
+        {/* Only show compare price if it exists and is different from the main price */}
+        {product.comparePrice && product.comparePrice !== product.price && (
           <span className="text-lg text-gray-500 line-through">{formatPrice(product.comparePrice)}</span>
         )}
       </div>
@@ -131,7 +132,7 @@ const ProductInfo = ({ product, averageRating = 0, reviewCount = 0, isLoadingRev
         <div className="flex space-x-3">
           <Button
             onClick={handleAddToCart}
-            className="flex-1 bg-thai-purple hover:bg-thai-purple/90"
+            className="flex-1 bg-anong-black text-white hover:bg-gradient-to-r hover:from-anong-black hover:to-anong-gold hover:text-anong-black transition-all duration-300"
             size="lg"
           >
             <ShoppingCart className="w-5 h-5 mr-2" />
