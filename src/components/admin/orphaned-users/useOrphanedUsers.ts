@@ -24,7 +24,22 @@ export const useOrphanedUsers = () => {
         return;
       }
 
-      setOrphanedUsers(data || []);
+      // Ensure data is an array and has the expected structure
+      if (Array.isArray(data)) {
+        setOrphanedUsers(data.map(user => ({
+          id: user.id || '',
+          email: user.email || '',
+          created_at: user.created_at || '',
+          raw_user_meta_data: user.raw_user_meta_data || {},
+          has_profile: Boolean(user.has_profile),
+          has_customer: Boolean(user.has_customer),
+          has_user_record: Boolean(user.has_user_record),
+          user_roles: Array.isArray(user.user_roles) ? user.user_roles : []
+        })));
+      } else {
+        console.warn('Unexpected data format from find_orphaned_auth_users:', data);
+        setOrphanedUsers([]);
+      }
     } catch (error: any) {
       console.error('Unexpected error:', error);
       toast({
@@ -63,14 +78,14 @@ export const useOrphanedUsers = () => {
         return;
       }
 
-      // Safely handle the response by checking if it's an object and has the expected properties
+      // Handle the response more safely
       if (data && typeof data === 'object' && !Array.isArray(data)) {
-        const response = data as Record<string, any>;
+        const response = data as any;
         
         if (response.success) {
           const actions = response.actions || [];
           const actionMessages = Array.isArray(actions) 
-            ? actions.map((action: any) => action.action).join(', ')
+            ? actions.map((action: any) => typeof action === 'object' ? action.action : action).join(', ')
             : 'User linked';
           
           toast({
