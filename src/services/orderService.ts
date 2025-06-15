@@ -1,4 +1,3 @@
-
 import { supabaseService } from './supabaseService';
 import { VATCalculator } from '@/utils/vatCalculator';
 import { shippingService, ShippingRate } from './shippingService';
@@ -25,14 +24,9 @@ export interface CreateOrderData {
 
 export class OrderService {
   private generateOrderNumber(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    
-    return `ORD-${year}${month}${day}-${timestamp.toString().slice(-6)}${random}`;
+    // Generate format: ANONG123456 (6 random digits)
+    const randomNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    return `ANONG${randomNumber}`;
   }
 
   async calculateShipping(address: { city: string; postalCode: string }, items: any[]): Promise<ShippingRate[]> {
@@ -55,18 +49,18 @@ export class OrderService {
 
       console.log('Order VAT calculation:', orderTotals);
 
-      // Generate order number client-side
+      // Generate order number client-side (will be overridden by DB function if empty)
       const orderNumber = this.generateOrderNumber();
       console.log('Generated order number:', orderNumber);
 
       // Create the order with proper VAT calculations
       const order: Database['public']['Tables']['orders']['Insert'] = {
-        order_number: orderNumber, // Use client-generated order number
+        order_number: orderNumber,
         customer_id: orderData.customer_id,
-        subtotal: orderTotals.totalExclVAT, // Subtotal excluding VAT
-        vat_amount: orderTotals.vatAmount, // Total VAT amount
+        subtotal: orderTotals.totalExclVAT,
+        vat_amount: orderTotals.vatAmount,
         shipping_amount: orderData.shipping_amount || 0,
-        total_amount: orderTotals.totalAmount, // Total including VAT
+        total_amount: orderTotals.totalAmount,
         shipping_address: orderData.shipping_address,
         billing_address: orderData.billing_address,
         shipping_method: orderData.shipping_method,

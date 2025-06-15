@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabaseService } from '@/services/supabaseService';
 import { orderService } from '@/services/orders/orderService';
@@ -39,14 +38,9 @@ export const useOrderCreation = () => {
   const { logSecurityEvent } = useSecurityAudit();
 
   const generateOrderNumber = (): string => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    
-    return `ORD-${year}${month}${day}-${timestamp.toString().slice(-6)}${random}`;
+    // Generate format: ANONG123456 (6 random digits)
+    const randomNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    return `ANONG${randomNumber}`;
   };
 
   const createOrder = async (orderData: OrderRequest) => {
