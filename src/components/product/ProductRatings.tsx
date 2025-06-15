@@ -67,6 +67,7 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
       }
       
       console.log('Reviews loaded:', data);
+      console.log('Number of reviews found:', data?.length || 0);
       setReviews(data || []);
     } catch (error) {
       console.error('Error loading reviews:', error);
@@ -81,6 +82,7 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
   };
 
   const handleReviewSubmitted = () => {
+    console.log('Review submitted, reloading reviews...');
     setShowAddReview(false);
     loadReviews();
   };

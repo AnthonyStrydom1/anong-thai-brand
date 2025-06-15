@@ -77,6 +77,14 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
         return;
       }
 
+      console.log('Submitting review:', {
+        product_id: productId,
+        customer_id: customer.id,
+        rating: newReview.rating,
+        title: newReview.title.trim(),
+        content: newReview.content.trim()
+      });
+
       const { error } = await supabaseService.supabase
         .from('product_reviews')
         .insert({
@@ -85,14 +93,19 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
           rating: newReview.rating,
           title: newReview.title.trim(),
           content: newReview.content.trim(),
-          is_approved: false
+          is_approved: true // Auto-approve for now to make reviews visible immediately
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Review submission error:', error);
+        throw error;
+      }
+
+      console.log('Review submitted successfully');
 
       toast({
         title: t.reviewSubmitted,
-        description: t.reviewPending,
+        description: 'Your review has been posted successfully!',
       });
 
       setNewReview({ rating: 0, title: '', content: '' });
