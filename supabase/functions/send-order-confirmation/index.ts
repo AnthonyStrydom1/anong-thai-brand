@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@4.0.0";
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
@@ -44,11 +45,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    console.log('Starting order confirmation email process...');
+    console.log('🚀 Order confirmation email function started');
 
     // Check if RESEND_API_KEY is configured
     if (!Deno.env.get("RESEND_API_KEY")) {
-      console.error("RESEND_API_KEY is not configured");
+      console.error("❌ RESEND_API_KEY is not configured");
       return new Response(JSON.stringify({ 
         error: "Email service not configured",
         details: "RESEND_API_KEY is missing" 
@@ -61,19 +62,42 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    console.log('✅ RESEND_API_KEY is configured');
+
     const orderData: OrderConfirmationRequest = await req.json();
-    console.log('Sending order confirmation email for order:', orderData.orderNumber);
-    console.log('Recipient email:', orderData.customerEmail);
+    console.log('📧 Processing order confirmation for:', {
+      orderNumber: orderData.orderNumber,
+      customerEmail: orderData.customerEmail,
+      itemCount: orderData.orderItems?.length || 0,
+      totalAmount: orderData.totalAmount
+    });
+
+    // Validate required data
+    if (!orderData.orderNumber || !orderData.customerEmail) {
+      console.error('❌ Missing required order data:', {
+        hasOrderNumber: !!orderData.orderNumber,
+        hasCustomerEmail: !!orderData.customerEmail
+      });
+      return new Response(JSON.stringify({ 
+        error: "Missing required order data" 
+      }), {
+        status: 400,
+        headers: { 
+          "Content-Type": "application/json", 
+          ...corsHeaders 
+        },
+      });
+    }
 
     // Render the React email template
-    console.log('Rendering email template...');
+    console.log('🎨 Rendering order confirmation email template...');
     const html = await renderAsync(
       React.createElement(OrderConfirmationEmail, orderData)
     );
-    console.log('Email template rendered successfully');
+    console.log('✅ Email template rendered successfully, HTML length:', html.length);
 
     // Send the email
-    console.log('Sending email via Resend...');
+    console.log('📤 Sending order confirmation email via Resend...');
     const emailResponse = await resend.emails.send({
       from: "Anong Thai Brand <noreply@anongthaibrand.com>",
       to: [orderData.customerEmail],
@@ -81,12 +105,17 @@ const handler = async (req: Request): Promise<Response> => {
       html,
     });
 
-    console.log("Order confirmation email sent successfully:", emailResponse);
+    console.log("✅ Order confirmation email sent successfully:", {
+      messageId: emailResponse.data?.id,
+      recipient: orderData.customerEmail,
+      orderNumber: orderData.orderNumber
+    });
 
     return new Response(JSON.stringify({ 
       success: true, 
       messageId: emailResponse.data?.id,
-      recipient: orderData.customerEmail 
+      recipient: orderData.customerEmail,
+      orderNumber: orderData.orderNumber
     }), {
       status: 200,
       headers: {
@@ -95,11 +124,14 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
   } catch (error: any) {
-    console.error("Error sending order confirmation email:", error);
+    console.error("❌ Error in order confirmation email function:", error);
     
     // Log more detailed error information
     if (error.message) {
       console.error("Error message:", error.message);
+    }
+    if (error.stack) {
+      console.error("Error stack:", error.stack);
     }
     if (error.response) {
       console.error("Error response:", error.response);

@@ -7,20 +7,20 @@ export const EmailFooter = () => {
   return (
     <>
       <Section style={ctaSection}>
-        <Button href="https://anong.co.za/orders" style={button}>
+        <Button href="https://anongthaibrand.com/orders" style={button}>
           Track Your Order
         </Button>
       </Section>
 
       <Text style={footerText}>
         If you have any questions about your order, please contact us at{' '}
-        <Link href="mailto:orders@anong.com" style={link}>orders@anong.com</Link> or 
-        visit our website at <Link href="https://anong.co.za" style={link}>anong.co.za</Link>
+        <Link href="mailto:orders@anongthaibrand.com" style={link}>orders@anongthaibrand.com</Link> or 
+        visit our website at <Link href="https://anongthaibrand.com" style={link}>anongthaibrand.com</Link>
       </Text>
 
       <Text style={signature}>
         Warm regards,<br />
-        The ANONG Team
+        The Anong Thai Brand Team
       </Text>
     </>
   )

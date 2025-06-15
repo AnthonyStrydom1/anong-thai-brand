@@ -25,7 +25,7 @@ export const PaymentInstructions = ({ orderNumber }: PaymentInstructionsProps) =
       
       <Section style={bankDetailsBox}>
         <Text style={bankDetail}><strong>Bank:</strong> Standard Bank</Text>
-        <Text style={bankDetail}><strong>Account Name:</strong> ANONG Thai Kitchen</Text>
+        <Text style={bankDetail}><strong>Account Name:</strong> Anong Thai Brand</Text>
         <Text style={bankDetail}><strong>Account Number:</strong> 123456789</Text>
         <Text style={bankDetail}><strong>Branch Code:</strong> 051001</Text>
         <Text style={bankDetail}><strong>Reference:</strong> {orderNumber}</Text>
@@ -33,7 +33,7 @@ export const PaymentInstructions = ({ orderNumber }: PaymentInstructionsProps) =
 
       <Text style={paymentNote}>
         Please use your order number <strong>{orderNumber}</strong> as the payment reference 
-        and email proof of payment to <Link href="mailto:orders@anong.com" style={link}>orders@anong.com</Link>
+        and email proof of payment to <Link href="mailto:orders@anongthaibrand.com" style={link}>orders@anongthaibrand.com</Link>
       </Text>
     </Section>
   )
