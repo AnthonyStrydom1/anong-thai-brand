@@ -22,6 +22,12 @@ class MFAAuthService {
 
       if (error) {
         console.log('❌ MFA Service: Credential validation failed:', error.message);
+        
+        // Provide more specific error messages
+        if (error.message?.includes('Invalid login credentials')) {
+          throw new Error('Invalid email or password. Please check your credentials and try again.');
+        }
+        
         throw error;
       }
 
@@ -61,9 +67,9 @@ class MFAAuthService {
         }));
         console.log('🎯 MFA Service: MANDATORY MFA flow initiated successfully');
       } else {
-        // If email failed, clear the session
+        // If email failed, clear the session and throw the specific error
         mfaSessionManager.clearSession();
-        throw new Error('Failed to send MFA email');
+        throw new Error(emailResult.error || 'Failed to send MFA email');
       }
 
       return { mfaRequired: true };

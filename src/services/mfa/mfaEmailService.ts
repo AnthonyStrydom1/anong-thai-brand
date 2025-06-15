@@ -8,17 +8,49 @@ export class MFAEmailService {
     console.log('📧 MFA Email Service: Sending MFA email to:', email);
     
     try {
+      // First check if the user exists in auth.users
+      console.log('🔍 MFA Email Service: Checking if user exists in auth.users...');
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      
+      if (authError) {
+        console.error('❌ MFA Email Service: Could not check auth users:', authError);
+      } else {
+        const userExists = authUsers.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        console.log('👤 MFA Email Service: User exists in auth.users:', !!userExists);
+        if (userExists) {
+          console.log('📧 MFA Email Service: Found user with email:', userExists.email, 'ID:', userExists.id);
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke('send-mfa-email', {
         body: { email }
       });
 
       if (error) {
         console.error('❌ MFA Email Service: Supabase function error:', error);
+        
+        // If it's a user not found error, provide more helpful feedback
+        if (error.message?.includes('User not found')) {
+          return {
+            success: false,
+            error: 'Account not found. Please check your email address or sign up for a new account.'
+          };
+        }
+        
         throw new Error(`Failed to send MFA email: ${error.message}`);
       }
 
       if (!data || !data.success) {
         console.error('❌ MFA Email Service: Function returned failure:', data);
+        
+        // Check for specific error messages
+        if (data?.error?.includes('User not found')) {
+          return {
+            success: false,
+            error: 'Account not found. Please check your email address or sign up for a new account.'
+          };
+        }
+        
         throw new Error(data?.error || 'Failed to send MFA email');
       }
 
