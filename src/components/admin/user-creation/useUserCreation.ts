@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
+
+type AppRole = Database['public']['Enums']['app_role'];
 
 interface UserFormData {
   email: string;
@@ -68,7 +71,7 @@ export const useUserCreation = (onUserCreated: () => void) => {
             .from('user_roles')
             .insert({
               user_id: authData.user.id,
-              role: role
+              role: role as AppRole
             });
 
           if (roleError) {

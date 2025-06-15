@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
+
+type AppRole = Database['public']['Enums']['app_role'];
 
 export const useRoleManagement = (onRolesUpdated: () => void) => {
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
@@ -15,7 +18,7 @@ export const useRoleManagement = (onRolesUpdated: () => void) => {
         .from('user_roles')
         .insert({
           user_id: userId,
-          role: role
+          role: role as AppRole
         });
       
       if (error) {
@@ -57,7 +60,7 @@ export const useRoleManagement = (onRolesUpdated: () => void) => {
         .from('user_roles')
         .delete()
         .eq('user_id', userId)
-        .eq('role', role);
+        .eq('role', role as AppRole);
       
       if (error) throw error;
       
