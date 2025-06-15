@@ -77,6 +77,16 @@ export const h1 = {
   paddingBottom: '15px'
 }
 
+export const h2 = {
+  fontFamily: '"Playfair Display", serif',
+  fontSize: '20px',
+  fontWeight: '600',
+  color: '#1A1A1A', // anong-black
+  margin: '30px 0 15px',
+  borderLeft: '4px solid #D4AF37',
+  paddingLeft: '15px'
+}
+
 export const bodyText = {
   fontFamily: '"Lato", sans-serif',
   fontSize: '16px',
@@ -94,6 +104,214 @@ export const sectionTitle = {
   margin: '30px 0 15px',
   borderLeft: '4px solid #D4AF37',
   paddingLeft: '15px'
+}
+
+// Order box styles
+export const orderBox = {
+  backgroundColor: '#F8F8F8',
+  padding: '20px',
+  borderRadius: '6px',
+  border: '1px solid #D4AF37',
+  margin: '20px 0'
+}
+
+export const orderInfoColumn = {
+  width: '50%',
+  verticalAlign: 'top' as const,
+  paddingRight: '10px'
+}
+
+export const orderLabel = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '14px',
+  fontWeight: '600',
+  color: '#6B6B6B',
+  margin: '0 0 5px',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.5px'
+}
+
+export const orderValue = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '16px',
+  fontWeight: '700',
+  color: '#1A1A1A',
+  margin: '0 0 15px'
+}
+
+// Items section styles
+export const itemsSection = {
+  margin: '30px 0'
+}
+
+export const itemRow = {
+  borderBottom: '1px solid #E5E5E5',
+  padding: '15px 0'
+}
+
+export const itemNameColumn = {
+  width: '50%',
+  verticalAlign: 'top' as const,
+  paddingRight: '15px'
+}
+
+export const itemQtyColumn = {
+  width: '15%',
+  verticalAlign: 'top' as const,
+  textAlign: 'center' as const
+}
+
+export const itemPriceColumn = {
+  width: '17.5%',
+  verticalAlign: 'top' as const,
+  textAlign: 'right' as const
+}
+
+export const itemTotalColumn = {
+  width: '17.5%',
+  verticalAlign: 'top' as const,
+  textAlign: 'right' as const
+}
+
+export const itemName = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '16px',
+  fontWeight: '600',
+  color: '#1A1A1A',
+  margin: '0 0 5px'
+}
+
+export const itemSku = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '12px',
+  color: '#6B6B6B',
+  margin: '0'
+}
+
+export const itemQty = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '14px',
+  color: '#4A4A4A',
+  margin: '0'
+}
+
+export const itemPrice = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '14px',
+  color: '#4A4A4A',
+  margin: '0'
+}
+
+export const itemTotal = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '16px',
+  fontWeight: '600',
+  color: '#1A1A1A',
+  margin: '0'
+}
+
+export const itemDivider = {
+  borderTop: '1px solid #F0F0F0',
+  margin: '10px 0'
+}
+
+// Summary section styles
+export const summarySection = {
+  backgroundColor: '#F8F8F8',
+  padding: '20px',
+  borderRadius: '6px',
+  margin: '20px 0'
+}
+
+export const summaryLabelColumn = {
+  width: '70%',
+  verticalAlign: 'top' as const
+}
+
+export const summaryValueColumn = {
+  width: '30%',
+  verticalAlign: 'top' as const,
+  textAlign: 'right' as const
+}
+
+export const summaryLabel = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '14px',
+  color: '#4A4A4A',
+  margin: '0 0 10px'
+}
+
+export const summaryValue = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '14px',
+  color: '#4A4A4A',
+  margin: '0 0 10px'
+}
+
+export const totalDivider = {
+  borderTop: '2px solid #D4AF37',
+  margin: '15px 0 10px'
+}
+
+export const totalLabel = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '18px',
+  fontWeight: '700',
+  color: '#1A1A1A',
+  margin: '0'
+}
+
+export const totalValue = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '18px',
+  fontWeight: '700',
+  color: '#D4AF37',
+  margin: '0'
+}
+
+// Payment section styles
+export const paymentSection = {
+  margin: '30px 0'
+}
+
+export const bankDetailsBox = {
+  backgroundColor: '#F8F8F8',
+  padding: '20px',
+  borderRadius: '6px',
+  border: '1px solid #E5E5E5',
+  margin: '15px 0'
+}
+
+export const bankDetail = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '14px',
+  color: '#1A1A1A',
+  margin: '5px 0',
+  lineHeight: '1.4'
+}
+
+export const paymentNote = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '14px',
+  color: '#4A4A4A',
+  margin: '20px 0',
+  padding: '15px',
+  backgroundColor: '#FFFBF5',
+  border: '1px solid #D4AF37',
+  borderRadius: '6px'
+}
+
+// Shipping section styles
+export const shippingSection = {
+  margin: '30px 0'
+}
+
+export const addressText = {
+  fontFamily: '"Lato", sans-serif',
+  fontSize: '14px',
+  color: '#1A1A1A',
+  margin: '10px 0',
+  lineHeight: '1.6'
 }
 
 export const table = {
