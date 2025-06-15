@@ -9,10 +9,8 @@ interface EmailFooterProps {
 }
 
 export const EmailFooter = ({ orderNumber }: EmailFooterProps) => {
-  // Use the current domain or localhost for development
-  const baseUrl = typeof window !== 'undefined' 
-    ? window.location.origin 
-    : 'http://localhost:8080'; // Default to localhost for development
+  // Use environment variable or fallback to production URL
+  const baseUrl = Deno.env.get('SITE_URL') || 'https://anong.co.za';
   
   // Create the correct order tracking URL - points to orders page with search parameter
   const trackingUrl = orderNumber 
