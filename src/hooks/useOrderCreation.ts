@@ -11,6 +11,7 @@ export const useOrderCreation = () => {
   const createOrder = async (orderData: CreateOrderData) => {
     setIsCreating(true);
     try {
+      console.log('🚀 === ORDER CREATION START ===');
       console.log('🚀 Starting order creation process...');
       const order = await orderService.createOrder(orderData);
       console.log('✅ Order created successfully:', order);
@@ -20,9 +21,11 @@ export const useOrderCreation = () => {
         description: `Order ${order.order_number} has been created.`,
       });
 
-      // Send order confirmation email
+      // ALWAYS attempt to send order confirmation email
+      console.log('📧 === EMAIL SENDING PROCESS START ===');
+      console.log('📧 About to start email sending process');
+      
       try {
-        console.log('📧 === EMAIL SENDING PROCESS START ===');
         console.log('📧 Preparing to send order confirmation email for order:', order.order_number);
         
         // Validate email address
@@ -30,6 +33,9 @@ export const useOrderCreation = () => {
         console.log('📧 Customer email identified:', customerEmail);
         
         if (!customerEmail) {
+          console.error('📧 ERROR: No customer email found in billing or shipping address');
+          console.error('📧 Billing address:', orderData.billing_address);
+          console.error('📧 Shipping address:', orderData.shipping_address);
           throw new Error('No customer email found in billing or shipping address');
         }
         
@@ -69,7 +75,10 @@ export const useOrderCreation = () => {
         });
 
         console.log('📧 About to call EmailService.sendOrderConfirmation...');
+        console.log('📧 Full email data being sent:', emailData);
+        
         const emailResult = await EmailService.sendOrderConfirmation(emailData);
+        
         console.log('📧 EmailService.sendOrderConfirmation returned:', emailResult);
         console.log('✅ Order confirmation email sent successfully');
         console.log('📧 === EMAIL SENDING PROCESS END ===');
@@ -78,6 +87,7 @@ export const useOrderCreation = () => {
           title: "Confirmation Email Sent",
           description: "Order confirmation has been sent to your email.",
         });
+        
       } catch (emailError) {
         console.error('❌ === EMAIL SENDING FAILED ===');
         console.error('❌ Failed to send order confirmation email:', emailError);
@@ -98,7 +108,9 @@ export const useOrderCreation = () => {
         });
       }
       
+      console.log('🚀 === ORDER CREATION END ===');
       return order;
+      
     } catch (error) {
       console.error('❌ Failed to create order:', error);
       toast({
