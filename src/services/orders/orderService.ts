@@ -40,6 +40,10 @@ class OrderService {
     return orderStatusService.updatePaymentStatus(orderId, paymentStatus);
   }
 
+  async updateTrackingNumber(orderId: string, trackingNumber: string) {
+    return orderStatusService.updateTrackingNumber(orderId, trackingNumber);
+  }
+
   // Stock operations
   async restoreStockForCancelledOrder(orderId: string) {
     return orderStockService.restoreStockForCancelledOrder(orderId);

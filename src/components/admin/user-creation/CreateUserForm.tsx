@@ -3,31 +3,24 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from 'lucide-react';
-import UserFormFields, { UserFormData } from './UserFormFields';
-import RoleSelector from './RoleSelector';
-import { useUserCreation } from './useUserCreation';
+import UserFormFields from './UserFormFields';
+import { useAdminUserCreation } from './useAdminUserCreation';
+import type { UserFormData } from './UserFormFields';
 
 interface CreateUserFormProps {
   onUserCreated: () => void;
 }
 
 const CreateUserForm = ({ onUserCreated }: CreateUserFormProps) => {
-  const [formData, setFormData] = useState<UserFormData & { roles: string[] }>({
+  const [formData, setFormData] = useState<UserFormData>({
     email: '',
     password: '',
     firstName: '',
-    lastName: '',
-    roles: [] // No default role
+    lastName: ''
   });
 
-  const { createUser, isCreating } = useUserCreation(() => {
-    setFormData({ 
-      email: '', 
-      password: '', 
-      firstName: '', 
-      lastName: '', 
-      roles: [] 
-    });
+  const { createAdminUser, isCreating } = useAdminUserCreation(() => {
+    setFormData({ email: '', password: '', firstName: '', lastName: '' });
     onUserCreated();
   });
 
@@ -35,12 +28,8 @@ const CreateUserForm = ({ onUserCreated }: CreateUserFormProps) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleRolesChange = (roles: string[]) => {
-    setFormData(prev => ({ ...prev, roles }));
-  };
-
   const handleSubmit = () => {
-    createUser(formData);
+    createAdminUser(formData);
   };
 
   return (
@@ -48,24 +37,18 @@ const CreateUserForm = ({ onUserCreated }: CreateUserFormProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <UserPlus className="h-5 w-5" />
-          Create New User
+          Create New Admin User
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <UserFormFields formData={formData} onInputChange={handleInputChange} />
         
-        <RoleSelector 
-          selectedRoles={formData.roles}
-          onRolesChange={handleRolesChange}
-          mode="single"
-        />
-        
         <Button 
           onClick={handleSubmit}
-          disabled={isCreating || !formData.email || !formData.password || formData.roles.length === 0}
+          disabled={isCreating || !formData.email || !formData.password}
           className="w-full"
         >
-          {isCreating ? "Creating..." : "Create User"}
+          {isCreating ? "Creating..." : "Create Admin User"}
         </Button>
       </CardContent>
     </Card>

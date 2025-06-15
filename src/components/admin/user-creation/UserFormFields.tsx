@@ -2,9 +2,8 @@
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Mail, Lock } from 'lucide-react';
 
-interface UserFormData {
+export interface UserFormData {
   email: string;
   password: string;
   firstName: string;
@@ -22,69 +21,55 @@ const UserFormFields = ({ formData, onInputChange }: UserFormFieldsProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="firstName">First Name</Label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              id="firstName"
-              type="text"
-              placeholder="First name"
-              value={formData.firstName}
-              onChange={(e) => onInputChange('firstName', e.target.value)}
-              className="pl-10"
-            />
-          </div>
+          <Input
+            id="firstName"
+            type="text"
+            value={formData.firstName}
+            onChange={(e) => onInputChange('firstName', e.target.value)}
+            placeholder="Enter first name"
+          />
         </div>
-        
         <div>
           <Label htmlFor="lastName">Last Name</Label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              id="lastName"
-              type="text"
-              placeholder="Last name"
-              value={formData.lastName}
-              onChange={(e) => onInputChange('lastName', e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="email">Email Address *</Label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            id="email"
-            type="email"
-            placeholder="admin@example.com"
-            value={formData.email}
-            onChange={(e) => onInputChange('email', e.target.value)}
-            className="pl-10"
-            required
+            id="lastName"
+            type="text"
+            value={formData.lastName}
+            onChange={(e) => onInputChange('lastName', e.target.value)}
+            placeholder="Enter last name"
           />
         </div>
       </div>
-
+      
       <div>
-        <Label htmlFor="password">Password *</Label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            id="password"
-            type="password"
-            placeholder="Strong password"
-            value={formData.password}
-            onChange={(e) => onInputChange('password', e.target.value)}
-            className="pl-10"
-            required
-          />
-        </div>
+        <Label htmlFor="email">Email Address</Label>
+        <Input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => onInputChange('email', e.target.value)}
+          placeholder="Enter email address"
+          required
+        />
+      </div>
+      
+      <div>
+        <Label htmlFor="password">Password</Label>
+        <Input
+          id="password"
+          type="password"
+          value={formData.password}
+          onChange={(e) => onInputChange('password', e.target.value)}
+          placeholder="Enter password"
+          required
+          minLength={6}
+        />
+        <p className="text-sm text-gray-500 mt-1">
+          Password must be at least 6 characters long
+        </p>
       </div>
     </>
   );
 };
 
 export default UserFormFields;
-export type { UserFormData };
