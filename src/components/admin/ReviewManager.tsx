@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabaseService } from '@/services/supabaseService';
 import { toast } from '@/hooks/use-toast';
-import { Star, CheckCircle, XCircle, Eye, User } from 'lucide-react';
+import { Star, CheckCircle, XCircle, User } from 'lucide-react';
 import StarRating from '@/components/product/StarRating';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface Review {
   id: string;
@@ -35,6 +35,7 @@ const ReviewManager = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('pending');
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     loadReviews();
@@ -133,88 +134,88 @@ const ReviewManager = () => {
   const pendingReviews = reviews.filter(r => !r.is_approved);
   const approvedReviews = reviews.filter(r => r.is_approved);
 
-  const renderReviewsTable = (reviewsList: Review[]) => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Product</TableHead>
-          <TableHead>Customer</TableHead>
-          <TableHead>Rating</TableHead>
-          <TableHead>Title</TableHead>
-          <TableHead>Content</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {reviewsList.map((review) => {
-          const customerName = review.customer?.fullname || 
-            `${review.customer?.first_name || ''} ${review.customer?.last_name || ''}`.trim() || 
-            'Anonymous';
+  const ReviewCard = ({ review }: { review: Review }) => {
+    const customerName = review.customer?.fullname || 
+      `${review.customer?.first_name || ''} ${review.customer?.last_name || ''}`.trim() || 
+      'Anonymous';
 
-          return (
-            <TableRow key={review.id}>
-              <TableCell className="font-medium">
-                {review.products?.name || 'Unknown Product'}
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center space-x-2">
-                  <User className="w-4 h-4 text-gray-400" />
-                  <div>
-                    <div className="font-medium">{customerName}</div>
-                    <div className="text-sm text-gray-500">{review.customer?.email}</div>
-                  </div>
+    return (
+      <Card className="mb-4">
+        <CardContent className="p-4">
+          <div className="space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center space-x-2">
+                <User className="w-4 h-4 text-gray-400" />
+                <div>
+                  <div className="font-medium text-sm">{customerName}</div>
+                  <div className="text-xs text-gray-500">{review.customer?.email}</div>
                 </div>
-              </TableCell>
-              <TableCell>
-                <StarRating rating={review.rating} size="sm" />
-              </TableCell>
-              <TableCell className="max-w-[200px]">
-                <div className="truncate font-medium">{review.title}</div>
-              </TableCell>
-              <TableCell className="max-w-[300px]">
-                <div className="truncate text-sm text-gray-600">{review.content}</div>
-              </TableCell>
-              <TableCell className="text-sm text-gray-500">
+              </div>
+              <div className="text-xs text-gray-500">
                 {new Date(review.created_at).toLocaleDateString()}
-              </TableCell>
-              <TableCell>
-                <div className="flex space-x-2">
-                  {!review.is_approved ? (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleApprove(review.id)}
-                        className="text-green-600 hover:text-green-700"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleReject(review.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <XCircle className="w-4 h-4 mr-1" />
-                        Reject
-                      </Button>
-                    </>
-                  ) : (
-                    <Badge variant="outline" className="text-green-600">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Approved
-                    </Badge>
-                  )}
-                </div>
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
-  );
+              </div>
+            </div>
+
+            <div>
+              <div className="font-medium text-sm mb-1">{review.products?.name || 'Unknown Product'}</div>
+              <StarRating rating={review.rating} size="sm" />
+            </div>
+
+            <div>
+              <div className="font-medium text-sm mb-1">{review.title}</div>
+              <p className="text-sm text-gray-600">{review.content}</p>
+            </div>
+
+            {!review.is_approved ? (
+              <div className="flex space-x-2 pt-2">
+                <Button
+                  size="sm"
+                  onClick={() => handleApprove(review.id)}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <CheckCircle className="w-4 h-4 mr-1" />
+                  Approve
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleReject(review.id)}
+                  className="flex-1 text-red-600 border-red-600 hover:bg-red-50"
+                >
+                  <XCircle className="w-4 h-4 mr-1" />
+                  Reject
+                </Button>
+              </div>
+            ) : (
+              <Badge variant="outline" className="text-green-600 w-fit">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Approved
+              </Badge>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderReviewsList = (reviewsList: Review[]) => {
+    if (reviewsList.length === 0) {
+      return (
+        <div className="text-center py-8 text-gray-500">
+          <Star className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+          <p>No reviews found</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {reviewsList.map((review) => (
+          <ReviewCard key={review.id} review={review} />
+        ))}
+      </div>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -274,36 +275,15 @@ const ReviewManager = () => {
             </TabsList>
 
             <TabsContent value="pending">
-              {pendingReviews.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Star className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>No pending reviews</p>
-                </div>
-              ) : (
-                renderReviewsTable(pendingReviews)
-              )}
+              {renderReviewsList(pendingReviews)}
             </TabsContent>
 
             <TabsContent value="approved">
-              {approvedReviews.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <CheckCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>No approved reviews</p>
-                </div>
-              ) : (
-                renderReviewsTable(approvedReviews)
-              )}
+              {renderReviewsList(approvedReviews)}
             </TabsContent>
 
             <TabsContent value="all">
-              {reviews.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Eye className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>No reviews found</p>
-                </div>
-              ) : (
-                renderReviewsTable(reviews)
-              )}
+              {renderReviewsList(reviews)}
             </TabsContent>
           </Tabs>
         </CardContent>
