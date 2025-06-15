@@ -56,7 +56,7 @@ export const useUserCreation = (onUserCreated: () => void) => {
         return;
       }
 
-      // Try to create the user in Supabase Auth using admin functions
+      // Try to create the user in Supabase Auth
       console.log('Attempting to create auth user...');
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
@@ -69,7 +69,7 @@ export const useUserCreation = (onUserCreated: () => void) => {
         }
       });
 
-      // Handle different types of signup errors
+      // Handle the "user already registered" error specifically
       if (signUpError) {
         console.error('Auth signup error:', signUpError);
         
@@ -79,79 +79,14 @@ export const useUserCreation = (onUserCreated: () => void) => {
           
           console.log('User exists in auth, attempting to find and link existing user...');
           
-          // User exists in auth.users but not in our tables
-          // Let's try to get the existing auth user and create records for them
-          try {
-            // We can't directly query auth.users, so we'll try a different approach
-            // Let's attempt to sign them in to get their ID, then sign them out
-            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-              email: formData.email,
-              password: formData.password
-            });
-
-            if (signInData.user && !signInError) {
-              const existingUserId = signInData.user.id;
-              console.log('Found existing user ID:', existingUserId);
-              
-              // Sign them out immediately
-              await supabase.auth.signOut();
-              
-              // Now create the user record in our tables
-              // Assign roles first
-              for (const role of formData.roles) {
-                const { error: roleError } = await supabase
-                  .from('user_roles')
-                  .insert({
-                    user_id: existingUserId,
-                    role: role as AppRole
-                  });
-
-                if (roleError && !roleError.message.includes('duplicate key')) {
-                  console.error(`Error assigning ${role} role:`, roleError);
-                }
-              }
-
-              // If user has admin role, create them in the users table
-              if (formData.roles.includes('admin')) {
-                const { error: userError } = await supabase
-                  .from('users')
-                  .insert({
-                    id: existingUserId,
-                    email: formData.email,
-                    first_name: formData.firstName,
-                    last_name: formData.lastName,
-                    auth_user_id: existingUserId
-                  });
-
-                if (userError && !userError.message.includes('duplicate key')) {
-                  console.error('Admin user record creation error:', userError);
-                }
-              }
-
-              const roleText = formData.roles.length === 1 ? 
-                `${formData.roles[0]} role` : 
-                `${formData.roles.join(', ')} roles`;
-
-              toast({
-                title: "Success!",
-                description: `Existing user ${formData.email} has been updated with ${roleText}.`,
-              });
-
-              onUserCreated();
-              return;
-            }
-          } catch (linkError) {
-            console.error('Error linking existing user:', linkError);
-          }
-          
           toast({
-            title: "User Already Exists",
-            description: `A user with email ${formData.email} already exists in the authentication system. If this is an existing user who needs role assignment, please contact a system administrator.`,
+            title: "User Already Exists in Authentication System",
+            description: `The email ${formData.email} is already registered in the authentication system. This user may have been created outside of the admin panel. Please contact the system administrator or try a different approach to assign roles to this existing user.`,
             variant: "destructive"
           });
         } else {
           toast({
-            title: "Error",
+            title: "Authentication Error",
             description: `Failed to create user account: ${signUpError.message}`,
             variant: "destructive"
           });
@@ -163,7 +98,7 @@ export const useUserCreation = (onUserCreated: () => void) => {
         console.log('Auth user created successfully, now assigning roles');
         
         // Assign roles to the user
-        for (const role of formData.roles) {
+        const roleAssignmentPromises = formData.roles.map(async (role) => {
           const { error: roleError } = await supabase
             .from('user_roles')
             .insert({
@@ -173,13 +108,11 @@ export const useUserCreation = (onUserCreated: () => void) => {
 
           if (roleError) {
             console.error(`Error assigning ${role} role:`, roleError);
-            toast({
-              title: "Partial Success",
-              description: `User created but failed to assign ${role} role: ${roleError.message}`,
-              variant: "destructive"
-            });
+            throw new Error(`Failed to assign ${role} role: ${roleError.message}`);
           }
-        }
+        });
+
+        await Promise.all(roleAssignmentPromises);
 
         // If user has admin role, create them in the users table
         if (formData.roles.includes('admin')) {
@@ -200,6 +133,7 @@ export const useUserCreation = (onUserCreated: () => void) => {
               description: `User and roles created but admin record failed: ${userError.message}`,
               variant: "destructive"
             });
+            return;
           }
         }
 
@@ -218,7 +152,7 @@ export const useUserCreation = (onUserCreated: () => void) => {
       console.error('Unexpected error:', error);
       toast({
         title: "Error",
-        description: error.message || "An unexpected error occurred.",
+        description: error.message || "An unexpected error occurred while creating the user.",
         variant: "destructive"
       });
     } finally {
