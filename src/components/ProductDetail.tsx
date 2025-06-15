@@ -47,25 +47,22 @@ const ProductDetail = () => {
     localProductIngredients: localProduct?.ingredients 
   });
   
+  // Always use local product data for ingredients and other details
   const product = supabaseProduct ? {
-    ...localProduct,
     id: supabaseProduct.id,
     name: { en: supabaseProduct.name, th: supabaseProduct.name },
     description: { en: supabaseProduct.description || '', th: supabaseProduct.description || '' },
     price: Number(supabaseProduct.price),
     sku: supabaseProduct.sku,
-    // Use the image mapping function to get the correct image
     image: getProductImage(supabaseProduct.name),
     category: localProduct?.category || 'curry-pastes',
     featured: Boolean(supabaseProduct.is_featured),
-    // Don't set comparePrice unless it's actually different
     comparePrice: undefined,
-    // Ensure ingredients are properly mapped from local data
+    // Always use local product data for ingredients and useIn
     ingredients: localProduct?.ingredients || { en: [], th: [] },
     useIn: localProduct?.useIn || { en: [], th: [] }
   } : localProduct ? {
     ...localProduct,
-    // Ensure local products also use the correct image mapping
     image: getProductImage(localProduct.name[language])
   } : undefined;
 
@@ -137,7 +134,7 @@ const ProductDetail = () => {
         <TabsContent value="ingredients" className="mt-6">
           <Card>
             <CardContent className="p-6">
-              {product.ingredients && product.ingredients[language] && product.ingredients[language].length > 0 ? (
+              {product.ingredients?.[language]?.length > 0 ? (
                 <ul className="list-disc list-inside space-y-2">
                   {product.ingredients[language].map((ingredient, index) => (
                     <li key={index} className="text-gray-700">{ingredient}</li>
