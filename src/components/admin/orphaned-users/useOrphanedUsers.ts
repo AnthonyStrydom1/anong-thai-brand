@@ -127,38 +127,26 @@ export const useOrphanedUsers = () => {
     try {
       setIsRemoving(userId);
       
-      // First, clean up all related records in public schema using our custom function
-      const { error: cleanupError } = await supabase
-        .from('security_audit_log') // Use a dummy table to make the RPC call work
-        .select('id')
-        .limit(0);
-      
-      // Call the cleanup function directly using a raw RPC call
-      const { error: rpcError } = await supabase.rpc('cleanup_user_data' as any, {
+      // First, clean up all related records in public schema
+      const { error: cleanupError } = await supabase.rpc('cleanup_user_data' as any, {
         _user_id: userId
       });
 
-      if (rpcError) {
-        console.error('Error cleaning up user data:', rpcError);
-        // Continue with auth user deletion even if cleanup fails
-      }
-
-      // Delete the auth user (this is the critical part that requires admin service key)
-      const { error: deleteError } = await supabase.auth.admin.deleteUser(userId);
-
-      if (deleteError) {
-        console.error('Error deleting auth user:', deleteError);
+      if (cleanupError) {
+        console.error('Error cleaning up user data:', cleanupError);
         toast({
           title: "Error",
-          description: `Failed to delete user: ${deleteError.message}`,
+          description: `Failed to clean up user data: ${cleanupError.message}`,
           variant: "destructive"
         });
         return;
       }
 
+      // Show warning about auth user deletion
       toast({
-        title: "Success!",
-        description: `User ${userEmail} has been completely removed.`,
+        title: "Partial Success",
+        description: `User data cleaned up successfully. Note: The auth user ${userEmail} still exists and may need to be removed manually from the Supabase Auth dashboard.`,
+        variant: "default"
       });
       
       await fetchOrphanedUsers();
