@@ -41,8 +41,9 @@ export const useUserCreation = (onUserCreated: () => void) => {
       console.log('Creating user:', formData.email, 'with roles:', formData.roles);
 
       // Check if user already exists in auth
-      const { data: existingUsers } = await supabase.auth.admin.listUsers();
-      const userExists = existingUsers.users?.some(user => user.email === formData.email);
+      const { data: listUsersResponse } = await supabase.auth.admin.listUsers();
+      const existingUsers = listUsersResponse?.users || [];
+      const userExists = existingUsers.some(user => user.email === formData.email);
       
       if (userExists) {
         toast({
