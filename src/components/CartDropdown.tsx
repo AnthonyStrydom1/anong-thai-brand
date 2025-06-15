@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const CartDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { items, itemCount, total, removeItem } = useCart();
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
 
   const translations = {
     en: {
@@ -102,7 +104,7 @@ const CartDropdown = () => {
                             </button>
                           </div>
                           <p className="text-sm text-gray-500">
-                            {item.quantity} x ${item.product.price.toFixed(2)}
+                            {item.quantity} x {formatPrice(item.product.price)}
                           </p>
                         </div>
                       </div>
@@ -113,7 +115,7 @@ const CartDropdown = () => {
                 <div className="p-4 border-t border-gray-200">
                   <div className="flex justify-between mb-4">
                     <span className="font-semibold">{t.total}:</span>
-                    <span className="font-semibold">${total.toFixed(2)}</span>
+                    <span className="font-semibold">{formatPrice(total)}</span>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-2">
