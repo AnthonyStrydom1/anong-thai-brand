@@ -63,7 +63,7 @@ export const useSecurityAudit = () => {
     }
   };
 
-  const getSecurityLogs = async (limit: number = 100) => {
+  const getSecurityLogs = async (limit: number = 100): Promise<SecurityAuditLog[]> => {
     try {
       setIsLoading(true);
       setError(null);
@@ -78,6 +78,7 @@ export const useSecurityAudit = () => {
         console.error('Error fetching security logs:', error);
         setError(error.message);
         setLogs([]);
+        return [];
       } else {
         // Transform the data to match our interface, handling the ip_address type conversion
         const transformedLogs: SecurityAuditLog[] = (data || []).map(log => ({
@@ -85,18 +86,20 @@ export const useSecurityAudit = () => {
           ip_address: log.ip_address ? String(log.ip_address) : null
         }));
         setLogs(transformedLogs);
+        return transformedLogs;
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch security logs';
       setError(errorMessage);
       setLogs([]);
       console.error('Error fetching security logs:', err);
+      return [];
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getSecurityLogsByUser = async (userId: string, limit: number = 50) => {
+  const getSecurityLogsByUser = async (userId: string, limit: number = 50): Promise<SecurityAuditLog[]> => {
     try {
       setIsLoading(true);
       setError(null);
