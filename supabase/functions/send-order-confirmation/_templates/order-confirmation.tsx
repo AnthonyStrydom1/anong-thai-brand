@@ -47,11 +47,11 @@ export const OrderConfirmationEmail = ({
           <EmailHeader />
 
           <Section style={content}>
-            <Heading style={h1}>Order Confirmation</Heading>
-            
             <Text style={greeting}>
               Sawasdee {customerName}! 🙏
             </Text>
+            
+            <Heading style={h1}>Order Confirmation</Heading>
             
             <Text style={bodyText}>
               Thank you for your order! We're thrilled to share the authentic taste of Thailand with you. 

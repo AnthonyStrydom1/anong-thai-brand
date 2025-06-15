@@ -7,16 +7,14 @@ export const EmailHeader = () => {
   return (
     <Section style={header}>
       <Row>
-        <Column>
+        <Column style={{ textAlign: 'center' as const, paddingBottom: '20px' }}>
           <Img
             src="https://anong.co.za/lovable-uploads/f440215b-ebf7-4c9f-9cf6-412d4018796e.png"
-            width="50"
-            height="50"
+            width="60"
+            height="60"
             alt="Anong Thai Brand Logo"
             style={logo}
           />
-        </Column>
-        <Column style={brandColumn}>
           <Text style={brandName}>ANONG THAI BRAND</Text>
           <Text style={brandTagline}>Authentic Thai Flavors from Thailand</Text>
         </Column>
