@@ -73,7 +73,16 @@ const Events = () => {
       learnMore: "Learn More",
       free: "Free",
       participants: "participants",
-      spotsLeft: "spots left"
+      spotsLeft: "spots left",
+      loading: "Loading events...",
+      allEvents: "All Events",
+      upcomingEvents: "Upcoming Events",
+      eventDetails: "Event Details",
+      date: "Date",
+      time: "Time",
+      location: "Location",
+      capacity: "Capacity",
+      price: "Price"
     },
     th: {
       title: "งานและเวิร์คช็อป",
@@ -85,7 +94,16 @@ const Events = () => {
       learnMore: "เรียนรู้เพิ่มเติม",
       free: "ฟรี",
       participants: "คน",
-      spotsLeft: "ที่เหลือ"
+      spotsLeft: "ที่เหลือ",
+      loading: "กำลังโหลดงาน...",
+      allEvents: "งานทั้งหมด",
+      upcomingEvents: "งานที่จะมาถึง",
+      eventDetails: "รายละเอียดงาน",
+      date: "วันที่",
+      time: "เวลา",
+      location: "สถานที่",
+      capacity: "จำนวนที่รับ",
+      price: "ราคา"
     }
   };
 
@@ -101,7 +119,18 @@ const Events = () => {
   };
 
   const formatEventDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const date = new Date(dateString);
+    if (language === 'th') {
+      return date.toLocaleDateString('th-TH', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -112,7 +141,14 @@ const Events = () => {
   };
 
   const formatEventTime = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const date = new Date(dateString);
+    if (language === 'th') {
+      return date.toLocaleDateString('th-TH', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    return date.toLocaleDateString('en-US', {
       hour: '2-digit',
       minute: '2-digit'
     });
@@ -162,6 +198,7 @@ const Events = () => {
                 <div className="h-4 bg-anong-gold/20 rounded mx-auto w-96"></div>
                 <div className="h-4 bg-anong-gold/20 rounded mx-auto w-80"></div>
               </div>
+              <p className="text-anong-black/60 mt-4">{t.loading}</p>
             </motion.div>
           ) : events.length === 0 ? (
             <motion.div 
@@ -219,7 +256,7 @@ const Events = () => {
                               <div className="flex items-center gap-2">
                                 <Users className="w-4 h-4 text-anong-gold" />
                                 <span>
-                                  {event.current_participants}/${event.max_participants} {t.participants}
+                                  {event.current_participants}/{event.max_participants} {t.participants}
                                   {event.max_participants - event.current_participants > 0 && (
                                     <span className="text-anong-gold ml-2">
                                       ({event.max_participants - event.current_participants} {t.spotsLeft})
@@ -251,64 +288,67 @@ const Events = () => {
               )}
 
               {/* All Events */}
-              <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={fadeInUp}
-                transition={{ delay: 0.4 }}
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {events.filter(event => !event.is_featured).map((event, index) => (
-                    <motion.div
-                      key={event.id}
-                      initial="hidden"
-                      animate="visible"
-                      variants={fadeInUp}
-                      transition={{ delay: 0.1 * index }}
-                    >
-                      <Card className="anong-card h-full">
-                        <CardHeader>
-                          <CardTitle className="anong-heading text-lg">{event.title}</CardTitle>
-                          {event.short_description && (
-                            <p className="anong-body text-sm text-anong-black/70 line-clamp-2">
-                              {event.short_description}
-                            </p>
-                          )}
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="space-y-2 text-sm">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4 text-anong-gold" />
-                              <span>{formatEventDate(event.start_date)}</span>
+              {events.filter(event => !event.is_featured).length > 0 && (
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={fadeInUp}
+                  transition={{ delay: 0.4 }}
+                >
+                  <h2 className="anong-subheading text-2xl md:text-3xl mb-6 text-anong-black">{events.filter(event => event.is_featured).length > 0 ? t.upcomingEvents : t.allEvents}</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {events.filter(event => !event.is_featured).map((event, index) => (
+                      <motion.div
+                        key={event.id}
+                        initial="hidden"
+                        animate="visible"
+                        variants={fadeInUp}
+                        transition={{ delay: 0.1 * index }}
+                      >
+                        <Card className="anong-card h-full">
+                          <CardHeader>
+                            <CardTitle className="anong-heading text-lg">{event.title}</CardTitle>
+                            {event.short_description && (
+                              <p className="anong-body text-sm text-anong-black/70 line-clamp-2">
+                                {event.short_description}
+                              </p>
+                            )}
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="space-y-2 text-sm">
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-anong-gold" />
+                                <span>{formatEventDate(event.start_date)}</span>
+                              </div>
+                              {event.location && (
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="w-4 h-4 text-anong-gold" />
+                                  <span>{event.location}</span>
+                                </div>
+                              )}
+                              {event.max_participants && (
+                                <div className="flex items-center gap-2">
+                                  <Users className="w-4 h-4 text-anong-gold" />
+                                  <span>{event.current_participants}/{event.max_participants}</span>
+                                </div>
+                              )}
                             </div>
-                            {event.location && (
-                              <div className="flex items-center gap-2">
-                                <MapPin className="w-4 h-4 text-anong-gold" />
-                                <span>{event.location}</span>
-                              </div>
-                            )}
-                            {event.max_participants && (
-                              <div className="flex items-center gap-2">
-                                <Users className="w-4 h-4 text-anong-gold" />
-                                <span>{event.current_participants}/{event.max_participants}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex justify-between items-center pt-4">
-                            <span className="text-lg font-semibold text-anong-gold">
-                              {event.price > 0 ? `R ${event.price}` : t.free}
-                            </span>
-                            <Button size="sm" className="anong-btn-secondary">
-                              {t.bookNow}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
+                            
+                            <div className="flex justify-between items-center pt-4">
+                              <span className="text-lg font-semibold text-anong-gold">
+                                {event.price > 0 ? `R ${event.price}` : t.free}
+                              </span>
+                              <Button size="sm" className="anong-btn-secondary">
+                                {t.bookNow}
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
             </div>
           )}
         </div>
