@@ -14,6 +14,48 @@ export const useRoleManagement = (onRolesUpdated: () => void) => {
     try {
       console.log(`Adding ${role} role to user:`, userId);
       
+      // First, ensure the user has a record in the users table (required for admin roles)
+      if (role === 'admin') {
+        console.log('Admin role detected, ensuring user record exists in users table');
+        
+        // Check if user record already exists
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('id')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (!existingUser) {
+          console.log('Creating user record for admin role assignment');
+          
+          // Get user data from auth.users
+          const { data: authUser } = await supabase.auth.admin.getUserById(userId);
+          
+          if (authUser.user) {
+            // Create user record
+            const { error: userCreateError } = await supabase
+              .from('users')
+              .insert({
+                id: userId,
+                email: authUser.user.email || userEmail || '',
+                first_name: authUser.user.user_metadata?.first_name || null,
+                last_name: authUser.user.user_metadata?.last_name || null,
+                auth_user_id: userId
+              });
+
+            if (userCreateError) {
+              console.error('Error creating user record:', userCreateError);
+              throw new Error(`Failed to create user record: ${userCreateError.message}`);
+            }
+            
+            console.log('User record created successfully');
+          } else {
+            throw new Error('Auth user not found');
+          }
+        }
+      }
+      
+      // Now assign the role
       const { error } = await supabase
         .from('user_roles')
         .insert({
