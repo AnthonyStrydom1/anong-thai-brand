@@ -1,482 +1,122 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
+import { productService } from "./products/productService";
+import { categoryService } from "./categories/categoryService";
+import { customerService } from "./customers/customerService";
+import { orderService } from "./orders/orderService";
+import { inventoryService } from "./inventory/inventoryService";
 
-// Database types
-type DbProduct = Database['public']['Tables']['products']['Row'];
-type DbCategory = Database['public']['Tables']['categories']['Row'];
-type DbCustomer = Database['public']['Tables']['customers']['Row'];
-type DbOrder = Database['public']['Tables']['orders']['Row'];
-type DbOrderItem = Database['public']['Tables']['order_items']['Row'];
-
-export interface SupabaseProduct {
-  id: string;
-  name: string;
-  description: string | null;
-  short_description: string | null;
-  sku: string;
-  price: number;
-  category_id: string | null;
-  images: any;
-  stock_quantity: number;
-  is_active: boolean | null;
-  is_featured: boolean | null;
-  created_at: string;
-  ingredients: {
-    en: string[];
-    th: string[];
-  } | null;
-}
-
-// Helper function to safely parse ingredients from database
-const parseIngredients = (ingredients: any): { en: string[]; th: string[] } | null => {
-  if (!ingredients) return null;
-  
-  try {
-    // If it's already parsed or in the correct format
-    if (typeof ingredients === 'object' && ingredients.en && ingredients.th) {
-      return {
-        en: Array.isArray(ingredients.en) ? ingredients.en : [],
-        th: Array.isArray(ingredients.th) ? ingredients.th : []
-      };
-    }
-    
-    // If it's a JSON string, parse it
-    if (typeof ingredients === 'string') {
-      const parsed = JSON.parse(ingredients);
-      return {
-        en: Array.isArray(parsed.en) ? parsed.en : [],
-        th: Array.isArray(parsed.th) ? parsed.th : []
-      };
-    }
-    
-    return null;
-  } catch (error) {
-    console.warn('Failed to parse ingredients:', error);
-    return null;
-  }
-};
-
-// Helper function to transform database product to SupabaseProduct
-const transformDbProduct = (dbProduct: DbProduct): SupabaseProduct => ({
-  id: dbProduct.id,
-  name: dbProduct.name,
-  description: dbProduct.description,
-  short_description: dbProduct.short_description,
-  sku: dbProduct.sku,
-  price: dbProduct.price,
-  category_id: dbProduct.category_id,
-  images: dbProduct.images,
-  stock_quantity: dbProduct.stock_quantity,
-  is_active: dbProduct.is_active,
-  is_featured: dbProduct.is_featured,
-  created_at: dbProduct.created_at,
-  ingredients: parseIngredients(dbProduct.ingredients)
-});
-
-export interface SupabaseCategory {
-  id: string;
-  name: string;
-  description: string | null;
-  slug: string;
-  image_url: string | null;
-  is_active: boolean | null;
-}
-
-export interface SupabaseCustomer {
-  id: number;
-  fullname: string;
-  email: string;
-  first_name: string | null;
-  last_name: string | null;
-  phone: string | null;
-  created_at: string | null;
-  total_orders: number | null;
-  total_spent: number | null;
-  is_active: boolean | null;
-  user_id: string | null;
-}
-
-export interface SupabaseOrder {
-  id: string;
-  order_number: string;
-  customer_id: number | null;
-  status: string | null;
-  payment_status: string | null;
-  total_amount: number;
-  subtotal: number;
-  vat_amount: number | null;
-  shipping_amount: number | null;
-  created_at: string;
-}
+// Re-export types for backward compatibility
+export type { 
+  SupabaseProduct, 
+  SupabaseCategory, 
+  SupabaseCustomer, 
+  SupabaseOrder 
+} from "./types/supabaseTypes";
 
 class SupabaseService {
   // Expose the supabase client for direct access when needed
   public supabase = supabase;
 
-  // Products - These are public as per RLS policies
+  // Products
   async getProducts(categoryId?: string) {
-    let query = supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true);
-    
-    if (categoryId && categoryId !== 'all') {
-      query = query.eq('category_id', categoryId);
-    }
-    
-    const { data, error } = await query;
-    if (error) throw error;
-    return data.map(transformDbProduct);
+    return productService.getProducts(categoryId);
   }
 
   async getProduct(id: string) {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('id', id)
-      .eq('is_active', true)
-      .single();
-    
-    if (error) throw error;
-    return transformDbProduct(data);
+    return productService.getProduct(id);
   }
 
-  // Admin-only product management
-  async createProduct(product: Omit<SupabaseProduct, 'id' | 'created_at'>) {
-    const { data, error } = await supabase
-      .from('products')
-      .insert([product])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return transformDbProduct(data);
+  async createProduct(product: Parameters<typeof productService.createProduct>[0]) {
+    return productService.createProduct(product);
   }
 
   async updateProductStock(productId: string, quantity: number) {
-    const { data, error } = await supabase
-      .from('products')
-      .update({ stock_quantity: quantity })
-      .eq('id', productId)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return transformDbProduct(data);
+    return productService.updateProductStock(productId, quantity);
   }
 
-  // Categories - Public as per RLS policies
+  async searchProducts(searchTerm: string) {
+    return productService.searchProducts(searchTerm);
+  }
+
+  // Categories
   async getCategories() {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order');
-    
-    if (error) throw error;
-    return data as SupabaseCategory[];
+    return categoryService.getCategories();
   }
 
-  // Admin-only category management
-  async createCategory(category: Omit<SupabaseCategory, 'id'>) {
-    const { data, error } = await supabase
-      .from('categories')
-      .insert([category])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data as SupabaseCategory;
+  async createCategory(category: Parameters<typeof categoryService.createCategory>[0]) {
+    return categoryService.createCategory(category);
   }
 
-  // Secure customer operations
-  async createCustomer(customer: Omit<SupabaseCustomer, 'id' | 'created_at'>) {
-    const { data, error } = await supabase
-      .from('customers')
-      .insert([customer])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data as SupabaseCustomer;
+  // Customers
+  async createCustomer(customer: Parameters<typeof customerService.createCustomer>[0]) {
+    return customerService.createCustomer(customer);
   }
 
   async getCustomer(id: number) {
-    const { data, error } = await supabase
-      .from('customers')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    return data as SupabaseCustomer;
+    return customerService.getCustomer(id);
   }
 
   async getCurrentUserCustomer() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-
-    const { data, error } = await supabase
-      .from('customers')
-      .select('*')
-      .eq('user_id', user.id)
-      .maybeSingle();
-    
-    if (error) throw error;
-    return data as SupabaseCustomer | null;
+    return customerService.getCurrentUserCustomer();
   }
 
   async getCustomerByUserId(userId: string) {
-    const { data, error } = await supabase
-      .from('customers')
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle();
-    
-    if (error) throw error;
-    return data as SupabaseCustomer | null;
+    return customerService.getCustomerByUserId(userId);
   }
 
-  async updateCustomer(id: number, updates: Partial<Omit<SupabaseCustomer, 'id' | 'created_at'>>) {
-    const { data, error } = await supabase
-      .from('customers')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data as SupabaseCustomer;
+  async updateCustomer(id: number, updates: Parameters<typeof customerService.updateCustomer>[1]) {
+    return customerService.updateCustomer(id, updates);
   }
 
-  // Order operations - secured by RLS
-  async createOrder(order: Database['public']['Tables']['orders']['Insert']) {
-    const { data, error } = await supabase
-      .from('orders')
-      .insert(order)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data as SupabaseOrder;
+  // Orders
+  async createOrder(order: Parameters<typeof orderService.createOrder>[0]) {
+    return orderService.createOrder(order);
   }
 
   async getOrders(customerId: number) {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('customer_id', customerId)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data as SupabaseOrder[];
+    return orderService.getOrders(customerId);
   }
 
-  // Admin-only: Get all orders
   async getAllOrders() {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data as SupabaseOrder[];
+    return orderService.getAllOrders();
   }
 
   async getOrder(id: string) {
-    const { data, error } = await supabase
-      .from('orders')
-      .select(`
-        *,
-        order_items (
-          *,
-          products (name, sku, price)
-        )
-      `)
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    return data;
+    return orderService.getOrder(id);
   }
 
-  // Order Items - secured by RLS
-  async createOrderItem(orderItem: Omit<DbOrderItem, 'id' | 'created_at'>) {
-    const { data, error } = await supabase
-      .from('order_items')
-      .insert([orderItem])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+  async createOrderItem(orderItem: Parameters<typeof orderService.createOrderItem>[0]) {
+    return orderService.createOrderItem(orderItem);
   }
 
-  // Admin-only: Inventory operations
-  async createInventoryMovement(movement: {
-    product_id: string;
-    movement_type: 'in' | 'out' | 'adjustment';
-    quantity: number;
-    reference_type?: 'purchase' | 'sale' | 'adjustment' | 'return';
-    reference_id?: string;
-    notes?: string;
-  }) {
-    const { data, error } = await supabase
-      .from('inventory_movements')
-      .insert([movement])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  }
-
-  async getInventoryMovements(productId: string) {
-    const { data, error } = await supabase
-      .from('inventory_movements')
-      .select('*')
-      .eq('product_id', productId)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data;
-  }
-
-  // Search - Public products only
-  async searchProducts(searchTerm: string) {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true)
-      .or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,short_description.ilike.%${searchTerm}%`);
-    
-    if (error) throw error;
-    return data.map(transformDbProduct);
-  }
-
-  // Admin-only: Order management
   async updateOrderStatus(orderId: string, status: string) {
-    try {
-      // If cancelling an order, restore stock first
-      if (status === 'cancelled') {
-        // Get current order status to check if it was previously active
-        const { data: currentOrder, error: fetchError } = await supabase
-          .from('orders')
-          .select('status')
-          .eq('id', orderId)
-          .single();
-
-        if (fetchError) throw fetchError;
-
-        // Only restore stock if the order was not already cancelled
-        if (currentOrder.status !== 'cancelled') {
-          await this.restoreStockForCancelledOrder(orderId);
-        }
-      }
-
-      // Update the order status
-      const { data, error } = await supabase
-        .from('orders')
-        .update({ status })
-        .eq('id', orderId)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data as SupabaseOrder;
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      throw error;
-    }
+    return orderService.updateOrderStatus(orderId, status);
   }
 
   async updatePaymentStatus(orderId: string, paymentStatus: string) {
-    const { data, error } = await supabase
-      .from('orders')
-      .update({ payment_status: paymentStatus })
-      .eq('id', orderId)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data as SupabaseOrder;
+    return orderService.updatePaymentStatus(orderId, paymentStatus);
   }
 
-  // Secure: Get customer orders by user ID
   async getCustomerOrdersByUserId(userId: string) {
-    const { data, error } = await supabase
-      .rpc('get_customer_orders', { user_uuid: userId });
-    
-    if (error) throw error;
-    return data;
+    return orderService.getCustomerOrdersByUserId(userId);
   }
 
-  // Admin-only: Delete order with stock restoration and customer updates
   async deleteOrder(orderId: string) {
-    try {
-      const { data, error } = await supabase.rpc('delete_order', {
-        order_id_param: orderId
-      });
-      
-      if (error) throw error;
-      return { success: true };
-    } catch (error) {
-      console.error('Error deleting order:', error);
-      throw error;
-    }
+    return orderService.deleteOrder(orderId);
   }
 
-  // Add method to restore stock for cancelled orders
   async restoreStockForCancelledOrder(orderId: string) {
-    try {
-      // Get all order items for this order
-      const { data: orderItems, error: itemsError } = await supabase
-        .from('order_items')
-        .select('product_id, quantity')
-        .eq('order_id', orderId);
+    return orderService.restoreStockForCancelledOrder(orderId);
+  }
 
-      if (itemsError) throw itemsError;
+  // Inventory
+  async createInventoryMovement(movement: Parameters<typeof inventoryService.createInventoryMovement>[0]) {
+    return inventoryService.createInventoryMovement(movement);
+  }
 
-      // Restore stock for each product in the order
-      for (const item of orderItems) {
-        // Update product stock manually since we don't have the RPC function yet
-        const { data: product, error: productError } = await supabase
-          .from('products')
-          .select('stock_quantity')
-          .eq('id', item.product_id)
-          .single();
-
-        if (productError) {
-          console.error('Error fetching product:', item.product_id, productError);
-          continue;
-        }
-
-        const { error: stockError } = await supabase
-          .from('products')
-          .update({ stock_quantity: product.stock_quantity + item.quantity })
-          .eq('id', item.product_id);
-
-        if (stockError) {
-          console.error('Error restoring stock for product:', item.product_id, stockError);
-          // Continue with other items even if one fails
-        }
-
-        // Create inventory movement record
-        await this.createInventoryMovement({
-          product_id: item.product_id,
-          movement_type: 'in',
-          quantity: item.quantity,
-          reference_type: 'return',
-          reference_id: orderId,
-          notes: 'Stock restored due to order cancellation'
-        });
-      }
-
-      return { success: true };
-    } catch (error) {
-      console.error('Error restoring stock for cancelled order:', error);
-      throw error;
-    }
+  async getInventoryMovements(productId: string) {
+    return inventoryService.getInventoryMovements(productId);
   }
 }
 
