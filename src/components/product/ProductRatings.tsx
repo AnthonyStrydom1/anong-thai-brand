@@ -48,8 +48,7 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
   const loadReviews = async () => {
     try {
       setIsLoading(true);
-      setReviews([]); // Clear existing reviews first
-      console.log('Loading reviews for product:', productId);
+      console.log('Loading reviews for specific product:', productId);
       
       const { data, error } = await supabaseService.supabase
         .from('product_reviews')
@@ -70,12 +69,17 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
         throw error;
       }
       
-      console.log('Reviews loaded for product', productId, ':', data);
-      console.log('Number of reviews found:', data?.length || 0);
+      console.log('Raw reviews data from DB:', data);
+      console.log('Filtering for product ID:', productId);
       
-      // Additional validation to ensure reviews belong to this product
-      const filteredReviews = data?.filter(review => review.product_id === productId) || [];
-      console.log('Filtered reviews count:', filteredReviews.length);
+      // Ensure we only get reviews for this specific product
+      const filteredReviews = (data || []).filter(review => {
+        console.log(`Review ${review.id}: product_id = "${review.product_id}", target = "${productId}", match = ${review.product_id === productId}`);
+        return review.product_id === productId;
+      });
+      
+      console.log('Final filtered reviews:', filteredReviews);
+      console.log('Number of reviews for this product:', filteredReviews.length);
       
       setReviews(filteredReviews);
     } catch (error) {
@@ -85,7 +89,7 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
         description: t.failedToLoadReviews,
         variant: 'destructive'
       });
-      setReviews([]); // Ensure we clear reviews on error
+      setReviews([]);
     } finally {
       setIsLoading(false);
     }
@@ -97,9 +101,14 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
     loadReviews();
   };
 
+  // Calculate average rating only from reviews for THIS product
   const averageRating = reviews.length > 0 
     ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
     : 0;
+
+  console.log('Current product ID:', productId);
+  console.log('Reviews for this product:', reviews.length);
+  console.log('Calculated average rating:', averageRating);
 
   if (isLoading) {
     return (
@@ -113,10 +122,6 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
       </Card>
     );
   }
-
-  // Debug info - remove in production
-  console.log('ProductRatings rendering for product:', productId);
-  console.log('Current reviews state:', reviews.length, 'reviews');
 
   return (
     <div className="space-y-6">
