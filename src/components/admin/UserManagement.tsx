@@ -45,7 +45,7 @@ const UserManagement = () => {
   const [searchEmail, setSearchEmail] = useState('');
   const [viewMode, setViewMode] = useState<'admin' | 'all'>('admin');
   const [isLoading, setIsLoading] = useState(false);
-  const { isAdmin } = useUserRoles();
+  const { isAdmin, isLoading: rolesLoading } = useUserRoles();
   const { deleteAdminUser, deletingUserId } = useAdminUserDeletion(() => {
     loadData();
   });
@@ -53,8 +53,18 @@ const UserManagement = () => {
     loadUserRoles();
   });
 
+  // Load data when component mounts and user is confirmed as admin
   useEffect(() => {
-    if (isAdmin()) {
+    if (!rolesLoading && isAdmin()) {
+      console.log('UserManagement: Loading data on mount for admin user');
+      loadData();
+    }
+  }, [rolesLoading, isAdmin]);
+
+  // Load data when view mode changes
+  useEffect(() => {
+    if (!rolesLoading && isAdmin()) {
+      console.log('UserManagement: Loading data due to view mode change:', viewMode);
       loadData();
     }
   }, [viewMode]);
@@ -176,6 +186,18 @@ const UserManagement = () => {
       fullName.includes(searchTerm)
     );
   });
+
+  // Show loading while checking roles
+  if (rolesLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading user management...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAdmin()) {
     return (
