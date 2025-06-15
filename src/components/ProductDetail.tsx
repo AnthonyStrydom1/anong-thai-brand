@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { products } from '@/data/products';
@@ -58,7 +59,7 @@ const ProductDetail = () => {
     category: localProduct?.category || 'curry-pastes',
     featured: Boolean(supabaseProduct.is_featured),
     comparePrice: undefined,
-    // Always use local product data for ingredients and useIn
+    // Always prioritize local product data for ingredients and useIn
     ingredients: localProduct?.ingredients || { en: [], th: [] },
     useIn: localProduct?.useIn || { en: [], th: [] }
   } : localProduct ? {
@@ -134,7 +135,7 @@ const ProductDetail = () => {
         <TabsContent value="ingredients" className="mt-6">
           <Card>
             <CardContent className="p-6">
-              {product.ingredients?.[language]?.length > 0 ? (
+              {product.ingredients && product.ingredients[language] && product.ingredients[language].length > 0 ? (
                 <ul className="list-disc list-inside space-y-2">
                   {product.ingredients[language].map((ingredient, index) => (
                     <li key={index} className="text-gray-700">{ingredient}</li>
