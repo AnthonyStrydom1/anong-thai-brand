@@ -62,8 +62,8 @@ export const useOrderCreation = () => {
         vat_amount: orderTotals.vatAmount, // Extracted VAT amount
         shipping_amount: orderData.shipping_amount, // VAT-inclusive shipping
         total_amount: orderTotals.totalAmount, // VAT-inclusive total
-        shipping_address: orderData.shipping_address,
-        billing_address: orderData.billing_address,
+        shipping_address: orderData.shipping_address as any, // Convert to JSON
+        billing_address: orderData.billing_address as any, // Convert to JSON
         shipping_method: orderData.shipping_method,
         currency: 'ZAR',
         status: 'pending',
