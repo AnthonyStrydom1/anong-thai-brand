@@ -11,6 +11,7 @@ import { useCustomerData } from '@/hooks/useCustomerData';
 
 const CustomerManager = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<SupabaseCustomer | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const {
     customers,
@@ -25,6 +26,12 @@ const CustomerManager = () => {
 
   const handleViewCustomer = (customer: SupabaseCustomer) => {
     setSelectedCustomer(customer);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedCustomer(null);
   };
 
   const formatCurrency = (amount: number) => {
@@ -54,16 +61,11 @@ const CustomerManager = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <CustomerDetailsDialog 
-                selectedCustomer={selectedCustomer}
+              <CustomerTable
+                customers={customers}
+                onViewCustomer={handleViewCustomer}
                 formatCurrency={formatCurrency}
-              >
-                <CustomerTable
-                  customers={customers}
-                  onViewCustomer={handleViewCustomer}
-                  formatCurrency={formatCurrency}
-                />
-              </CustomerDetailsDialog>
+              />
             </CardContent>
           </Card>
 
@@ -71,6 +73,13 @@ const CustomerManager = () => {
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
+          />
+
+          <CustomerDetailsDialog 
+            selectedCustomer={selectedCustomer}
+            formatCurrency={formatCurrency}
+            isOpen={isDialogOpen}
+            onClose={handleCloseDialog}
           />
         </>
       )}

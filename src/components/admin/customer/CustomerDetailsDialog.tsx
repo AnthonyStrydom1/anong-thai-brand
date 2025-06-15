@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
 import { SupabaseCustomer } from "@/services/supabaseService";
@@ -8,15 +8,13 @@ import { SupabaseCustomer } from "@/services/supabaseService";
 interface CustomerDetailsDialogProps {
   selectedCustomer: SupabaseCustomer | null;
   formatCurrency: (amount: number) => string;
-  children: React.ReactNode;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const CustomerDetailsDialog = ({ selectedCustomer, formatCurrency, children }: CustomerDetailsDialogProps) => {
+const CustomerDetailsDialog = ({ selectedCustomer, formatCurrency, isOpen, onClose }: CustomerDetailsDialogProps) => {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Customer Details</DialogTitle>
