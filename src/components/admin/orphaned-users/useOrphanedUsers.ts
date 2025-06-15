@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -11,33 +12,11 @@ export const useOrphanedUsers = () => {
   const fetchOrphanedUsers = async () => {
     try {
       setIsLoading(true);
-      console.log('🔍 Starting fetchOrphanedUsers...');
-      
-      // First, let's test if we can call any RPC function
-      console.log('📡 Testing basic RPC call...');
       
       const { data, error } = await supabase.rpc('find_orphaned_auth_users');
       
-      console.log('📊 RPC Response received:', {
-        hasData: !!data,
-        dataType: typeof data,
-        isArray: Array.isArray(data),
-        dataLength: data?.length,
-        error: error,
-        errorMessage: error?.message,
-        errorCode: error?.code,
-        errorDetails: error?.details,
-        errorHint: error?.hint
-      });
-
       if (error) {
-        console.error('❌ Database function error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint
-        });
-        
+        console.error('Error fetching orphaned users:', error);
         toast({
           title: "Database Error",
           description: `Error calling find_orphaned_auth_users: ${error.message}`,
@@ -46,63 +25,28 @@ export const useOrphanedUsers = () => {
         return;
       }
 
-      // Log the exact structure we received
-      if (data && data.length > 0) {
-        console.log('📋 First record structure:', {
-          keys: Object.keys(data[0]),
-          values: data[0],
-          types: Object.entries(data[0]).reduce((acc, [key, value]) => {
-            acc[key] = typeof value;
-            return acc;
-          }, {} as Record<string, string>)
-        });
-      }
-
-      // Handle the response - data should now be properly structured
-      if (data === null || data === undefined) {
-        console.log('⚠️ No data returned from function');
+      // Handle the response
+      if (!data || !Array.isArray(data)) {
         setOrphanedUsers([]);
         return;
       }
-
-      if (!Array.isArray(data)) {
-        console.error('❌ Expected array but got:', typeof data, data);
-        setOrphanedUsers([]);
-        return;
-      }
-
-      console.log(`✅ Processing ${data.length} users from database function`);
 
       // Map the data to ensure proper structure
-      const mappedUsers = data.map((user: any, index: number) => {
-        const mapped = {
-          id: user.id || '',
-          email: user.email || '',
-          created_at: user.created_at || '',
-          raw_user_meta_data: user.raw_user_meta_data || {},
-          has_profile: Boolean(user.has_profile),
-          has_customer: Boolean(user.has_customer),
-          has_user_record: Boolean(user.has_user_record),
-          user_roles: Array.isArray(user.user_roles) ? user.user_roles : []
-        };
-        
-        if (index === 0) {
-          console.log('📝 First mapped user example:', mapped);
-        }
-        
-        return mapped;
-      });
+      const mappedUsers = data.map((user: any) => ({
+        id: user.id || '',
+        email: user.email || '',
+        created_at: user.created_at || '',
+        raw_user_meta_data: user.raw_user_meta_data || {},
+        has_profile: Boolean(user.has_profile),
+        has_customer: Boolean(user.has_customer),
+        has_user_record: Boolean(user.has_user_record),
+        user_roles: Array.isArray(user.user_roles) ? user.user_roles : []
+      }));
 
-      console.log(`🎯 Successfully mapped ${mappedUsers.length} users`);
       setOrphanedUsers(mappedUsers);
       
     } catch (error: any) {
-      console.error('💥 JavaScript error in fetchOrphanedUsers:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
-      
+      console.error('Unexpected error in fetchOrphanedUsers:', error);
       toast({
         title: "Application Error",
         description: `JavaScript error: ${error.message}`,
