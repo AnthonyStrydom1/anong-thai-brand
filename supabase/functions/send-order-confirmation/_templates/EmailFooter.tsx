@@ -9,8 +9,8 @@ interface EmailFooterProps {
 }
 
 export const EmailFooter = ({ orderNumber }: EmailFooterProps) => {
-  // Use the current preview URL for development, fallback to production URL
-  const baseUrl = Deno.env.get('SITE_URL') || 'https://lovable.app';
+  // Use the configured site URL or fallback to your actual domain
+  const baseUrl = Deno.env.get('SITE_URL') || 'https://anongthaibrand.com';
   
   // Create the correct order tracking URL - points to orders page with search parameter
   const trackingUrl = orderNumber 
