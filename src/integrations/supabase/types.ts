@@ -851,6 +851,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      cleanup_user_data: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
       create_admin_user: {
         Args: {
           user_email: string

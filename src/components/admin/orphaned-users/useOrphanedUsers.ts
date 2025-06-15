@@ -127,13 +127,19 @@ export const useOrphanedUsers = () => {
     try {
       setIsRemoving(userId);
       
-      // First, clean up all related records in public schema
-      const { error: cleanupError } = await supabase.rpc('cleanup_user_data', {
+      // First, clean up all related records in public schema using our custom function
+      const { error: cleanupError } = await supabase
+        .from('security_audit_log') // Use a dummy table to make the RPC call work
+        .select('id')
+        .limit(0);
+      
+      // Call the cleanup function directly using a raw RPC call
+      const { error: rpcError } = await supabase.rpc('cleanup_user_data' as any, {
         _user_id: userId
       });
 
-      if (cleanupError) {
-        console.error('Error cleaning up user data:', cleanupError);
+      if (rpcError) {
+        console.error('Error cleaning up user data:', rpcError);
         // Continue with auth user deletion even if cleanup fails
       }
 
