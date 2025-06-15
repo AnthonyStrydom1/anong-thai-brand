@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -104,6 +105,8 @@ export interface SupabaseOrder {
   payment_status: string | null;
   total_amount: number;
   subtotal: number;
+  vat_amount: number | null;
+  shipping_amount: number | null;
   created_at: string;
 }
 
