@@ -66,7 +66,18 @@ class SupabaseService {
       .order('name');
     
     if (error) throw error;
-    return data || [];
+    return (data || []) as SupabaseProduct[];
+  }
+
+  async getProduct(id: string): Promise<SupabaseProduct | null> {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    return data as SupabaseProduct;
   }
 
   async createProduct(product: Omit<SupabaseProduct, 'id' | 'created_at' | 'updated_at'>): Promise<SupabaseProduct> {
@@ -77,7 +88,7 @@ class SupabaseService {
       .single();
     
     if (error) throw error;
-    return data;
+    return data as SupabaseProduct;
   }
 
   async updateProduct(id: string, updates: Partial<Omit<SupabaseProduct, 'id' | 'created_at' | 'updated_at'>>): Promise<SupabaseProduct> {
@@ -89,7 +100,7 @@ class SupabaseService {
       .single();
     
     if (error) throw error;
-    return data;
+    return data as SupabaseProduct;
   }
 
   async deleteProduct(id: string): Promise<void> {
@@ -122,7 +133,29 @@ class SupabaseService {
       .single();
     
     if (error && error.code !== 'PGRST116') throw error;
-    return data || null;
+    return data as SupabaseCustomer;
+  }
+
+  async getCustomerByUserId(userId: string): Promise<SupabaseCustomer | null> {
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    return data as SupabaseCustomer;
+  }
+
+  async createCustomer(customer: Omit<SupabaseCustomer, 'id' | 'created_at' | 'updated_at'>): Promise<SupabaseCustomer> {
+    const { data, error } = await supabase
+      .from('customers')
+      .insert([customer])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as SupabaseCustomer;
   }
 
   async updateCustomer(id: number, updates: Partial<Omit<SupabaseCustomer, 'id' | 'created_at' | 'updated_at'>>): Promise<SupabaseCustomer> {
@@ -130,6 +163,100 @@ class SupabaseService {
       .from('customers')
       .update(updates)
       .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data as SupabaseCustomer;
+  }
+
+  // Order methods
+  async createOrder(order: Database['public']['Tables']['orders']['Insert']) {
+    const { data, error } = await supabase
+      .from('orders')
+      .insert([order])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async getOrder(id: string) {
+    const { data, error } = await supabase
+      .from('orders')
+      .select(`
+        *,
+        order_items (
+          *,
+          products (name, sku, price)
+        )
+      `)
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async getOrders(customerId: number) {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  async getAllOrders() {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  async getCustomerOrdersByUserId(userId: string) {
+    const { data, error } = await supabase.rpc('get_customer_orders', {
+      user_uuid: userId
+    });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  async createOrderItem(orderItem: Database['public']['Tables']['order_items']['Insert']) {
+    const { data, error } = await supabase
+      .from('order_items')
+      .insert([orderItem])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async updateOrderStatus(orderId: string, status: string) {
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ status })
+      .eq('id', orderId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async updatePaymentStatus(orderId: string, paymentStatus: string) {
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ payment_status: paymentStatus })
+      .eq('id', orderId)
       .select()
       .single();
     
@@ -168,7 +295,7 @@ class SupabaseService {
     if (userError) throw userError;
   }
 
-  async addUserRole(userId: string, role: string): Promise<void> {
+  async addUserRole(userId: string, role: 'admin' | 'moderator' | 'user'): Promise<void> {
     const { error } = await supabase
       .from('user_roles')
       .insert([{ user_id: userId, role }]);
@@ -176,7 +303,7 @@ class SupabaseService {
     if (error && error.code !== '23505') throw error; // Ignore duplicate key errors
   }
 
-  async removeUserRole(userId: string, role: string): Promise<void> {
+  async removeUserRole(userId: string, role: 'admin' | 'moderator' | 'user'): Promise<void> {
     const { error } = await supabase
       .from('user_roles')
       .delete()
