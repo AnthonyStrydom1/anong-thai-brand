@@ -30,11 +30,11 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
           key={category.id}
           variant={activeCategory === category.id ? "default" : "outline"}
           onClick={() => onCategoryChange(category.id)}
-          className={
+          className={`text-sm ${
             activeCategory === category.id
               ? "bg-thai-purple hover:bg-thai-purple-dark"
               : "border-thai-purple text-thai-purple hover:bg-thai-purple/10"
-          }
+          }`}
         >
           {category.name[language]}
         </Button>
