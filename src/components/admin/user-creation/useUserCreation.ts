@@ -40,21 +40,24 @@ export const useUserCreation = (onUserCreated: () => void) => {
     try {
       console.log('Creating user:', formData.email, 'with roles:', formData.roles);
 
-      // Check if user already exists in auth
-      const { data: listUsersResponse } = await supabase.auth.admin.listUsers();
-      const existingUsers = listUsersResponse?.users || [];
-      const userExists = existingUsers.some(user => user.email === formData.email);
-      
-      if (userExists) {
+      // First check if user exists in our public.users table
+      const { data: existingPublicUser } = await supabase
+        .from('users')
+        .select('id, email')
+        .eq('email', formData.email)
+        .maybeSingle();
+
+      if (existingPublicUser) {
         toast({
           title: "Error",
-          description: `A user with email ${formData.email} already exists. Please use a different email address.`,
+          description: `A user with email ${formData.email} already exists in the system. Please use a different email address.`,
           variant: "destructive"
         });
         return;
       }
 
-      // Create the user in Supabase Auth
+      // Try to create the user in Supabase Auth using admin functions
+      console.log('Attempting to create auth user...');
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -66,14 +69,84 @@ export const useUserCreation = (onUserCreated: () => void) => {
         }
       });
 
+      // Handle different types of signup errors
       if (signUpError) {
         console.error('Auth signup error:', signUpError);
         
-        // Handle specific error cases
-        if (signUpError.message.includes('already registered')) {
+        if (signUpError.message.includes('already registered') || 
+            signUpError.message.includes('already exists') ||
+            signUpError.message.includes('User already registered')) {
+          
+          console.log('User exists in auth, attempting to find and link existing user...');
+          
+          // User exists in auth.users but not in our tables
+          // Let's try to get the existing auth user and create records for them
+          try {
+            // We can't directly query auth.users, so we'll try a different approach
+            // Let's attempt to sign them in to get their ID, then sign them out
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+              email: formData.email,
+              password: formData.password
+            });
+
+            if (signInData.user && !signInError) {
+              const existingUserId = signInData.user.id;
+              console.log('Found existing user ID:', existingUserId);
+              
+              // Sign them out immediately
+              await supabase.auth.signOut();
+              
+              // Now create the user record in our tables
+              // Assign roles first
+              for (const role of formData.roles) {
+                const { error: roleError } = await supabase
+                  .from('user_roles')
+                  .insert({
+                    user_id: existingUserId,
+                    role: role as AppRole
+                  });
+
+                if (roleError && !roleError.message.includes('duplicate key')) {
+                  console.error(`Error assigning ${role} role:`, roleError);
+                }
+              }
+
+              // If user has admin role, create them in the users table
+              if (formData.roles.includes('admin')) {
+                const { error: userError } = await supabase
+                  .from('users')
+                  .insert({
+                    id: existingUserId,
+                    email: formData.email,
+                    first_name: formData.firstName,
+                    last_name: formData.lastName,
+                    auth_user_id: existingUserId
+                  });
+
+                if (userError && !userError.message.includes('duplicate key')) {
+                  console.error('Admin user record creation error:', userError);
+                }
+              }
+
+              const roleText = formData.roles.length === 1 ? 
+                `${formData.roles[0]} role` : 
+                `${formData.roles.join(', ')} roles`;
+
+              toast({
+                title: "Success!",
+                description: `Existing user ${formData.email} has been updated with ${roleText}.`,
+              });
+
+              onUserCreated();
+              return;
+            }
+          } catch (linkError) {
+            console.error('Error linking existing user:', linkError);
+          }
+          
           toast({
-            title: "Error",
-            description: `User ${formData.email} already exists. Please use a different email address.`,
+            title: "User Already Exists",
+            description: `A user with email ${formData.email} already exists in the authentication system. If this is an existing user who needs role assignment, please contact a system administrator.`,
             variant: "destructive"
           });
         } else {
@@ -87,7 +160,7 @@ export const useUserCreation = (onUserCreated: () => void) => {
       }
 
       if (authData.user) {
-        console.log('Auth user created, now assigning roles');
+        console.log('Auth user created successfully, now assigning roles');
         
         // Assign roles to the user
         for (const role of formData.roles) {

@@ -68,11 +68,88 @@ export const useAdminUserCreation = (onUserCreated: () => void) => {
 
       if (signUpError) {
         console.error('Auth signup error:', signUpError);
-        toast({
-          title: "Error",
-          description: `Failed to create user account: ${signUpError.message}`,
-          variant: "destructive"
-        });
+        
+        // Handle existing user case
+        if (signUpError.message.includes('already registered') || 
+            signUpError.message.includes('already exists') ||
+            signUpError.message.includes('User already registered')) {
+          
+          console.log('User exists in auth, attempting to link existing admin user...');
+          
+          try {
+            // Try to sign in to get the user ID
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+              email: formData.email,
+              password: formData.password
+            });
+
+            if (signInData.user && !signInError) {
+              const existingUserId = signInData.user.id;
+              console.log('Found existing user ID:', existingUserId);
+              
+              // Sign them out immediately
+              await supabase.auth.signOut();
+              
+              // Assign admin role
+              const { error: roleError } = await supabase.rpc('assign_admin_role', {
+                _user_id: existingUserId
+              });
+
+              if (roleError) {
+                console.error('Role assignment error:', roleError);
+                toast({
+                  title: "Error",
+                  description: `Failed to assign admin role: ${roleError.message}`,
+                  variant: "destructive"
+                });
+                return;
+              }
+
+              // Create admin user record in our users table
+              const { error: userError } = await supabase
+                .from('users')
+                .insert({
+                  id: existingUserId,
+                  email: formData.email,
+                  first_name: formData.firstName,
+                  last_name: formData.lastName,
+                  auth_user_id: existingUserId
+                });
+
+              if (userError && !userError.message.includes('duplicate key')) {
+                console.error('Admin user creation error:', userError);
+                toast({
+                  title: "Partial Success",
+                  description: `Admin role assigned but user record creation failed: ${userError.message}`,
+                  variant: "destructive"
+                });
+                return;
+              }
+
+              toast({
+                title: "Success!",
+                description: `Existing user ${formData.email} has been assigned admin role.`,
+              });
+
+              onUserCreated();
+              return;
+            }
+          } catch (linkError) {
+            console.error('Error linking existing admin user:', linkError);
+          }
+          
+          toast({
+            title: "User Already Exists",
+            description: `A user with email ${formData.email} already exists in the authentication system. If this user needs admin access, please contact a system administrator.`,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: `Failed to create user account: ${signUpError.message}`,
+            variant: "destructive"
+          });
+        }
         return;
       }
 
