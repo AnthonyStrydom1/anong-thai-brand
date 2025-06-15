@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,13 +27,7 @@ const ProductInfo = ({ product, averageRating = 0, reviewCount = 0, isLoadingRev
   const { language } = useLanguage();
 
   const handleAddToCart = () => {
-    addItem({
-      id: product.id,
-      name: product.name[language],
-      price: product.price,
-      image: product.image,
-      quantity: quantity
-    });
+    addItem(product, quantity);
     
     toast({
       title: language === 'en' ? "Added to cart" : "เพิ่มในตะกร้า",
