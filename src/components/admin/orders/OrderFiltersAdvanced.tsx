@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Search, Filter, CalendarIcon, X } from 'lucide-react';
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
 
 interface OrderFiltersAdvancedProps {
   statusFilter: string;
@@ -34,24 +35,25 @@ const OrderFiltersAdvanced = ({
 }: OrderFiltersAdvancedProps) => {
   const [calendarOpen, setCalendarOpen] = React.useState(false);
 
-  const handleDateSelect = (selectedDate: Date | undefined) => {
-    if (!selectedDate) return;
-
-    if (!dateRange.from || (dateRange.from && dateRange.to)) {
-      // Start new range
-      onDateRangeChange({ from: selectedDate, to: undefined });
-    } else if (selectedDate < dateRange.from) {
-      // Selected date is before start, make it the new start
-      onDateRangeChange({ from: selectedDate, to: dateRange.from });
-      setCalendarOpen(false);
-    } else {
-      // Complete the range
-      onDateRangeChange({ from: dateRange.from, to: selectedDate });
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
+    if (!range) {
+      onDateRangeChange({ from: undefined, to: undefined });
+      return;
+    }
+    
+    onDateRangeChange({
+      from: range.from,
+      to: range.to
+    });
+    
+    // Close calendar when both dates are selected
+    if (range.from && range.to) {
       setCalendarOpen(false);
     }
   };
 
-  const clearDateRange = () => {
+  const clearDateRange = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onDateRangeChange({ from: undefined, to: undefined });
   };
 
@@ -140,18 +142,17 @@ const OrderFiltersAdvanced = ({
                       {format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd")}
                     </>
                   ) : (
-                    format(dateRange.from, "MMM dd, yyyy")
+                    <>
+                      {format(dateRange.from, "MMM dd")} - Select end date
+                    </>
                   )
                 ) : (
-                  <span>Pick dates</span>
+                  <span>Pick date range</span>
                 )}
                 {(dateRange.from || dateRange.to) && (
                   <X 
                     className="ml-auto h-4 w-4 hover:text-red-500" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearDateRange();
-                    }}
+                    onClick={clearDateRange}
                   />
                 )}
               </Button>
@@ -159,9 +160,13 @@ const OrderFiltersAdvanced = ({
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 initialFocus
-                mode="single"
-                selected={dateRange.from}
-                onSelect={handleDateSelect}
+                mode="range"
+                defaultMonth={dateRange.from}
+                selected={{
+                  from: dateRange.from,
+                  to: dateRange.to
+                }}
+                onSelect={handleDateRangeSelect}
                 numberOfMonths={2}
                 className="pointer-events-auto"
               />
