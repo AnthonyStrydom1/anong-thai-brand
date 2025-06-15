@@ -529,6 +529,7 @@ export type Database = {
           dimensions: Json | null
           id: string
           images: Json | null
+          ingredients: Json | null
           is_active: boolean | null
           is_featured: boolean | null
           low_stock_threshold: number | null
@@ -553,6 +554,7 @@ export type Database = {
           dimensions?: Json | null
           id?: string
           images?: Json | null
+          ingredients?: Json | null
           is_active?: boolean | null
           is_featured?: boolean | null
           low_stock_threshold?: number | null
@@ -577,6 +579,7 @@ export type Database = {
           dimensions?: Json | null
           id?: string
           images?: Json | null
+          ingredients?: Json | null
           is_active?: boolean | null
           is_featured?: boolean | null
           low_stock_threshold?: number | null

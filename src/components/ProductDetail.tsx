@@ -43,11 +43,12 @@ const ProductDetail = () => {
   console.log('Product debug:', { 
     id, 
     supabaseProduct, 
-    localProduct, 
+    localProduct,
+    supabaseIngredients: supabaseProduct?.ingredients,
     localProductIngredients: localProduct?.ingredients 
   });
   
-  // Always use local product data for ingredients and other details
+  // Priority: use Supabase data but fallback to local data for missing fields
   const product = supabaseProduct ? {
     id: supabaseProduct.id,
     name: { en: supabaseProduct.name, th: supabaseProduct.name },
@@ -59,8 +60,8 @@ const ProductDetail = () => {
     category: localProduct?.category || 'curry-pastes',
     featured: Boolean(supabaseProduct.is_featured),
     comparePrice: undefined,
-    // Always prioritize local product data for ingredients and useIn
-    ingredients: localProduct?.ingredients || { en: [], th: [] },
+    // Use Supabase ingredients if available, otherwise fallback to local data
+    ingredients: supabaseProduct.ingredients || localProduct?.ingredients || { en: [], th: [] },
     useIn: localProduct?.useIn || { en: [], th: [] }
   } : localProduct ? {
     ...localProduct,

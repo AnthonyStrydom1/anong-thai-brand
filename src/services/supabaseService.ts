@@ -21,6 +21,10 @@ export interface SupabaseProduct {
   is_active: boolean | null;
   is_featured: boolean | null;
   created_at: string;
+  ingredients: {
+    en: string[];
+    th: string[];
+  } | null;
 }
 
 export interface SupabaseCategory {
