@@ -58,6 +58,9 @@ const UserManagement = () => {
     if (!rolesLoading && isAdmin()) {
       console.log('UserManagement: Loading data on mount for admin user');
       loadData();
+    } else if (!rolesLoading && !isAdmin()) {
+      console.log('UserManagement: User is not admin, stopping loading');
+      setIsLoading(false);
     }
   }, [rolesLoading, isAdmin]);
 
@@ -69,18 +72,33 @@ const UserManagement = () => {
     }
   }, [viewMode]);
 
-  const loadData = () => {
-    if (viewMode === 'admin') {
-      loadAdminUsers();
-    } else {
-      loadAllUsers();
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      console.log('Starting to load data for viewMode:', viewMode);
+      
+      if (viewMode === 'admin') {
+        await loadAdminUsers();
+      } else {
+        await loadAllUsers();
+      }
+      await loadUserRoles();
+      
+      console.log('Data loading completed successfully');
+    } catch (error) {
+      console.error('Error in loadData:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load user data. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
-    loadUserRoles();
   };
 
   const loadAdminUsers = async () => {
     try {
-      setIsLoading(true);
       console.log('Loading admin users from users table...');
       
       const { data: usersData, error: usersError } = await supabase
@@ -93,24 +111,17 @@ const UserManagement = () => {
         throw usersError;
       }
       
-      console.log('Loaded admin users:', usersData);
+      console.log('Loaded admin users:', usersData?.length || 0, 'users');
       setAdminUsers(usersData || []);
       
     } catch (error: any) {
       console.error('Error loading admin users:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to load admin users.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
+      throw error;
     }
   };
 
   const loadAllUsers = async () => {
     try {
-      setIsLoading(true);
       console.log('Loading all users...');
       
       // Get all users from profiles table (represents all registered users)
@@ -124,18 +135,12 @@ const UserManagement = () => {
         throw profilesError;
       }
       
-      console.log('Loaded all users:', profilesData);
+      console.log('Loaded all users:', profilesData?.length || 0, 'users');
       setAllUsers(profilesData || []);
       
     } catch (error: any) {
       console.error('Error loading all users:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to load users.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
+      throw error;
     }
   };
 
@@ -151,10 +156,11 @@ const UserManagement = () => {
         throw error;
       }
       
-      console.log('Loaded user roles:', data);
+      console.log('Loaded user roles:', data?.length || 0, 'roles');
       setUserRoles(data || []);
     } catch (error) {
       console.error('Error loading user roles:', error);
+      // Don't throw here as roles are not critical for basic functionality
       toast({
         title: "Warning",
         description: "Failed to load user roles. Role information may be incomplete.",
@@ -193,7 +199,7 @@ const UserManagement = () => {
       <div className="flex items-center justify-center py-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading user management...</p>
+          <p className="text-gray-600">Checking permissions...</p>
         </div>
       </div>
     );
