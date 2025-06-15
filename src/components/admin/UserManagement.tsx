@@ -38,23 +38,23 @@ const UserManagement = () => {
   // Load data when component mounts and user is confirmed as admin
   useEffect(() => {
     if (!rolesLoading && isAdmin()) {
-      console.log('UserManagement: Loading data on mount for admin user');
+      console.log('UserManagement: User is admin, loading initial data');
       loadData(viewMode);
-    } else if (!rolesLoading && !isAdmin()) {
-      console.log('UserManagement: User is not admin, stopping loading');
     }
-  }, [rolesLoading, isAdmin]);
+  }, [rolesLoading, isAdmin()]);
 
-  // Load data when view mode changes
+  // Load data when view mode changes (but only if not loading roles)
   useEffect(() => {
-    if (!rolesLoading && isAdmin()) {
-      console.log('UserManagement: Loading data due to view mode change:', viewMode);
+    if (!rolesLoading && isAdmin() && !isLoading) {
+      console.log('UserManagement: View mode changed to:', viewMode);
       loadData(viewMode);
     }
   }, [viewMode]);
 
   const currentUsers = viewMode === 'admin' ? adminUsers : allUsers;
   const filteredUsers = currentUsers.filter(user => {
+    if (!searchEmail) return true;
+    
     const searchTerm = searchEmail.toLowerCase();
     const email = user.email || '';
     const firstName = viewMode === 'admin' 
@@ -74,7 +74,9 @@ const UserManagement = () => {
   });
 
   const handleRefresh = () => {
-    loadData(viewMode);
+    if (!isLoading) {
+      loadData(viewMode);
+    }
   };
 
   // Show loading while checking roles

@@ -33,14 +33,85 @@ export const useUserManagement = () => {
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const loadData = async (viewMode: 'admin' | 'all') => {
+  const loadUserRoles = async () => {
     try {
-      setIsLoading(true);
+      console.log('Loading user roles...');
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('*');
+      
+      if (error) {
+        console.error('Error loading user roles:', error);
+        setUserRoles([]);
+        return;
+      }
+      
+      console.log('Loaded user roles:', data?.length || 0, 'roles');
+      setUserRoles(data || []);
+    } catch (error) {
+      console.error('Error loading user roles:', error);
+      setUserRoles([]);
+    }
+  };
+
+  const loadAdminUsers = async () => {
+    try {
+      console.log('Loading admin users from users table...');
+      
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (usersError) {
+        console.error('Error loading admin users:', usersError);
+        setAdminUsers([]);
+        return;
+      }
+      
+      console.log('Loaded admin users:', usersData?.length || 0, 'users');
+      setAdminUsers(usersData || []);
+      
+    } catch (error: any) {
+      console.error('Error loading admin users:', error);
+      setAdminUsers([]);
+    }
+  };
+
+  const loadAllUsers = async () => {
+    try {
+      console.log('Loading all users...');
+      
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (profilesError) {
+        console.error('Error loading all users:', profilesError);
+        setAllUsers([]);
+        return;
+      }
+      
+      console.log('Loaded all users:', profilesData?.length || 0, 'users');
+      setAllUsers(profilesData || []);
+      
+    } catch (error: any) {
+      console.error('Error loading all users:', error);
+      setAllUsers([]);
+    }
+  };
+
+  const loadData = async (viewMode: 'admin' | 'all') => {
+    setIsLoading(true);
+    
+    try {
       console.log('Starting to load data for viewMode:', viewMode);
       
-      // Load user roles first as they're needed for both modes
+      // Always load user roles first
       await loadUserRoles();
       
+      // Then load the appropriate user data
       if (viewMode === 'admin') {
         await loadAdminUsers();
       } else {
@@ -56,80 +127,8 @@ export const useUserManagement = () => {
         variant: "destructive"
       });
     } finally {
+      // Always clear loading state
       setIsLoading(false);
-    }
-  };
-
-  const loadAdminUsers = async () => {
-    try {
-      console.log('Loading admin users from users table...');
-      
-      const { data: usersData, error: usersError } = await supabase
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (usersError) {
-        console.error('Error loading admin users:', usersError);
-        throw usersError;
-      }
-      
-      console.log('Loaded admin users:', usersData?.length || 0, 'users');
-      setAdminUsers(usersData || []);
-      
-    } catch (error: any) {
-      console.error('Error loading admin users:', error);
-      throw error;
-    }
-  };
-
-  const loadAllUsers = async () => {
-    try {
-      console.log('Loading all users...');
-      
-      // Get all users from profiles table (represents all registered users)
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (profilesError) {
-        console.error('Error loading all users:', profilesError);
-        throw profilesError;
-      }
-      
-      console.log('Loaded all users:', profilesData?.length || 0, 'users');
-      setAllUsers(profilesData || []);
-      
-    } catch (error: any) {
-      console.error('Error loading all users:', error);
-      throw error;
-    }
-  };
-
-  const loadUserRoles = async () => {
-    try {
-      console.log('Loading user roles...');
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('*');
-      
-      if (error) {
-        console.error('Error loading user roles:', error);
-        throw error;
-      }
-      
-      console.log('Loaded user roles:', data?.length || 0, 'roles');
-      setUserRoles(data || []);
-    } catch (error) {
-      console.error('Error loading user roles:', error);
-      // Don't throw here as roles are not critical for basic functionality
-      toast({
-        title: "Warning",
-        description: "Failed to load user roles. Role information may be incomplete.",
-        variant: "destructive"
-      });
-      setUserRoles([]);
     }
   };
 
