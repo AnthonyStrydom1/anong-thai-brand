@@ -91,9 +91,11 @@ export const useOrphanedUsers = () => {
             ? actions.map((action: any) => typeof action === 'object' ? action.action : action).join(', ')
             : 'User linked';
           
+          const userType = createAdminRecord ? 'admin user' : 'customer';
+          
           toast({
             title: "Success!",
-            description: `User linked successfully. Actions: ${actionMessages}`,
+            description: `User linked successfully as ${userType}. Actions: ${actionMessages}`,
           });
           
           await fetchOrphanedUsers();
@@ -163,8 +165,10 @@ export const useOrphanedUsers = () => {
   };
 
   const getOrphanedUsers = () => {
+    // Show users who are missing either profile or customer records
+    // Admin users (those with user_record) are considered complete even without roles in some cases
     return orphanedUsers.filter(user => 
-      !user.has_profile || !user.has_customer || user.user_roles.length === 0
+      !user.has_profile || !user.has_customer
     );
   };
 

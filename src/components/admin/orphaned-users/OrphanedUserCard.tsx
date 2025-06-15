@@ -32,11 +32,11 @@ const OrphanedUserCard = ({ user, isLinking, isRemoving, onLinkUser, onRemoveUse
             <Badge variant={user.has_customer ? "default" : "destructive"}>
               Customer: {user.has_customer ? "✓" : "✗"}
             </Badge>
-            <Badge variant={user.user_roles.length > 0 ? "default" : "destructive"}>
-              Roles: {user.user_roles.length > 0 ? user.user_roles.join(", ") : "None"}
-            </Badge>
             <Badge variant={user.has_user_record ? "default" : "secondary"}>
               Admin Record: {user.has_user_record ? "✓" : "✗"}
+            </Badge>
+            <Badge variant={user.user_roles.length > 0 ? "default" : "secondary"}>
+              Roles: {user.user_roles.length > 0 ? user.user_roles.join(", ") : "None"}
             </Badge>
           </div>
         </div>
@@ -46,12 +46,16 @@ const OrphanedUserCard = ({ user, isLinking, isRemoving, onLinkUser, onRemoveUse
           <div className="text-sm text-gray-600">
             <p><strong>Name:</strong> {user.raw_user_meta_data?.first_name || 'N/A'} {user.raw_user_meta_data?.last_name || 'N/A'}</p>
             <p><strong>User ID:</strong> {user.id}</p>
+            <p className="text-xs mt-2 text-blue-600">
+              <strong>Note:</strong> Regular customers only need Profile + Customer records. Admin users need all records + roles.
+            </p>
           </div>
           <div className="flex gap-2">
             <Button
               onClick={() => onLinkUser(user.id, true, true, false)}
               disabled={isLinking || isRemoving}
               size="sm"
+              className="bg-green-600 hover:bg-green-700"
             >
               {isLinking ? (
                 <>
@@ -59,7 +63,7 @@ const OrphanedUserCard = ({ user, isLinking, isRemoving, onLinkUser, onRemoveUse
                   Linking...
                 </>
               ) : (
-                'Link as Regular User'
+                'Link as Customer'
               )}
             </Button>
             <Button
@@ -67,8 +71,9 @@ const OrphanedUserCard = ({ user, isLinking, isRemoving, onLinkUser, onRemoveUse
               disabled={isLinking || isRemoving}
               variant="outline"
               size="sm"
+              className="border-blue-600 text-blue-600 hover:bg-blue-50"
             >
-              Link as Admin User
+              Link as Admin
             </Button>
             <Button
               onClick={() => onRemoveUser(user.id, user.email)}

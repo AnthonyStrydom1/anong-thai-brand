@@ -1,18 +1,39 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Info } from 'lucide-react';
 
 const OrphanedUsersInfo = () => {
   return (
-    <Card>
+    <Card className="border-blue-200 bg-blue-50">
       <CardHeader>
-        <CardTitle className="text-lg">What this tool does</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-blue-800">
+          <Info className="h-5 w-5" />
+          Account Types & Data Structure
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 text-sm text-gray-600">
-        <p><strong>Regular User Linking:</strong> Creates profile and customer records, assigns 'user' role</p>
-        <p><strong>Admin User Linking:</strong> Creates profile, customer, and admin user records, assigns 'user' role</p>
-        <p><strong>Orphaned Users:</strong> Auth users missing profile, customer records, or roles</p>
-        <p><strong>Note:</strong> Admin roles must be assigned separately through the role management system</p>
+      <CardContent className="text-sm text-blue-700 space-y-3">
+        <div>
+          <h4 className="font-semibold mb-1">Regular Customers (Shoppers)</h4>
+          <p>• Created during normal signup process</p>
+          <p>• Have records in: <strong>profiles</strong> + <strong>customers</strong> tables</p>
+          <p>• Do NOT have records in: <strong>users</strong> table or <strong>user_roles</strong></p>
+          <p>• Can shop, place orders, and manage their account</p>
+        </div>
+        
+        <div>
+          <h4 className="font-semibold mb-1">Admin Users (Staff)</h4>
+          <p>• Created through admin panel or manual linking</p>
+          <p>• Have records in: <strong>profiles</strong> + <strong>customers</strong> + <strong>users</strong> tables</p>
+          <p>• Have roles in: <strong>user_roles</strong> table (admin, moderator, etc.)</p>
+          <p>• Can access admin dashboard and manage the system</p>
+        </div>
+
+        <div className="bg-white p-3 rounded border border-blue-200">
+          <h4 className="font-semibold mb-1">Linking Options</h4>
+          <p><strong>"Link as Customer":</strong> Creates profile + customer records (normal shopper)</p>
+          <p><strong>"Link as Admin":</strong> Creates profile + customer + users records + admin role</p>
+        </div>
       </CardContent>
     </Card>
   );
