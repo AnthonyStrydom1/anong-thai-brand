@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +8,7 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from '@/components/ui/use-toast';
 import { Product } from '@/types';
+import { SupabaseProduct } from '@/services/supabaseService';
 import StarRating from './StarRating';
 
 interface ProductInfoProps {
@@ -27,7 +29,23 @@ const ProductInfo = ({ product, averageRating = 0, reviewCount = 0, isLoadingRev
   const { language } = useLanguage();
 
   const handleAddToCart = () => {
-    addItem(product, quantity);
+    // Transform Product to SupabaseProduct format for cart
+    const supabaseProduct: SupabaseProduct = {
+      id: product.id,
+      name: product.name[language],
+      description: product.description[language],
+      short_description: product.shortDescription?.[language] || null,
+      sku: product.sku || `SKU-${product.id}`,
+      price: product.price,
+      category_id: null,
+      images: product.image ? [product.image] : [],
+      stock_quantity: 100, // Default stock for local products
+      is_active: true,
+      is_featured: product.featured || false,
+      created_at: new Date().toISOString()
+    };
+    
+    addItem(supabaseProduct, quantity);
     
     toast({
       title: language === 'en' ? "Added to cart" : "เพิ่มในตะกร้า",
