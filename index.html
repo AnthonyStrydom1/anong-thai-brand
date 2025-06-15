@@ -14,24 +14,21 @@
     <!-- Prevent duplicate indexing -->
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     
-    <!-- Improved domain redirect script - less aggressive -->
+    <!-- Minimal redirect script - only for development environments -->
     <script>
       (function() {
-        const targetDomain = 'anongthaibrand.com';
         const currentHost = window.location.hostname.toLowerCase();
-        const currentProtocol = window.location.protocol;
         
-        // Only redirect specific problematic domains, not all non-matching domains
-        const shouldRedirect = 
+        // Only redirect development/staging domains, never production or crawlers
+        const isDevelopment = 
           currentHost.includes('lovable.app') ||
-          currentHost.includes('localhost') ||
-          currentHost.includes('staging') ||
-          currentHost.includes('preview') ||
-          (currentHost.startsWith('www.') && currentHost !== 'www.' + targetDomain);
+          currentHost === 'localhost' ||
+          currentHost.includes('127.0.0.1');
         
-        // Don't redirect if we're already on the target domain (even if HTTP)
-        // This allows Google to crawl properly
-        if (shouldRedirect && currentHost !== 'localhost' && !currentHost.includes(targetDomain)) {
+        // Only redirect if we're clearly in a development environment
+        // This allows Google and other crawlers to access the site normally
+        if (isDevelopment && !window.location.search.includes('nocrawl')) {
+          const targetDomain = 'anongthaibrand.com';
           const newUrl = 'https://' + targetDomain + window.location.pathname + window.location.search + window.location.hash;
           window.location.replace(newUrl);
         }
