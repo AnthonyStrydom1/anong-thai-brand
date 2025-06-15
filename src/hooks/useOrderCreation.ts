@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { orderService, type CreateOrderData } from '@/services/orderService';
-import { EmailService } from '@/services/emailService';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 export const useOrderCreation = () => {
@@ -22,16 +22,16 @@ export const useOrderCreation = () => {
         description: `Order ${order.order_number} has been created.`,
       });
 
+      // START EMAIL SENDING PROCESS IMMEDIATELY AFTER ORDER CREATION
       console.log('📧 === EMAIL SENDING PROCESS START ===');
-      console.log('📧 About to start email sending process');
-      console.log('📧 Preparing to send order confirmation email for order:', order.order_number);
+      console.log('📧 About to start email sending process for order:', order.order_number);
       
-      // Validate email address
+      // Get customer email from form data
       const customerEmail = orderData.billing_address.email || orderData.shipping_address.email;
       console.log('📧 Customer email identified:', customerEmail);
       
       if (!customerEmail) {
-        console.error('📧 ERROR: No customer email found in billing or shipping address');
+        console.error('📧 ERROR: No customer email found in order data');
         console.error('📧 Billing address:', orderData.billing_address);
         console.error('📧 Shipping address:', orderData.shipping_address);
         
@@ -41,11 +41,10 @@ export const useOrderCreation = () => {
           variant: "destructive",
         });
         
-        console.log('🚀 === ORDER CREATION END (no email) ===');
         return order;
       }
       
-      // Prepare email data
+      // Prepare email data structure
       const emailData = {
         orderNumber: order.order_number,
         customerName: `${orderData.shipping_address.firstName} ${orderData.shipping_address.lastName}`,
@@ -72,36 +71,41 @@ export const useOrderCreation = () => {
         orderDate: order.created_at || new Date().toISOString(),
       };
 
-      console.log('📧 Email data prepared successfully:', {
+      console.log('📧 Email data prepared:', {
         orderNumber: emailData.orderNumber,
         customerEmail: emailData.customerEmail,
         itemCount: emailData.orderItems.length,
-        totalAmount: emailData.totalAmount,
-        hasValidEmail: !!emailData.customerEmail && emailData.customerEmail.includes('@')
+        totalAmount: emailData.totalAmount
       });
 
-      console.log('📧 About to call EmailService.sendOrderConfirmation...');
-      console.log('📧 Full email data being sent:', emailData);
+      // Send email using Supabase Edge Function
+      console.log('📧 Calling Supabase edge function send-order-confirmation...');
       
       try {
-        const emailResult = await EmailService.sendOrderConfirmation(emailData);
-        console.log('📧 EmailService.sendOrderConfirmation returned:', emailResult);
-        console.log('✅ Order confirmation email sent successfully');
+        const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-order-confirmation', {
+          body: emailData,
+        });
+
+        if (emailError) {
+          console.error('❌ Supabase function error:', emailError);
+          throw emailError;
+        }
+
+        console.log('✅ Email sent successfully:', emailResult);
         
         toast({
           title: "Confirmation Email Sent",
           description: "Order confirmation has been sent to your email.",
         });
+        
       } catch (emailError) {
         console.error('❌ === EMAIL SENDING FAILED ===');
         console.error('❌ Failed to send order confirmation email:', emailError);
         console.error('❌ Email error details:', {
           message: emailError?.message || 'Unknown error',
           stack: emailError?.stack || 'No stack trace',
-          name: emailError?.name || 'Unknown error type',
-          toString: emailError?.toString() || 'Cannot convert to string'
+          name: emailError?.name || 'Unknown error type'
         });
-        console.error('❌ Full error object:', emailError);
         
         toast({
           title: "Order Created",
