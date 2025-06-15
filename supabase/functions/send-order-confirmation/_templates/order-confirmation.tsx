@@ -33,8 +33,15 @@ export const OrderConfirmationEmail = ({
 }: OrderConfirmationEmailProps) => {
   return (
     <Html>
-      <Head />
-      <Preview>Order Confirmation #{orderNumber} - Thank you for your order!</Preview>
+      <Head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;500;600&display=swap" 
+          rel="stylesheet" 
+        />
+      </Head>
+      <Preview>Order Confirmation #{orderNumber} - Thank you for choosing Anong Thai Brand!</Preview>
       <Body style={main}>
         <Container style={container}>
           <EmailHeader />
@@ -43,12 +50,12 @@ export const OrderConfirmationEmail = ({
             <Heading style={h1}>Order Confirmation</Heading>
             
             <Text style={greeting}>
-              Hello {customerName},
+              Sawasdee {customerName}! 🙏
             </Text>
             
             <Text style={bodyText}>
-              Thank you for your order! We're excited to share the authentic taste of Thailand with you. 
-              Your order has been confirmed and we'll begin preparing it right away.
+              Thank you for your order! We're thrilled to share the authentic taste of Thailand with you. 
+              Your order has been confirmed and we'll begin preparing your premium Thai products with the utmost care.
             </Text>
 
             <OrderDetails orderNumber={orderNumber} orderDate={orderDate} />

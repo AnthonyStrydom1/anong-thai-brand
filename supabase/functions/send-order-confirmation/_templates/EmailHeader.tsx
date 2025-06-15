@@ -10,15 +10,15 @@ export const EmailHeader = () => {
         <Column>
           <Img
             src="https://anong.co.za/lovable-uploads/f440215b-ebf7-4c9f-9cf6-412d4018796e.png"
-            width="40"
-            height="40"
+            width="50"
+            height="50"
             alt="Anong Thai Brand Logo"
             style={logo}
           />
         </Column>
         <Column style={brandColumn}>
-          <Text style={brandName}>Anong Thai Brand</Text>
-          <Text style={brandTagline}>Authentic Thai Flavors</Text>
+          <Text style={brandName}>ANONG THAI BRAND</Text>
+          <Text style={brandTagline}>Authentic Thai Flavors from Thailand</Text>
         </Column>
       </Row>
     </Section>
