@@ -204,7 +204,7 @@ const UserDeletionDialog = ({
                 <Checkbox
                   id="delete-from-auth"
                   checked={deleteFromAuth}
-                  onCheckedChange={setDeleteFromAuth}
+                  onCheckedChange={(checked) => setDeleteFromAuth(checked === true)}
                 />
                 <label htmlFor="delete-from-auth" className="text-sm">
                   Also delete from Supabase Authentication
@@ -215,7 +215,7 @@ const UserDeletionDialog = ({
                 <Checkbox
                   id="confirm-delete"
                   checked={confirmDelete}
-                  onCheckedChange={setConfirmDelete}
+                  onCheckedChange={(checked) => setConfirmDelete(checked === true)}
                 />
                 <label htmlFor="confirm-delete" className="text-sm">
                   I understand this action cannot be undone

@@ -46,18 +46,22 @@ export const useAdminUserDeletion = () => {
         return null;
       }
 
-      if (!data.success && data.error) {
+      // Type cast the Json response to our expected format
+      const result = data as any;
+
+      if (!result.success && result.error) {
         toast({
           title: "Error",
-          description: data.error,
+          description: result.error,
           variant: "destructive"
         });
         return null;
       }
 
-      console.log('Deletion preview:', data);
-      setDeletionPreview(data);
-      return data;
+      console.log('Deletion preview:', result);
+      const previewData = result as DeletionPreview;
+      setDeletionPreview(previewData);
+      return previewData;
     } catch (error: any) {
       console.error('Unexpected error getting deletion preview:', error);
       toast({
@@ -95,16 +99,19 @@ export const useAdminUserDeletion = () => {
         return null;
       }
 
-      if (!data.success) {
+      // Type cast the Json response to our expected format
+      const result = data as any;
+
+      if (!result.success) {
         toast({
           title: "Error",
-          description: data.error || "Failed to delete user",
+          description: result.error || "Failed to delete user",
           variant: "destructive"
         });
-        return data;
+        return result as DeletionResult;
       }
 
-      console.log('Database deletion result:', data);
+      console.log('Database deletion result:', result);
 
       // If requested, also delete from Supabase Auth
       if (deleteFromAuth) {
@@ -137,7 +144,7 @@ export const useAdminUserDeletion = () => {
       });
 
       setDeletionPreview(null);
-      return data;
+      return result as DeletionResult;
     } catch (error: any) {
       console.error('Unexpected error deleting user:', error);
       toast({
