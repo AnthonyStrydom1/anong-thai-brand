@@ -381,6 +381,7 @@ export const useOrderManager = () => {
       
       await supabaseService.deleteOrder(orderToDelete.id);
       
+      // Remove the deleted order from the local state immediately
       setOrders(orders.filter(order => order.id !== orderToDelete.id));
       
       toast({
@@ -390,6 +391,9 @@ export const useOrderManager = () => {
       
       setDeleteDialogOpen(false);
       setOrderToDelete(null);
+      
+      // Reload orders to ensure we have the most up-to-date data
+      await loadOrders();
       
     } catch (error) {
       console.error('Failed to delete order:', error);
