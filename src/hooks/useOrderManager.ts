@@ -35,6 +35,8 @@ export const useOrderManager = () => {
     setSelectedOrder,
     isOrderDialogOpen,
     setIsOrderDialogOpen,
+    isStatusDialogOpen,
+    setIsStatusDialogOpen,
     selectedOrders,
     setSelectedOrders,
     deleteDialogOpen,
@@ -87,6 +89,14 @@ export const useOrderManager = () => {
     }
   };
 
+  const handleEditOrder = (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      setSelectedOrder(order);
+      setIsStatusDialogOpen(true);
+    }
+  };
+
   const handleConfirmDeleteOrder = async () => {
     if (!orderToDelete) return;
     
@@ -102,6 +112,7 @@ export const useOrderManager = () => {
     isLoading,
     selectedOrder,
     isOrderDialogOpen,
+    isStatusDialogOpen,
     selectedOrders,
     statusFilter,
     paymentFilter,
@@ -114,6 +125,7 @@ export const useOrderManager = () => {
     // Setters
     setSelectedOrder,
     setIsOrderDialogOpen,
+    setIsStatusDialogOpen,
     setSelectedOrders,
     setStatusFilter,
     setPaymentFilter,
@@ -133,6 +145,7 @@ export const useOrderManager = () => {
     updateTrackingNumber,
     viewOrderDetails,
     handleDeleteOrder,
+    handleEditOrder,
     confirmDeleteOrder: handleConfirmDeleteOrder,
   };
 };

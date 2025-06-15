@@ -15,6 +15,7 @@ const OrderManager = () => {
     isLoading,
     selectedOrder,
     isOrderDialogOpen,
+    isStatusDialogOpen,
     statusFilter,
     paymentFilter,
     searchTerm,
@@ -25,6 +26,7 @@ const OrderManager = () => {
     
     // Setters
     setIsOrderDialogOpen,
+    setIsStatusDialogOpen,
     setStatusFilter,
     setPaymentFilter,
     setSearchTerm,
@@ -39,6 +41,7 @@ const OrderManager = () => {
     updateTrackingNumber,
     viewOrderDetails,
     handleDeleteOrder,
+    handleEditOrder,
     confirmDeleteOrder,
   } = useOrderManager();
 
@@ -86,18 +89,24 @@ const OrderManager = () => {
           onPaymentStatusUpdate={updatePaymentStatus}
           onViewDetails={viewOrderDetails}
           onDeleteOrder={handleDeleteOrder}
+          onEditOrder={handleEditOrder}
         />
       </div>
 
       <OrderDialogs
         isOrderDialogOpen={isOrderDialogOpen}
         onOrderDialogOpenChange={setIsOrderDialogOpen}
+        isStatusDialogOpen={isStatusDialogOpen}
+        onStatusDialogOpenChange={setIsStatusDialogOpen}
         selectedOrder={selectedOrder}
         deleteDialogOpen={deleteDialogOpen}
         onDeleteDialogOpenChange={setDeleteDialogOpen}
         orderToDelete={orderToDelete}
         onConfirmDelete={confirmDeleteOrder}
         isDeleting={isDeleting}
+        onStatusUpdate={updateOrderStatus}
+        onPaymentStatusUpdate={updatePaymentStatus}
+        onTrackingUpdate={updateTrackingNumber}
       />
     </div>
   );

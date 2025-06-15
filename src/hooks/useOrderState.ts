@@ -7,6 +7,7 @@ export const useOrderState = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<ExtendedOrder | null>(null);
@@ -20,6 +21,8 @@ export const useOrderState = () => {
     setSelectedOrder,
     isOrderDialogOpen,
     setIsOrderDialogOpen,
+    isStatusDialogOpen,
+    setIsStatusDialogOpen,
     selectedOrders,
     setSelectedOrders,
     deleteDialogOpen,

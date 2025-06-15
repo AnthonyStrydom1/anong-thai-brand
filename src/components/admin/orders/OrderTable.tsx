@@ -3,8 +3,8 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Edit, Trash2 } from 'lucide-react';
+import { Eye, Edit } from 'lucide-react';
+import OrderActionButtons from './OrderActionButtons';
 import { ExtendedOrder } from '@/hooks/useOrderManager';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { format } from 'date-fns';
@@ -15,6 +15,7 @@ interface OrderTableProps {
   onPaymentStatusUpdate: (orderId: string, paymentStatus: string) => void;
   onViewDetails: (orderId: string) => void;
   onDeleteOrder: (orderId: string) => void;
+  onEditOrder?: (orderId: string) => void;
 }
 
 const OrderTable = ({
@@ -22,7 +23,8 @@ const OrderTable = ({
   onStatusUpdate,
   onPaymentStatusUpdate,
   onViewDetails,
-  onDeleteOrder
+  onDeleteOrder,
+  onEditOrder = () => {}
 }: OrderTableProps) => {
   const { formatPrice } = useCurrency();
 
@@ -47,6 +49,10 @@ const OrderTable = ({
     }
   };
 
+  const handleMarkShipped = (orderId: string) => {
+    onStatusUpdate(orderId, 'shipped');
+  };
+
   if (filteredOrders.length === 0) {
     return (
       <div className="text-center py-12">
@@ -65,8 +71,9 @@ const OrderTable = ({
             <TableHead>Date</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Payment</TableHead>
+            <TableHead>Tracking</TableHead>
             <TableHead className="text-right">Total</TableHead>
-            <TableHead className="w-20">Actions</TableHead>
+            <TableHead className="w-32">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -89,81 +96,53 @@ const OrderTable = ({
                 </div>
               </TableCell>
               <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Badge 
-                      variant={getStatusBadgeVariant(order.status)} 
-                      className="cursor-pointer hover:opacity-80"
-                    >
-                      {order.status}
-                    </Badge>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => onStatusUpdate(order.id, 'pending')}>
-                      Pending
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onStatusUpdate(order.id, 'processing')}>
-                      Processing
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onStatusUpdate(order.id, 'shipped')}>
-                      Shipped
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onStatusUpdate(order.id, 'delivered')}>
-                      Delivered
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onStatusUpdate(order.id, 'cancelled')}>
-                      Cancelled
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Badge variant={getStatusBadgeVariant(order.status)}>
+                  {order.status}
+                </Badge>
               </TableCell>
               <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Badge 
-                      variant={getPaymentBadgeVariant(order.payment_status)} 
-                      className="cursor-pointer hover:opacity-80"
-                    >
-                      {order.payment_status}
-                    </Badge>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => onPaymentStatusUpdate(order.id, 'pending')}>
-                      Pending
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onPaymentStatusUpdate(order.id, 'paid')}>
-                      Paid
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onPaymentStatusUpdate(order.id, 'failed')}>
-                      Failed
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onPaymentStatusUpdate(order.id, 'refunded')}>
-                      Refunded
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Badge variant={getPaymentBadgeVariant(order.payment_status)}>
+                  {order.payment_status}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                {order.tracking_number ? (
+                  <div className="text-sm">
+                    <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
+                      {order.tracking_number}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-gray-400 text-sm">No tracking</span>
+                )}
               </TableCell>
               <TableCell className="text-right font-medium">
                 {formatPrice(order.total_amount)}
               </TableCell>
               <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onViewDetails(order.id)}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      View Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDeleteOrder(order.id)} className="text-red-600">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex space-x-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onViewDetails(order.id)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onEditOrder(order.id)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <OrderActionButtons
+                    orderId={order.id}
+                    onViewDetails={onViewDetails}
+                    onEditOrder={onEditOrder}
+                    onDeleteOrder={onDeleteOrder}
+                    onMarkShipped={handleMarkShipped}
+                  />
+                </div>
               </TableCell>
             </TableRow>
           ))}
