@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,6 +10,7 @@ import { ShippingRate } from '@/services/shippingService';
 import { VATCalculator } from '@/utils/vatCalculator';
 import { enhancedSecurityService } from '@/services/enhancedSecurityService';
 import { useSecurityAudit } from '@/hooks/useSecurityAudit';
+import { useOrderCreation } from '@/hooks/useOrderCreation';
 
 export const useCheckoutForm = () => {
   const { items, total, clearCart } = useCart();
@@ -18,6 +18,7 @@ export const useCheckoutForm = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { logSecurityEvent } = useSecurityAudit();
+  const { createOrder: createOrderWithEmail, isCreating } = useOrderCreation();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -298,7 +299,8 @@ export const useCheckoutForm = () => {
           address: formData.address,
           city: formData.city,
           postalCode: formData.postalCode,
-          phone: formData.phone
+          phone: formData.phone,
+          email: formData.email // ADD EMAIL TO SHIPPING ADDRESS
         },
         billing_address: {
           firstName: formData.firstName,
@@ -306,7 +308,8 @@ export const useCheckoutForm = () => {
           address: formData.address,
           city: formData.city,
           postalCode: formData.postalCode,
-          phone: formData.phone
+          phone: formData.phone,
+          email: formData.email // ADD EMAIL TO BILLING ADDRESS
         },
         shipping_amount: selectedShippingRate.cost,
         shipping_method: selectedShippingRate.description
@@ -318,7 +321,8 @@ export const useCheckoutForm = () => {
         totalAmount: orderTotals.totalAmount
       });
 
-      const createdOrder = await orderService.createOrder(orderRequestData);
+      console.log('🔄 USING useOrderCreation.createOrder (WITH EMAIL LOGIC)');
+      const createdOrder = await createOrderWithEmail(orderRequestData);
       console.log('✅ Order created successfully:', createdOrder.order_number);
 
       // Log successful order creation
