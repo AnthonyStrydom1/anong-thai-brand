@@ -40,6 +40,7 @@ export const ProductImage = ({ image, productName, fadeInVariants }: ProductImag
         className="max-w-[280px] max-h-[280px] w-auto h-auto object-contain"
         loading="eager"
         decoding="async"
+        fetchPriority="high"
         onError={(e) => {
           (e.target as HTMLImageElement).src = '/placeholder.svg';
         }}

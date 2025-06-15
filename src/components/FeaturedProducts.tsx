@@ -49,8 +49,12 @@ const FeaturedProducts = () => {
         
         {featuredProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {featuredProducts.map((product, index) => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                priority={index < 3} // Mark first 3 products as priority
+              />
             ))}
           </div>
         ) : (

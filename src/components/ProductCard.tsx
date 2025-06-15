@@ -15,9 +15,10 @@ import { useProductRating } from './product/useProductRating';
 
 interface ProductCardProps {
   product: SupabaseProduct;
+  priority?: boolean; // New prop to indicate if this is a priority image
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, priority = false }: ProductCardProps) => {
   const { addItem } = useCart();
   const { formatPrice } = useCurrency();
   const { language } = useLanguage();
@@ -81,8 +82,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
               src={productImage}
               alt={displayName}
               className="max-w-[160px] max-h-[160px] w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-200"
-              loading="lazy"
+              loading={priority ? "eager" : "lazy"}
               decoding="async"
+              fetchPriority={priority ? "high" : "auto"}
               onError={(e) => {
                 (e.target as HTMLImageElement).src = '/placeholder.svg';
               }}
