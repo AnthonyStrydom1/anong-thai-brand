@@ -22,7 +22,7 @@ export const useOrderCreation = () => {
         description: `Order ${order.order_number} has been created.`,
       });
 
-      // IMMEDIATE EMAIL SENDING - BEFORE ANY RETURN STATEMENTS
+      // IMMEDIATE EMAIL SENDING - EXECUTE RIGHT HERE
       console.log('📧 === EMAIL SENDING PROCESS START ===');
       console.log('📧 Starting email process for order:', order.order_number);
       
@@ -103,7 +103,6 @@ export const useOrderCreation = () => {
       console.log('📧 === EMAIL SENDING PROCESS END ===');
       console.log('🚀 === ORDER CREATION END ===');
       
-      // Return order AFTER email processing
       return order;
       
     } catch (error) {
