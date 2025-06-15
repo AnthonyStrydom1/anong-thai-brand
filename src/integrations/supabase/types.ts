@@ -871,6 +871,19 @@ export type Database = {
         Args: { order_id_param: string }
         Returns: undefined
       }
+      find_orphaned_auth_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          email: string
+          created_at: string
+          raw_user_meta_data: Json
+          has_profile: boolean
+          has_customer: boolean
+          has_user_record: boolean
+          user_roles: string[]
+        }[]
+      }
       generate_mfa_code: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -901,6 +914,15 @@ export type Database = {
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      link_orphaned_user: {
+        Args: {
+          _user_id: string
+          _create_profile?: boolean
+          _create_customer?: boolean
+          _create_admin_record?: boolean
+        }
+        Returns: Json
       }
       log_security_event: {
         Args: {
