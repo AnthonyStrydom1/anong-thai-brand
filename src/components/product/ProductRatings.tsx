@@ -41,6 +41,7 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
 
   useEffect(() => {
     if (productId) {
+      console.log('ProductRatings useEffect triggered for productId:', productId);
       loadReviews();
     }
   }, [productId]);
@@ -48,7 +49,9 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
   const loadReviews = async () => {
     try {
       setIsLoading(true);
-      console.log('Loading reviews for specific product:', productId);
+      console.log('=== LOADING REVIEWS ===');
+      console.log('Target product ID:', productId);
+      console.log('Product ID type:', typeof productId);
       
       const { data, error } = await supabaseService.supabase
         .from('product_reviews')
@@ -69,17 +72,29 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
         throw error;
       }
       
-      console.log('Raw reviews data from DB:', data);
-      console.log('Filtering for product ID:', productId);
+      console.log('Raw query result:', data);
+      console.log('Number of rows returned:', data?.length || 0);
       
-      // Ensure we only get reviews for this specific product
+      // Log each review's product_id for debugging
+      if (data && data.length > 0) {
+        data.forEach((review, index) => {
+          console.log(`Review ${index}: id=${review.id}, product_id="${review.product_id}" (type: ${typeof review.product_id}), target="${productId}" (type: ${typeof productId}), match=${review.product_id === productId}`);
+        });
+      } else {
+        console.log('No reviews found in query result');
+      }
+      
+      // The query should already filter by product_id, but let's double-check
       const filteredReviews = (data || []).filter(review => {
-        console.log(`Review ${review.id}: product_id = "${review.product_id}", target = "${productId}", match = ${review.product_id === productId}`);
-        return review.product_id === productId;
+        const match = String(review.product_id) === String(productId);
+        if (!match) {
+          console.warn(`Review ${review.id} doesn't match: "${review.product_id}" !== "${productId}"`);
+        }
+        return match;
       });
       
-      console.log('Final filtered reviews:', filteredReviews);
-      console.log('Number of reviews for this product:', filteredReviews.length);
+      console.log('Final filtered reviews count:', filteredReviews.length);
+      console.log('Setting reviews state...');
       
       setReviews(filteredReviews);
     } catch (error) {
@@ -101,13 +116,15 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
     loadReviews();
   };
 
-  // Calculate average rating only from reviews for THIS product
+  // Calculate average rating - this should only use reviews for THIS specific product
   const averageRating = reviews.length > 0 
     ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
     : 0;
 
+  console.log('=== RATING CALCULATION ===');
   console.log('Current product ID:', productId);
-  console.log('Reviews for this product:', reviews.length);
+  console.log('Reviews count for this product:', reviews.length);
+  console.log('Reviews:', reviews.map(r => ({ id: r.id, rating: r.rating, product_id: r.product_id })));
   console.log('Calculated average rating:', averageRating);
 
   if (isLoading) {
@@ -139,11 +156,15 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
               </Button>
             )}
           </CardTitle>
-          {reviews.length > 0 && (
+          {reviews.length > 0 ? (
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <StarRating rating={Math.round(averageRating)} />
               <span>{averageRating.toFixed(1)} {t.outOf5}</span>
               <span>({reviews.length} {reviews.length !== 1 ? t.reviews : t.review})</span>
+            </div>
+          ) : (
+            <div className="text-sm text-gray-500">
+              {t.noReviews}
             </div>
           )}
         </CardHeader>
