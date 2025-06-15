@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,7 +39,10 @@ const Account = () => {
       account: 'Account',
       orders: 'Orders',
       settings: 'Settings',
-      signIn: 'Sign In'
+      signIn: 'Sign In',
+      loading: 'Loading...',
+      tapUserIcon: 'Tap the user icon above to sign in or create an account.',
+      useUserMenu: 'Use the user menu (👤) in the navigation bar to sign in or create an account.'
     },
     th: {
       title: 'บัญชีของฉัน',
@@ -57,7 +61,10 @@ const Account = () => {
       account: 'บัญชี',
       orders: 'คำสั่งซื้อ',
       settings: 'การตั้งค่า',
-      signIn: 'เข้าสู่ระบบ'
+      signIn: 'เข้าสู่ระบบ',
+      loading: 'กำลังโหลด...',
+      tapUserIcon: 'แตะไอคอนผู้ใช้ด้านบนเพื่อลงชื่อเข้าใช้หรือสร้างบัญชี',
+      useUserMenu: 'ใช้เมนูผู้ใช้ (👤) ในแถบนำทางเพื่อลงชื่อเข้าใช้หรือสร้างบัญชี'
     }
   };
 
@@ -85,7 +92,7 @@ const Account = () => {
         <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-thai-purple mx-auto mb-4"></div>
-            <p>Loading...</p>
+            <p>{t.loading}</p>
           </div>
         </main>
         <Footer />
@@ -112,12 +119,12 @@ const Account = () => {
                     translations={t}
                   />
                   <p className="text-sm text-gray-500">
-                    Tap the user icon above to sign in or create an account.
+                    {t.tapUserIcon}
                   </p>
                 </div>
               ) : (
                 <p className="text-sm text-gray-500">
-                  Use the user menu (👤) in the navigation bar to sign in or create an account.
+                  {t.useUserMenu}
                 </p>
               )}
             </div>

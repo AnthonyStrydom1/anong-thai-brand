@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import NavigationBanner from '@/components/NavigationBanner';
@@ -5,7 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 
 const Settings = () => {
-  const { language } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   
   // Scroll to top when component mounts
   useEffect(() => {
@@ -27,7 +28,9 @@ const Settings = () => {
       analytics: 'Allow analytics',
       thirdParty: 'Share with third parties',
       save: 'Save Changes',
-      cancel: 'Cancel'
+      cancel: 'Cancel',
+      english: 'English',
+      thai: 'Thai'
     },
     th: {
       title: 'ตั้งค่า',
@@ -43,7 +46,9 @@ const Settings = () => {
       analytics: 'อนุญาตการวิเคราะห์',
       thirdParty: 'แบ่งปันกับบุคคลที่สาม',
       save: 'บันทึกการเปลี่ยนแปลง',
-      cancel: 'ยกเลิก'
+      cancel: 'ยกเลิก',
+      english: 'อังกฤษ',
+      thai: 'ไทย'
     }
   };
 
@@ -61,9 +66,13 @@ const Settings = () => {
             <h2 className="text-xl font-semibold mb-4">{t.account}</h2>
             <div className="flex items-center justify-between mb-4">
               <span className="text-gray-700">{t.language}</span>
-              <select className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-thai-purple focus:border-thai-purple">
-                <option value="en">English</option>
-                <option value="th">ไทย</option>
+              <select 
+                value={language} 
+                onChange={(e) => e.target.value !== language && toggleLanguage()}
+                className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-thai-purple focus:border-thai-purple"
+              >
+                <option value="en">{t.english}</option>
+                <option value="th">{t.thai}</option>
               </select>
             </div>
           </div>

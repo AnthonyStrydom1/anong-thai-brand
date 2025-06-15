@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 import NavigationBanner from "@/components/NavigationBanner";
 import Footer from "@/components/Footer";
 import { supabaseService } from "@/services/supabaseService";
@@ -13,6 +14,7 @@ import OrderCard from "@/components/orders/OrderCard";
 
 const Orders = () => {
   const { user } = useAuth();
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [orders, setOrders] = useState<any[]>([]);
@@ -20,6 +22,23 @@ const Orders = () => {
 
   // Get search parameter from URL (for direct email links)
   const searchOrderNumber = searchParams.get('search');
+
+  const translations = {
+    en: {
+      error: "Error",
+      failedToLoad: "Failed to load orders. Please try again.",
+      showingOrder: "Showing order:",
+      noUserFound: "No user found"
+    },
+    th: {
+      error: "ข้อผิดพลาด",
+      failedToLoad: "ไม่สามารถโหลดคำสั่งซื้อได้ กรุณาลองใหม่อีกครั้ง",
+      showingOrder: "แสดงคำสั่งซื้อ:",
+      noUserFound: "ไม่พบผู้ใช้"
+    }
+  };
+
+  const t = translations[language];
 
   useEffect(() => {
     if (user) {
@@ -33,7 +52,7 @@ const Orders = () => {
       console.log('Loading orders for user:', user?.id);
       
       if (!user) {
-        console.error('No user found');
+        console.error(t.noUserFound);
         setOrders([]);
         return;
       }
@@ -60,8 +79,8 @@ const Orders = () => {
     } catch (error) {
       console.error('Error loading orders:', error);
       toast({
-        title: "Error",
-        description: "Failed to load orders. Please try again.",
+        title: t.error,
+        description: t.failedToLoad,
         variant: "destructive"
       });
       setOrders([]);
@@ -108,7 +127,7 @@ const Orders = () => {
         {searchOrderNumber && (
           <div className="mb-6 p-4 bg-anong-gold/10 border border-anong-gold/30 rounded-lg">
             <p className="anong-body text-anong-black">
-              Showing order: <strong>#{searchOrderNumber}</strong>
+              {t.showingOrder} <strong>#{searchOrderNumber}</strong>
             </p>
           </div>
         )}

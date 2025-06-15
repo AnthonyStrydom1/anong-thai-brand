@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,7 +25,9 @@ const Profile = () => {
       placeholder: 'Not provided',
       loginRequired: 'Please log in to view your profile',
       editProfile: 'Edit Profile',
-      viewMode: 'View Profile'
+      viewMode: 'View Profile',
+      editProfileTitle: 'Edit Profile',
+      loading: 'Loading...'
     },
     th: {
       title: 'โปรไฟล์ของฉัน',
@@ -37,7 +40,9 @@ const Profile = () => {
       placeholder: 'ไม่ได้ให้ข้อมูล',
       loginRequired: 'กรุณาเข้าสู่ระบบเพื่อดูโปรไฟล์ของคุณ',
       editProfile: 'แก้ไขโปรไฟล์',
-      viewMode: 'ดูโปรไฟล์'
+      viewMode: 'ดูโปรไฟล์',
+      editProfileTitle: 'แก้ไขโปรไฟล์',
+      loading: 'กำลังโหลด...'
     }
   };
 
@@ -49,6 +54,7 @@ const Profile = () => {
         <NavigationBanner />
         <main className="flex-1 container mx-auto px-4 py-12 watercolor-bg flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-anong-dark-green"></div>
+          <p className="ml-4">{t.loading}</p>
         </main>
         <Footer />
       </div>
@@ -106,7 +112,7 @@ const Profile = () => {
         <div className="luxury-card p-8 mb-8">
           {isEditing ? (
             <>
-              <h2 className="heading-elegant text-xl mb-6 text-anong-dark-green">Edit Profile</h2>
+              <h2 className="heading-elegant text-xl mb-6 text-anong-dark-green">{t.editProfileTitle}</h2>
               <EditProfileForm 
                 onSave={handleEditSave}
                 onCancel={handleEditCancel}

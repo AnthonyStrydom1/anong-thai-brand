@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import ProductManager from '@/components/admin/ProductManager';
 import OrderManager from '@/components/admin/OrderManager';
@@ -20,6 +20,7 @@ import { supabaseService } from '@/services/supabaseService';
 import { useIsMobile } from '@/hooks/useIsMobile';
 
 const AdminPage = () => {
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({
     totalProducts: 0,
@@ -30,6 +31,22 @@ const AdminPage = () => {
     outOfStockItems: 0
   });
   const isMobile = useIsMobile();
+
+  // Basic translations for admin interface
+  const translations = {
+    en: {
+      adminPanel: "Admin Panel",
+      loading: "Loading...",
+      error: "Failed to load stats"
+    },
+    th: {
+      adminPanel: "แผงควบคุมผู้ดูแลระบบ",
+      loading: "กำลังโหลด...",
+      error: "ไม่สามารถโหลดสถิติได้"
+    }
+  };
+
+  const t = translations[language];
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -70,7 +87,7 @@ const AdminPage = () => {
         outOfStockItems: outOfStock
       });
     } catch (error) {
-      console.error('Failed to load stats:', error);
+      console.error(t.error, error);
     }
   };
 
