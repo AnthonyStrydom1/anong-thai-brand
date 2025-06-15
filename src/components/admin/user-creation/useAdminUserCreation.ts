@@ -40,7 +40,7 @@ export const useAdminUserCreation = (onUserCreated: () => void) => {
 
       // Check if auth user already exists
       const { data: authUsersResponse } = await supabase.auth.admin.listUsers();
-      const existingAuthUser = authUsersResponse?.users?.find(user => 
+      const existingAuthUser = authUsersResponse?.users?.find((user: any) => 
         user.email && user.email.toLowerCase() === formData.email.toLowerCase()
       );
 
