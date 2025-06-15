@@ -2,6 +2,7 @@
 import { supabaseService } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
 import { useAdminSecurity } from "@/hooks/useAdminSecurity";
+import { VATCalculator } from "@/utils/vatCalculator";
 import { ExtendedOrder } from './useOrderManager';
 
 export const useOrderOperations = (
@@ -29,7 +30,22 @@ export const useOrderOperations = (
       }
 
       console.log('Loaded orders:', data);
-      setOrders(data || []);
+      
+      // Process orders to ensure VAT calculations are consistent
+      const processedOrders = data?.map(order => {
+        // If vat_amount is missing or incorrect, recalculate from total_amount
+        if (!order.vat_amount && order.total_amount) {
+          const vatBreakdown = VATCalculator.calculateFromInclusivePrice(order.total_amount);
+          return {
+            ...order,
+            vat_amount: vatBreakdown.vatAmount,
+            subtotal: vatBreakdown.priceExcludingVAT
+          };
+        }
+        return order;
+      }) || [];
+
+      setOrders(processedOrders);
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to load orders:', error);
@@ -67,6 +83,14 @@ export const useOrderOperations = (
       }
 
       console.log('Order details loaded:', data);
+      
+      // Ensure VAT calculations are correct for the selected order
+      if (!data.vat_amount && data.total_amount) {
+        const vatBreakdown = VATCalculator.calculateFromInclusivePrice(data.total_amount);
+        data.vat_amount = vatBreakdown.vatAmount;
+        data.subtotal = vatBreakdown.priceExcludingVAT;
+      }
+      
       setSelectedOrder(data);
       setIsOrderDialogOpen(true);
     } catch (error) {

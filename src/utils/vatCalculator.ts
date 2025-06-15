@@ -51,7 +51,7 @@ export class VATCalculator {
       totalIncludingVAT += breakdown.priceIncludingVAT;
     });
 
-    // Shipping is also VAT-inclusive
+    // Shipping is also VAT-inclusive if provided
     const shippingBreakdown = this.calculateFromInclusivePrice(shippingCost);
 
     return {

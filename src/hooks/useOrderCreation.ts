@@ -1,117 +1,152 @@
 
 import { useState } from 'react';
-import { orderService, type CreateOrderData } from '@/services/orderService';
-import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
+import { supabaseService } from '@/services/supabaseService';
+import { orderService } from '@/services/orderService';
+import { toast } from '@/hooks/use-toast';
+import { VATCalculator } from '@/utils/vatCalculator';
+import { useSecurityAudit } from '@/hooks/useSecurityAudit';
+
+interface OrderItem {
+  product_id: string;
+  product_name: string;
+  product_sku: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+}
+
+interface OrderAddress {
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  phone: string;
+  email: string;
+}
+
+interface OrderRequest {
+  customer_id: number;
+  items: OrderItem[];
+  shipping_address: OrderAddress;
+  billing_address: OrderAddress;
+  shipping_amount: number;
+  shipping_method: string;
+}
 
 export const useOrderCreation = () => {
   const [isCreating, setIsCreating] = useState(false);
-  const { toast } = useToast();
+  const { logSecurityEvent } = useSecurityAudit();
 
-  const createOrder = async (orderData: CreateOrderData) => {
+  const createOrder = async (orderData: OrderRequest) => {
     setIsCreating(true);
-    console.log('🚀 === ORDER CREATION START ===');
-    console.log('🚀 Starting order creation process...');
     
     try {
-      const order = await orderService.createOrder(orderData);
-      console.log('✅ Order created successfully:', order);
-      
-      toast({
-        title: "Order Created Successfully",
-        description: `Order ${order.order_number} has been created.`,
+      console.log('🛒 Creating order with data:', orderData);
+
+      // Calculate totals using VAT-inclusive prices
+      const orderTotals = VATCalculator.calculateOrderTotals(
+        orderData.items.map(item => ({
+          price: item.unit_price, // These are VAT-inclusive
+          quantity: item.quantity
+        })),
+        orderData.shipping_amount // This is also VAT-inclusive
+      );
+
+      console.log('💰 Calculated order totals:', orderTotals);
+
+      // Create the order with proper VAT breakdown
+      const order = await orderService.createOrder({
+        customer_id: orderData.customer_id,
+        subtotal: orderTotals.subtotal, // VAT-exclusive subtotal
+        vat_amount: orderTotals.vatAmount, // Extracted VAT amount
+        shipping_amount: orderData.shipping_amount, // VAT-inclusive shipping
+        total_amount: orderTotals.totalAmount, // VAT-inclusive total
+        shipping_address: orderData.shipping_address,
+        billing_address: orderData.billing_address,
+        shipping_method: orderData.shipping_method,
+        currency: 'ZAR',
+        status: 'pending',
+        payment_status: 'pending'
       });
 
-      // IMMEDIATE EMAIL SENDING - EXECUTE RIGHT HERE
-      console.log('📧 === EMAIL SENDING PROCESS START ===');
-      console.log('📧 Starting email process for order:', order.order_number);
-      
-      // Get customer email from form data
-      const customerEmail = orderData.billing_address?.email || orderData.shipping_address?.email;
-      console.log('📧 Customer email found:', customerEmail);
-      
-      if (!customerEmail) {
-        console.error('📧 ERROR: No customer email available');
-        toast({
-          title: "Order Created",
-          description: "Order created successfully, but no email address found for confirmation.",
-          variant: "destructive",
+      console.log('📝 Order created:', order);
+
+      // Create order items
+      for (const item of orderData.items) {
+        await orderService.createOrderItem({
+          order_id: order.id,
+          product_id: item.product_id,
+          product_name: item.product_name,
+          product_sku: item.product_sku,
+          quantity: item.quantity,
+          unit_price: item.unit_price, // VAT-inclusive unit price
+          total_price: item.total_price // VAT-inclusive total price
         });
-      } else {
-        // Prepare email data structure
+      }
+
+      console.log('📦 Order items created');
+
+      // Send order confirmation email with proper VAT breakdown
+      try {
+        console.log('📧 Sending order confirmation email...');
+        
         const emailData = {
           orderNumber: order.order_number,
           customerName: `${orderData.shipping_address.firstName} ${orderData.shipping_address.lastName}`,
-          customerEmail: customerEmail,
-          orderItems: orderData.items.map(item => ({
-            product_name: item.product_name,
-            product_sku: item.product_sku,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-            total_price: item.total_price,
-          })),
-          subtotal: order.subtotal,
-          vatAmount: order.vat_amount || 0,
-          shippingAmount: order.shipping_amount || 0,
-          totalAmount: order.total_amount,
-          shippingAddress: {
-            firstName: orderData.shipping_address.firstName,
-            lastName: orderData.shipping_address.lastName,
-            address: orderData.shipping_address.address,
-            city: orderData.shipping_address.city,
-            postalCode: orderData.shipping_address.postalCode,
-            phone: orderData.shipping_address.phone,
-          },
-          orderDate: order.created_at || new Date().toISOString(),
+          customerEmail: orderData.shipping_address.email,
+          orderItems: orderData.items,
+          subtotal: orderTotals.subtotal, // VAT-exclusive
+          vatAmount: orderTotals.vatAmount, // Extracted VAT
+          shippingAmount: orderData.shipping_amount, // VAT-inclusive
+          totalAmount: orderTotals.totalAmount, // VAT-inclusive
+          shippingAddress: orderData.shipping_address,
+          orderDate: new Date().toISOString()
         };
 
-        console.log('📧 Email data prepared for:', customerEmail);
-        console.log('📧 Email data structure:', emailData);
-        console.log('📧 Calling Supabase function send-order-confirmation...');
-        
-        try {
-          const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-order-confirmation', {
-            body: emailData,
-          });
+        const { data, error } = await supabaseService.supabase.functions.invoke(
+          'send-order-confirmation',
+          { body: emailData }
+        );
 
-          if (emailError) {
-            console.error('❌ Email function error:', emailError);
-            console.error('❌ Email error details:', emailError.message, emailError.stack);
-            throw emailError;
-          }
-
-          console.log('✅ Email sent successfully:', emailResult);
-          
+        if (error) {
+          console.error('❌ Email error:', error);
+          // Don't fail the order creation for email errors
           toast({
-            title: "Confirmation Email Sent",
-            description: "Order confirmation has been sent to your email.",
+            title: 'Order Created',
+            description: `Order ${order.order_number} created successfully, but email notification failed.`,
           });
-          
-        } catch (emailError) {
-          console.error('❌ Email sending failed:', emailError);
-          console.error('❌ Email error message:', emailError?.message);
-          console.error('❌ Email error details:', emailError);
-          
+        } else {
+          console.log('✅ Order confirmation email sent');
           toast({
-            title: "Order Created",
-            description: "Order created successfully, but confirmation email failed to send.",
-            variant: "destructive",
+            title: 'Order Created Successfully',
+            description: `Order ${order.order_number} has been created and confirmation email sent.`,
           });
         }
+      } catch (emailError) {
+        console.error('❌ Email sending failed:', emailError);
+        // Don't fail the order creation for email errors
+        toast({
+          title: 'Order Created',
+          description: `Order ${order.order_number} created successfully, but email notification failed.`,
+        });
       }
-      
-      console.log('📧 === EMAIL SENDING PROCESS END ===');
-      console.log('🚀 === ORDER CREATION END ===');
-      
-      return order;
-      
-    } catch (error) {
-      console.error('❌ Failed to create order:', error);
-      toast({
-        title: "Order Creation Failed",
-        description: "There was an error creating your order. Please try again.",
-        variant: "destructive",
+
+      await logSecurityEvent('order_created_with_email', 'order', order.id, {
+        orderNumber: order.order_number,
+        totalAmount: orderTotals.totalAmount,
+        customerEmail: orderData.shipping_address.email
       });
+
+      return order;
+    } catch (error) {
+      console.error('❌ Order creation failed:', error);
+      
+      await logSecurityEvent('order_creation_failed', 'order', undefined, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        customerEmail: orderData.shipping_address.email
+      }, false);
+
       throw error;
     } finally {
       setIsCreating(false);
