@@ -69,15 +69,14 @@ export class MFAPasswordChangeService {
       
       const { data: verificationData, error: verificationError } = await supabase
         .rpc('verify_mfa_challenge', {
-          challenge_id: sessionData.challengeId,
-          user_code: code
+          user_email: sessionData.email,
+          provided_code: code
         });
 
       console.log('📊 MFA Password Change: Verification result:', { 
         verificationData, 
         verificationError,
-        hasData: !!verificationData,
-        isValid: verificationData?.is_valid 
+        hasData: !!verificationData
       });
 
       if (verificationError) {
@@ -85,14 +84,14 @@ export class MFAPasswordChangeService {
         throw new Error(`Verification failed: ${verificationError.message}`);
       }
 
-      if (!verificationData || !verificationData.is_valid) {
+      if (!verificationData) {
         console.error('❌ MFA Password Change: Invalid verification code');
         throw new Error('Invalid or expired verification code');
       }
 
       console.log('✅ MFA Password Change: Code verified successfully');
 
-      // Use auth admin to update password by email
+      // Get all users to find the one with matching email
       const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
       
       if (userError) {
