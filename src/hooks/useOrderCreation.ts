@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { supabaseService } from '@/services/supabaseService';
-import { orderService } from '@/services/orderService';
+import { orderService } from '@/services/orders/orderService';
 import { toast } from '@/hooks/use-toast';
 import { VATCalculator } from '@/utils/vatCalculator';
 import { useSecurityAudit } from '@/hooks/useSecurityAudit';
@@ -58,7 +58,7 @@ export const useOrderCreation = () => {
       // Create the order with proper VAT breakdown
       const order = await orderService.createOrder({
         customer_id: orderData.customer_id,
-        subtotal: orderTotals.subtotal, // VAT-exclusive subtotal
+        subtotal: orderTotals.totalExclVAT, // VAT-exclusive subtotal
         vat_amount: orderTotals.vatAmount, // Extracted VAT amount
         shipping_amount: orderData.shipping_amount, // VAT-inclusive shipping
         total_amount: orderTotals.totalAmount, // VAT-inclusive total
@@ -96,7 +96,7 @@ export const useOrderCreation = () => {
           customerName: `${orderData.shipping_address.firstName} ${orderData.shipping_address.lastName}`,
           customerEmail: orderData.shipping_address.email,
           orderItems: orderData.items,
-          subtotal: orderTotals.subtotal, // VAT-exclusive
+          subtotal: orderTotals.totalExclVAT, // VAT-exclusive
           vatAmount: orderTotals.vatAmount, // Extracted VAT
           shippingAmount: orderData.shipping_amount, // VAT-inclusive
           totalAmount: orderTotals.totalAmount, // VAT-inclusive

@@ -55,13 +55,13 @@ export class VATCalculator {
     const shippingBreakdown = this.calculateFromInclusivePrice(shippingCost);
 
     return {
-      subtotal: Number(totalExcludingVAT.toFixed(2)),
-      vatAmount: Number((totalVATAmount + shippingBreakdown.vatAmount).toFixed(2)),
-      shippingAmount: Number(shippingCost.toFixed(2)),
-      shippingExclVAT: Number(shippingBreakdown.priceExcludingVAT.toFixed(2)),
-      shippingVAT: Number(shippingBreakdown.vatAmount.toFixed(2)),
-      totalAmount: Number((totalIncludingVAT + shippingCost).toFixed(2)),
-      totalExclVAT: Number((totalExcludingVAT + shippingBreakdown.priceExcludingVAT).toFixed(2))
+      subtotal: Number(totalExcludingVAT.toFixed(2)), // Items subtotal excluding VAT
+      vatAmount: Number((totalVATAmount + shippingBreakdown.vatAmount).toFixed(2)), // Total VAT amount
+      shippingAmount: Number(shippingCost.toFixed(2)), // Shipping including VAT
+      shippingExclVAT: Number(shippingBreakdown.priceExcludingVAT.toFixed(2)), // Shipping excluding VAT
+      shippingVAT: Number(shippingBreakdown.vatAmount.toFixed(2)), // Shipping VAT
+      totalAmount: Number((totalIncludingVAT + shippingCost).toFixed(2)), // Total including VAT
+      totalExclVAT: Number((totalExcludingVAT + shippingBreakdown.priceExcludingVAT).toFixed(2)) // Total excluding VAT
     };
   }
 
