@@ -128,12 +128,20 @@ const ProductDetail = () => {
         <TabsContent value="ingredients" className="mt-6">
           <Card>
             <CardContent className="p-6">
-              <p className="text-gray-700">
-                {language === 'en' 
-                  ? 'Detailed ingredient information coming soon.' 
-                  : 'รายละเอียดส่วนผสมจะมีให้ในเร็วๆ นี้'
-                }
-              </p>
+              {product.ingredients && product.ingredients[language] && product.ingredients[language].length > 0 ? (
+                <ul className="list-disc list-inside space-y-2">
+                  {product.ingredients[language].map((ingredient, index) => (
+                    <li key={index} className="text-gray-700">{ingredient}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-700">
+                  {language === 'en' 
+                    ? 'Detailed ingredient information coming soon.' 
+                    : 'รายละเอียดส่วนผสมจะมีให้ในเร็วๆ นี้'
+                  }
+                </p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
