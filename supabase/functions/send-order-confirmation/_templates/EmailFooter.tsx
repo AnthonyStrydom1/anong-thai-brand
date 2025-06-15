@@ -9,8 +9,8 @@ interface EmailFooterProps {
 }
 
 export const EmailFooter = ({ orderNumber }: EmailFooterProps) => {
-  // Use localhost with correct port for development, production URL for production
-  const baseUrl = Deno.env.get('SITE_URL') || 'http://localhost:5173';
+  // Use the current preview URL for development, fallback to production URL
+  const baseUrl = Deno.env.get('SITE_URL') || 'https://lovable.app';
   
   // Create the correct order tracking URL - points to orders page with search parameter
   const trackingUrl = orderNumber 
