@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@4.0.0";
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
@@ -76,7 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send the email
     console.log('Sending email via Resend...');
     const emailResponse = await resend.emails.send({
-      from: "ANONG Thai Kitchen <noreply@anongthaibrand.com>",
+      from: "Anong Thai Brand <noreply@anongthaibrand.com>",
       to: [orderData.customerEmail],
       subject: `Order Confirmation #${orderData.orderNumber} - Thank you for your order!`,
       html,

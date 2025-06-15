@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
@@ -128,7 +127,7 @@ serve(async (req: Request) => {
     console.log('📤 Preparing to send branded email via Resend API...');
     
     const emailPayload = {
-      from: 'ANONG Thai Kitchen <noreply@anongthaibrand.com>',
+      from: 'Anong Thai Brand <noreply@anongthaibrand.com>',
       to: [email],
       subject: 'Your ANONG Verification Code - Welcome to Authentic Thai Flavors!',
       html,

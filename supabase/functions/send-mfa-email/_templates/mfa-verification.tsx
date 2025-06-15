@@ -103,7 +103,7 @@ export const MfaVerificationEmail = ({
 
           {/* Footer */}
           <Section style={footer}>
-            <Text style={footerBrand}>ANONG</Text>
+            <Text style={footerBrand}>Anong Thai Brand</Text>
             <Text style={footerTagline}>Bringing Thailand to Your Table</Text>
           </Section>
         </Container>
