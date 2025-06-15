@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabaseService } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
@@ -33,6 +32,7 @@ export const useOrderManager = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<ExtendedOrder | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -44,7 +44,7 @@ export const useOrderManager = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [orders, statusFilter, paymentFilter, searchTerm]);
+  }, [orders, statusFilter, paymentFilter, searchTerm, dateRange]);
 
   const loadOrders = async () => {
     try {
@@ -95,6 +95,24 @@ export const useOrderManager = () => {
       );
     }
 
+    // Apply date range filter
+    if (dateRange.from || dateRange.to) {
+      filtered = filtered.filter(order => {
+        const orderDate = new Date(order.created_at);
+        const fromDate = dateRange.from ? new Date(dateRange.from.setHours(0, 0, 0, 0)) : null;
+        const toDate = dateRange.to ? new Date(dateRange.to.setHours(23, 59, 59, 999)) : null;
+
+        if (fromDate && toDate) {
+          return orderDate >= fromDate && orderDate <= toDate;
+        } else if (fromDate) {
+          return orderDate >= fromDate;
+        } else if (toDate) {
+          return orderDate <= toDate;
+        }
+        return true;
+      });
+    }
+
     setFilteredOrders(filtered);
   };
 
@@ -102,6 +120,7 @@ export const useOrderManager = () => {
     setStatusFilter('all');
     setPaymentFilter('all');
     setSearchTerm('');
+    setDateRange({});
   };
 
   const handleSelectAll = (checked: boolean) => {
@@ -423,6 +442,7 @@ export const useOrderManager = () => {
     statusFilter,
     paymentFilter,
     searchTerm,
+    dateRange,
     deleteDialogOpen,
     orderToDelete,
     isDeleting,
@@ -434,6 +454,7 @@ export const useOrderManager = () => {
     setStatusFilter,
     setPaymentFilter,
     setSearchTerm,
+    setDateRange,
     setDeleteDialogOpen,
     setOrderToDelete,
     
