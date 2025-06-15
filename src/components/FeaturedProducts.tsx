@@ -3,16 +3,35 @@ import React from 'react';
 import ProductCard from './ProductCard';
 import { useSupabaseProducts } from '@/hooks/useSupabaseProducts';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const FeaturedProducts = () => {
   const { products, isLoading, error } = useSupabaseProducts();
+  const { language } = useLanguage();
+
+  const translations = {
+    en: {
+      title: 'Featured Products',
+      subtitle: 'Discover our most popular authentic Thai ingredients',
+      errorMessage: 'Unable to load products. Please try again later.',
+      noProducts: 'No featured products available at the moment.'
+    },
+    th: {
+      title: 'สินค้าแนะนำ',
+      subtitle: 'ค้นพบส่วนผสมไทยแท้ที่ได้รับความนิยมมากที่สุดของเรา',
+      errorMessage: 'ไม่สามารถโหลดสินค้าได้ กรุณาลองใหม่อีกครั้ง',
+      noProducts: 'ไม่มีสินค้าแนะนำในขณะนี้'
+    }
+  };
+
+  const t = translations[language];
 
   if (isLoading) {
     return (
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-2">Featured Products</h2>
-          <p className="text-gray-600 text-center mb-12">Discover our most popular authentic Thai ingredients</p>
+          <h2 className="text-3xl font-bold text-center mb-2">{t.title}</h2>
+          <p className="text-gray-600 text-center mb-12">{t.subtitle}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="space-y-4">
@@ -31,8 +50,8 @@ const FeaturedProducts = () => {
     return (
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-2">Featured Products</h2>
-          <p className="text-red-600 text-center mb-12">Unable to load products. Please try again later.</p>
+          <h2 className="text-3xl font-bold text-center mb-2">{t.title}</h2>
+          <p className="text-red-600 text-center mb-12">{t.errorMessage}</p>
         </div>
       </section>
     );
@@ -44,8 +63,8 @@ const FeaturedProducts = () => {
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-2">Featured Products</h2>
-        <p className="text-gray-600 text-center mb-12">Discover our most popular authentic Thai ingredients</p>
+        <h2 className="text-3xl font-bold text-center mb-2">{t.title}</h2>
+        <p className="text-gray-600 text-center mb-12">{t.subtitle}</p>
         
         {featuredProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -58,7 +77,7 @@ const FeaturedProducts = () => {
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 text-center">No featured products available at the moment.</p>
+          <p className="text-gray-600 text-center">{t.noProducts}</p>
         )}
       </div>
     </section>

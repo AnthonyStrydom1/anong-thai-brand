@@ -50,6 +50,17 @@ interface ProductTranslations {
   relatedRecipes: string;
   viewRecipe: string;
   noRelatedRecipes: string;
+
+  // Product status
+  featured: string;
+  lowStock: string;
+  outOfStock: string;
+  inStock: string;
+  
+  // Categories
+  category: string;
+  sku: string;
+  status: string;
 }
 
 export const productTranslations: Record<'en' | 'th', ProductTranslations> = {
@@ -96,7 +107,16 @@ export const productTranslations: Record<'en' | 'th', ProductTranslations> = {
     
     relatedRecipes: 'Recipes Using This Product',
     viewRecipe: 'View Recipe',
-    noRelatedRecipes: 'No recipes found for this product.'
+    noRelatedRecipes: 'No recipes found for this product.',
+
+    featured: 'Featured',
+    lowStock: 'Low Stock',
+    outOfStock: 'Out of Stock',
+    inStock: 'In Stock',
+    
+    category: 'Category',
+    sku: 'SKU',
+    status: 'Status'
   },
   th: {
     backToShop: 'กลับไปยังร้านค้า',
@@ -141,7 +161,16 @@ export const productTranslations: Record<'en' | 'th', ProductTranslations> = {
     
     relatedRecipes: 'สูตรอาหารที่ใช้ผลิตภัณฑ์นี้',
     viewRecipe: 'ดูสูตรอาหาร',
-    noRelatedRecipes: 'ไม่พบสูตรอาหารสำหรับผลิตภัณฑ์นี้'
+    noRelatedRecipes: 'ไม่พบสูตรอาหารสำหรับผลิตภัณฑ์นี้',
+
+    featured: 'แนะนำ',
+    lowStock: 'สินค้าเหลือน้อย',
+    outOfStock: 'สินค้าหมด',
+    inStock: 'มีสินค้า',
+    
+    category: 'หมวดหมู่',
+    sku: 'รหัสสินค้า',
+    status: 'สถานะ'
   }
 };
 

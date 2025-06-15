@@ -17,6 +17,8 @@ interface NavigationTranslations {
   loginSuccess: string;
   welcomeBack: string;
   logoutSuccess: string;
+  menu: string;
+  events: string;
 }
 
 export const navigationTranslations: Record<'en' | 'th', NavigationTranslations> = {
@@ -37,7 +39,9 @@ export const navigationTranslations: Record<'en' | 'th', NavigationTranslations>
     settings: 'Settings',
     loginSuccess: 'Login Successful',
     welcomeBack: 'Welcome back!',
-    logoutSuccess: 'You have been logged out'
+    logoutSuccess: 'You have been logged out',
+    menu: 'Menu',
+    events: 'Events'
   },
   th: {
     home: 'หน้าแรก',
@@ -56,6 +60,8 @@ export const navigationTranslations: Record<'en' | 'th', NavigationTranslations>
     settings: 'ตั้งค่า',
     loginSuccess: 'เข้าสู่ระบบสำเร็จ',
     welcomeBack: 'ยินดีต้อนรับกลับ!',
-    logoutSuccess: 'คุณได้ออกจากระบบแล้ว'
+    logoutSuccess: 'คุณได้ออกจากระบบแล้ว',
+    menu: 'เมนู',
+    events: 'งานและกิจกรรม'
   }
 };

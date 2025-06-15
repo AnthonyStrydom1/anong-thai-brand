@@ -12,6 +12,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
 import { getProductData } from './product/ProductDataMapper';
 import { useProductRating } from './product/useProductRating';
+import { useProductTranslations } from '@/translations/product';
 
 interface ProductCardProps {
   product: SupabaseProduct;
@@ -23,13 +24,14 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
   const { formatPrice } = useCurrency();
   const { language } = useLanguage();
   const { averageRating, reviewCount, isLoading } = useProductRating(product.id);
+  const t = useProductTranslations(language);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addItem(product, 1);
     toast({
-      title: language === 'en' ? "Added to cart" : "เพิ่มลงตะกร้าแล้ว",
+      title: t.addedToCart,
       description: `${getDisplayName()} ${language === 'en' ? 'has been added to your cart' : 'ถูกเพิ่มลงตะกร้าแล้ว'}.`,
     });
   };
@@ -92,17 +94,17 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
           </div>
           {product.is_featured && (
             <Badge className="absolute top-3 left-3 bg-red-500 hover:bg-red-600">
-              {language === 'en' ? 'Featured' : 'แนะนำ'}
+              {t.featured}
             </Badge>
           )}
           {product.stock_quantity <= 5 && product.stock_quantity > 0 && (
             <Badge variant="destructive" className="absolute top-3 right-3">
-              {language === 'en' ? 'Low Stock' : 'สินค้าเหลือน้อย'}
+              {t.lowStock}
             </Badge>
           )}
           {product.stock_quantity === 0 && (
             <Badge variant="secondary" className="absolute top-3 right-3">
-              {language === 'en' ? 'Out of Stock' : 'สินค้าหมด'}
+              {t.outOfStock}
             </Badge>
           )}
         </div>
@@ -125,7 +127,7 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
             ) : (
               <div className="flex items-center space-x-1">
                 <span className="text-xs text-gray-400">
-                  {language === 'en' ? 'No reviews' : 'ยังไม่มีรีวิว'}
+                  {t.noReviews.split('.')[0]}
                 </span>
               </div>
             )}
@@ -140,10 +142,7 @@ const ProductCard = ({ product, priority = false }: ProductCardProps) => {
           disabled={product.stock_quantity === 0}
         >
           <ShoppingCart className="w-4 h-4 mr-2" />
-          {product.stock_quantity === 0 
-            ? (language === 'en' ? 'Out of Stock' : 'สินค้าหมด')
-            : (language === 'en' ? 'Add to Cart' : 'เพิ่มลงตะกร้า')
-          }
+          {product.stock_quantity === 0 ? t.outOfStock : t.addToCart}
         </Button>
       </div>
     </Card>
