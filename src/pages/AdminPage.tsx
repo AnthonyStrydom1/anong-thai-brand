@@ -9,6 +9,7 @@ import SecurityDashboard from '@/components/admin/SecurityDashboard';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import UserManagement from '@/components/admin/UserManagement';
 import ReviewManager from '@/components/admin/ReviewManager';
+import EventManager from '@/components/admin/EventManager';
 import MobileAdminLayout from '@/components/admin/MobileAdminLayout';
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
 import AdminHeader from '@/components/admin/AdminHeader';
@@ -91,6 +92,8 @@ const AdminPage = () => {
         return <CustomerManager />;
       case 'users':
         return <UserManagement />;
+      case 'events':
+        return <EventManager />;
       case 'reviews':
         return <ReviewManager />;
       case 'security':
@@ -157,6 +160,12 @@ const AdminPage = () => {
               <TabsContent value="users" className="mt-0">
                 <div className="anong-card p-6">
                   <UserManagement />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="events" className="mt-0">
+                <div className="anong-card p-6">
+                  <EventManager />
                 </div>
               </TabsContent>
 

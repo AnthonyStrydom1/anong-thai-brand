@@ -9,7 +9,7 @@ interface AdminTabsProps {
 const AdminTabs = ({ activeTab }: AdminTabsProps) => {
   return (
     <div className="mb-6">
-      <TabsList className="grid w-full grid-cols-4 md:grid-cols-9 h-auto p-1 bg-white border">
+      <TabsList className="grid w-full grid-cols-5 md:grid-cols-10 h-auto p-1 bg-white border">
         <TabsTrigger value="overview" className="text-xs md:text-sm px-2 md:px-4 py-2">
           Overview
         </TabsTrigger>
@@ -27,6 +27,9 @@ const AdminTabs = ({ activeTab }: AdminTabsProps) => {
         </TabsTrigger>
         <TabsTrigger value="users" className="text-xs md:text-sm px-2 md:px-4 py-2">
           Users
+        </TabsTrigger>
+        <TabsTrigger value="events" className="text-xs md:text-sm px-2 md:px-4 py-2">
+          Events
         </TabsTrigger>
         <TabsTrigger value="reviews" className="text-xs md:text-sm px-2 md:px-4 py-2">
           Reviews
