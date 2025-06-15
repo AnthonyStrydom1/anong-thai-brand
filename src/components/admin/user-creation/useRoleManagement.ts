@@ -28,30 +28,30 @@ export const useRoleManagement = (onRolesUpdated: () => void) => {
         if (!existingUser) {
           console.log('Creating user record for admin role assignment');
           
-          // Get user data from auth.users
-          const { data: authUser } = await supabase.auth.admin.getUserById(userId);
-          
-          if (authUser.user) {
-            // Create user record
-            const { error: userCreateError } = await supabase
-              .from('users')
-              .insert({
-                id: userId,
-                email: authUser.user.email || userEmail || '',
-                first_name: authUser.user.user_metadata?.first_name || null,
-                last_name: authUser.user.user_metadata?.last_name || null,
-                auth_user_id: userId
-              });
+          // Get user data from customers table or use provided email
+          const { data: customerData } = await supabase
+            .from('customers')
+            .select('email, first_name, last_name')
+            .eq('user_id', userId)
+            .maybeSingle();
 
-            if (userCreateError) {
-              console.error('Error creating user record:', userCreateError);
-              throw new Error(`Failed to create user record: ${userCreateError.message}`);
-            }
-            
-            console.log('User record created successfully');
-          } else {
-            throw new Error('Auth user not found');
+          // Create user record with available data
+          const { error: userCreateError } = await supabase
+            .from('users')
+            .insert({
+              id: userId,
+              email: customerData?.email || userEmail || '',
+              first_name: customerData?.first_name || null,
+              last_name: customerData?.last_name || null,
+              auth_user_id: userId
+            });
+
+          if (userCreateError) {
+            console.error('Error creating user record:', userCreateError);
+            throw new Error(`Failed to create user record: ${userCreateError.message}`);
           }
+          
+          console.log('User record created successfully');
         }
       }
       
