@@ -33,19 +33,25 @@ export class PayFastService {
   private credentials: PayFastCredentials | null = null;
 
   constructor() {
+    console.log('🏦 PayFastService: Initializing service');
     // In production, these would come from Supabase secrets
     this.loadCredentials();
   }
 
   private loadCredentials() {
+    console.log('🔑 PayFastService: Loading credentials');
     // For now, return null - will be populated when API credentials are added
     this.credentials = null;
+    console.log('🔑 PayFastService: Credentials loaded:', this.credentials ? 'Yes' : 'No');
   }
 
   public isApiIntegrationEnabled(): boolean {
-    return this.credentials !== null && 
+    const isEnabled = this.credentials !== null && 
            this.credentials.merchantId !== '' && 
            this.credentials.merchantKey !== '';
+    
+    console.log('🔍 PayFastService: API integration enabled:', isEnabled);
+    return isEnabled;
   }
 
   public async createPayment(request: PayFastPaymentRequest): Promise<PayFastPaymentResponse> {
@@ -138,7 +144,9 @@ export class PayFastService {
   }
 
   public getPaymentMethods(): Array<{id: string, name: string, description: string}> {
-    return [
+    console.log('📋 PayFastService: Getting payment methods');
+    
+    const methods = [
       {
         id: 'eft',
         name: 'EFT/Bank Transfer',
@@ -159,6 +167,9 @@ export class PayFastService {
           : 'Instant EFT - requires PayFast integration'
       }
     ];
+
+    console.log('📋 PayFastService: Available methods:', methods);
+    return methods;
   }
 }
 
