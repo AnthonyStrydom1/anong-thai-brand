@@ -13,8 +13,10 @@ const OrphanedUserManager = () => {
     orphanedUsers,
     isLoading,
     isLinking,
+    isRemoving,
     fetchOrphanedUsers,
     linkUser,
+    removeUser,
     getOrphanedUsers
   } = useOrphanedUsers();
 
@@ -22,6 +24,12 @@ const OrphanedUserManager = () => {
 
   const handleLinkUser = (userId: string, createProfile: boolean, createCustomer: boolean, createAdminRecord: boolean) => {
     linkUser(userId, createProfile, createCustomer, createAdminRecord);
+  };
+
+  const handleRemoveUser = (userId: string, userEmail: string) => {
+    if (confirm(`Are you sure you want to permanently remove user ${userEmail}? This action cannot be undone.`)) {
+      removeUser(userId, userEmail);
+    }
   };
 
   return (
@@ -48,7 +56,9 @@ const OrphanedUserManager = () => {
                 key={user.id}
                 user={user}
                 isLinking={isLinking === user.id}
+                isRemoving={isRemoving === user.id}
                 onLinkUser={handleLinkUser}
+                onRemoveUser={handleRemoveUser}
               />
             ))
           )}

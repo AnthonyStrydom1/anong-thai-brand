@@ -8,6 +8,7 @@ export const useOrphanedUsers = () => {
   const [orphanedUsers, setOrphanedUsers] = useState<OrphanedUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLinking, setIsLinking] = useState<string | null>(null);
+  const [isRemoving, setIsRemoving] = useState<string | null>(null);
 
   const fetchOrphanedUsers = async () => {
     try {
@@ -25,13 +26,11 @@ export const useOrphanedUsers = () => {
         return;
       }
 
-      // Handle the response
       if (!data || !Array.isArray(data)) {
         setOrphanedUsers([]);
         return;
       }
 
-      // Map the data to ensure proper structure
       const mappedUsers = data.map((user: any) => ({
         id: user.id || '',
         email: user.email || '',
@@ -83,7 +82,6 @@ export const useOrphanedUsers = () => {
         return;
       }
 
-      // Handle the response more safely
       if (data && typeof data === 'object' && !Array.isArray(data)) {
         const response = data as any;
         
@@ -98,7 +96,6 @@ export const useOrphanedUsers = () => {
             description: `User linked successfully. Actions: ${actionMessages}`,
           });
           
-          // Refresh the list
           await fetchOrphanedUsers();
         } else {
           toast({
@@ -126,6 +123,51 @@ export const useOrphanedUsers = () => {
     }
   };
 
+  const removeUser = async (userId: string, userEmail: string) => {
+    try {
+      setIsRemoving(userId);
+      
+      // First, clean up all related records in public schema
+      const { error: cleanupError } = await supabase.rpc('cleanup_user_data', {
+        _user_id: userId
+      });
+
+      if (cleanupError) {
+        console.error('Error cleaning up user data:', cleanupError);
+        // Continue with auth user deletion even if cleanup fails
+      }
+
+      // Delete the auth user (this is the critical part that requires admin service key)
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(userId);
+
+      if (deleteError) {
+        console.error('Error deleting auth user:', deleteError);
+        toast({
+          title: "Error",
+          description: `Failed to delete user: ${deleteError.message}`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Success!",
+        description: `User ${userEmail} has been completely removed.`,
+      });
+      
+      await fetchOrphanedUsers();
+    } catch (error: any) {
+      console.error('Unexpected error removing user:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while removing user.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRemoving(null);
+    }
+  };
+
   const getOrphanedUsers = () => {
     return orphanedUsers.filter(user => 
       !user.has_profile || !user.has_customer || user.user_roles.length === 0
@@ -140,8 +182,10 @@ export const useOrphanedUsers = () => {
     orphanedUsers,
     isLoading,
     isLinking,
+    isRemoving,
     fetchOrphanedUsers,
     linkUser,
+    removeUser,
     getOrphanedUsers
   };
 };

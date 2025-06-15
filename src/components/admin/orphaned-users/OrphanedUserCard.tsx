@@ -3,16 +3,18 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, UserX } from 'lucide-react';
 import type { OrphanedUser } from './types';
 
 interface OrphanedUserCardProps {
   user: OrphanedUser;
   isLinking: boolean;
+  isRemoving: boolean;
   onLinkUser: (userId: string, createProfile: boolean, createCustomer: boolean, createAdminRecord: boolean) => void;
+  onRemoveUser: (userId: string, userEmail: string) => void;
 }
 
-const OrphanedUserCard = ({ user, isLinking, onLinkUser }: OrphanedUserCardProps) => {
+const OrphanedUserCard = ({ user, isLinking, isRemoving, onLinkUser, onRemoveUser }: OrphanedUserCardProps) => {
   return (
     <Card>
       <CardHeader>
@@ -48,7 +50,7 @@ const OrphanedUserCard = ({ user, isLinking, onLinkUser }: OrphanedUserCardProps
           <div className="flex gap-2">
             <Button
               onClick={() => onLinkUser(user.id, true, true, false)}
-              disabled={isLinking}
+              disabled={isLinking || isRemoving}
               size="sm"
             >
               {isLinking ? (
@@ -62,11 +64,29 @@ const OrphanedUserCard = ({ user, isLinking, onLinkUser }: OrphanedUserCardProps
             </Button>
             <Button
               onClick={() => onLinkUser(user.id, true, true, true)}
-              disabled={isLinking}
+              disabled={isLinking || isRemoving}
               variant="outline"
               size="sm"
             >
               Link as Admin User
+            </Button>
+            <Button
+              onClick={() => onRemoveUser(user.id, user.email)}
+              disabled={isLinking || isRemoving}
+              variant="destructive"
+              size="sm"
+            >
+              {isRemoving ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Removing...
+                </>
+              ) : (
+                <>
+                  <UserX className="h-4 w-4 mr-2" />
+                  Remove User
+                </>
+              )}
             </Button>
           </div>
         </div>
