@@ -76,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send the email
     console.log('Sending email via Resend...');
     const emailResponse = await resend.emails.send({
-      from: "ANONG Thai Kitchen <noreply@anong.co.za>",
+      from: "ANONG Thai Kitchen <noreply@anongthaibrand.com>",
       to: [orderData.customerEmail],
       subject: `Order Confirmation #${orderData.orderNumber} - Thank you for your order!`,
       html,
