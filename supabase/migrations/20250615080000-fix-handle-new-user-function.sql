@@ -1,0 +1,57 @@
+
+-- Fix the handle_new_user function to avoid foreign key constraint violations
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = 'public'
+AS $$
+BEGIN
+  -- Insert into profiles table (existing functionality)
+  INSERT INTO public.profiles (id, email, first_name, last_name)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    NEW.raw_user_meta_data ->> 'first_name',
+    NEW.raw_user_meta_data ->> 'last_name'
+  );
+  
+  -- Also insert into customers table
+  INSERT INTO public.customers (
+    user_id,
+    fullname,
+    email,
+    first_name,
+    last_name,
+    created_at
+  )
+  VALUES (
+    NEW.id,
+    COALESCE(
+      TRIM(CONCAT(NEW.raw_user_meta_data ->> 'first_name', ' ', NEW.raw_user_meta_data ->> 'last_name')),
+      NEW.email
+    ),
+    NEW.email,
+    NEW.raw_user_meta_data ->> 'first_name',
+    NEW.raw_user_meta_data ->> 'last_name',
+    NOW()
+  );
+  
+  -- Only assign default user role for regular users (not admin users)
+  -- Admin users will have their roles assigned separately
+  IF NOT EXISTS (
+    SELECT 1 FROM public.user_roles 
+    WHERE user_id = NEW.id AND role = 'admin'
+  ) THEN
+    INSERT INTO public.user_roles (user_id, role)
+    VALUES (NEW.id, 'user')
+    ON CONFLICT (user_id, role) DO NOTHING;
+  END IF;
+  
+  RETURN NEW;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Log the error but don't block user creation
+    RAISE WARNING 'Error in handle_new_user for user %: %', NEW.id, SQLERRM;
+    RETURN NEW;
+END;
+$$;
