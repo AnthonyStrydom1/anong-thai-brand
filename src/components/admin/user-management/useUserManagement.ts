@@ -38,12 +38,14 @@ export const useUserManagement = () => {
       setIsLoading(true);
       console.log('Starting to load data for viewMode:', viewMode);
       
+      // Load user roles first as they're needed for both modes
+      await loadUserRoles();
+      
       if (viewMode === 'admin') {
         await loadAdminUsers();
       } else {
         await loadAllUsers();
       }
-      await loadUserRoles();
       
       console.log('Data loading completed successfully');
     } catch (error) {
@@ -127,6 +129,7 @@ export const useUserManagement = () => {
         description: "Failed to load user roles. Role information may be incomplete.",
         variant: "destructive"
       });
+      setUserRoles([]);
     }
   };
 
