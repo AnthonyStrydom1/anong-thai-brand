@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { orderService, type CreateOrderData } from '@/services/orderService';
 import { EmailService } from '@/services/emailService';
@@ -35,8 +34,8 @@ export const useOrderCreation = () => {
             total_price: item.total_price,
           })),
           subtotal: order.subtotal,
-          vatAmount: order.vat_amount,
-          shippingAmount: order.shipping_amount || 0,
+          vatAmount: order.vat || 0,
+          shippingAmount: order.shipping_cost || 0,
           totalAmount: order.total_amount,
           shippingAddress: {
             firstName: orderData.shipping_address.firstName,

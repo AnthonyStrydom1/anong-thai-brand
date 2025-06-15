@@ -1,6 +1,9 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { renderAsync } from 'npm:@react-email/components@0.0.22'
+import React from 'npm:react@18.3.1'
+import { MfaVerificationEmail } from './_templates/mfa-verification.tsx'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -113,44 +116,22 @@ serve(async (req: Request) => {
       throw new Error('Failed to generate verification code');
     }
 
-    // Send email using Resend API directly
-    console.log('📤 Preparing to send email via Resend API...');
-    
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #2c3e50; margin-bottom: 10px;">Anong Thai Brand</h1>
-          <h2 style="color: #34495e; font-weight: normal;">Your Verification Code</h2>
-        </div>
-        
-        <div style="background-color: #f8f9fa; border-radius: 8px; padding: 30px; text-align: center; margin: 20px 0;">
-          <p style="font-size: 16px; color: #666; margin-bottom: 20px;">Your verification code is:</p>
-          <div style="background-color: white; border: 2px solid #e9ecef; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #2c3e50; font-family: monospace;">${mfaCode}</span>
-          </div>
-          <p style="color: #dc3545; font-weight: bold; margin-top: 15px;">This code will expire in 5 minutes.</p>
-        </div>
-        
-        <div style="background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
-          <p style="margin: 0; color: #1565c0; font-size: 14px;">
-            <strong>Security Notice:</strong> If you didn't request this code, please ignore this email and consider changing your password.
-          </p>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-          <p style="color: #999; font-size: 12px; margin: 0;">
-            © 2024 Anong Thai Brand. This is an automated message.
-          </p>
-        </div>
-      </div>
-    `;
+    // Render the React email template
+    console.log('🎨 Rendering branded MFA email template...');
+    const html = await renderAsync(
+      React.createElement(MfaVerificationEmail, {
+        verificationCode: mfaCode
+      })
+    );
 
-    // Now use your verified domain
+    // Send email using Resend API
+    console.log('📤 Preparing to send branded email via Resend API...');
+    
     const emailPayload = {
-      from: 'Anong Thai Brand <noreply@anongthaibrand.com>',
+      from: 'ANONG Thai Kitchen <noreply@anongthaibrand.com>',
       to: [email],
-      subject: 'Your Verification Code - Anong Thai Brand',
-      html: emailHtml,
+      subject: 'Your ANONG Verification Code - Welcome to Authentic Thai Flavors!',
+      html,
     };
 
     console.log('📧 Email payload prepared:', {
@@ -195,7 +176,7 @@ serve(async (req: Request) => {
       let emailResult;
       try {
         emailResult = JSON.parse(responseText);
-        console.log('✅ Email sent successfully:', emailResult);
+        console.log('✅ Branded MFA email sent successfully:', emailResult);
       } catch (parseError) {
         console.error('❌ Failed to parse Resend response as JSON:', parseError);
         console.log('📄 Raw response text:', responseText);
@@ -205,7 +186,7 @@ serve(async (req: Request) => {
       const response = {
         success: true,
         challengeId: challengeId,
-        message: 'Verification code sent successfully',
+        message: 'Branded verification code sent successfully',
         debug: {
           emailSent: true,
           emailId: emailResult.id,
