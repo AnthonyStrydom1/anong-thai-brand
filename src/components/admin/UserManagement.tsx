@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,8 +9,10 @@ import { Search, Shield, User, UserPlus, AlertCircle, RefreshCw, UserMinus } fro
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useUserRoles } from '@/hooks/useUserRoles';
-import CreateAdminUserForm from './CreateAdminUserForm';
+import CreateUserForm from './user-creation/CreateUserForm';
+import UserRoleManager from './user-creation/UserRoleManager';
 import { useAdminUserDeletion } from './user-creation/useAdminUserDeletion';
+import { useRoleManagement } from './user-creation/useRoleManagement';
 
 interface AdminUser {
   id: string;
@@ -28,31 +31,48 @@ interface UserRole {
   created_at: string;
 }
 
+interface AllUser {
+  id: string;
+  email?: string;
+  created_at: string;
+  raw_user_meta_data?: any;
+}
+
 const UserManagement = () => {
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [allUsers, setAllUsers] = useState<AllUser[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [searchEmail, setSearchEmail] = useState('');
+  const [viewMode, setViewMode] = useState<'admin' | 'all'>('admin');
   const [isLoading, setIsLoading] = useState(false);
-  const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
   const { isAdmin } = useUserRoles();
   const { deleteAdminUser, deletingUserId } = useAdminUserDeletion(() => {
-    loadAdminUsers();
+    loadData();
+  });
+  const { addRole, removeRole, updatingUserId } = useRoleManagement(() => {
     loadUserRoles();
   });
 
   useEffect(() => {
     if (isAdmin()) {
-      loadAdminUsers();
-      loadUserRoles();
+      loadData();
     }
-  }, []);
+  }, [viewMode]);
+
+  const loadData = () => {
+    if (viewMode === 'admin') {
+      loadAdminUsers();
+    } else {
+      loadAllUsers();
+    }
+    loadUserRoles();
+  };
 
   const loadAdminUsers = async () => {
     try {
       setIsLoading(true);
       console.log('Loading admin users from users table...');
       
-      // Get admin users from our users table (only contains admin users now)
       const { data: usersData, error: usersError } = await supabase
         .from('users')
         .select('*')
@@ -66,15 +86,42 @@ const UserManagement = () => {
       console.log('Loaded admin users:', usersData);
       setAdminUsers(usersData || []);
       
-      toast({
-        title: "Admin Users Loaded",
-        description: `Successfully loaded ${usersData?.length || 0} admin users.`,
-      });
     } catch (error: any) {
       console.error('Error loading admin users:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to load admin users. Make sure you have admin privileges.",
+        description: error.message || "Failed to load admin users.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadAllUsers = async () => {
+    try {
+      setIsLoading(true);
+      console.log('Loading all users...');
+      
+      // Get all users from profiles table (represents all registered users)
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (profilesError) {
+        console.error('Error loading all users:', profilesError);
+        throw profilesError;
+      }
+      
+      console.log('Loaded all users:', profilesData);
+      setAllUsers(profilesData || []);
+      
+    } catch (error: any) {
+      console.error('Error loading all users:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load users.",
         variant: "destructive"
       });
     } finally {
@@ -106,53 +153,26 @@ const UserManagement = () => {
     }
   };
 
-  const assignAdminRole = async (userId: string, userEmail: string | undefined) => {
-    if (!userId) return;
-    
-    setAssigningUserId(userId);
-    try {
-      console.log('Assigning admin role to user:', userId);
-      const { error } = await supabase.rpc('assign_admin_role', {
-        _user_id: userId
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Success!",
-        description: `Admin role assigned to ${userEmail || 'user'}`,
-      });
-      
-      // Reload user roles to reflect changes
-      await loadUserRoles();
-    } catch (error) {
-      console.error('Error assigning admin role:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to assign admin role.",
-        variant: "destructive"
-      });
-    } finally {
-      setAssigningUserId(null);
-    }
-  };
-
   const getUserRoles = (userId: string) => {
     return userRoles.filter(role => role.user_id === userId);
   };
 
-  const hasAdminRole = (userId: string) => {
-    return getUserRoles(userId).some(role => role.role === 'admin');
-  };
-
-  const filteredUsers = adminUsers.filter(user => {
+  const currentUsers = viewMode === 'admin' ? adminUsers : allUsers;
+  const filteredUsers = currentUsers.filter(user => {
     const searchTerm = searchEmail.toLowerCase();
-    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim().toLowerCase();
+    const email = user.email || '';
+    const firstName = viewMode === 'admin' 
+      ? (user as AdminUser).first_name || '' 
+      : (user as AllUser).raw_user_meta_data?.first_name || '';
+    const lastName = viewMode === 'admin' 
+      ? (user as AdminUser).last_name || '' 
+      : (user as AllUser).raw_user_meta_data?.last_name || '';
+    const fullName = `${firstName} ${lastName}`.trim().toLowerCase();
     
     return (
-      user.email?.toLowerCase().includes(searchTerm) ||
-      user.first_name?.toLowerCase().includes(searchTerm) ||
-      user.last_name?.toLowerCase().includes(searchTerm) ||
+      email.toLowerCase().includes(searchTerm) ||
+      firstName.toLowerCase().includes(searchTerm) ||
+      lastName.toLowerCase().includes(searchTerm) ||
       fullName.includes(searchTerm)
     );
   });
@@ -173,21 +193,41 @@ const UserManagement = () => {
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-6">
         <UserPlus className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">Admin User Management</h1>
+        <h1 className="text-2xl font-bold">User Management</h1>
       </div>
 
-      {/* Create Admin User Form */}
-      <CreateAdminUserForm onUserCreated={() => {
-        loadAdminUsers();
-        loadUserRoles();
-      }} />
+      {/* Create User Form */}
+      <CreateUserForm onUserCreated={loadData} />
+
+      {/* View Mode Toggle */}
+      <Card>
+        <CardHeader>
+          <CardTitle>View Options</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <Button 
+              variant={viewMode === 'admin' ? 'default' : 'outline'}
+              onClick={() => setViewMode('admin')}
+            >
+              Admin Users Only
+            </Button>
+            <Button 
+              variant={viewMode === 'all' ? 'default' : 'outline'}
+              onClick={() => setViewMode('all')}
+            >
+              All Users
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Search Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Search Admin Users
+            Search Users
             {isLoading && <RefreshCw className="h-4 w-4 animate-spin" />}
           </CardTitle>
         </CardHeader>
@@ -206,10 +246,7 @@ const UserManagement = () => {
             </div>
             <div className="flex items-end">
               <Button 
-                onClick={() => {
-                  loadAdminUsers();
-                  loadUserRoles();
-                }}
+                onClick={loadData}
                 disabled={isLoading}
                 variant="outline"
                 className="flex items-center gap-2"
@@ -222,29 +259,28 @@ const UserManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Admin Users List */}
+      {/* Users List */}
       <Card>
         <CardHeader>
-          <CardTitle>Admin Users ({filteredUsers.length})</CardTitle>
+          <CardTitle>
+            {viewMode === 'admin' ? 'Admin Users' : 'All Users'} ({filteredUsers.length})
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="text-center py-8">
               <RefreshCw className="w-8 h-8 mx-auto mb-4 text-gray-400 animate-spin" />
-              <p className="text-gray-600">Loading admin users...</p>
+              <p className="text-gray-600">Loading users...</p>
             </div>
           ) : filteredUsers.length === 0 ? (
             <div className="text-center py-8">
               <User className="w-12 h-12 mx-auto mb-4 text-gray-400" />
               <p className="text-gray-500 mb-2">
-                {searchEmail ? "No admin users found matching your search." : "No admin users found."}
+                {searchEmail ? "No users found matching your search." : "No users found."}
               </p>
               {!searchEmail && (
                 <Button 
-                  onClick={() => {
-                    loadAdminUsers();
-                    loadUserRoles();
-                  }}
+                  onClick={loadData}
                   variant="outline"
                   className="mt-2"
                 >
@@ -256,10 +292,16 @@ const UserManagement = () => {
             <div className="space-y-4">
               {filteredUsers.map((user) => {
                 const roles = getUserRoles(user.id);
-                const isUserAdmin = hasAdminRole(user.id);
-                const displayName = user.first_name && user.last_name 
-                  ? `${user.first_name} ${user.last_name}` 
-                  : user.email;
+                const email = user.email || 'No email';
+                const firstName = viewMode === 'admin' 
+                  ? (user as AdminUser).first_name 
+                  : (user as AllUser).raw_user_meta_data?.first_name;
+                const lastName = viewMode === 'admin' 
+                  ? (user as AdminUser).last_name 
+                  : (user as AllUser).raw_user_meta_data?.last_name;
+                const displayName = firstName && lastName 
+                  ? `${firstName} ${lastName}` 
+                  : email;
                 
                 return (
                   <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
@@ -269,70 +311,40 @@ const UserManagement = () => {
                           <Shield className="w-5 h-5 text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="font-medium">{displayName || 'No email'}</h3>
-                          {user.email && displayName !== user.email && (
-                            <p className="text-sm text-gray-500">{user.email}</p>
+                          <h3 className="font-medium">{displayName}</h3>
+                          {email && displayName !== email && (
+                            <p className="text-sm text-gray-500">{email}</p>
                           )}
                           <p className="text-sm text-gray-500">
                             Joined: {new Date(user.created_at).toLocaleDateString()}
                           </p>
-                          {!user.is_active && (
-                            <Badge variant="secondary" className="text-xs">Inactive</Badge>
-                          )}
                           <p className="text-xs text-gray-400">ID: {user.id}</p>
                         </div>
                       </div>
                     </div>
                     
                     <div className="flex items-center gap-3">
-                      {/* Role Badges */}
-                      <div className="flex gap-2">
-                        {roles.length === 0 ? (
-                          <Badge variant="secondary">user</Badge>
-                        ) : (
-                          roles.map((role) => (
-                            <Badge 
-                              key={role.id}
-                              variant={role.role === 'admin' ? 'default' : 'secondary'}
-                            >
-                              {role.role}
-                            </Badge>
-                          ))
-                        )}
-                      </div>
+                      <UserRoleManager
+                        userId={user.id}
+                        userEmail={email}
+                        userRoles={roles}
+                        onAddRole={addRole}
+                        onRemoveRole={removeRole}
+                        isUpdating={updatingUserId === user.id}
+                      />
                       
-                      {/* Admin Assignment Button */}
-                      {!isUserAdmin && (
+                      {/* Delete Admin Button (only for admin users) */}
+                      {viewMode === 'admin' && roles.some(r => r.role === 'admin') && (
                         <Button
                           size="sm"
-                          onClick={() => assignAdminRole(user.id, user.email)}
-                          disabled={assigningUserId === user.id}
+                          variant="destructive"
+                          onClick={() => deleteAdminUser(user.id, email)}
+                          disabled={deletingUserId === user.id}
                           className="flex items-center gap-2"
                         >
-                          <Shield className="w-4 h-4" />
-                          {assigningUserId === user.id ? "Assigning..." : "Make Admin"}
+                          <UserMinus className="w-4 h-4" />
+                          {deletingUserId === user.id ? "Removing..." : "Remove"}
                         </Button>
-                      )}
-                      
-                      {isUserAdmin && (
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-2 text-green-600">
-                            <Shield className="w-4 h-4" />
-                            <span className="text-sm font-medium">Admin</span>
-                          </div>
-                          
-                          {/* Remove Admin Button */}
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => deleteAdminUser(user.id, user.email)}
-                            disabled={deletingUserId === user.id}
-                            className="flex items-center gap-2"
-                          >
-                            <UserMinus className="w-4 h-4" />
-                            {deletingUserId === user.id ? "Removing..." : "Remove"}
-                          </Button>
-                        </div>
                       )}
                     </div>
                   </div>
@@ -349,10 +361,10 @@ const UserManagement = () => {
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
             <div className="text-sm text-blue-800">
-              <p className="font-medium mb-1">Admin User Management</p>
+              <p className="font-medium mb-1">User Management</p>
               <p>
-                This interface manages admin users only. Regular customers are managed separately in the customers table.
-                Admin users have elevated privileges and can access the admin dashboard and management features.
+                Use this interface to create new users and manage user roles. You can view admin users only or all registered users. 
+                Users can have multiple roles (user, moderator, admin) and roles can be added or removed dynamically.
               </p>
             </div>
           </div>
