@@ -8,6 +8,7 @@ import StockManager from '@/components/admin/StockManager';
 import SecurityDashboard from '@/components/admin/SecurityDashboard';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import UserManagement from '@/components/admin/UserManagement';
+import ReviewManager from '@/components/admin/ReviewManager';
 import MobileAdminLayout from '@/components/admin/MobileAdminLayout';
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
 import AdminHeader from '@/components/admin/AdminHeader';
@@ -90,6 +91,8 @@ const AdminPage = () => {
         return <CustomerManager />;
       case 'users':
         return <UserManagement />;
+      case 'reviews':
+        return <ReviewManager />;
       case 'security':
         return <SecurityDashboard />;
       case 'analytics':
@@ -144,6 +147,10 @@ const AdminPage = () => {
 
             <TabsContent value="users">
               <UserManagement />
+            </TabsContent>
+
+            <TabsContent value="reviews">
+              <ReviewManager />
             </TabsContent>
 
             <TabsContent value="security">

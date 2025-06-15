@@ -93,7 +93,7 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
           rating: newReview.rating,
           title: newReview.title.trim(),
           content: newReview.content.trim(),
-          is_approved: true // Auto-approve for now to make reviews visible immediately
+          is_approved: false // Reviews now require admin approval
         });
 
       if (error) {
@@ -105,7 +105,7 @@ const ReviewForm = ({ productId, onReviewSubmitted, onCancel }: ReviewFormProps)
 
       toast({
         title: t.reviewSubmitted,
-        description: 'Your review has been posted successfully!',
+        description: 'Your review has been submitted and is pending approval.',
       });
 
       setNewReview({ rating: 0, title: '', content: '' });
