@@ -22,96 +22,78 @@ export const useOrderCreation = () => {
         description: `Order ${order.order_number} has been created.`,
       });
 
-      // START EMAIL SENDING PROCESS IMMEDIATELY AFTER ORDER CREATION
+      // IMMEDIATE EMAIL SENDING - NO EARLY RETURNS BEFORE THIS
       console.log('📧 === EMAIL SENDING PROCESS START ===');
-      console.log('📧 About to start email sending process for order:', order.order_number);
+      console.log('📧 Starting email process for order:', order.order_number);
       
       // Get customer email from form data
-      const customerEmail = orderData.billing_address.email || orderData.shipping_address.email;
-      console.log('📧 Customer email identified:', customerEmail);
+      const customerEmail = orderData.billing_address?.email || orderData.shipping_address?.email;
+      console.log('📧 Customer email found:', customerEmail);
       
       if (!customerEmail) {
-        console.error('📧 ERROR: No customer email found in order data');
-        console.error('📧 Billing address:', orderData.billing_address);
-        console.error('📧 Shipping address:', orderData.shipping_address);
-        
+        console.error('📧 ERROR: No customer email available');
         toast({
           title: "Order Created",
           description: "Order created successfully, but no email address found for confirmation.",
           variant: "destructive",
         });
+      } else {
+        // Prepare email data structure
+        const emailData = {
+          orderNumber: order.order_number,
+          customerName: `${orderData.shipping_address.firstName} ${orderData.shipping_address.lastName}`,
+          customerEmail: customerEmail,
+          orderItems: orderData.items.map(item => ({
+            product_name: item.product_name,
+            product_sku: item.product_sku,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            total_price: item.total_price,
+          })),
+          subtotal: order.subtotal,
+          vatAmount: order.vat_amount || 0,
+          shippingAmount: order.shipping_amount || 0,
+          totalAmount: order.total_amount,
+          shippingAddress: {
+            firstName: orderData.shipping_address.firstName,
+            lastName: orderData.shipping_address.lastName,
+            address: orderData.shipping_address.address,
+            city: orderData.shipping_address.city,
+            postalCode: orderData.shipping_address.postalCode,
+            phone: orderData.shipping_address.phone,
+          },
+          orderDate: order.created_at || new Date().toISOString(),
+        };
+
+        console.log('📧 Email data prepared for:', customerEmail);
+        console.log('📧 Calling Supabase function send-order-confirmation...');
         
-        return order;
-      }
-      
-      // Prepare email data structure
-      const emailData = {
-        orderNumber: order.order_number,
-        customerName: `${orderData.shipping_address.firstName} ${orderData.shipping_address.lastName}`,
-        customerEmail: customerEmail,
-        orderItems: orderData.items.map(item => ({
-          product_name: item.product_name,
-          product_sku: item.product_sku,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          total_price: item.total_price,
-        })),
-        subtotal: order.subtotal,
-        vatAmount: order.vat_amount || 0,
-        shippingAmount: order.shipping_amount || 0,
-        totalAmount: order.total_amount,
-        shippingAddress: {
-          firstName: orderData.shipping_address.firstName,
-          lastName: orderData.shipping_address.lastName,
-          address: orderData.shipping_address.address,
-          city: orderData.shipping_address.city,
-          postalCode: orderData.shipping_address.postalCode,
-          phone: orderData.shipping_address.phone,
-        },
-        orderDate: order.created_at || new Date().toISOString(),
-      };
+        try {
+          const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-order-confirmation', {
+            body: emailData,
+          });
 
-      console.log('📧 Email data prepared:', {
-        orderNumber: emailData.orderNumber,
-        customerEmail: emailData.customerEmail,
-        itemCount: emailData.orderItems.length,
-        totalAmount: emailData.totalAmount
-      });
+          if (emailError) {
+            console.error('❌ Email function error:', emailError);
+            throw emailError;
+          }
 
-      // Send email using Supabase Edge Function
-      console.log('📧 Calling Supabase edge function send-order-confirmation...');
-      
-      try {
-        const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-order-confirmation', {
-          body: emailData,
-        });
-
-        if (emailError) {
-          console.error('❌ Supabase function error:', emailError);
-          throw emailError;
+          console.log('✅ Email sent successfully:', emailResult);
+          
+          toast({
+            title: "Confirmation Email Sent",
+            description: "Order confirmation has been sent to your email.",
+          });
+          
+        } catch (emailError) {
+          console.error('❌ Email sending failed:', emailError);
+          
+          toast({
+            title: "Order Created",
+            description: "Order created successfully, but confirmation email failed to send.",
+            variant: "destructive",
+          });
         }
-
-        console.log('✅ Email sent successfully:', emailResult);
-        
-        toast({
-          title: "Confirmation Email Sent",
-          description: "Order confirmation has been sent to your email.",
-        });
-        
-      } catch (emailError) {
-        console.error('❌ === EMAIL SENDING FAILED ===');
-        console.error('❌ Failed to send order confirmation email:', emailError);
-        console.error('❌ Email error details:', {
-          message: emailError?.message || 'Unknown error',
-          stack: emailError?.stack || 'No stack trace',
-          name: emailError?.name || 'Unknown error type'
-        });
-        
-        toast({
-          title: "Order Created",
-          description: "Order created successfully, but confirmation email failed to send. Please check your spam folder or contact support.",
-          variant: "destructive",
-        });
       }
       
       console.log('📧 === EMAIL SENDING PROCESS END ===');
