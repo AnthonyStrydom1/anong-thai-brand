@@ -27,6 +27,7 @@ export class WelcomeEmailService {
       }
       
       console.log('👋 WelcomeEmailService: About to call supabase.functions.invoke...');
+      console.log('👋 WelcomeEmailService: Supabase URL:', supabase.supabaseUrl);
       
       const { data, error } = await supabase.functions.invoke('send-welcome-email', {
         body: emailData,
@@ -50,7 +51,7 @@ export class WelcomeEmailService {
       console.log('👋 === WelcomeEmailService.sendWelcomeEmail END ===');
       
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ === WelcomeEmailService ERROR ===');
       console.error('❌ WelcomeEmailService: Error in sendWelcomeEmail:', error);
       console.error('❌ WelcomeEmailService: Error details:', {
