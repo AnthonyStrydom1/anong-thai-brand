@@ -1,18 +1,21 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Package, AlertTriangle, Plus, Minus, Edit } from "lucide-react";
+import { Package, AlertTriangle, Plus, Minus, Edit, RefreshCw } from "lucide-react";
 import { supabaseService, SupabaseProduct } from "@/services/supabaseService";
 import { toast } from "@/components/ui/use-toast";
 import { useAdminSecurity } from "@/hooks/useAdminSecurity";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const StockManager = () => {
   const [products, setProducts] = useState<SupabaseProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [editingStock, setEditingStock] = useState<string | null>(null);
   const [newQuantity, setNewQuantity] = useState<number>(0);
   const { logAdminAction } = useAdminSecurity();
@@ -20,6 +23,39 @@ const StockManager = () => {
 
   useEffect(() => {
     loadProducts();
+    
+    // Set up real-time subscription for inventory movements
+    const channel = supabase
+      .channel('inventory-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'inventory_movements'
+        },
+        () => {
+          console.log('Inventory movement detected, refreshing stock data');
+          loadProducts();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products'
+        },
+        () => {
+          console.log('Product change detected, refreshing stock data');
+          loadProducts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadProducts = async () => {
@@ -36,7 +72,17 @@ const StockManager = () => {
       });
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await loadProducts();
+    toast({
+      title: "Success",
+      description: "Stock levels refreshed"
+    });
   };
 
   const updateStock = async (productId: string, quantity: number) => {
@@ -99,13 +145,29 @@ const StockManager = () => {
   };
 
   if (isLoading) {
-    return <div className="p-6">Loading stock information...</div>;
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading stock information...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Stock Management</h1>
+        <Button 
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          variant="outline"
+          size="sm"
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh Stock'}
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
