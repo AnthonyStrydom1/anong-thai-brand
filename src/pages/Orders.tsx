@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import NavigationBanner from "@/components/NavigationBanner";
 import Footer from "@/components/Footer";
 import { supabaseService } from "@/services/supabaseService";
@@ -14,8 +14,12 @@ import OrderCard from "@/components/orders/OrderCard";
 const Orders = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Get search parameter from URL (for direct email links)
+  const searchOrderNumber = searchParams.get('search');
 
   useEffect(() => {
     if (user) {
@@ -36,7 +40,23 @@ const Orders = () => {
 
       const userOrders = await supabaseService.getCustomerOrdersByUserId(user.id);
       console.log('Loaded orders:', userOrders);
-      setOrders(userOrders || []);
+      
+      let filteredOrders = userOrders || [];
+      
+      // If there's a search parameter, filter to show only that order
+      if (searchOrderNumber) {
+        filteredOrders = filteredOrders.filter(order => 
+          order.order_number === searchOrderNumber
+        );
+        
+        // If we found the specific order, navigate to its details page
+        if (filteredOrders.length === 1) {
+          navigate(`/orders/${filteredOrders[0].id}`);
+          return;
+        }
+      }
+      
+      setOrders(filteredOrders);
     } catch (error) {
       console.error('Error loading orders:', error);
       toast({
@@ -84,6 +104,14 @@ const Orders = () => {
       
       <main className="flex-grow container mx-auto px-4 py-12">
         <OrdersHeader />
+        
+        {searchOrderNumber && (
+          <div className="mb-6 p-4 bg-anong-gold/10 border border-anong-gold/30 rounded-lg">
+            <p className="anong-body text-anong-black">
+              Showing order: <strong>#{searchOrderNumber}</strong>
+            </p>
+          </div>
+        )}
         
         <div className="space-y-6">
           {orders.map((order) => (

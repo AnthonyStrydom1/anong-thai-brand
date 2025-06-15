@@ -68,7 +68,7 @@ export const OrderConfirmationEmail = ({
             />
             <PaymentInstructions orderNumber={orderNumber} />
             <ShippingAddress shippingAddress={shippingAddress} />
-            <EmailFooter />
+            <EmailFooter orderNumber={orderNumber} />
           </Section>
         </Container>
       </Body>
