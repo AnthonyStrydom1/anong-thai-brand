@@ -49,7 +49,6 @@ const FeaturedProductCarousel: React.FC<FeaturedProductCarouselProps> = ({
       is_active: true,
       is_featured: true,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(), // Add missing field
       ingredients: product.ingredients || null // Add ingredients from Product
     };
     

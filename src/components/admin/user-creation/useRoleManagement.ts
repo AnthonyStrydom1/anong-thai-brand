@@ -1,45 +1,49 @@
 
 import { useState } from 'react';
-import { supabaseService } from '@/services/supabaseService';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useAdminSecurity } from '@/hooks/useAdminSecurity';
+import type { Database } from '@/integrations/supabase/types';
 
-type UserRole = 'admin' | 'moderator' | 'user';
+type AppRole = Database['public']['Enums']['app_role'];
 
-export const useRoleManagement = (onRoleUpdated: () => void) => {
+export const useRoleManagement = (onRolesUpdated: () => void) => {
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
-  const { logAdminAction } = useAdminSecurity();
 
-  const addRole = async (userId: string, role: string, userEmail: string) => {
+  const addRole = async (userId: string, role: string, userEmail?: string) => {
+    setUpdatingUserId(userId);
     try {
-      setUpdatingUserId(userId);
+      console.log(`Adding ${role} role to user:`, userId);
       
-      await logAdminAction('create', 'user_role', userId, {
-        role,
-        user_email: userEmail,
-        action: 'add_role'
-      });
-
-      await supabaseService.addUserRole(userId, role as UserRole);
+      const { error } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: userId,
+          role: role as AppRole
+        });
       
-      toast({
-        title: "Success",
-        description: `${role} role added to ${userEmail}`
-      });
+      if (error) {
+        // Check if it's a duplicate role error
+        if (error.code === '23505') {
+          toast({
+            title: "Info",
+            description: `User already has the ${role} role.`,
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Success!",
+          description: `${role.charAt(0).toUpperCase() + role.slice(1)} role assigned to ${userEmail || 'user'}`,
+        });
+      }
       
-      onRoleUpdated();
-    } catch (error: any) {
-      console.error('Error adding role:', error);
-      
-      await logAdminAction('create', 'user_role', userId, {
-        error: error.message,
-        role,
-        user_email: userEmail
-      }, false);
-      
+      onRolesUpdated();
+    } catch (error) {
+      console.error(`Error adding ${role} role:`, error);
       toast({
         title: "Error",
-        description: error.message || "Failed to add role",
+        description: error instanceof Error ? error.message : `Failed to assign ${role} role.`,
         variant: "destructive"
       });
     } finally {
@@ -47,36 +51,30 @@ export const useRoleManagement = (onRoleUpdated: () => void) => {
     }
   };
 
-  const removeRole = async (userId: string, role: string, userEmail: string) => {
+  const removeRole = async (userId: string, role: string, userEmail?: string) => {
+    setUpdatingUserId(userId);
     try {
-      setUpdatingUserId(userId);
+      console.log(`Removing ${role} role from user:`, userId);
       
-      await logAdminAction('delete', 'user_role', userId, {
-        role,
-        user_email: userEmail,
-        action: 'remove_role'
-      });
-
-      await supabaseService.removeUserRole(userId, role as UserRole);
+      const { error } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .eq('role', role as AppRole);
+      
+      if (error) throw error;
       
       toast({
-        title: "Success",
-        description: `${role} role removed from ${userEmail}`
+        title: "Success!",
+        description: `${role.charAt(0).toUpperCase() + role.slice(1)} role removed from ${userEmail || 'user'}`,
       });
       
-      onRoleUpdated();
-    } catch (error: any) {
-      console.error('Error removing role:', error);
-      
-      await logAdminAction('delete', 'user_role', userId, {
-        error: error.message,
-        role,
-        user_email: userEmail
-      }, false);
-      
+      onRolesUpdated();
+    } catch (error) {
+      console.error(`Error removing ${role} role:`, error);
       toast({
         title: "Error",
-        description: error.message || "Failed to remove role",
+        description: error instanceof Error ? error.message : `Failed to remove ${role} role.`,
         variant: "destructive"
       });
     } finally {

@@ -50,18 +50,6 @@ export class OrderStatusService {
     if (error) throw error;
     return data as SupabaseOrder;
   }
-
-  async updateTrackingNumber(orderId: string, trackingNumber: string) {
-    const { data, error } = await supabase
-      .from('orders')
-      .update({ tracking_number: trackingNumber })
-      .eq('id', orderId)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data as SupabaseOrder;
-  }
 }
 
 export const orderStatusService = new OrderStatusService();

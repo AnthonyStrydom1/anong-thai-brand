@@ -43,8 +43,7 @@ const ProductInfo = ({ product, averageRating = 0, reviewCount = 0, isLoadingRev
       is_active: true,
       is_featured: product.featured || false,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      ingredients: product.ingredients || null
+      ingredients: product.ingredients || null // Add ingredients from Product
     };
     
     addItem(supabaseProduct, quantity);

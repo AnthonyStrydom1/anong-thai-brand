@@ -1,62 +1,28 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
+import type { SupabaseCategory } from "../types/supabaseTypes";
 
-type SupabaseCategory = Database['public']['Tables']['categories']['Row'];
-type CategoryInsert = Database['public']['Tables']['categories']['Insert'];
-
-export class CategoryService {
-  async getCategories(): Promise<SupabaseCategory[]> {
+class CategoryService {
+  async getCategories() {
     const { data, error } = await supabase
       .from('categories')
       .select('*')
       .eq('is_active', true)
-      .order('sort_order', { ascending: true });
-
+      .order('sort_order');
+    
     if (error) throw error;
-    return data || [];
+    return data as SupabaseCategory[];
   }
 
-  async createCategories(categories: CategoryInsert[]): Promise<SupabaseCategory[]> {
+  async createCategory(category: Omit<SupabaseCategory, 'id'>) {
     const { data, error } = await supabase
       .from('categories')
-      .insert(categories)
-      .select();
-
-    if (error) throw error;
-    return data || [];
-  }
-
-  async getCategoryById(id: string): Promise<SupabaseCategory | null> {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
-  }
-
-  async updateCategory(id: string, updates: Partial<CategoryInsert>): Promise<SupabaseCategory> {
-    const { data, error } = await supabase
-      .from('categories')
-      .update(updates)
-      .eq('id', id)
+      .insert([category])
       .select()
       .single();
-
+    
     if (error) throw error;
-    return data;
-  }
-
-  async deleteCategory(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('categories')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+    return data as SupabaseCategory;
   }
 }
 

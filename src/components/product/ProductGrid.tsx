@@ -10,7 +10,7 @@ interface ProductGridProps {
 }
 
 const ProductGrid = ({ categoryId, searchTerm }: ProductGridProps) => {
-  const { products, isLoading, error } = useSupabaseProducts();
+  const { products, isLoading, error } = useSupabaseProducts(categoryId);
 
   if (isLoading) {
     return (
@@ -35,17 +35,14 @@ const ProductGrid = ({ categoryId, searchTerm }: ProductGridProps) => {
     );
   }
 
-  // Filter products by search term and category if provided
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = !searchTerm || 
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.short_description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = !categoryId || product.category_id === categoryId;
-    
-    return matchesSearch && matchesCategory;
-  });
+  // Filter products by search term if provided
+  const filteredProducts = searchTerm 
+    ? products.filter(product => 
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.short_description?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : products;
 
   if (filteredProducts.length === 0) {
     return (

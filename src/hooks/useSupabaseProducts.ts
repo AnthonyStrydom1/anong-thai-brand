@@ -1,86 +1,39 @@
 
 import { useState, useEffect } from 'react';
-import { supabaseService, type SupabaseProduct } from '@/services/supabaseService';
+import { supabaseService, SupabaseProduct } from '@/services/supabaseService';
+import { toast } from '@/components/ui/use-toast';
 
 export const useSupabaseProducts = (categoryId?: string) => {
   const [products, setProducts] = useState<SupabaseProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadProducts = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await supabaseService.getProducts();
-      // Filter by category if provided
-      const filteredData = categoryId ? data.filter(p => p.category_id === categoryId) : data;
-      setProducts(filteredData);
-    } catch (err) {
-      console.error('Error loading products:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load products');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadProduct = async (id: string): Promise<SupabaseProduct | null> => {
-    try {
-      return await supabaseService.getProduct(id);
-    } catch (err) {
-      console.error('Error loading product:', err);
-      throw err;
-    }
-  };
-
-  const createProduct = async (product: Omit<SupabaseProduct, 'id' | 'created_at' | 'updated_at'>) => {
-    try {
-      const newProduct = await supabaseService.createProduct(product);
-      setProducts(prev => [...prev, newProduct]);
-      return newProduct;
-    } catch (err) {
-      console.error('Error creating product:', err);
-      throw err;
-    }
-  };
-
-  const updateProduct = async (id: string, updates: Partial<Omit<SupabaseProduct, 'id' | 'created_at' | 'updated_at'>>) => {
-    try {
-      const updatedProduct = await supabaseService.updateProduct(id, updates);
-      setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
-      return updatedProduct;
-    } catch (err) {
-      console.error('Error updating product:', err);
-      throw err;
-    }
-  };
-
-  const deleteProduct = async (id: string) => {
-    try {
-      await supabaseService.deleteProduct(id);
-      setProducts(prev => prev.filter(p => p.id !== id));
-    } catch (err) {
-      console.error('Error deleting product:', err);
-      throw err;
-    }
-  };
-
   useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await supabaseService.getProducts(categoryId);
+        setProducts(data);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load products';
+        setError(errorMessage);
+        toast({
+          title: 'Error',
+          description: errorMessage,
+          variant: 'destructive'
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     loadProducts();
   }, [categoryId]);
 
-  return {
-    products,
-    isLoading,
-    error,
-    loadProducts,
-    loadProduct,
-    createProduct,
-    updateProduct,
-    deleteProduct,
-  };
+  return { products, isLoading, error, refetch: () => setIsLoading(true) };
 };
 
-// Export single product hook
 export const useSupabaseProduct = (id: string) => {
   const [product, setProduct] = useState<SupabaseProduct | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -88,27 +41,51 @@ export const useSupabaseProduct = (id: string) => {
 
   useEffect(() => {
     const loadProduct = async () => {
-      if (!id) return;
-      
       try {
         setIsLoading(true);
         setError(null);
-        const data = await supabaseService.getProduct(id);
-        setProduct(data);
+        
+        // Handle both UUID and recipe product ID formats
+        let productData = null;
+        
+        // First try to get by UUID (direct Supabase ID)
+        if (id.length > 20) {
+          productData = await supabaseService.getProduct(id);
+        } else {
+          // Map recipe product IDs to product names
+          const recipeProductMap: { [key: string]: string } = {
+            'pad-thai-sauce': 'Pad Thai Sauce',
+            'sukiyaki-sauce': 'Sukiyaki Dipping Sauce',
+            'tom-yum-paste': 'Tom Yum Chili Paste',
+            'red-curry-paste': 'Red Curry Paste',
+            'panang-curry-paste': 'Panang Curry Paste',
+            'massaman-curry-paste': 'Massaman Curry Paste',
+            'green-curry-paste': 'Green Curry Paste',
+            'yellow-curry-paste': 'Yellow Curry Paste'
+          };
+          
+          const productName = recipeProductMap[id];
+          if (productName) {
+            // Get all products and find by name
+            const allProducts = await supabaseService.getProducts();
+            productData = allProducts.find(p => p.name === productName) || null;
+          }
+        }
+        
+        setProduct(productData);
       } catch (err) {
-        console.error('Error loading product:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load product');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load product';
+        setError(errorMessage);
+        console.error('Product loading error:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadProduct();
+    if (id) {
+      loadProduct();
+    }
   }, [id]);
 
-  return {
-    product,
-    isLoading,
-    error,
-  };
+  return { product, isLoading, error };
 };
