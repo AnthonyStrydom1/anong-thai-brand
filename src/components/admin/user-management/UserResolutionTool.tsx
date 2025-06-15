@@ -43,8 +43,8 @@ const UserResolutionTool = () => {
         .maybeSingle();
 
       // Check if auth user exists
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      const authUser = authUsers?.users?.find(user => user.email === email);
+      const { data: authUsersResponse, error: authError } = await supabase.auth.admin.listUsers();
+      const authUser = authUsersResponse?.users?.find((user: any) => user.email === email);
 
       // Check if profile exists
       const { data: profile, error: profileError } = await supabase
