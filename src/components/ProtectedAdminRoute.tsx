@@ -21,7 +21,8 @@ const ProtectedAdminRoute = ({ children }: ProtectedAdminRouteProps) => {
     isAdminResult: user ? isAdmin() : false 
   });
 
-  // Show loading state while checking authentication and roles
+  // Show loading state while checking authentication OR roles
+  // This prevents the brief "Access Denied" flash
   if (authLoading || rolesLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -41,7 +42,7 @@ const ProtectedAdminRoute = ({ children }: ProtectedAdminRouteProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  // Show access denied if not admin
+  // Show access denied if not admin (only after loading is complete)
   if (!isAdmin()) {
     console.log('❌ ProtectedAdminRoute: User is not admin, showing access denied');
     return (
