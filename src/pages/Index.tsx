@@ -1,5 +1,6 @@
 
 import React from 'react';
+import NavigationBanner from '@/components/NavigationBanner';
 import HeroBanner from '@/components/HeroBanner';
 import FeaturedProducts from '@/components/FeaturedProducts';
 import BrandStory from '@/components/BrandStory';
@@ -11,6 +12,7 @@ import TestUserCleanup from '@/components/TestUserCleanup';
 const Index = () => {
   return (
     <div className="min-h-screen">
+      <NavigationBanner />
       <HeroBanner />
       <FeaturedProducts />
       <BrandStory />
