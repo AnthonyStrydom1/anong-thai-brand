@@ -88,24 +88,34 @@ const OrphanedUserManager = () => {
         return;
       }
 
-      // Type the response properly
-      const response = data as LinkUserResponse;
-
-      if (response?.success) {
-        const actions = response.actions || [];
-        const actionMessages = actions.map((action) => action.action).join(', ');
+      // Safely handle the response by checking if it's an object and has the expected properties
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        const response = data as Record<string, any>;
         
-        toast({
-          title: "Success!",
-          description: `User linked successfully. Actions: ${actionMessages}`,
-        });
-        
-        // Refresh the list
-        await fetchOrphanedUsers();
+        if (response.success) {
+          const actions = response.actions || [];
+          const actionMessages = Array.isArray(actions) 
+            ? actions.map((action: any) => action.action).join(', ')
+            : 'User linked';
+          
+          toast({
+            title: "Success!",
+            description: `User linked successfully. Actions: ${actionMessages}`,
+          });
+          
+          // Refresh the list
+          await fetchOrphanedUsers();
+        } else {
+          toast({
+            title: "Error",
+            description: response.error || "Failed to link user",
+            variant: "destructive"
+          });
+        }
       } else {
         toast({
           title: "Error",
-          description: response?.error || "Failed to link user",
+          description: "Unexpected response format from server",
           variant: "destructive"
         });
       }
