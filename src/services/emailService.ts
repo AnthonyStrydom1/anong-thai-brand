@@ -30,20 +30,25 @@ interface OrderEmailData {
 export class EmailService {
   static async sendOrderConfirmation(orderData: OrderEmailData): Promise<void> {
     try {
-      console.log('Sending order confirmation email via edge function');
+      console.log('EmailService: Sending order confirmation email via edge function');
+      console.log('EmailService: Order data:', {
+        orderNumber: orderData.orderNumber,
+        customerEmail: orderData.customerEmail,
+        itemCount: orderData.orderItems.length
+      });
       
       const { data, error } = await supabase.functions.invoke('send-order-confirmation', {
         body: orderData,
       });
 
       if (error) {
-        console.error('Error invoking send-order-confirmation function:', error);
+        console.error('EmailService: Error invoking send-order-confirmation function:', error);
         throw new Error(`Failed to send order confirmation: ${error.message}`);
       }
 
-      console.log('Order confirmation email sent successfully:', data);
+      console.log('EmailService: Order confirmation email sent successfully:', data);
     } catch (error) {
-      console.error('Error in sendOrderConfirmation:', error);
+      console.error('EmailService: Error in sendOrderConfirmation:', error);
       throw error;
     }
   }

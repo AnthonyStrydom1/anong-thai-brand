@@ -45,17 +45,38 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log('Starting order confirmation email process...');
+
+    // Check if RESEND_API_KEY is configured
+    if (!Deno.env.get("RESEND_API_KEY")) {
+      console.error("RESEND_API_KEY is not configured");
+      return new Response(JSON.stringify({ 
+        error: "Email service not configured",
+        details: "RESEND_API_KEY is missing" 
+      }), {
+        status: 500,
+        headers: { 
+          "Content-Type": "application/json", 
+          ...corsHeaders 
+        },
+      });
+    }
+
     const orderData: OrderConfirmationRequest = await req.json();
     console.log('Sending order confirmation email for order:', orderData.orderNumber);
+    console.log('Recipient email:', orderData.customerEmail);
 
     // Render the React email template
+    console.log('Rendering email template...');
     const html = await renderAsync(
       React.createElement(OrderConfirmationEmail, orderData)
     );
+    console.log('Email template rendered successfully');
 
     // Send the email
+    console.log('Sending email via Resend...');
     const emailResponse = await resend.emails.send({
-      from: "ANONG Thai Kitchen <orders@anong.com>",
+      from: "ANONG Thai Kitchen <noreply@anong.co.za>",
       to: [orderData.customerEmail],
       subject: `Order Confirmation #${orderData.orderNumber} - Thank you for your order!`,
       html,
@@ -65,7 +86,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify({ 
       success: true, 
-      messageId: emailResponse.data?.id 
+      messageId: emailResponse.data?.id,
+      recipient: orderData.customerEmail 
     }), {
       status: 200,
       headers: {
@@ -75,10 +97,20 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error sending order confirmation email:", error);
+    
+    // Log more detailed error information
+    if (error.message) {
+      console.error("Error message:", error.message);
+    }
+    if (error.response) {
+      console.error("Error response:", error.response);
+    }
+    
     return new Response(
       JSON.stringify({ 
         error: "Failed to send order confirmation email",
-        details: error.message 
+        details: error.message,
+        type: error.name || "Unknown error"
       }),
       {
         status: 500,
