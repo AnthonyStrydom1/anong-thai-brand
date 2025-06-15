@@ -11,7 +11,9 @@ export const useOrderCreation = () => {
   const createOrder = async (orderData: CreateOrderData) => {
     setIsCreating(true);
     try {
+      console.log('🚀 Starting order creation process...');
       const order = await orderService.createOrder(orderData);
+      console.log('✅ Order created successfully:', order);
       
       toast({
         title: "Order Created Successfully",
@@ -20,7 +22,7 @@ export const useOrderCreation = () => {
 
       // Send order confirmation email
       try {
-        console.log('Preparing to send order confirmation email');
+        console.log('📧 Preparing to send order confirmation email for order:', order.order_number);
         
         // Prepare email data
         const emailData = {
@@ -49,26 +51,39 @@ export const useOrderCreation = () => {
           orderDate: order.created_at || new Date().toISOString(),
         };
 
+        console.log('📧 Email data prepared:', {
+          orderNumber: emailData.orderNumber,
+          customerEmail: emailData.customerEmail,
+          itemCount: emailData.orderItems.length,
+          totalAmount: emailData.totalAmount
+        });
+
         await EmailService.sendOrderConfirmation(emailData);
-        console.log('Order confirmation email sent successfully');
+        console.log('✅ Order confirmation email sent successfully');
         
         toast({
           title: "Confirmation Email Sent",
           description: "Order confirmation has been sent to your email.",
         });
       } catch (emailError) {
-        console.error('Failed to send order confirmation email:', emailError);
+        console.error('❌ Failed to send order confirmation email:', emailError);
+        console.error('❌ Email error details:', {
+          message: emailError.message,
+          stack: emailError.stack,
+          name: emailError.name
+        });
+        
         // Don't fail the entire order creation if email fails
         toast({
           title: "Order Created",
-          description: "Order created successfully, but confirmation email failed to send.",
+          description: "Order created successfully, but confirmation email failed to send. Please check your spam folder or contact support.",
           variant: "destructive",
         });
       }
       
       return order;
     } catch (error) {
-      console.error('Failed to create order:', error);
+      console.error('❌ Failed to create order:', error);
       toast({
         title: "Order Creation Failed",
         description: "There was an error creating your order. Please try again.",

@@ -30,25 +30,44 @@ interface OrderEmailData {
 export class EmailService {
   static async sendOrderConfirmation(orderData: OrderEmailData): Promise<void> {
     try {
-      console.log('EmailService: Sending order confirmation email via edge function');
-      console.log('EmailService: Order data:', {
-        orderNumber: orderData.orderNumber,
-        customerEmail: orderData.customerEmail,
-        itemCount: orderData.orderItems.length
-      });
+      console.log('📧 EmailService: Starting order confirmation email process');
+      console.log('📧 EmailService: Validating email data...');
+      
+      // Validate required data
+      if (!orderData.orderNumber) {
+        throw new Error('Order number is missing');
+      }
+      if (!orderData.customerEmail) {
+        throw new Error('Customer email is missing');
+      }
+      if (!orderData.orderItems || orderData.orderItems.length === 0) {
+        throw new Error('Order items are missing');
+      }
+      
+      console.log('📧 EmailService: Email data validation passed');
+      console.log('📧 EmailService: Sending to:', orderData.customerEmail);
+      console.log('📧 EmailService: Order number:', orderData.orderNumber);
+      console.log('📧 EmailService: Items count:', orderData.orderItems.length);
       
       const { data, error } = await supabase.functions.invoke('send-order-confirmation', {
         body: orderData,
       });
 
       if (error) {
-        console.error('EmailService: Error invoking send-order-confirmation function:', error);
-        throw new Error(`Failed to send order confirmation: ${error.message}`);
+        console.error('📧 EmailService: Supabase function error:', error);
+        throw new Error(`Failed to invoke order confirmation function: ${error.message}`);
       }
 
-      console.log('EmailService: Order confirmation email sent successfully:', data);
+      console.log('📧 EmailService: Supabase function response:', data);
+      console.log('✅ EmailService: Order confirmation email process completed successfully');
     } catch (error) {
-      console.error('EmailService: Error in sendOrderConfirmation:', error);
+      console.error('❌ EmailService: Error in sendOrderConfirmation:', error);
+      console.error('❌ EmailService: Error details:', {
+        message: error.message,
+        stack: error.stack,
+        orderNumber: orderData.orderNumber,
+        customerEmail: orderData.customerEmail
+      });
       throw error;
     }
   }
