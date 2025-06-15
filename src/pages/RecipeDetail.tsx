@@ -17,31 +17,62 @@ const RecipeDetail = () => {
   const { language } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
   
-  // More robust recipe lookup with case-insensitive matching and URL decoding
+  // Enhanced recipe lookup with multiple fallback strategies
   const recipe = useMemo(() => {
     if (!id) return null;
     
-    // First try exact match
-    let foundRecipe = recipes.find(r => r.id === id);
+    console.log('Looking for recipe with ID:', id);
+    console.log('Available recipes:', recipes.map(r => ({ id: r.id, name: r.name })));
     
-    // If no exact match, try case-insensitive match
-    if (!foundRecipe) {
-      foundRecipe = recipes.find(r => r.id.toLowerCase() === id.toLowerCase());
+    // Strategy 1: Direct exact match
+    let foundRecipe = recipes.find(r => r.id === id);
+    if (foundRecipe) {
+      console.log('Found recipe via exact match:', foundRecipe.id);
+      return foundRecipe;
     }
     
-    // If still no match, try with URL decoding
-    if (!foundRecipe) {
+    // Strategy 2: Case-insensitive match
+    foundRecipe = recipes.find(r => r.id.toLowerCase() === id.toLowerCase());
+    if (foundRecipe) {
+      console.log('Found recipe via case-insensitive match:', foundRecipe.id);
+      return foundRecipe;
+    }
+    
+    // Strategy 3: URL decoded match
+    try {
       const decodedId = decodeURIComponent(id);
       foundRecipe = recipes.find(r => r.id === decodedId || r.id.toLowerCase() === decodedId.toLowerCase());
+      if (foundRecipe) {
+        console.log('Found recipe via URL decoded match:', foundRecipe.id);
+        return foundRecipe;
+      }
+    } catch (e) {
+      console.log('Failed to decode URL:', e);
     }
     
-    // Log for debugging
-    if (!foundRecipe) {
-      console.log('Recipe not found for ID:', id);
-      console.log('Available recipe IDs:', recipes.map(r => r.id));
+    // Strategy 4: Partial match (for hyphenated variations)
+    const normalizedId = id.toLowerCase().replace(/[-_\s]/g, '');
+    foundRecipe = recipes.find(r => {
+      const normalizedRecipeId = r.id.toLowerCase().replace(/[-_\s]/g, '');
+      return normalizedRecipeId === normalizedId;
+    });
+    if (foundRecipe) {
+      console.log('Found recipe via normalized match:', foundRecipe.id);
+      return foundRecipe;
     }
     
-    return foundRecipe;
+    // Strategy 5: Search by name match (last resort)
+    foundRecipe = recipes.find(r => 
+      r.name.en.toLowerCase().replace(/[-_\s]/g, '') === normalizedId ||
+      r.name.th.toLowerCase().replace(/[-_\s]/g, '') === normalizedId
+    );
+    if (foundRecipe) {
+      console.log('Found recipe via name match:', foundRecipe.id);
+      return foundRecipe;
+    }
+    
+    console.log('No recipe found for ID:', id);
+    return null;
   }, [id]);
   
   useEffect(() => {
@@ -100,9 +131,23 @@ const RecipeDetail = () => {
                 : `ไม่พบสูตรอาหารที่มี ID "${id}"`
               }
             </p>
-            <Link to="/recipes" className="anong-btn-primary">
-              {language === 'en' ? 'Browse all recipes' : 'ดูสูตรอาหารทั้งหมด'}
-            </Link>
+            <div className="space-y-4">
+              <Link to="/recipes" className="anong-btn-primary">
+                {language === 'en' ? 'Browse all recipes' : 'ดูสูตรอาหารทั้งหมด'}
+              </Link>
+              <div className="text-sm text-gray-500">
+                <p>Available recipe IDs:</p>
+                <div className="max-w-md mx-auto text-left bg-gray-100 p-4 rounded mt-2">
+                  {recipes.map(r => (
+                    <div key={r.id} className="mb-1">
+                      <Link to={`/recipe/${r.id}`} className="text-blue-600 hover:underline">
+                        {r.id} - {r.name[language]}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </main>
         <Footer />
