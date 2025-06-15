@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { products } from '@/data/products';
@@ -52,6 +51,7 @@ const ProductDetail = () => {
     id: supabaseProduct.id,
     name: { en: supabaseProduct.name, th: supabaseProduct.name },
     description: { en: supabaseProduct.description || '', th: supabaseProduct.description || '' },
+    shortDescription: localProduct?.shortDescription || { en: supabaseProduct.short_description || '', th: supabaseProduct.short_description || '' },
     price: Number(supabaseProduct.price),
     sku: supabaseProduct.sku,
     image: getProductImage(supabaseProduct.name),
