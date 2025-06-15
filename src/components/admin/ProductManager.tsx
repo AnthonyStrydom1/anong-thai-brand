@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -135,7 +134,8 @@ const ProductManager = () => {
         is_featured: formData.is_featured,
         weight: formData.weight ? parseFloat(formData.weight) : null,
         category_id: formData.category_id || null,
-        images: []
+        images: [],
+        ingredients: { en: [], th: [] } // Add default ingredients structure
       };
 
       let savedProduct;

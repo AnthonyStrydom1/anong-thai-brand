@@ -42,7 +42,8 @@ const ProductInfo = ({ product, averageRating = 0, reviewCount = 0, isLoadingRev
       stock_quantity: 100,
       is_active: true,
       is_featured: product.featured || false,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      ingredients: product.ingredients || null // Add ingredients from Product
     };
     
     addItem(supabaseProduct, quantity);

@@ -49,6 +49,7 @@ const FeaturedProductCarousel: React.FC<FeaturedProductCarouselProps> = ({
       is_active: true,
       is_featured: true,
       created_at: new Date().toISOString(),
+      ingredients: product.ingredients || null // Add ingredients from Product
     };
     
     addItem(supabaseProduct, 1);
