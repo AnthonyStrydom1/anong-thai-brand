@@ -92,14 +92,14 @@ export class MFAPasswordChangeService {
       console.log('✅ MFA Password Change: Code verified successfully');
 
       // Get all users to find the one with matching email
-      const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+      const { data: usersResponse, error: userError } = await supabase.auth.admin.listUsers();
       
       if (userError) {
         console.error('❌ MFA Password Change: Error fetching users:', userError);
         throw new Error('Failed to fetch user data');
       }
 
-      const user = userData.users.find(u => u.email === sessionData.email);
+      const user = usersResponse.users.find((u: any) => u.email === sessionData.email);
       
       if (!user) {
         console.error('❌ MFA Password Change: User not found');
