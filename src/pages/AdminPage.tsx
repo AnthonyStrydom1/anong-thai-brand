@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -10,6 +11,7 @@ import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import UserManagement from '@/components/admin/UserManagement';
 import ReviewManager from '@/components/admin/ReviewManager';
 import EventManager from '@/components/admin/EventManager';
+import OrphanedUserManager from '@/components/admin/OrphanedUserManager';
 import MobileAdminLayout from '@/components/admin/MobileAdminLayout';
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
 import AdminHeader from '@/components/admin/AdminHeader';
@@ -109,6 +111,8 @@ const AdminPage = () => {
         return <CustomerManager />;
       case 'users':
         return <UserManagement />;
+      case 'orphaned':
+        return <OrphanedUserManager />;
       case 'events':
         return <EventManager />;
       case 'reviews':
@@ -143,7 +147,7 @@ const AdminPage = () => {
           <AdminHeader />
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <AdminTabs activeTab={activeTab} />
+            <AdminTabs />
 
             <div className="mt-6">
               <TabsContent value="overview" className="mt-0">
@@ -177,6 +181,12 @@ const AdminPage = () => {
               <TabsContent value="users" className="mt-0">
                 <div className="anong-card p-6">
                   <UserManagement />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="orphaned" className="mt-0">
+                <div className="anong-card p-6">
+                  <OrphanedUserManager />
                 </div>
               </TabsContent>
 

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -18,6 +17,12 @@ interface OrphanedUser {
   has_customer: boolean;
   has_user_record: boolean;
   user_roles: string[];
+}
+
+interface LinkUserResponse {
+  success: boolean;
+  actions?: Array<{ action: string }>;
+  error?: string;
 }
 
 const OrphanedUserManager = () => {
@@ -83,9 +88,12 @@ const OrphanedUserManager = () => {
         return;
       }
 
-      if (data?.success) {
-        const actions = data.actions || [];
-        const actionMessages = actions.map((action: any) => action.action).join(', ');
+      // Type the response properly
+      const response = data as LinkUserResponse;
+
+      if (response?.success) {
+        const actions = response.actions || [];
+        const actionMessages = actions.map((action) => action.action).join(', ');
         
         toast({
           title: "Success!",
@@ -97,7 +105,7 @@ const OrphanedUserManager = () => {
       } else {
         toast({
           title: "Error",
-          description: data?.error || "Failed to link user",
+          description: response?.error || "Failed to link user",
           variant: "destructive"
         });
       }
