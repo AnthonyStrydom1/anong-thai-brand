@@ -15,7 +15,7 @@ export class MFAEmailService {
       if (authError) {
         console.error('❌ MFA Email Service: Could not check auth users:', authError);
       } else {
-        const userExists = authUsers.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        const userExists = authUsers.users.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
         console.log('👤 MFA Email Service: User exists in auth.users:', !!userExists);
         if (userExists) {
           console.log('📧 MFA Email Service: Found user with email:', userExists.email, 'ID:', userExists.id);
