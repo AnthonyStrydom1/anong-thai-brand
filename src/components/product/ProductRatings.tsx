@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,7 +54,8 @@ const ProductRatings = ({ productId, onStatsUpdate }: ProductRatingsProps) => {
       console.log('Target product ID:', productId);
       console.log('Product ID type:', typeof productId);
       
-      const { data, error } = await supabaseService.supabase
+      // Try to find reviews that match either the UUID or the recipe product name mapping
+      let reviewsQuery = supabaseService.supabase
         .from('product_reviews')
         .select(`
           *,
@@ -63,40 +65,65 @@ const ProductRatings = ({ productId, onStatsUpdate }: ProductRatingsProps) => {
             last_name
           )
         `)
-        .eq('product_id', productId)
         .eq('is_approved', true)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Reviews query error:', error);
-        throw error;
-      }
+      // First try direct UUID match
+      let { data: directMatches } = await reviewsQuery.eq('product_id', productId);
       
-      console.log('Raw query result:', data);
-      console.log('Number of rows returned:', data?.length || 0);
+      console.log('Direct UUID matches:', directMatches?.length || 0);
       
-      // Log each review's product_id for debugging
-      if (data && data.length > 0) {
-        data.forEach((review, index) => {
-          console.log(`Review ${index}: id=${review.id}, product_id="${review.product_id}" (type: ${typeof review.product_id}), target="${productId}" (type: ${typeof productId}), match=${review.product_id === productId}`);
-        });
-      } else {
-        console.log('No reviews found in query result');
-      }
-      
-      // The query should already filter by product_id, but let's double-check
-      const filteredReviews = (data || []).filter(review => {
-        const match = String(review.product_id) === String(productId);
-        if (!match) {
-          console.warn(`Review ${review.id} doesn't match: "${review.product_id}" !== "${productId}"`);
+      // If no direct matches and productId looks like a recipe ID, try to find by product name
+      let nameMatches: any[] = [];
+      if ((!directMatches || directMatches.length === 0) && productId.length < 20) {
+        // Map recipe product IDs to product names for review lookup
+        const recipeProductMap: { [key: string]: string[] } = {
+          'pad-thai-sauce': ['Pad Thai Sauce'],
+          'sukiyaki-sauce': ['Sukiyaki Dipping Sauce'],
+          'tom-yum-paste': ['Tom Yum Chili Paste'],
+          'red-curry-paste': ['Red Curry Paste'],
+          'panang-curry-paste': ['Panang Curry Paste'],
+          'massaman-curry-paste': ['Massaman Curry Paste'],
+          'green-curry-paste': ['Green Curry Paste'],
+          'yellow-curry-paste': ['Yellow Curry Paste']
+        };
+        
+        const productNames = recipeProductMap[productId];
+        if (productNames) {
+          // Get all products to find the actual UUID for these names
+          const allProducts = await supabaseService.getProducts();
+          const matchingProducts = allProducts.filter(p => productNames.includes(p.name));
+          
+          if (matchingProducts.length > 0) {
+            console.log('Found matching products:', matchingProducts.map(p => ({ id: p.id, name: p.name })));
+            
+            // Get reviews for these product UUIDs
+            const productUUIDs = matchingProducts.map(p => p.id);
+            const { data: uuidMatches } = await supabaseService.supabase
+              .from('product_reviews')
+              .select(`
+                *,
+                customers (
+                  fullname,
+                  first_name,
+                  last_name
+                )
+              `)
+              .in('product_id', productUUIDs)
+              .eq('is_approved', true)
+              .order('created_at', { ascending: false });
+            
+            nameMatches = uuidMatches || [];
+            console.log('Found reviews by product name mapping:', nameMatches.length);
+          }
         }
-        return match;
-      });
+      }
       
-      console.log('Final filtered reviews count:', filteredReviews.length);
-      console.log('Setting reviews state...');
+      // Combine both result sets
+      const allReviews = [...(directMatches || []), ...nameMatches];
+      console.log('Total reviews found:', allReviews.length);
       
-      setReviews(filteredReviews);
+      setReviews(allReviews);
     } catch (error) {
       console.error('Error loading reviews:', error);
       toast({

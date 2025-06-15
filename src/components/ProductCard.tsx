@@ -11,6 +11,7 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
 import { getProductData } from './product/ProductDataMapper';
+import { useProductRating } from './product/useProductRating';
 
 interface ProductCardProps {
   product: SupabaseProduct;
@@ -20,6 +21,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { addItem } = useCart();
   const { formatPrice } = useCurrency();
   const { language } = useLanguage();
+  const { averageRating, reviewCount, isLoading } = useProductRating(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -113,10 +115,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <span className="text-2xl font-bold text-anong-deep-green">
               {formatPrice(product.price)}
             </span>
-            <div className="flex items-center space-x-1">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm text-gray-600">4.8</span>
-            </div>
+            {!isLoading && reviewCount > 0 ? (
+              <div className="flex items-center space-x-1">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <span className="text-sm text-gray-600">{averageRating.toFixed(1)}</span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1">
+                <span className="text-xs text-gray-400">
+                  {language === 'en' ? 'No reviews' : 'ยังไม่มีรีวิว'}
+                </span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Link>
