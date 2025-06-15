@@ -1,128 +1,123 @@
-
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useSupabaseProduct } from '@/hooks/useSupabaseProducts';
-import { ProductInfo } from './product/ProductInfo';
-import { ProductDetailTabs } from './product/ProductDetailTabs';
-import { ProductBreadcrumb } from './product/ProductBreadcrumb';
-import { ProductNotFound } from './product/ProductNotFound';
-import { RelatedRecipes } from './product/RelatedRecipes';
-import { ProductImage } from './product/ProductImage';
-import { ProductDetailSkeleton } from './product/ProductDetailSkeleton';
-import { BackToShopButton } from './product/BackToShopButton';
-import { getProductImage, getProductData, getRelatedRecipes } from './product/ProductDataMapper';
-import ProductRatings from './product/ProductRatings';
-import { useProductTranslations } from './product/useProductTranslations';
-import { motion } from 'framer-motion';
-import { useEffect } from 'react';
+import { products } from '@/data/products';
 import { recipes } from '@/data/recipes';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ProductImage from './product/ProductImage';
+import ProductInfo from './product/ProductInfo';
+import ProductRatings from './product/ProductRatings';
+import { RelatedRecipes } from './product/RelatedRecipes';
+import ProductNotFound from './product/ProductNotFound';
+import ProductDetailSkeleton from './product/ProductDetailSkeleton';
+import { useSupabaseProduct } from '@/hooks/useSupabaseProducts';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
-  const t = useProductTranslations(language);
+  const [reviewStats, setReviewStats] = useState({ averageRating: 0, reviewCount: 0, isLoading: true });
   
-  // Scroll to top when component mounts
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  const { product: supabaseProduct, isLoading: isLoadingSupabase } = useSupabaseProduct(id || '');
   
-  const { product, isLoading, error } = useSupabaseProduct(id || '');
-  
-  if (isLoading) {
+  // Fallback to local products data if Supabase product not found
+  const localProduct = products.find(p => p.id === id);
+  const product = supabaseProduct ? {
+    ...localProduct,
+    id: supabaseProduct.id,
+    name: { en: supabaseProduct.name, th: supabaseProduct.name },
+    description: { en: supabaseProduct.description || '', th: supabaseProduct.description || '' },
+    price: Number(supabaseProduct.price),
+    sku: supabaseProduct.sku,
+    // Keep other properties from local product for UI consistency
+    image: localProduct?.image || '',
+    images: localProduct?.images || [],
+    category: localProduct?.category || { en: 'Products', th: 'สินค้า' },
+    featured: Boolean(supabaseProduct.is_featured),
+    comparePrice: supabaseProduct.compare_price ? Number(supabaseProduct.compare_price) : undefined
+  } : localProduct;
+
+  const relatedRecipes = recipes.filter(recipe => 
+    recipe.relatedProducts?.includes(id || '')
+  );
+
+  const translations = {
+    description: language === 'en' ? 'Description' : 'รายละเอียด',
+    ingredients: language === 'en' ? 'Ingredients' : 'ส่วนผสม',
+    reviews: language === 'en' ? 'Reviews' : 'รีวิว',
+    relatedRecipes: language === 'en' ? 'Related Recipes' : 'สูตรอาหารที่เกี่ยวข้อง',
+    viewRecipe: language === 'en' ? 'View Recipe' : 'ดูสูตร',
+    noRecipes: language === 'en' ? 'No related recipes found.' : 'ไม่พบสูตรอาหารที่เกี่ยวข้อง'
+  };
+
+  // Handler to receive review stats from ProductRatings
+  const handleReviewStatsUpdate = (stats: { averageRating: number; reviewCount: number; isLoading: boolean }) => {
+    setReviewStats(stats);
+  };
+
+  if (isLoadingSupabase) {
     return <ProductDetailSkeleton />;
   }
 
-  if (error || !product) {
-    return <ProductNotFound language={language} />;
+  if (!product) {
+    return <ProductNotFound />;
   }
 
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.5 }
-    }
-  };
-
-  const productData = getProductData(product.name);
-  const productImage = getProductImage(product.name);
-
-  // Convert Supabase product to the format expected by existing components
-  const convertedProduct = {
-    id: product.id,
-    name: productData.name,
-    description: productData.description,
-    shortDescription: productData.shortDescription,
-    ingredients: productData.ingredients,
-    howToUse: { 
-      en: productData.howToUse.en.join('. '), 
-      th: productData.howToUse.th.join('. ') 
-    },
-    useIn: productData.howToUse,
-    price: product.price,
-    image: productImage,
-    category: (product.category_id as 'curry-pastes' | 'stir-fry-sauces' | 'dipping-sauces') || 'curry-pastes'
-  };
-
-  // Get related recipes based on product name
-  const relatedRecipeIds = getRelatedRecipes(product.name);
-  const relatedRecipes = recipes.filter(recipe => relatedRecipeIds.includes(recipe.id));
-
   return (
-    <div className="container mx-auto px-4 py-12">
-      <BackToShopButton language={language} />
-      <ProductBreadcrumb productName={convertedProduct.name[language]} language={language} />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <ProductImage 
-          image={convertedProduct.image}
-          productName={convertedProduct.name[language]}
-          fadeInVariants={fadeIn}
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+        <ProductImage product={product} />
+        <ProductInfo 
+          product={product} 
+          averageRating={reviewStats.averageRating}
+          reviewCount={reviewStats.reviewCount}
+          isLoadingReviews={reviewStats.isLoading}
         />
-        
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-          transition={{ delay: 0.2 }}
-        >
-          <ProductInfo 
-            product={convertedProduct} 
-            language={language} 
-            translations={{
-              addToCart: t.addToCart,
-              quantity: t.quantity,
-              addedToCart: t.addedToCart
-            }} 
-          />
-          
-          <ProductDetailTabs 
-            product={convertedProduct} 
-            language={language} 
-            translations={{
-              description: t.description,
-              ingredients: t.ingredients,
-              howToUse: t.howToUse
-            }} 
-          />
-        </motion.div>
       </div>
 
-      <div className="mt-12">
-        <ProductRatings productId={product.id} />
-      </div>
+      <Tabs defaultValue="description" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="description">{translations.description}</TabsTrigger>
+          <TabsTrigger value="ingredients">{translations.ingredients}</TabsTrigger>
+          <TabsTrigger value="reviews">{translations.reviews}</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="description" className="mt-6">
+          <Card>
+            <CardContent className="p-6">
+              <p className="text-gray-700 leading-relaxed">
+                {product.description[language]}
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="ingredients" className="mt-6">
+          <Card>
+            <CardContent className="p-6">
+              <p className="text-gray-700">
+                {language === 'en' 
+                  ? 'Detailed ingredient information coming soon.' 
+                  : 'รายละเอียดส่วนผสมจะมีให้ในเร็วๆ นี้'
+                }
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="reviews" className="mt-6">
+          <ProductRatings 
+            productId={product.id} 
+            onStatsUpdate={handleReviewStatsUpdate}
+          />
+        </TabsContent>
+      </Tabs>
 
       {relatedRecipes.length > 0 && (
-        <RelatedRecipes 
+        <RelatedRecipes
           recipes={relatedRecipes}
           language={language}
-          translations={{
-            relatedRecipes: t.relatedRecipes,
-            viewRecipe: t.viewRecipe,
-            noRecipes: t.noRelatedRecipes
-          }}
+          translations={translations}
         />
       )}
     </div>

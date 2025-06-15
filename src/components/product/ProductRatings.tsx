@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,9 +28,10 @@ interface Review {
 
 interface ProductRatingsProps {
   productId: string;
+  onStatsUpdate?: (stats: { averageRating: number; reviewCount: number; isLoading: boolean }) => void;
 }
 
-const ProductRatings = ({ productId }: ProductRatingsProps) => {
+const ProductRatings = ({ productId, onStatsUpdate }: ProductRatingsProps) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddReview, setShowAddReview] = useState(false);
@@ -126,6 +126,17 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
   console.log('Reviews count for this product:', reviews.length);
   console.log('Reviews:', reviews.map(r => ({ id: r.id, rating: r.rating, product_id: r.product_id })));
   console.log('Calculated average rating:', averageRating);
+
+  // Update parent component with stats
+  useEffect(() => {
+    if (onStatsUpdate) {
+      onStatsUpdate({
+        averageRating,
+        reviewCount: reviews.length,
+        isLoading
+      });
+    }
+  }, [averageRating, reviews.length, isLoading, onStatsUpdate]);
 
   if (isLoading) {
     return (

@@ -1,103 +1,154 @@
 
-import { Button } from "@/components/ui/button";
-import { ShoppingCart } from "lucide-react";
-import { Product } from "@/types";
-import { SupabaseProduct } from "@/services/supabaseService";
-import { useState } from "react";
-import { useCart } from "@/contexts/CartContext";
-import { useCurrency } from "@/contexts/CurrencyContext";
-import { toast } from "@/components/ui/use-toast";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ShoppingCart, Heart, Share2 } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from '@/components/ui/use-toast';
+import { Product } from '@/types';
+import StarRating from './StarRating';
 
 interface ProductInfoProps {
   product: Product;
-  language: 'en' | 'th';
-  translations: {
-    addToCart: string;
-    quantity: string;
-    addedToCart: string;
-  };
+  averageRating?: number;
+  reviewCount?: number;
+  isLoadingReviews?: boolean;
 }
 
-export const ProductInfo = ({ product, language, translations }: ProductInfoProps) => {
+const ProductInfo = ({ product, averageRating = 0, reviewCount = 0, isLoadingReviews = false }: ProductInfoProps) => {
   const [quantity, setQuantity] = useState(1);
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
   const { formatPrice } = useCurrency();
-  
-  const increaseQuantity = () => setQuantity(prev => prev + 1);
-  const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
-  
+  const { language } = useLanguage();
+
   const handleAddToCart = () => {
-    // Convert Product to SupabaseProduct format for cart
-    const supabaseProduct: SupabaseProduct = {
+    addToCart({
       id: product.id,
       name: product.name[language],
-      description: product.description[language],
-      short_description: product.shortDescription[language],
-      sku: `SKU-${product.id}`,
       price: product.price,
-      category_id: product.category,
-      images: [product.image],
-      stock_quantity: 100, // Default stock
-      is_active: true,
-      is_featured: false,
-      created_at: new Date().toISOString(),
-    };
+      image: product.image,
+      quantity: quantity
+    });
     
-    addItem(supabaseProduct, quantity);
     toast({
-      title: translations.addedToCart,
-      description: `${product.name[language]} x ${quantity}`,
+      title: language === 'en' ? "Added to cart" : "เพิ่มในตะกร้า",
+      description: language === 'en' 
+        ? `${quantity} ${product.name[language]} added to your cart`
+        : `เพิ่ม ${quantity} ${product.name[language]} ในตะกร้าแล้ว`
     });
   };
 
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: product.name[language],
+        text: product.description[language],
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: language === 'en' ? "Link copied" : "คัดลอกลิงก์แล้ว",
+        description: language === 'en' ? "Product link copied to clipboard" : "คัดลอกลิงก์สินค้าแล้ว"
+      });
+    }
+  };
+
   return (
-    <div>
-      <h1 className="text-3xl font-semibold text-gray-800 mb-2">
-        {product.name[language]}
-      </h1>
-      <p className="text-2xl font-semibold text-thai-purple mb-6">
-        {formatPrice(product.price)}
-      </p>
-      
-      <p className="text-gray-700 mb-6">
-        {product.shortDescription[language]}
-      </p>
-      
-      {/* Quantity Selector */}
-      <div className="mb-8">
-        <p className="text-gray-700 mb-2">{translations.quantity}</p>
-        <div className="flex border border-gray-300 rounded-md w-32">
-          <button 
-            onClick={decreaseQuantity}
-            className="px-3 py-1 border-r border-gray-300"
-          >
-            -
-          </button>
-          <input
-            type="number"
-            min="1"
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name[language]}</h1>
+        <p className="text-gray-600 text-lg">{product.description[language]}</p>
+      </div>
+
+      {/* Rating Section - Only show if we have reviews or if loading is complete */}
+      {!isLoadingReviews && (
+        <div className="flex items-center space-x-3">
+          {reviewCount > 0 ? (
+            <>
+              <StarRating rating={Math.round(averageRating)} />
+              <span className="text-sm text-gray-600">
+                {averageRating.toFixed(1)} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+              </span>
+            </>
+          ) : (
+            <span className="text-sm text-gray-500">
+              {language === 'en' ? 'Be the first to review' : 'เป็นคนแรกที่รีวิว'}
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="flex items-center space-x-4">
+        <span className="text-3xl font-bold text-thai-purple">{formatPrice(product.price)}</span>
+        {product.comparePrice && (
+          <span className="text-lg text-gray-500 line-through">{formatPrice(product.comparePrice)}</span>
+        )}
+      </div>
+
+      {product.featured && (
+        <Badge variant="secondary" className="bg-red-100 text-red-800">
+          {language === 'en' ? 'Featured' : 'แนะนำ'}
+        </Badge>
+      )}
+
+      <div className="space-y-4">
+        <div className="flex items-center space-x-4">
+          <label htmlFor="quantity" className="text-sm font-medium">
+            {language === 'en' ? 'Quantity:' : 'จำนวน:'}
+          </label>
+          <select
+            id="quantity"
             value={quantity}
-            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-            className="w-full text-center focus:outline-none"
-          />
-          <button 
-            onClick={increaseQuantity}
-            className="px-3 py-1 border-l border-gray-300"
+            onChange={(e) => setQuantity(Number(e.target.value))}
+            className="border border-gray-300 rounded-md px-3 py-1"
           >
-            +
-          </button>
+            {[...Array(10)].map((_, i) => (
+              <option key={i + 1} value={i + 1}>
+                {i + 1}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex space-x-3">
+          <Button
+            onClick={handleAddToCart}
+            className="flex-1 bg-thai-purple hover:bg-thai-purple/90"
+            size="lg"
+          >
+            <ShoppingCart className="w-5 h-5 mr-2" />
+            {language === 'en' ? 'Add to Cart' : 'เพิ่มในตะกร้า'}
+          </Button>
+          
+          <Button variant="outline" size="lg">
+            <Heart className="w-5 h-5" />
+          </Button>
+          
+          <Button variant="outline" size="lg" onClick={handleShare}>
+            <Share2 className="w-5 h-5" />
+          </Button>
         </div>
       </div>
-      
-      {/* Add to Cart */}
-      <Button
-        onClick={handleAddToCart}
-        size="lg"
-        className="hover:bg-thai-purple-dark hover:bg-opacity-90"
-      >
-        <ShoppingCart className="mr-2 h-5 w-5" />
-        {translations.addToCart}
-      </Button>
+
+      <div className="border-t pt-6 space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600">{language === 'en' ? 'SKU:' : 'รหัสสินค้า:'}</span>
+          <span>{product.sku}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600">{language === 'en' ? 'Category:' : 'หมวดหมู่:'}</span>
+          <span>{product.category[language]}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600">{language === 'en' ? 'Availability:' : 'สถานะสินค้า:'}</span>
+          <span className="text-green-600">{language === 'en' ? 'In Stock' : 'มีสินค้า'}</span>
+        </div>
+      </div>
     </div>
   );
 };
+
+export default ProductInfo;
