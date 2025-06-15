@@ -13,6 +13,8 @@ import { RelatedRecipes } from './product/RelatedRecipes';
 import { ProductNotFound } from './product/ProductNotFound';
 import { ProductDetailSkeleton } from './product/ProductDetailSkeleton';
 import { useSupabaseProduct } from '@/hooks/useSupabaseProducts';
+import { getProductData } from './product/ProductDataMapper';
+import { useProductTranslations } from '@/translations/product';
 
 // Enhanced image extraction with exact mapping to uploaded images
 const getProductImage = (productName: string) => {
@@ -34,6 +36,7 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
   const [reviewStats, setReviewStats] = useState({ averageRating: 0, reviewCount: 0, isLoading: true });
+  const t = useProductTranslations(language);
   
   const { product: supabaseProduct, isLoading: isLoadingSupabase } = useSupabaseProduct(id || '');
   
@@ -48,22 +51,24 @@ const ProductDetail = () => {
     localProductIngredients: localProduct?.ingredients 
   });
   
-  // Priority: use Supabase data but fallback to local data for missing fields
-  const product = supabaseProduct ? {
-    id: supabaseProduct.id,
-    name: { en: supabaseProduct.name, th: supabaseProduct.name },
-    description: { en: supabaseProduct.description || '', th: supabaseProduct.description || '' },
-    shortDescription: localProduct?.shortDescription || { en: supabaseProduct.short_description || '', th: supabaseProduct.short_description || '' },
-    price: Number(supabaseProduct.price),
-    sku: supabaseProduct.sku,
-    image: getProductImage(supabaseProduct.name),
-    category: localProduct?.category || 'curry-pastes',
-    featured: Boolean(supabaseProduct.is_featured),
-    comparePrice: undefined,
-    // Use Supabase ingredients if available, otherwise fallback to local data
-    ingredients: supabaseProduct.ingredients || localProduct?.ingredients || { en: [], th: [] },
-    useIn: localProduct?.useIn || { en: [], th: [] }
-  } : localProduct ? {
+  // Priority: use Supabase data but get translated content from ProductDataMapper
+  const product = supabaseProduct ? (() => {
+    const productData = getProductData(supabaseProduct.name);
+    return {
+      id: supabaseProduct.id,
+      name: productData.name,
+      description: productData.description,
+      shortDescription: productData.shortDescription,
+      price: Number(supabaseProduct.price),
+      sku: supabaseProduct.sku,
+      image: getProductImage(supabaseProduct.name),
+      category: localProduct?.category || 'curry-pastes',
+      featured: Boolean(supabaseProduct.is_featured),
+      comparePrice: undefined,
+      ingredients: productData.ingredients,
+      useIn: productData.useIn
+    };
+  })() : localProduct ? {
     ...localProduct,
     image: getProductImage(localProduct.name[language])
   } : undefined;
@@ -71,15 +76,6 @@ const ProductDetail = () => {
   const relatedRecipes = recipes.filter(recipe => 
     recipe.relatedProducts?.includes(id || '')
   );
-
-  const translations = {
-    description: language === 'en' ? 'Description' : 'รายละเอียด',
-    ingredients: language === 'en' ? 'Ingredients' : 'ส่วนผสม',
-    reviews: language === 'en' ? 'Reviews' : 'รีวิว',
-    relatedRecipes: language === 'en' ? 'Related Recipes' : 'สูตรอาหารที่เกี่ยวข้อง',
-    viewRecipe: language === 'en' ? 'View Recipe' : 'ดูสูตร',
-    noRecipes: language === 'en' ? 'No related recipes found.' : 'ไม่พบสูตรอาหารที่เกี่ยวข้อง'
-  };
 
   // Handler to receive review stats from ProductRatings
   const handleReviewStatsUpdate = (stats: { averageRating: number; reviewCount: number; isLoading: boolean }) => {
@@ -118,9 +114,9 @@ const ProductDetail = () => {
 
       <Tabs defaultValue="description" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="description">{translations.description}</TabsTrigger>
-          <TabsTrigger value="ingredients">{translations.ingredients}</TabsTrigger>
-          <TabsTrigger value="reviews">{translations.reviews}</TabsTrigger>
+          <TabsTrigger value="description">{t.description}</TabsTrigger>
+          <TabsTrigger value="ingredients">{t.ingredients}</TabsTrigger>
+          <TabsTrigger value="reviews">{t.customerReviews}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="description" className="mt-6">
@@ -166,7 +162,11 @@ const ProductDetail = () => {
         <RelatedRecipes
           recipes={relatedRecipes}
           language={language}
-          translations={translations}
+          translations={{
+            relatedRecipes: t.relatedRecipes,
+            viewRecipe: t.viewRecipe,
+            noRecipes: t.noRelatedRecipes
+          }}
         />
       )}
     </div>
