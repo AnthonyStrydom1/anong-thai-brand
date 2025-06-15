@@ -12,6 +12,7 @@ interface ReviewItemProps {
     title: string;
     content: string;
     created_at: string;
+    product_id: string;
     is_verified_purchase: boolean;
     customer?: {
       fullname: string;
@@ -28,6 +29,8 @@ const ReviewItem = ({ review }: ReviewItemProps) => {
   const customerName = review.customer?.fullname || 
     `${review.customer?.first_name || ''} ${review.customer?.last_name || ''}`.trim() || 
     t.anonymous;
+
+  console.log('ReviewItem rendering for product:', review.product_id, 'review:', review.id);
 
   return (
     <div className="border-b border-gray-200 pb-4 last:border-b-0">

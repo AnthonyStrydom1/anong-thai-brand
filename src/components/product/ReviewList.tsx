@@ -11,6 +11,7 @@ interface Review {
   content: string;
   created_at: string;
   customer_id: number;
+  product_id: string;
   is_verified_purchase: boolean;
   customer?: {
     fullname: string;
@@ -26,6 +27,9 @@ interface ReviewListProps {
 const ReviewList = ({ reviews }: ReviewListProps) => {
   const { language } = useLanguage();
   const t = useProductTranslations(language);
+
+  console.log('ReviewList rendering with', reviews.length, 'reviews');
+  console.log('Review product IDs:', reviews.map(r => r.product_id));
 
   if (reviews.length === 0) {
     return (

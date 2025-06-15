@@ -18,6 +18,7 @@ interface Review {
   content: string;
   created_at: string;
   customer_id: number;
+  product_id: string;
   is_verified_purchase: boolean;
   customer?: {
     fullname: string;
@@ -39,12 +40,15 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
   const t = useProductTranslations(language);
 
   useEffect(() => {
-    loadReviews();
+    if (productId) {
+      loadReviews();
+    }
   }, [productId]);
 
   const loadReviews = async () => {
     try {
       setIsLoading(true);
+      setReviews([]); // Clear existing reviews first
       console.log('Loading reviews for product:', productId);
       
       const { data, error } = await supabaseService.supabase
@@ -66,9 +70,14 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
         throw error;
       }
       
-      console.log('Reviews loaded:', data);
+      console.log('Reviews loaded for product', productId, ':', data);
       console.log('Number of reviews found:', data?.length || 0);
-      setReviews(data || []);
+      
+      // Additional validation to ensure reviews belong to this product
+      const filteredReviews = data?.filter(review => review.product_id === productId) || [];
+      console.log('Filtered reviews count:', filteredReviews.length);
+      
+      setReviews(filteredReviews);
     } catch (error) {
       console.error('Error loading reviews:', error);
       toast({
@@ -76,13 +85,14 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
         description: t.failedToLoadReviews,
         variant: 'destructive'
       });
+      setReviews([]); // Ensure we clear reviews on error
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleReviewSubmitted = () => {
-    console.log('Review submitted, reloading reviews...');
+    console.log('Review submitted, reloading reviews for product:', productId);
     setShowAddReview(false);
     loadReviews();
   };
@@ -103,6 +113,10 @@ const ProductRatings = ({ productId }: ProductRatingsProps) => {
       </Card>
     );
   }
+
+  // Debug info - remove in production
+  console.log('ProductRatings rendering for product:', productId);
+  console.log('Current reviews state:', reviews.length, 'reviews');
 
   return (
     <div className="space-y-6">
