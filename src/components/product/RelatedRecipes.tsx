@@ -94,8 +94,9 @@ export const RelatedRecipes = ({ recipes, language, translations }: RelatedRecip
                       <span>{recipe.time} min</span> • <span>{recipe.servings} {language === 'en' ? 'servings' : 'ที่'}</span>
                     </div>
                     <Button 
+                      variant="gold" 
                       size="sm" 
-                      className="bg-white border border-thai-purple text-thai-purple hover:bg-thai-purple hover:text-white transition-colors"
+                      className="bg-anong-gold text-anong-black hover:bg-anong-warm-yellow font-medium"
                       asChild
                     >
                       <Link to={`/recipe/${recipe.id}`} className="flex items-center">
