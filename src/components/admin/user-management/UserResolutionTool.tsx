@@ -35,26 +35,31 @@ const UserResolutionTool = () => {
   const checkUserStatus = async () => {
     setIsLoading(true);
     try {
+      // Normalize email to lowercase for consistent checking
+      const normalizedEmail = email.toLowerCase().trim();
+      
       // Check if customer exists
       const { data: customer, error: customerError } = await supabase
         .from('customers')
         .select('*')
-        .eq('email', email)
+        .ilike('email', normalizedEmail)
         .maybeSingle();
 
       // Check if auth user exists
       const { data: authUsersResponse, error: authError } = await supabase.auth.admin.listUsers();
-      const authUser = authUsersResponse?.users?.find((user: any) => user.email === email);
+      const authUser = authUsersResponse?.users?.find((user: AuthUser) => 
+        user.email?.toLowerCase() === normalizedEmail
+      );
 
       // Check if profile exists
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('email', email)
+        .ilike('email', normalizedEmail)
         .maybeSingle();
 
       setUserInfo({
-        email,
+        email: normalizedEmail,
         hasAuthUser: !!authUser,
         authUserId: authUser?.id,
         hasCustomer: !!customer,
@@ -68,9 +73,12 @@ const UserResolutionTool = () => {
       });
 
       console.log('User status check:', {
+        originalEmail: email,
+        normalizedEmail,
         hasAuthUser: !!authUser,
         hasCustomer: !!customer,
-        hasProfile: !!profile
+        hasProfile: !!profile,
+        authUserEmail: authUser?.email
       });
 
     } catch (error: any) {
@@ -189,6 +197,11 @@ const UserResolutionTool = () => {
                   <li>✅ Customer: {userInfo.hasCustomer ? 'EXISTS' : 'MISSING'} {userInfo.customerId && `(ID: ${userInfo.customerId})`}</li>
                   <li>✅ Profile: {userInfo.hasProfile ? 'EXISTS' : 'MISSING'} {userInfo.profileId && `(ID: ${userInfo.profileId})`}</li>
                 </ul>
+                {userInfo.authUser?.email && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Auth user email: {userInfo.authUser.email}
+                  </p>
+                )}
               </AlertDescription>
             </Alert>
 
