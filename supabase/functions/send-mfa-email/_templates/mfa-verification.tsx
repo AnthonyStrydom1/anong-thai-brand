@@ -34,7 +34,7 @@ export const MfaVerificationEmail = ({
             <Row>
               <Column>
                 <Img
-                  src="https://anong.co.za/lovable-uploads/f440215b-ebf7-4c9f-9cf6-412d4018796e.png"
+                  src="https://anongthaibrand.com/lovable-uploads/f440215b-ebf7-4c9f-9cf6-412d4018796e.png"
                   width="40"
                   height="40"
                   alt="ANONG Logo"
@@ -90,9 +90,9 @@ export const MfaVerificationEmail = ({
 
             <Text style={footerText}>
               Need help? Contact us at{' '}
-              <Link href="mailto:support@anong.com" style={link}>support@anong.com</Link>{' '}
+              <Link href="mailto:support@anongthaibrand.com" style={link}>support@anongthaibrand.com</Link>{' '}
               or visit our website at{' '}
-              <Link href="https://anong.co.za" style={link}>anong.co.za</Link>
+              <Link href="https://anongthaibrand.com" style={link}>anongthaibrand.com</Link>
             </Text>
 
             <Text style={signature}>
@@ -103,7 +103,7 @@ export const MfaVerificationEmail = ({
 
           {/* Footer */}
           <Section style={footer}>
-            <Text style={footerBrand}>ANONG Thai Kitchen</Text>
+            <Text style={footerBrand}>ANONG</Text>
             <Text style={footerTagline}>Bringing Thailand to Your Table</Text>
           </Section>
         </Container>
@@ -192,14 +192,14 @@ const codeSection = {
 
 const codeLabel = {
   fontSize: '14px',
-  color: '#9db5a1', // anong-sage
+  color: '#1a1a1a', // anong-black
   fontWeight: '600',
   margin: '0 0 12px',
   textTransform: 'uppercase' as const,
 }
 
 const codeBox = {
-  backgroundColor: '#2b3d2f', // anong-deep-green
+  backgroundColor: '#1a1a1a', // anong-black
   border: '2px solid #d4af37', // anong-gold
   borderRadius: '12px',
   padding: '24px',
@@ -209,7 +209,7 @@ const codeBox = {
 
 const verificationCodeText = {
   fontSize: '36px',
-  color: '#ffffff',
+  color: '#d4af37', // anong-gold
   fontWeight: 'bold',
   letterSpacing: '8px',
   margin: '0',
@@ -258,7 +258,7 @@ const link = {
 
 const footerText = {
   fontSize: '14px',
-  color: '#9db5a1',
+  color: '#2c2c2c',
   lineHeight: '1.5',
   margin: '24px 0',
   textAlign: 'center' as const,
@@ -272,7 +272,7 @@ const signature = {
 }
 
 const footer = {
-  backgroundColor: '#2b3d2f', // anong-deep-green
+  backgroundColor: '#1a1a1a', // anong-black
   padding: '20px',
   textAlign: 'center' as const,
   borderRadius: '0 0 12px 12px',
