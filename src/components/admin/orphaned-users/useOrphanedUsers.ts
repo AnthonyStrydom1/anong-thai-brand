@@ -12,14 +12,11 @@ export const useOrphanedUsers = () => {
   const fetchOrphanedUsers = async () => {
     try {
       setIsLoading(true);
-      console.log('🔍 Calling find_orphaned_auth_users function...');
       
       const { data, error } = await supabase.rpc('find_orphaned_auth_users');
       
-      console.log('📊 Raw response from find_orphaned_auth_users:', { data, error });
-      
       if (error) {
-        console.error('❌ Error from find_orphaned_auth_users:', error);
+        console.error('Error fetching orphaned users:', error);
         toast({
           title: "Error",
           description: "Failed to fetch orphaned users: " + error.message,
@@ -28,48 +25,34 @@ export const useOrphanedUsers = () => {
         return;
       }
 
-      console.log('✅ Successfully got data:', data);
-      console.log('📋 Data type:', typeof data);
-      console.log('📋 Is array:', Array.isArray(data));
-      
-      if (data) {
-        console.log('📋 First item structure:', data[0]);
-      }
-
-      // Handle the response more carefully
+      // Handle the response - data should now be properly structured
       if (data === null || data === undefined) {
-        console.log('⚠️ No data returned, setting empty array');
         setOrphanedUsers([]);
         return;
       }
 
       if (!Array.isArray(data)) {
-        console.error('❌ Data is not an array:', data);
+        console.error('Unexpected data format:', data);
         setOrphanedUsers([]);
         return;
       }
 
       // Map the data to ensure proper structure
-      const mappedUsers = data.map((user: any, index: number) => {
-        console.log(`📝 Processing user ${index}:`, user);
-        
-        return {
-          id: user.id || '',
-          email: user.email || '',
-          created_at: user.created_at || '',
-          raw_user_meta_data: user.raw_user_meta_data || {},
-          has_profile: Boolean(user.has_profile),
-          has_customer: Boolean(user.has_customer),
-          has_user_record: Boolean(user.has_user_record),
-          user_roles: Array.isArray(user.user_roles) ? user.user_roles : []
-        };
-      });
+      const mappedUsers = data.map((user: any) => ({
+        id: user.id || '',
+        email: user.email || '',
+        created_at: user.created_at || '',
+        raw_user_meta_data: user.raw_user_meta_data || {},
+        has_profile: Boolean(user.has_profile),
+        has_customer: Boolean(user.has_customer),
+        has_user_record: Boolean(user.has_user_record),
+        user_roles: Array.isArray(user.user_roles) ? user.user_roles : []
+      }));
 
-      console.log('✅ Mapped users:', mappedUsers);
       setOrphanedUsers(mappedUsers);
       
     } catch (error: any) {
-      console.error('💥 Unexpected error in fetchOrphanedUsers:', error);
+      console.error('Unexpected error in fetchOrphanedUsers:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred while fetching users.",
