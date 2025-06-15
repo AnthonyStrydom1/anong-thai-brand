@@ -80,6 +80,7 @@ const UsersList = ({
                 onDeleteAdminUser={onDeleteAdminUser}
                 updatingUserId={updatingUserId}
                 deletingUserId={deletingUserId}
+                onRefresh={onRefresh}
               />
             ))}
           </div>

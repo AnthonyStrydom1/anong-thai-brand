@@ -839,6 +839,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_user_complete: {
+        Args: { _user_id: string; _delete_from_auth?: boolean }
+        Returns: Json
+      }
+      admin_get_user_deletion_preview: {
+        Args: { _user_id: string }
+        Returns: Json
+      }
       assign_admin_role: {
         Args: { _user_id: string }
         Returns: undefined
