@@ -92,21 +92,24 @@ export class MFAPasswordChangeService {
 
       console.log('✅ MFA Password Change: Code verified successfully');
 
-      // Get user by email to update password
-      const { data: userData, error: userError } = await supabase
-        .from('auth.users')
-        .select('id')
-        .eq('email', sessionData.email)
-        .single();
+      // Use auth admin to update password by email
+      const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+      
+      if (userError) {
+        console.error('❌ MFA Password Change: Error fetching users:', userError);
+        throw new Error('Failed to fetch user data');
+      }
 
-      if (userError || !userData) {
-        console.error('❌ MFA Password Change: User not found:', userError);
+      const user = userData.users.find(u => u.email === sessionData.email);
+      
+      if (!user) {
+        console.error('❌ MFA Password Change: User not found');
         throw new Error('User not found');
       }
 
       // Update password using admin function
       const { error: updateError } = await supabase.auth.admin.updateUserById(
-        userData.id,
+        user.id,
         { password: newPassword }
       );
 

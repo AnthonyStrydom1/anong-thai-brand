@@ -42,7 +42,8 @@ class MFAAuthService {
         email,
         password,
         timestamp: Date.now(),
-        userId: userId
+        userId: userId,
+        type: 'signin'
       };
       
       console.log('💾 MFA Service: Storing session data for MANDATORY MFA flow');

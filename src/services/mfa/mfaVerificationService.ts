@@ -67,7 +67,11 @@ export class MFAVerificationService {
       // Verify the MFA code
       await this.verifyCode(code, sessionData);
 
-      // Complete sign in with verified credentials
+      // Complete sign in with verified credentials (only if password exists)
+      if (!sessionData.password) {
+        throw new Error('Invalid session data - missing credentials');
+      }
+
       const data = await this.signInWithCredentials(sessionData.email, sessionData.password);
 
       // CRITICAL FIX: Clear MFA session ONLY after successful sign-in completion

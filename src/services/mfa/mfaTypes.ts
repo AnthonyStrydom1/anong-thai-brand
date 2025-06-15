@@ -6,6 +6,8 @@ export interface MFASignInData {
 
 export interface MFASessionData {
   email: string;
+  password?: string; // Added for signin flow
+  userId?: string; // Added for user identification
   challengeId?: string;
   type: 'signin' | 'password_change';
   timestamp: number;
