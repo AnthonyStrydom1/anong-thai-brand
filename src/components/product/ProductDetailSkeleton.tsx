@@ -16,3 +16,5 @@ export const ProductDetailSkeleton = () => {
     </div>
   );
 };
+
+export default ProductDetailSkeleton;

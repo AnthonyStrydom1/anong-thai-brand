@@ -5,12 +5,12 @@ import { recipes } from '@/data/recipes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ProductImage from './product/ProductImage';
+import { ProductImage } from './product/ProductImage';
 import ProductInfo from './product/ProductInfo';
 import ProductRatings from './product/ProductRatings';
 import { RelatedRecipes } from './product/RelatedRecipes';
-import ProductNotFound from './product/ProductNotFound';
-import ProductDetailSkeleton from './product/ProductDetailSkeleton';
+import { ProductNotFound } from './product/ProductNotFound';
+import { ProductDetailSkeleton } from './product/ProductDetailSkeleton';
 import { useSupabaseProduct } from '@/hooks/useSupabaseProducts';
 
 const ProductDetail = () => {
@@ -31,10 +31,11 @@ const ProductDetail = () => {
     sku: supabaseProduct.sku,
     // Keep other properties from local product for UI consistency
     image: localProduct?.image || '',
-    images: localProduct?.images || [],
-    category: localProduct?.category || { en: 'Products', th: 'สินค้า' },
+    category: localProduct?.category || 'curry-pastes',
     featured: Boolean(supabaseProduct.is_featured),
-    comparePrice: supabaseProduct.compare_price ? Number(supabaseProduct.compare_price) : undefined
+    comparePrice: supabaseProduct.price ? Number(supabaseProduct.price) : undefined,
+    ingredients: localProduct?.ingredients || { en: [], th: [] },
+    useIn: localProduct?.useIn || { en: [], th: [] }
   } : localProduct;
 
   const relatedRecipes = recipes.filter(recipe => 
@@ -60,13 +61,23 @@ const ProductDetail = () => {
   }
 
   if (!product) {
-    return <ProductNotFound />;
+    return <ProductNotFound language={language} />;
   }
+
+  // Animation variants
+  const fadeInVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
-        <ProductImage product={product} />
+        <ProductImage 
+          image={product.image} 
+          productName={product.name[language]} 
+          fadeInVariants={fadeInVariants} 
+        />
         <ProductInfo 
           product={product} 
           averageRating={reviewStats.averageRating}

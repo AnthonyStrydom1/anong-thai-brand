@@ -17,3 +17,5 @@ export const ProductNotFound = ({ language }: ProductNotFoundProps) => {
     </div>
   );
 };
+
+export default ProductNotFound;

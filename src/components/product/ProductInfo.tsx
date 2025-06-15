@@ -11,7 +11,11 @@ import { Product } from '@/types';
 import StarRating from './StarRating';
 
 interface ProductInfoProps {
-  product: Product;
+  product: Product & {
+    comparePrice?: number;
+    featured?: boolean;
+    sku?: string;
+  };
   averageRating?: number;
   reviewCount?: number;
   isLoadingReviews?: boolean;
@@ -19,12 +23,12 @@ interface ProductInfoProps {
 
 const ProductInfo = ({ product, averageRating = 0, reviewCount = 0, isLoadingReviews = false }: ProductInfoProps) => {
   const [quantity, setQuantity] = useState(1);
-  const { addToCart } = useCart();
+  const { addItem } = useCart();
   const { formatPrice } = useCurrency();
   const { language } = useLanguage();
 
   const handleAddToCart = () => {
-    addToCart({
+    addItem({
       id: product.id,
       name: product.name[language],
       price: product.price,
@@ -133,20 +137,24 @@ const ProductInfo = ({ product, averageRating = 0, reviewCount = 0, isLoadingRev
         </div>
       </div>
 
-      <div className="border-t pt-6 space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">{language === 'en' ? 'SKU:' : 'รหัสสินค้า:'}</span>
-          <span>{product.sku}</span>
+      {(product.sku || product.category) && (
+        <div className="border-t pt-6 space-y-2">
+          {product.sku && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">{language === 'en' ? 'SKU:' : 'รหัสสินค้า:'}</span>
+              <span>{product.sku}</span>
+            </div>
+          )}
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">{language === 'en' ? 'Category:' : 'หมวดหมู่:'}</span>
+            <span>{typeof product.category === 'string' ? product.category : product.category[language]}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">{language === 'en' ? 'Availability:' : 'สถานะสินค้า:'}</span>
+            <span className="text-green-600">{language === 'en' ? 'In Stock' : 'มีสินค้า'}</span>
+          </div>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">{language === 'en' ? 'Category:' : 'หมวดหมู่:'}</span>
-          <span>{product.category[language]}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">{language === 'en' ? 'Availability:' : 'สถานะสินค้า:'}</span>
-          <span className="text-green-600">{language === 'en' ? 'In Stock' : 'มีสินค้า'}</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
