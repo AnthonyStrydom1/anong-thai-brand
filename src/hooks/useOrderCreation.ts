@@ -38,6 +38,17 @@ export const useOrderCreation = () => {
   const [isCreating, setIsCreating] = useState(false);
   const { logSecurityEvent } = useSecurityAudit();
 
+  const generateOrderNumber = (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    
+    return `ORD-${year}${month}${day}-${timestamp.toString().slice(-6)}${random}`;
+  };
+
   const createOrder = async (orderData: OrderRequest) => {
     setIsCreating(true);
     
@@ -55,8 +66,13 @@ export const useOrderCreation = () => {
 
       console.log('💰 Calculated order totals:', orderTotals);
 
+      // Generate order number
+      const orderNumber = generateOrderNumber();
+      console.log('📝 Generated order number:', orderNumber);
+
       // Create the order with proper VAT breakdown
       const order = await orderService.createOrder({
+        order_number: orderNumber,
         customer_id: orderData.customer_id,
         subtotal: orderTotals.totalExclVAT, // VAT-exclusive subtotal
         vat_amount: orderTotals.vatAmount, // Extracted VAT amount
