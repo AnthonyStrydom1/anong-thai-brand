@@ -1,8 +1,8 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 import { domainValidationService } from './domainValidation';
 import { mfaAuthService } from '../mfaAuthService';
+import { WelcomeEmailService } from '../welcomeEmailService';
 
 export interface SignUpData {
   email: string;
@@ -17,53 +17,52 @@ export interface SignInData {
 }
 
 export class AuthOperationsService {
-  async signUp({ email, password, firstName, lastName }: SignUpData) {
-    if (!domainValidationService.isDomainValid()) {
-      throw new Error('Authentication not available on this domain');
-    }
+  async signUp(data: SignUpData) {
+    try {
+      console.log('🔐 AuthOperations: Starting sign up process');
+      
+      const { data: authData, error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            first_name: data.firstName,
+            last_name: data.lastName,
+          },
+          emailRedirectTo: `${window.location.origin}/`,
+        },
+      });
 
-    domainValidationService.clearCrossDomainSessions();
+      if (error) {
+        console.error('🔐 AuthOperations: Sign up error:', error);
+        throw error;
+      }
 
-    // Clear any existing session
-    await supabase.auth.signOut();
+      console.log('🔐 AuthOperations: Sign up successful, user created:', authData.user?.id);
 
-    console.log('🔄 Auth Operations: Starting sign up with NO email confirmation');
-
-    // Sign up with email confirmation completely disabled
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        // Completely disable email confirmation
-        emailRedirectTo: undefined,
-        // Set user metadata
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          email_confirm: false // Explicitly disable email confirmation
+      // Send welcome email after successful signup
+      if (authData.user && data.firstName) {
+        try {
+          console.log('👋 AuthOperations: Sending welcome email...');
+          await WelcomeEmailService.sendWelcomeEmail({
+            customerName: data.firstName + (data.lastName ? ` ${data.lastName}` : ''),
+            customerEmail: data.email,
+          });
+          console.log('✅ AuthOperations: Welcome email sent successfully');
+        } catch (emailError) {
+          console.error('❌ AuthOperations: Failed to send welcome email:', emailError);
+          // Don't throw here - we don't want to block the signup process if email fails
         }
       }
-    });
 
-    if (error) {
-      console.error('❌ Auth Operations: Sign up error:', error);
+      return {
+        user: authData.user,
+        session: authData.session,
+      };
+    } catch (error) {
+      console.error('🔐 AuthOperations: Sign up process failed:', error);
       throw error;
     }
-
-    console.log('✅ Auth Operations: Sign up successful - immediate account activation');
-    console.log('📋 Auth Operations: User data:', { 
-      hasUser: !!data.user, 
-      hasSession: !!data.session,
-      userId: data.user?.id,
-      userConfirmed: data.user?.email_confirmed_at ? 'confirmed' : 'pending'
-    });
-
-    // Account should be created and immediately available
-    return { 
-      user: data.user, 
-      session: data.session,
-      accountCreated: true 
-    };
   }
 
   async signIn({ email, password }: SignInData) {
