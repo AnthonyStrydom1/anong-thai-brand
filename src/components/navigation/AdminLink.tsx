@@ -26,9 +26,9 @@ const AdminLink = () => {
   return (
     <Link 
       to="/admin" 
-      className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors w-full"
+      className="flex items-center py-3 px-4 text-white hover:bg-anong-gold hover:text-anong-black transition-colors w-full font-serif"
     >
-      <Shield className="w-4 h-4" />
+      <Shield className="mr-2 h-5 w-5" />
       <span>Admin Dashboard</span>
     </Link>
   );

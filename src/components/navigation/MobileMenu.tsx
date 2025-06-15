@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, User, Search } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import AdminLink from './AdminLink';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -124,6 +125,11 @@ const MobileMenu = ({
                 </div>
               </Link>
             </Button>
+            
+            {/* Admin Dashboard Link for Mobile */}
+            <div className="border-b border-anong-gold/10">
+              <AdminLink />
+            </div>
             
             <Button
               variant="ghost"
