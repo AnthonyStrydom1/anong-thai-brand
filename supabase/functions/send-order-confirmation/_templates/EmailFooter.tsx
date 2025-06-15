@@ -9,10 +9,15 @@ interface EmailFooterProps {
 }
 
 export const EmailFooter = ({ orderNumber }: EmailFooterProps) => {
+  // Use the current domain or localhost for development
+  const baseUrl = typeof window !== 'undefined' 
+    ? window.location.origin 
+    : 'http://localhost:8080'; // Default to localhost for development
+  
   // Create the correct order tracking URL - points to orders page with search parameter
   const trackingUrl = orderNumber 
-    ? `https://anong.co.za/orders?search=${orderNumber}`
-    : `https://anong.co.za/orders`;
+    ? `${baseUrl}/orders?search=${orderNumber}`
+    : `${baseUrl}/orders`;
 
   return (
     <>
@@ -25,7 +30,7 @@ export const EmailFooter = ({ orderNumber }: EmailFooterProps) => {
       <Text style={footerText}>
         If you have any questions about your order, please contact us at{' '}
         <Link href="mailto:orders@anongthaibrand.com" style={link}>orders@anongthaibrand.com</Link> or 
-        visit our website at <Link href="https://anong.co.za" style={link}>anong.co.za</Link>
+        visit our website at <Link href={baseUrl} style={link}>our website</Link>
       </Text>
 
       <Text style={signature}>
