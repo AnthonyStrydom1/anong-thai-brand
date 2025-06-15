@@ -2,7 +2,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import NavigationBanner from "@/components/NavigationBanner";
 import Footer from "@/components/Footer";
-import MenuGrid from "@/components/MenuGrid";
+import MenuPagesGrid from "@/components/MenuPagesGrid";
 import { useEffect } from "react";
 
 const Menu = () => {
@@ -22,11 +22,13 @@ const Menu = () => {
   const translations = {
     en: {
       title: "Our Menu",
-      description: "Explore our authentic Thai dishes made with fresh ingredients and traditional recipes."
+      description: "Explore our authentic Thai dishes made with fresh ingredients and traditional recipes.",
+      menuPages: "Menu Pages"
     },
     th: {
       title: "เมนูของเรา",
-      description: "สำรวจอาหารไทยแท้ของเราที่ทำจากวัตถุดิบสดและสูตรดั้งเดิม"
+      description: "สำรวจอาหารไทยแท้ของเราที่ทำจากวัตถุดิบสดและสูตรดั้งเดิม",
+      menuPages: "หน้าเมนู"
     }
   };
 
@@ -47,8 +49,13 @@ const Menu = () => {
             </p>
           </div>
 
-          {/* Menu Items Grid */}
-          <MenuGrid />
+          {/* Menu Pages Grid */}
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-anong-black mb-8 text-center font-serif">
+              {t.menuPages}
+            </h2>
+            <MenuPagesGrid />
+          </div>
         </div>
       </main>
       
