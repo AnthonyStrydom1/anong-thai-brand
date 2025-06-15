@@ -14,24 +14,24 @@
     <!-- Prevent duplicate indexing -->
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     
-    <!-- Comprehensive domain redirect script -->
+    <!-- Improved domain redirect script - less aggressive -->
     <script>
       (function() {
         const targetDomain = 'anongthaibrand.com';
         const currentHost = window.location.hostname.toLowerCase();
         const currentProtocol = window.location.protocol;
         
-        // List of all possible variations that should redirect
+        // Only redirect specific problematic domains, not all non-matching domains
         const shouldRedirect = 
-          currentHost !== targetDomain || 
-          currentProtocol !== 'https:' ||
           currentHost.includes('lovable.app') ||
           currentHost.includes('localhost') ||
-          currentHost.startsWith('www.') ||
           currentHost.includes('staging') ||
-          currentHost.includes('preview');
+          currentHost.includes('preview') ||
+          (currentHost.startsWith('www.') && currentHost !== 'www.' + targetDomain);
         
-        if (shouldRedirect && currentHost !== 'localhost') {
+        // Don't redirect if we're already on the target domain (even if HTTP)
+        // This allows Google to crawl properly
+        if (shouldRedirect && currentHost !== 'localhost' && !currentHost.includes(targetDomain)) {
           const newUrl = 'https://' + targetDomain + window.location.pathname + window.location.search + window.location.hash;
           window.location.replace(newUrl);
         }
