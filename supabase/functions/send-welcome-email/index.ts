@@ -34,6 +34,14 @@ const handler = async (req: Request): Promise<Response> => {
       timestamp: new Date().toISOString()
     });
 
+    // Check if Resend API key is available
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    console.log('👋 WelcomeEmail: Resend API key available:', !!resendApiKey);
+    if (!resendApiKey) {
+      console.error('❌ WelcomeEmail: RESEND_API_KEY is missing from environment variables');
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+
     // Validate required data
     if (!customerEmail) {
       console.error('👋 WelcomeEmail: Customer email is missing');
@@ -65,7 +73,15 @@ const handler = async (req: Request): Promise<Response> => {
       })
     );
 
-    console.log('👋 WelcomeEmail: Email template rendered, sending email...');
+    console.log('👋 WelcomeEmail: Email template rendered successfully');
+    console.log('👋 WelcomeEmail: Email HTML length:', emailHtml.length);
+
+    console.log('👋 WelcomeEmail: Attempting to send email via Resend...');
+    console.log('👋 WelcomeEmail: Email details:', {
+      from: "Anong Thai Brand <welcome@anongthaibrand.com>",
+      to: customerEmail,
+      subject: "Welcome to Anong Thai Brand! 🙏"
+    });
 
     // Send the email using your verified domain
     const result = await resend.emails.send({
@@ -75,14 +91,25 @@ const handler = async (req: Request): Promise<Response> => {
       html: emailHtml,
     });
 
-    console.log('👋 WelcomeEmail: Email sent successfully:', result);
+    console.log('👋 WelcomeEmail: Email sent via Resend - Full response:', JSON.stringify(result, null, 2));
+    
+    if (result.error) {
+      console.error('❌ WelcomeEmail: Resend returned error:', result.error);
+      throw new Error(`Resend error: ${JSON.stringify(result.error)}`);
+    }
+
+    if (result.data) {
+      console.log('✅ WelcomeEmail: Email sent successfully with ID:', result.data.id);
+    }
+
     console.log('✅ WelcomeEmail: Welcome email process completed successfully');
     console.log('👋 === WelcomeEmail.sendWelcomeEmail END ===');
 
     return new Response(JSON.stringify({ 
       success: true, 
       message: "Welcome email sent successfully",
-      messageId: result.data?.id 
+      messageId: result.data?.id,
+      recipient: customerEmail
     }), {
       status: 200,
       headers: {
@@ -98,14 +125,16 @@ const handler = async (req: Request): Promise<Response> => {
       message: error?.message || 'Unknown error message',
       stack: error?.stack || 'No stack trace available',
       errorType: typeof error,
-      errorName: error?.name || 'Unknown error name'
+      errorName: error?.name || 'Unknown error name',
+      errorCode: error?.code || 'No error code'
     });
     console.error('❌ === WelcomeEmail ERROR END ===');
 
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message || "Failed to send welcome email" 
+        error: error.message || "Failed to send welcome email",
+        details: error.toString()
       }),
       {
         status: 500,
