@@ -2,6 +2,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
+import NavigationBanner from "@/components/NavigationBanner";
 import { motion } from "framer-motion";
 import { Calendar, MapPin, Users, Clock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -119,6 +120,7 @@ const Events = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-anong-ivory">
+      <NavigationBanner />
       <main className="flex-grow anong-section thai-pattern-bg">
         <div className="container mx-auto px-4 md:px-6 max-w-7xl">
           {/* Header Section */}
