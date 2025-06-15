@@ -22,7 +22,7 @@ export const useOrderCreation = () => {
         description: `Order ${order.order_number} has been created.`,
       });
 
-      // IMMEDIATE EMAIL SENDING - NO EARLY RETURNS BEFORE THIS
+      // IMMEDIATE EMAIL SENDING - BEFORE ANY RETURN STATEMENTS
       console.log('📧 === EMAIL SENDING PROCESS START ===');
       console.log('📧 Starting email process for order:', order.order_number);
       
@@ -66,6 +66,7 @@ export const useOrderCreation = () => {
         };
 
         console.log('📧 Email data prepared for:', customerEmail);
+        console.log('📧 Email data structure:', emailData);
         console.log('📧 Calling Supabase function send-order-confirmation...');
         
         try {
@@ -75,6 +76,7 @@ export const useOrderCreation = () => {
 
           if (emailError) {
             console.error('❌ Email function error:', emailError);
+            console.error('❌ Email error details:', emailError.message, emailError.stack);
             throw emailError;
           }
 
@@ -87,6 +89,8 @@ export const useOrderCreation = () => {
           
         } catch (emailError) {
           console.error('❌ Email sending failed:', emailError);
+          console.error('❌ Email error message:', emailError?.message);
+          console.error('❌ Email error details:', emailError);
           
           toast({
             title: "Order Created",
@@ -98,6 +102,8 @@ export const useOrderCreation = () => {
       
       console.log('📧 === EMAIL SENDING PROCESS END ===');
       console.log('🚀 === ORDER CREATION END ===');
+      
+      // Return order AFTER email processing
       return order;
       
     } catch (error) {
