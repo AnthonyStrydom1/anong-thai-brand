@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Users, Search, Eye, Mail, Phone } from "lucide-react";
+import { Users, Search, Eye, Mail, Phone, Calendar } from "lucide-react";
 import { supabaseService, SupabaseCustomer } from "@/services/supabaseService";
 import { toast } from "@/hooks/use-toast";
 
@@ -18,6 +19,7 @@ const CustomerManager = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState<SupabaseCustomer | null>(null);
 
   useEffect(() => {
     loadCustomers();
@@ -42,9 +44,45 @@ const CustomerManager = () => {
       const { data, error, count } = await query;
       
       if (error) throw error;
-      setCustomers(data || []);
+      
+      // Calculate actual total spent for each customer from orders
+      const customersWithSpent = await Promise.all(
+        (data || []).map(async (customer) => {
+          try {
+            const { data: orders, error: ordersError } = await supabaseService.supabase
+              .from('orders')
+              .select('total_amount, status, payment_status')
+              .eq('customer_id', customer.id);
+            
+            if (ordersError) {
+              console.error('Error fetching orders for customer:', customer.id, ordersError);
+              return customer;
+            }
+            
+            // Only count completed orders (delivered or paid status, excluding cancelled)
+            const completedOrders = orders?.filter(order => 
+              order.status === 'delivered' || 
+              (order.payment_status === 'paid' && order.status !== 'cancelled')
+            ) || [];
+            
+            const actualTotalSpent = completedOrders.reduce((sum, order) => sum + Number(order.total_amount), 0);
+            
+            return {
+              ...customer,
+              total_spent: actualTotalSpent,
+              total_orders: orders?.length || 0
+            };
+          } catch (error) {
+            console.error('Error calculating spent for customer:', customer.id, error);
+            return customer;
+          }
+        })
+      );
+      
+      setCustomers(customersWithSpent);
       setTotalCustomers(count || 0);
     } catch (error) {
+      console.error('Load customers error:', error);
       toast({
         title: "Error",
         description: "Failed to load customers",
@@ -58,6 +96,14 @@ const CustomerManager = () => {
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1); // Reset to first page when searching
+  };
+
+  const handleViewCustomer = (customer: SupabaseCustomer) => {
+    setSelectedCustomer(customer);
+  };
+
+  const formatCurrency = (amount: number) => {
+    return `R${amount.toFixed(2)}`;
   };
 
   const totalPages = Math.ceil(totalCustomers / CUSTOMERS_PER_PAGE);
@@ -137,7 +183,7 @@ const CustomerManager = () => {
                         </div>
                       </TableCell>
                       <TableCell>{customer.total_orders || 0}</TableCell>
-                      <TableCell>${(customer.total_spent || 0).toFixed(2)}</TableCell>
+                      <TableCell>{formatCurrency(customer.total_spent || 0)}</TableCell>
                       <TableCell>
                         {customer.created_at ? new Date(customer.created_at).toLocaleDateString() : 'N/A'}
                       </TableCell>
@@ -147,10 +193,70 @@ const CustomerManager = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button variant="outline" size="sm">
-                          <Eye className="w-4 h-4 mr-2" />
-                          View
-                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleViewCustomer(customer)}
+                            >
+                              <Eye className="w-4 h-4 mr-2" />
+                              View
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Customer Details</DialogTitle>
+                            </DialogHeader>
+                            {selectedCustomer && (
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-500">Full Name</label>
+                                    <p className="text-sm">{selectedCustomer.fullname}</p>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-500">Email</label>
+                                    <p className="text-sm">{selectedCustomer.email}</p>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-500">Phone</label>
+                                    <p className="text-sm">{selectedCustomer.phone || 'N/A'}</p>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-500">Customer ID</label>
+                                    <p className="text-sm">{selectedCustomer.id}</p>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-500">Total Orders</label>
+                                    <p className="text-sm">{selectedCustomer.total_orders || 0}</p>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-500">Total Spent</label>
+                                    <p className="text-sm font-semibold text-green-600">
+                                      {formatCurrency(selectedCustomer.total_spent || 0)}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-500">Status</label>
+                                    <Badge variant={selectedCustomer.is_active ? "default" : "secondary"}>
+                                      {selectedCustomer.is_active ? "Active" : "Inactive"}
+                                    </Badge>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-500">Join Date</label>
+                                    <div className="flex items-center space-x-2">
+                                      <Calendar className="w-4 h-4 text-gray-400" />
+                                      <p className="text-sm">
+                                        {selectedCustomer.created_at ? new Date(selectedCustomer.created_at).toLocaleDateString() : 'N/A'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
                       </TableCell>
                     </TableRow>
                   ))}
