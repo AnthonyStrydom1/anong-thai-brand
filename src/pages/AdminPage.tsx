@@ -118,48 +118,66 @@ const AdminPage = () => {
 
   return (
     <ProtectedAdminRoute>
-      <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-anong-ivory via-anong-cream to-anong-ivory thai-pattern-bg">
         <div className="flex-1 container mx-auto py-4 px-4 md:py-8">
           <AdminHeader />
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <AdminTabs activeTab={activeTab} />
 
-            <TabsContent value="overview">
-              <AdminOverview stats={stats} onTabChange={setActiveTab} />
-            </TabsContent>
+            <div className="mt-6">
+              <TabsContent value="overview" className="mt-0">
+                <AdminOverview stats={stats} onTabChange={setActiveTab} />
+              </TabsContent>
 
-            <TabsContent value="products">
-              <ProductManager />
-            </TabsContent>
+              <TabsContent value="products" className="mt-0">
+                <div className="anong-card p-6">
+                  <ProductManager />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="stock">
-              <StockManager />
-            </TabsContent>
+              <TabsContent value="stock" className="mt-0">
+                <div className="anong-card p-6">
+                  <StockManager />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="orders">
-              <OrderManager />
-            </TabsContent>
+              <TabsContent value="orders" className="mt-0">
+                <div className="anong-card p-6">
+                  <OrderManager />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="customers">
-              <CustomerManager />
-            </TabsContent>
+              <TabsContent value="customers" className="mt-0">
+                <div className="anong-card p-6">
+                  <CustomerManager />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="users">
-              <UserManagement />
-            </TabsContent>
+              <TabsContent value="users" className="mt-0">
+                <div className="anong-card p-6">
+                  <UserManagement />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="reviews">
-              <ReviewManager />
-            </TabsContent>
+              <TabsContent value="reviews" className="mt-0">
+                <div className="anong-card p-6">
+                  <ReviewManager />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="security">
-              <SecurityDashboard />
-            </TabsContent>
+              <TabsContent value="security" className="mt-0">
+                <div className="anong-card p-6">
+                  <SecurityDashboard />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="analytics">
-              <AnalyticsDashboard />
-            </TabsContent>
+              <TabsContent value="analytics" className="mt-0">
+                <div className="anong-card p-6">
+                  <AnalyticsDashboard />
+                </div>
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
       </div>
