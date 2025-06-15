@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Package, ShoppingCart, Users, BarChart3, Warehouse } from 'lucide-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import PaymentIntegrationStatus from './payments/PaymentIntegrationStatus';
-import ShippingIntegrationStatus from './payments/ShippingIntegrationStatus';
+import ShippingIntegrationStatus from './orders/ShippingIntegrationStatus';
 
 interface AdminOverviewProps {
   stats: {
