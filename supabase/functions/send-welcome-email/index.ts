@@ -67,9 +67,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('👋 WelcomeEmail: Email template rendered, sending email...');
 
-    // Send the email
+    // Send the email using your verified domain
     const result = await resend.emails.send({
-      from: "Anong Thai Brand <onboarding@resend.dev>",
+      from: "Anong Thai Brand <welcome@anongthaibrand.com>",
       to: [customerEmail],
       subject: "Welcome to Anong Thai Brand! 🙏",
       html: emailHtml,
