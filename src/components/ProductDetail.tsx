@@ -93,7 +93,7 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
         <ProductImage 
           image={product.image} 

@@ -1,11 +1,10 @@
 
-import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 import RecipeHeader from "@/components/recipe/RecipeHeader";
 import RecipeInstructions from "@/components/recipe/RecipeInstructions";
 import RelatedProducts from "@/components/recipe/RelatedProducts";
 import IngredientsSection from "@/components/recipe/IngredientsSection";
 import RecipeImageCard from "@/components/recipe/RecipeImageCard";
+import { BackToRecipesButton } from "@/components/recipe/BackToRecipesButton";
 import Footer from "@/components/Footer";
 
 interface RecipeContentProps {
@@ -21,12 +20,7 @@ const RecipeContent = ({ recipe, relatedProducts, language, t }: RecipeContentPr
       <main className="flex-grow anong-section thai-pattern-bg">
         <div className="container mx-auto px-4 md:px-6 max-w-7xl py-8 md:py-12">
           {/* Back Button */}
-          <div className="mb-6">
-            <Link to="/recipes" className="flex items-center text-anong-black hover:text-anong-gold transition-colors">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              <span className="anong-body text-sm">{t.backToRecipes}</span>
-            </Link>
-          </div>
+          <BackToRecipesButton language={language} />
           
           {/* Recipe Header */}
           <RecipeHeader recipe={recipe} language={language} t={t} />
