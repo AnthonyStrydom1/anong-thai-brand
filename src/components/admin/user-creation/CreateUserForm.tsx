@@ -17,7 +17,7 @@ const CreateUserForm = ({ onUserCreated }: CreateUserFormProps) => {
     password: '',
     firstName: '',
     lastName: '',
-    roles: ['user'] // Default to user role
+    roles: [] // No default role
   });
 
   const { createUser, isCreating } = useUserCreation(() => {
@@ -26,7 +26,7 @@ const CreateUserForm = ({ onUserCreated }: CreateUserFormProps) => {
       password: '', 
       firstName: '', 
       lastName: '', 
-      roles: ['user'] 
+      roles: [] 
     });
     onUserCreated();
   });
@@ -57,6 +57,7 @@ const CreateUserForm = ({ onUserCreated }: CreateUserFormProps) => {
         <RoleSelector 
           selectedRoles={formData.roles}
           onRolesChange={handleRolesChange}
+          mode="single"
         />
         
         <Button 

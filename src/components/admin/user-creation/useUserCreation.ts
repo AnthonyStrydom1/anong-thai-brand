@@ -30,7 +30,7 @@ export const useUserCreation = (onUserCreated: () => void) => {
     if (formData.roles.length === 0) {
       toast({
         title: "Error",
-        description: "At least one role must be selected.",
+        description: "Please select a user role.",
         variant: "destructive"
       });
       return;
@@ -39,6 +39,19 @@ export const useUserCreation = (onUserCreated: () => void) => {
     setIsCreating(true);
     try {
       console.log('Creating user:', formData.email, 'with roles:', formData.roles);
+
+      // Check if user already exists in auth
+      const { data: existingUsers } = await supabase.auth.admin.listUsers();
+      const userExists = existingUsers.users?.some(user => user.email === formData.email);
+      
+      if (userExists) {
+        toast({
+          title: "Error",
+          description: `A user with email ${formData.email} already exists. Please use a different email address.`,
+          variant: "destructive"
+        });
+        return;
+      }
 
       // Create the user in Supabase Auth
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -54,11 +67,21 @@ export const useUserCreation = (onUserCreated: () => void) => {
 
       if (signUpError) {
         console.error('Auth signup error:', signUpError);
-        toast({
-          title: "Error",
-          description: `Failed to create user account: ${signUpError.message}`,
-          variant: "destructive"
-        });
+        
+        // Handle specific error cases
+        if (signUpError.message.includes('already registered')) {
+          toast({
+            title: "Error",
+            description: `User ${formData.email} already exists. Please use a different email address.`,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: `Failed to create user account: ${signUpError.message}`,
+            variant: "destructive"
+          });
+        }
         return;
       }
 
@@ -106,9 +129,13 @@ export const useUserCreation = (onUserCreated: () => void) => {
           }
         }
 
+        const roleText = formData.roles.length === 1 ? 
+          `${formData.roles[0]} role` : 
+          `${formData.roles.join(', ')} roles`;
+
         toast({
           title: "Success!",
-          description: `User ${formData.email} created successfully with ${formData.roles.join(', ')} role(s).`,
+          description: `User ${formData.email} created successfully with ${roleText}.`,
         });
 
         onUserCreated();
