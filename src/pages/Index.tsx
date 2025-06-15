@@ -1,88 +1,30 @@
 
-import { useLanguage } from "@/contexts/LanguageContext";
-import NavigationBanner from "@/components/NavigationBanner";
-import Footer from "@/components/Footer";
-import HeroBanner from "@/components/HeroBanner";
-import FeaturedProducts from "@/components/FeaturedProducts";
-import BrandStory from "@/components/BrandStory";
-import RestaurantBanner from "@/components/RestaurantBanner";
-import EventsBanner from "@/components/EventsBanner";
-import { motion } from "framer-motion";
-import { useEffect } from "react";
+import React from 'react';
+import HeroBanner from '@/components/HeroBanner';
+import FeaturedProducts from '@/components/FeaturedProducts';
+import BrandStory from '@/components/BrandStory';
+import MenuPreview from '@/components/MenuPreview';
+import EventsBanner from '@/components/EventsBanner';
+import RestaurantBanner from '@/components/RestaurantBanner';
+import TestUserCleanup from '@/components/TestUserCleanup';
 
 const Index = () => {
-  const { language } = useLanguage();
-  
-  // Scroll to top when component mounts
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-  
-  const sectionVariants = {
-    offscreen: {
-      y: 40,
-      opacity: 0
-    },
-    onscreen: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 1.4,
-        ease: [0.25, 0.1, 0.25, 1],
-        type: "spring",
-        damping: 25
-      }
-    }
-  };
-  
   return (
-    <div className="min-h-screen flex flex-col bg-anong-ivory">
-      <NavigationBanner />
+    <div className="min-h-screen">
+      <HeroBanner />
+      <FeaturedProducts />
+      <BrandStory />
+      <MenuPreview />
+      <EventsBanner />
+      <RestaurantBanner />
       
-      <main className="flex-grow">
-        <HeroBanner />
-        
-        <div className="relative thai-pattern-bg">
-          <motion.div
-            initial="offscreen"
-            whileInView="onscreen"
-            viewport={{ once: true, amount: 0.1 }}
-            variants={sectionVariants}
-          >
-            <FeaturedProducts />
-          </motion.div>
-          
-          <motion.div
-            initial="offscreen"
-            whileInView="onscreen"
-            viewport={{ once: true, amount: 0.1 }}
-            variants={sectionVariants}
-            className="my-16 md:my-24"
-          >
-            <BrandStory />
-          </motion.div>
-          
-          <motion.div
-            initial="offscreen"
-            whileInView="onscreen"
-            viewport={{ once: true, amount: 0.1 }}
-            variants={sectionVariants}
-          >
-            <RestaurantBanner />
-          </motion.div>
-
-          <motion.div
-            initial="offscreen"
-            whileInView="onscreen"
-            viewport={{ once: true, amount: 0.1 }}
-            variants={sectionVariants}
-          >
-            <EventsBanner />
-          </motion.div>
+      {/* Temporary cleanup utility - remove this after testing */}
+      <div className="py-8 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-2xl font-bold text-center mb-6">Development Tools</h2>
+          <TestUserCleanup />
         </div>
-      </main>
-      
-      <Footer />
+      </div>
     </div>
   );
 };
