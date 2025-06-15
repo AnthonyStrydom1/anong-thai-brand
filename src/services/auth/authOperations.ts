@@ -1,7 +1,9 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from '@supabase/supabase-js';
 import { domainValidationService } from './domainValidation';
 import { mfaAuthService } from '../mfaAuthService';
+import { mfaPasswordChangeService } from '../mfa/mfaPasswordChangeService';
 import { WelcomeEmailService } from '../welcomeEmailService';
 
 export interface SignUpData {
@@ -80,6 +82,7 @@ export class AuthOperationsService {
     const { error } = await supabase.auth.signOut();
     domainValidationService.clearDomainKey();
     mfaAuthService.clearMFASession();
+    mfaPasswordChangeService.clearSession();
     if (error) throw error;
   }
 
@@ -93,6 +96,27 @@ export class AuthOperationsService {
     });
 
     if (error) throw error;
+  }
+
+  // New MFA-protected password change
+  async initiatePasswordChange(email: string) {
+    if (!domainValidationService.isDomainValid()) {
+      throw new Error('Authentication not available on this domain');
+    }
+
+    return mfaPasswordChangeService.initiatePasswordChange(email);
+  }
+
+  async verifyAndChangePassword(code: string, newPassword: string) {
+    return mfaPasswordChangeService.verifyAndChangePassword(code, newPassword);
+  }
+
+  async resendPasswordChangeCode() {
+    return mfaPasswordChangeService.resendCode();
+  }
+
+  getPendingPasswordChangeEmail(): string | null {
+    return mfaPasswordChangeService.getPendingEmail();
   }
 }
 

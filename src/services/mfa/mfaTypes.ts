@@ -6,13 +6,15 @@ export interface MFASignInData {
 
 export interface MFASessionData {
   email: string;
-  password: string;
+  challengeId?: string;
+  type: 'signin' | 'password_change';
   timestamp: number;
-  userId?: string;
 }
 
 export interface MFAAuthResult {
   mfaRequired: boolean;
+  user?: any;
+  session?: any;
 }
 
 export interface MFAResendResult {

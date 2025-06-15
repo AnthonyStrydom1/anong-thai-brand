@@ -24,6 +24,23 @@ class AuthService {
     return authOperationsService.resetPassword(email);
   }
 
+  // New MFA-protected password change methods
+  async initiatePasswordChange(email: string) {
+    return authOperationsService.initiatePasswordChange(email);
+  }
+
+  async verifyAndChangePassword(code: string, newPassword: string) {
+    return authOperationsService.verifyAndChangePassword(code, newPassword);
+  }
+
+  async resendPasswordChangeCode() {
+    return authOperationsService.resendPasswordChangeCode();
+  }
+
+  getPendingPasswordChangeEmail(): string | null {
+    return authOperationsService.getPendingPasswordChangeEmail();
+  }
+
   // Session management
   async getCurrentUser(): Promise<User | null> {
     return sessionManagerService.getCurrentUser();
