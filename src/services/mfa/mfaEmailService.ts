@@ -4,79 +4,75 @@ import { mfaSessionManager } from './mfaSessionManager';
 import type { MFAResendResult } from './mfaTypes';
 
 export class MFAEmailService {
-  async sendMFAEmail(email: string): Promise<{ challengeId?: string; success?: boolean }> {
-    console.log('📧 MFA Email Service: Starting email send for:', email);
+  async sendMFAEmail(email: string): Promise<{ success: boolean; challengeId?: string; error?: string }> {
+    console.log('📧 MFA Email Service: Sending MFA email to:', email);
     
     try {
-      console.log('🔄 MFA Email Service: Invoking send-mfa-email function...');
-      
-      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-mfa-email', {
+      const { data, error } = await supabase.functions.invoke('send-mfa-email', {
         body: { email }
       });
 
-      console.log('📧 MFA Email Service: Function response received:', { 
-        emailData, 
-        emailError,
-        hasData: !!emailData,
-        hasError: !!emailError 
-      });
-
-      if (emailError) {
-        console.error('❌ MFA Email Service: Function error:', emailError);
-        throw new Error(`Failed to send verification email: ${emailError.message}`);
+      if (error) {
+        console.error('❌ MFA Email Service: Supabase function error:', error);
+        throw new Error(`Failed to send MFA email: ${error.message}`);
       }
 
-      if (!emailData) {
-        console.error('❌ MFA Email Service: No data returned from function');
-        throw new Error('No response from email service');
+      if (!data || !data.success) {
+        console.error('❌ MFA Email Service: Function returned failure:', data);
+        throw new Error(data?.error || 'Failed to send MFA email');
       }
 
-      if (!emailData.success) {
-        console.error('❌ MFA Email Service: Function returned error:', emailData);
-        throw new Error(emailData.error || 'Failed to send verification email');
-      }
-
-      console.log('✅ MFA Email Service: Email sent successfully, challenge ID:', emailData.challengeId);
-
-      // Store the challenge ID returned from the edge function
-      if (emailData.challengeId) {
-        mfaSessionManager.storeChallengeId(emailData.challengeId);
-        console.log('💾 MFA Email Service: Challenge ID stored');
-      } else {
-        console.warn('⚠️ MFA Email Service: No challenge ID returned');
-      }
-
-      return { ...emailData, success: true };
+      console.log('✅ MFA Email Service: Email sent successfully:', data);
+      return {
+        success: true,
+        challengeId: data.challengeId
+      };
     } catch (error: any) {
-      console.error('❌ MFA Email Service: Critical error:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-      throw new Error(error.message || 'Failed to send verification email');
+      console.error('❌ MFA Email Service: Error sending email:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to send MFA email'
+      };
     }
   }
 
   async resendCode(): Promise<MFAResendResult> {
+    console.log('🔄 MFA Email Service: Resending verification code');
+    
     const sessionData = mfaSessionManager.getSessionData();
     if (!sessionData) {
-      throw new Error('No pending MFA verification');
+      console.log('❌ MFA Email Service: No session data for resend');
+      throw new Error('No pending MFA verification found');
     }
 
-    console.log('🔄 MFA Email Service: Resending code to:', sessionData.email);
+    // Check if we can resend (not too recent)
+    const timeSinceLastSend = Date.now() - sessionData.timestamp;
+    const minResendInterval = 30 * 1000; // 30 seconds
+    
+    if (timeSinceLastSend < minResendInterval) {
+      const waitTime = Math.ceil((minResendInterval - timeSinceLastSend) / 1000);
+      throw new Error(`Please wait ${waitTime} seconds before requesting a new code`);
+    }
 
     try {
-      const emailData = await this.sendMFAEmail(sessionData.email);
-
-      // Update the challenge ID
-      if (emailData?.challengeId) {
-        mfaSessionManager.storeChallengeId(emailData.challengeId);
+      const result = await this.sendMFAEmail(sessionData.email);
+      
+      if (result.success) {
+        // Update session timestamp for the resend
+        const updatedSessionData = {
+          ...sessionData,
+          timestamp: Date.now()
+        };
+        mfaSessionManager.storeSessionData(updatedSessionData);
+        
+        console.log('✅ MFA Email Service: Code resent successfully');
+        return { success: true };
+      } else {
+        throw new Error(result.error || 'Failed to resend code');
       }
-
-      return { success: true };
     } catch (error: any) {
       console.error('❌ MFA Email Service: Resend failed:', error);
-      throw new Error(error.message || 'Failed to resend code');
+      throw error;
     }
   }
 }
