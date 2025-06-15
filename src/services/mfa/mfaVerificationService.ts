@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { mfaSessionManager } from './mfaSessionManager';
 import type { MFASessionData } from './mfaTypes';
@@ -33,13 +32,6 @@ export class MFAVerificationService {
   }
 
   async signInWithCredentials(email: string, password: string) {
-    // Ensure we're starting fresh
-    console.log('🔐 MFA Verification Service: Signing out any existing session...');
-    await supabase.auth.signOut();
-    
-    // Wait for signout to complete
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
     // Complete sign in with verified credentials
     console.log('🔐 MFA Verification Service: Completing final sign in...');
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -67,7 +59,7 @@ export class MFAVerificationService {
 
     console.log('📋 MFA Verification Service: Found session data for:', sessionData.email);
 
-    // Check session timeout (extend to 15 minutes to prevent frequent expiration)
+    // Check session timeout - keep at 15 minutes
     const sessionAge = Date.now() - sessionData.timestamp;
     const maxAge = 15 * 60 * 1000; // 15 minutes
     
@@ -78,10 +70,10 @@ export class MFAVerificationService {
     }
 
     try {
-      // Verify the MFA code
+      // Verify the MFA code first
       await this.verifyCode(code, sessionData);
 
-      // Complete sign in with verified credentials
+      // If verification successful, complete sign in
       if (!sessionData.password) {
         throw new Error('Invalid session data - missing credentials');
       }

@@ -30,11 +30,11 @@ class MFAAuthService {
       // Get the user ID before proceeding with MFA
       const userId = data.user?.id;
       
-      // Sign out immediately to prevent session persistence until MFA is complete
+      // Sign out to prevent session persistence until MFA is complete
       console.log('🚪 MFA Service: Signing out to start MFA flow...');
       await supabase.auth.signOut();
       
-      // Wait a bit to ensure signout is complete
+      // Wait to ensure signout is complete
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Store the session data temporarily for MFA
@@ -49,13 +49,12 @@ class MFAAuthService {
       console.log('💾 MFA Service: Storing session data for MANDATORY MFA flow');
       mfaSessionManager.storeSessionData(sessionData);
 
-      // Send MFA email and wait for it to complete
+      // Send MFA email
       console.log('📧 MFA Service: Sending MANDATORY MFA email...');
       const emailResult = await mfaEmailService.sendMFAEmail(email);
-      console.log('✅ MFA Service: MFA email sent successfully:', emailResult);
 
-      // Only trigger MFA session stored event after successful email sending
       if (emailResult.success) {
+        console.log('✅ MFA Service: MFA email sent successfully');
         // Trigger MFA session stored event to update UI
         window.dispatchEvent(new CustomEvent('mfa-session-stored', { 
           detail: { email, challengeId: emailResult.challengeId } 
@@ -67,7 +66,6 @@ class MFAAuthService {
         throw new Error('Failed to send MFA email');
       }
 
-      // ALWAYS return MFA required - no bypassing
       return { mfaRequired: true };
     } catch (error: any) {
       console.error('❌ MFA Service: Sign in initiation failed:', error);
@@ -97,7 +95,6 @@ class MFAAuthService {
   }
 
   getCurrentMFACode(): string | null {
-    // This is for demo purposes - in production, codes are sent via email
     return null;
   }
 }
