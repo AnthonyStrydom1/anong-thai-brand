@@ -39,6 +39,14 @@ const ProductDetail = () => {
   
   // Fallback to local products data if Supabase product not found
   const localProduct = products.find(p => p.id === id);
+  
+  console.log('Product debug:', { 
+    id, 
+    supabaseProduct, 
+    localProduct, 
+    localProductIngredients: localProduct?.ingredients 
+  });
+  
   const product = supabaseProduct ? {
     ...localProduct,
     id: supabaseProduct.id,
@@ -52,6 +60,7 @@ const ProductDetail = () => {
     featured: Boolean(supabaseProduct.is_featured),
     // Don't set comparePrice unless it's actually different
     comparePrice: undefined,
+    // Ensure ingredients are properly mapped from local data
     ingredients: localProduct?.ingredients || { en: [], th: [] },
     useIn: localProduct?.useIn || { en: [], th: [] }
   } : localProduct ? {

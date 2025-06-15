@@ -115,7 +115,7 @@ const ProductGrid = ({ initialCategory }: ProductGridProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-anong-ivory via-anong-cream to-anong-ivory">
       <NavigationBanner />
-      <section className="anong-section px-4 md:px-6 thai-pattern-bg relative">
+      <section className="px-4 md:px-6 py-8 md:py-12 thai-pattern-bg relative">
         {/* Background Pattern Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-anong-gold/5 via-transparent to-anong-deep-green/5 pointer-events-none"></div>
         
