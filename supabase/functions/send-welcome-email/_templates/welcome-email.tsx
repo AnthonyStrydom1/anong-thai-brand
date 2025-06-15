@@ -11,8 +11,8 @@ import {
   Link,
 } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
-import { EmailHeader } from '../../send-order-confirmation/_templates/EmailHeader.tsx'
-import { main, container, content, h1, greeting, bodyText, button, footerText, signature } from '../../send-order-confirmation/_templates/styles.ts'
+import { EmailHeader } from './EmailHeader.tsx'
+import { main, container, content, h1, greeting, bodyText, button, footerText, signature } from './styles.ts'
 
 interface WelcomeEmailProps {
   customerName: string;
