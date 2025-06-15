@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Eye, Package2, Truck, CheckCircle } from "lucide-react";
+import { ShoppingCart, Eye, Package2, Truck, CheckCircle, Trash2 } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface ExtendedOrder {
@@ -25,6 +25,7 @@ interface OrderStatusCardProps {
   onPaymentStatusUpdate: (orderId: string, paymentStatus: string) => void;
   onTrackingUpdate: (orderId: string, trackingNumber: string) => void;
   onViewDetails: (orderId: string) => void;
+  onDeleteOrder: (orderId: string) => void;
 }
 
 const OrderStatusCard = ({ 
@@ -32,7 +33,8 @@ const OrderStatusCard = ({
   onStatusUpdate, 
   onPaymentStatusUpdate, 
   onTrackingUpdate, 
-  onViewDetails 
+  onViewDetails,
+  onDeleteOrder
 }: OrderStatusCardProps) => {
   const { formatPrice } = useCurrency();
 
@@ -143,14 +145,26 @@ const OrderStatusCard = ({
             </div>
           </div>
           
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => onViewDetails(order.id)}
-          >
-            <Eye className="w-4 h-4 mr-2" />
-            View Details
-          </Button>
+          <div className="flex flex-col space-y-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => onViewDetails(order.id)}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              View Details
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={() => onDeleteOrder(order.id)}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -8,6 +8,7 @@ import OrderFilters from './orders/OrderFilters';
 import OrderActions from './orders/OrderActions';
 import OrderStatusCard from './orders/OrderStatusCard';
 import OrderDetailsDialog from './orders/OrderDetailsDialog';
+import OrderDeleteDialog from './orders/OrderDeleteDialog';
 import OrdersEmptyState from './orders/OrdersEmptyState';
 
 // Extended order type to include new fields
@@ -39,6 +40,9 @@ const OrderManager = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<ExtendedOrder | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { logAdminAction } = useAdminSecurity();
 
   useEffect(() => {
@@ -368,6 +372,59 @@ const OrderManager = () => {
     }
   };
 
+  const handleDeleteOrder = (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      setOrderToDelete(order);
+      setDeleteDialogOpen(true);
+    }
+  };
+
+  const confirmDeleteOrder = async () => {
+    if (!orderToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      console.log('Deleting order:', orderToDelete.id);
+      
+      await logAdminAction('delete', 'order', orderToDelete.id, {
+        order_number: orderToDelete.order_number,
+        customer_id: orderToDelete.customer_id,
+        total_amount: orderToDelete.total_amount,
+        status: orderToDelete.status
+      });
+      
+      await supabaseService.deleteOrder(orderToDelete.id);
+      
+      // Remove the order from local state
+      setOrders(orders.filter(order => order.id !== orderToDelete.id));
+      
+      toast({
+        title: "Success",
+        description: `Order #${orderToDelete.order_number} has been deleted successfully`,
+      });
+      
+      // Close the dialog
+      setDeleteDialogOpen(false);
+      setOrderToDelete(null);
+      
+    } catch (error) {
+      console.error('Failed to delete order:', error);
+      await logAdminAction('delete', 'order', orderToDelete.id, {
+        error: error.message,
+        order_number: orderToDelete.order_number
+      }, false);
+      
+      toast({
+        title: "Error",
+        description: "Failed to delete order. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (isLoading) {
     return <div className="p-6">Loading orders...</div>;
   }
@@ -408,6 +465,7 @@ const OrderManager = () => {
               onPaymentStatusUpdate={updatePaymentStatus}
               onTrackingUpdate={updateTrackingNumber}
               onViewDetails={viewOrderDetails}
+              onDeleteOrder={handleDeleteOrder}
             />
           ))}
         </div>
@@ -417,6 +475,14 @@ const OrderManager = () => {
         isOpen={isOrderDialogOpen}
         onOpenChange={setIsOrderDialogOpen}
         selectedOrder={selectedOrder}
+      />
+
+      <OrderDeleteDialog
+        isOpen={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        orderNumber={orderToDelete?.order_number || ''}
+        onConfirm={confirmDeleteOrder}
+        isDeleting={isDeleting}
       />
     </div>
   );

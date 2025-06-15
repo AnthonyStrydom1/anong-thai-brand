@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -410,6 +409,21 @@ class SupabaseService {
     
     if (error) throw error;
     return data;
+  }
+
+  // Admin-only: Delete order with stock restoration and customer updates
+  async deleteOrder(orderId: string) {
+    try {
+      const { data, error } = await supabase.rpc('delete_order', {
+        order_id_param: orderId
+      });
+      
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      throw error;
+    }
   }
 
   // Add method to restore stock for cancelled orders

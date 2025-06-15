@@ -807,6 +807,10 @@ export type Database = {
           code: string
         }[]
       }
+      delete_order: {
+        Args: { order_id_param: string }
+        Returns: undefined
+      }
       generate_mfa_code: {
         Args: Record<PropertyKey, never>
         Returns: string
