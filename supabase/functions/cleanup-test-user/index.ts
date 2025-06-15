@@ -33,6 +33,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { email }: CleanupRequest = await req.json();
     
+    if (!email) {
+      throw new Error('Email is required');
+    }
+    
     console.log('🧹 CleanupTestUser: Cleaning up user with email:', email);
 
     // Step 1: Find the auth user

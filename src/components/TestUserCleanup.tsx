@@ -11,7 +11,7 @@ const TestUserCleanup = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCleanup = async () => {
-    if (!email) {
+    if (!email.trim()) {
       toast({
         title: "Error",
         description: "Please enter an email address",
@@ -25,12 +25,14 @@ const TestUserCleanup = () => {
       console.log('🧹 Starting user cleanup for:', email);
       
       const { data, error } = await supabase.functions.invoke('cleanup-test-user', {
-        body: { email }
+        body: { email: email.trim() }
       });
+
+      console.log('🧹 Cleanup response:', { data, error });
 
       if (error) {
         console.error('🧹 Cleanup error:', error);
-        throw error;
+        throw new Error(error.message || 'Failed to cleanup user');
       }
 
       console.log('✅ Cleanup successful:', data);
@@ -44,7 +46,7 @@ const TestUserCleanup = () => {
       console.error('❌ Cleanup failed:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to cleanup user",
+        description: error.message || "Failed to cleanup user. Check console for details.",
         variant: "destructive"
       });
     } finally {
@@ -73,7 +75,7 @@ const TestUserCleanup = () => {
         
         <Button 
           onClick={handleCleanup}
-          disabled={isLoading || !email}
+          disabled={isLoading || !email.trim()}
           className="w-full"
         >
           {isLoading ? 'Cleaning up...' : 'Cleanup User'}
