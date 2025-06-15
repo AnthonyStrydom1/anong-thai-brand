@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { mfaSessionManager } from './mfaSessionManager';
 import type { MFAResendResult } from './mfaTypes';
@@ -8,50 +7,72 @@ export class MFAEmailService {
     console.log('📧 MFA Email Service: Sending MFA email to:', email);
     
     try {
-      // First check if the user exists in auth.users
+      // First check if the user exists in auth.users before attempting MFA challenge
       console.log('🔍 MFA Email Service: Checking if user exists in auth.users...');
       const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
       
       if (authError) {
         console.error('❌ MFA Email Service: Could not check auth users:', authError);
+        // Continue anyway, let the edge function handle it
       } else {
         const userExists = authUsers.users.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
         console.log('👤 MFA Email Service: User exists in auth.users:', !!userExists);
-        if (userExists) {
-          console.log('📧 MFA Email Service: Found user with email:', userExists.email, 'ID:', userExists.id);
+        
+        if (!userExists) {
+          console.log('❌ MFA Email Service: User not found in auth.users');
+          return {
+            success: false,
+            error: 'Account not found. Please check your email address or create a new account.'
+          };
         }
+        
+        console.log('📧 MFA Email Service: Found user with email:', userExists.email, 'ID:', userExists.id);
       }
 
+      console.log('📤 MFA Email Service: Calling send-mfa-email edge function...');
       const { data, error } = await supabase.functions.invoke('send-mfa-email', {
         body: { email }
       });
 
       if (error) {
-        console.error('❌ MFA Email Service: Supabase function error:', error);
+        console.error('❌ MFA Email Service: Edge function error:', error);
         
-        // If it's a user not found error, provide more helpful feedback
-        if (error.message?.includes('User not found')) {
+        // Provide more specific error messages based on the error
+        if (error.message?.includes('User not found') || error.message?.includes('non-2xx status code')) {
           return {
             success: false,
-            error: 'Account not found. Please check your email address or sign up for a new account.'
+            error: 'Account not found. Please check your email address or create a new account.'
           };
         }
         
-        throw new Error(`Failed to send MFA email: ${error.message}`);
+        if (error.message?.includes('Email service not configured')) {
+          return {
+            success: false,
+            error: 'Email service is temporarily unavailable. Please try again later.'
+          };
+        }
+        
+        return {
+          success: false,
+          error: 'Failed to send verification email. Please try again.'
+        };
       }
 
       if (!data || !data.success) {
-        console.error('❌ MFA Email Service: Function returned failure:', data);
+        console.error('❌ MFA Email Service: Edge function returned failure:', data);
         
-        // Check for specific error messages
+        // Check for specific error messages from the edge function
         if (data?.error?.includes('User not found')) {
           return {
             success: false,
-            error: 'Account not found. Please check your email address or sign up for a new account.'
+            error: 'Account not found. Please check your email address or create a new account.'
           };
         }
         
-        throw new Error(data?.error || 'Failed to send MFA email');
+        return {
+          success: false,
+          error: data?.error || 'Failed to send verification email. Please try again.'
+        };
       }
 
       console.log('✅ MFA Email Service: Email sent successfully:', data);
@@ -60,10 +81,26 @@ export class MFAEmailService {
         challengeId: data.challengeId
       };
     } catch (error: any) {
-      console.error('❌ MFA Email Service: Error sending email:', error);
+      console.error('❌ MFA Email Service: Unexpected error:', error);
+      
+      // Handle specific error types
+      if (error.message?.includes('User not found')) {
+        return {
+          success: false,
+          error: 'Account not found. Please check your email address or create a new account.'
+        };
+      }
+      
+      if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        return {
+          success: false,
+          error: 'Network error. Please check your connection and try again.'
+        };
+      }
+      
       return {
         success: false,
-        error: error.message || 'Failed to send MFA email'
+        error: 'An unexpected error occurred. Please try again.'
       };
     }
   }
