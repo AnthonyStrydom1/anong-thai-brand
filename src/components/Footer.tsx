@@ -259,7 +259,7 @@ const Footer = ({ className }: FooterProps) => {
             <div className="flex space-x-3 pt-2">
               {[
                 { href: "https://instagram.com", Icon: Instagram },
-                { href: "https://facebook.com", Icon: Facebook },
+                { href: "https://www.facebook.com/AnongThaiFood", Icon: Facebook },
                 { href: "https://twitter.com", Icon: Twitter }
               ].map(({ href, Icon }) => (
                 <a 
