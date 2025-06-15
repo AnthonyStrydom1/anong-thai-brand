@@ -88,6 +88,8 @@ export default function CreateCustomerForm() {
       }
 
       // If user doesn't exist in auth, create both auth user and customer
+      // Note: The handle_new_user trigger will automatically create the customer record
+      // but we want to make sure it doesn't create admin user records
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: 'TempPassword123!', // Temporary password - user should reset
@@ -95,6 +97,8 @@ export default function CreateCustomerForm() {
           data: {
             first_name: formData.fullName.split(' ')[0] || '',
             last_name: formData.fullName.split(' ').slice(1).join(' ') || '',
+            // Add a flag to indicate this is a customer creation, not admin
+            customer_creation: true
           }
         }
       });

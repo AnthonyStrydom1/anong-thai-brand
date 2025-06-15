@@ -7,10 +7,30 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
+interface AuthUser {
+  id: string;
+  email?: string;
+  raw_user_meta_data?: any;
+}
+
+interface UserInfo {
+  email: string;
+  hasAuthUser: boolean;
+  authUserId?: string;
+  hasCustomer: boolean;
+  customerId?: number;
+  customerUserId?: string;
+  hasProfile: boolean;
+  profileId?: string;
+  authUser?: AuthUser;
+  customer?: any;
+  profile?: any;
+}
+
 const UserResolutionTool = () => {
   const [email, setEmail] = useState('anthonys@hpd.co.za');
   const [isLoading, setIsLoading] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   const checkUserStatus = async () => {
     setIsLoading(true);
@@ -22,7 +42,7 @@ const UserResolutionTool = () => {
         .eq('email', email)
         .maybeSingle();
 
-      // Check if profile exists  
+      // Check if auth user exists
       const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
       const authUser = authUsers?.users?.find(user => user.email === email);
 
@@ -53,7 +73,7 @@ const UserResolutionTool = () => {
         hasProfile: !!profile
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking user status:', error);
       toast({
         title: "Error",
@@ -66,7 +86,7 @@ const UserResolutionTool = () => {
   };
 
   const createMissingRecords = async () => {
-    if (!userInfo || !userInfo.hasAuthUser) {
+    if (!userInfo || !userInfo.hasAuthUser || !userInfo.authUser) {
       toast({
         title: "Error",
         description: "No auth user found to create records for",
@@ -101,7 +121,7 @@ const UserResolutionTool = () => {
       if (!userInfo.hasCustomer) {
         const firstName = authUser.raw_user_meta_data?.first_name || '';
         const lastName = authUser.raw_user_meta_data?.last_name || '';
-        const fullName = `${firstName} ${lastName}`.trim() || authUser.email;
+        const fullName = `${firstName} ${lastName}`.trim() || authUser.email || '';
 
         const { error: customerError } = await supabase
           .from('customers')
@@ -129,7 +149,7 @@ const UserResolutionTool = () => {
       // Refresh user info
       await checkUserStatus();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating missing records:', error);
       toast({
         title: "Error",
