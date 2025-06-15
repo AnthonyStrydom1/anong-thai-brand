@@ -9,7 +9,7 @@ export const EmailHeader = () => {
       <Row>
         <Column style={{ textAlign: 'center' as const, paddingBottom: '20px' }}>
           <Img
-            src="https://anong.co.za/lovable-uploads/f440215b-ebf7-4c9f-9cf6-412d4018796e.png"
+            src="https://anongthaibrand.com/lovable-uploads/f440215b-ebf7-4c9f-9cf6-412d4018796e.png"
             width="60"
             height="60"
             alt="Anong Thai Brand Logo"
