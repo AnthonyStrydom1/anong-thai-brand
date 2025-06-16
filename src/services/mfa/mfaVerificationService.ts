@@ -82,6 +82,7 @@ export class MFAVerificationService {
 
       // CRITICAL FIX: Wait for auth state to stabilize before clearing MFA session
       console.log('✅ MFA Verification Service: Login successful, waiting for auth state...');
+      console.log('🔍 MFA Verification Service: Sign in data:', data);
       
       // Wait for the auth state to properly update
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -89,16 +90,31 @@ export class MFAVerificationService {
       // Verify the session is actually established
       const { data: { session } } = await supabase.auth.getSession();
       console.log('📊 MFA Verification Service: Current session:', session?.user?.email);
+      console.log('📊 MFA Verification Service: Full session:', session);
       
       if (session) {
         console.log('✅ MFA Verification Service: Auth session confirmed, clearing MFA session');
-        mfaSessionManager.clearSession();
         
-        // Dispatch success event instead of cleared event
+        // Check MFA session before clearing
+        console.log('🔍 MFA Verification Service: MFA session before clear:', mfaSessionManager.hasPendingMFA());
+        mfaSessionManager.clearSession();
+        console.log('🔍 MFA Verification Service: MFA session after clear:', mfaSessionManager.hasPendingMFA());
+        
+        // Dispatch BOTH events to ensure UI updates
         console.log('📡 MFA Verification Service: Dispatching mfa-verification-success event');
         window.dispatchEvent(new CustomEvent('mfa-verification-success', { 
           detail: { user: session.user } 
         }));
+        
+        console.log('📡 MFA Verification Service: Dispatching mfa-session-cleared event');
+        window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
+        
+        // Also dispatch a generic auth success event
+        console.log('📡 MFA Verification Service: Dispatching auth-success event');
+        window.dispatchEvent(new CustomEvent('auth-success', { 
+          detail: { user: session.user, session } 
+        }));
+        
       } else {
         console.warn('⚠️ MFA Verification Service: No session found after sign-in');
         throw new Error('Authentication failed - please try again');
