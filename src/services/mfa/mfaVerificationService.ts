@@ -1,4 +1,54 @@
-async verifyAndSignIn(code: string) {
+import { supabase } from "@/integrations/supabase/client";
+import { mfaSessionManager } from './mfaSessionManager';
+import type { MFASessionData } from './mfaTypes';
+
+export class MFAVerificationService {
+  async verifyCode(code: string, sessionData: MFASessionData) {
+    console.log('🔍 MFA Verification Service: Verifying code with Supabase...');
+    
+    const { data: verifyData, error: verifyError } = await supabase.rpc('verify_mfa_challenge', {
+      user_email: sessionData.email,
+      provided_code: code
+    });
+
+    if (verifyError) {
+      console.log('❌ MFA Verification Service: Code verification failed:', verifyError);
+      
+      // Check if it's an expiration error
+      if (verifyError.message?.includes('No valid challenge found') || 
+          verifyError.message?.includes('expired')) {
+        throw new Error('Verification code has expired. Please request a new code.');
+      }
+      
+      throw new Error('Invalid verification code');
+    }
+
+    if (!verifyData) {
+      throw new Error('Invalid verification code');
+    }
+
+    console.log('✅ MFA Verification Service: Code verified successfully');
+    return verifyData;
+  }
+
+  async signInWithCredentials(email: string, password: string) {
+    // Complete sign in with verified credentials
+    console.log('🔐 MFA Verification Service: Completing final sign in...');
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.log('❌ MFA Verification Service: Final sign in failed:', error);
+      throw error;
+    }
+
+    console.log('✅ MFA Verification Service: Sign in completed successfully');
+    return data;
+  }
+
+  async verifyAndSignIn(code: string) {
   console.log('🔍 MFA Verification Service: Starting verification with code:', code);
   
   const sessionData = mfaSessionManager.getSessionData();
@@ -67,3 +117,6 @@ async verifyAndSignIn(code: string) {
     throw error;
   }
 }
+}
+
+export const mfaVerificationService = new MFAVerificationService();
