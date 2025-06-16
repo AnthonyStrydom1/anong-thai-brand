@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +7,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider } from './hooks/useAuth';
+import ChatBot from './components/chatbot/ChatBot';
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import About from "./pages/About";
@@ -75,6 +75,7 @@ function App() {
                     <Route path="/terms" element={<Terms />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                  <ChatBot />
                 </BrowserRouter>
               </TooltipProvider>
             </CartProvider>
