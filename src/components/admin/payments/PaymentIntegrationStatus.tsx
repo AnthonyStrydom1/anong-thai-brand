@@ -6,10 +6,7 @@ import { CreditCard, AlertCircle, CheckCircle, ExternalLink } from "lucide-react
 import { enhancedPaymentService } from "@/services/payments/enhancedPaymentService";
 
 const PaymentIntegrationStatus = () => {
-  console.log('PaymentIntegrationStatus: Component rendering');
-  
   const paymentStatus = enhancedPaymentService.getPaymentStatus();
-  console.log('PaymentIntegrationStatus: Payment status:', paymentStatus);
 
   return (
     <Card className="mb-6">
