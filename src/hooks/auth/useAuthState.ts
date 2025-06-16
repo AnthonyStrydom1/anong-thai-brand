@@ -38,8 +38,32 @@ export function useAuthState() {
       }
     };
 
+    // Mobile-specific auth completion handler
+    const handleMobileAuthComplete = () => {
+      if (mounted) {
+        console.log('📱 Auth: Mobile auth complete - forcing state refresh');
+        const isMobile = window.innerWidth < 768;
+        
+        if (isMobile) {
+          // Force a complete auth state refresh on mobile
+          setTimeout(() => {
+            authService.getCurrentSession().then(session => {
+              if (session?.user && mounted) {
+                console.log('📱 Auth: Mobile auth refresh - setting authenticated state');
+                setUser(session.user);
+                setSession(session);
+                setMfaPending(false);
+                setIsLoading(false);
+              }
+            });
+          }, 100);
+        }
+      }
+    };
+
     window.addEventListener('mfa-session-stored', handleMFAStored);
     window.addEventListener('mfa-session-cleared', handleMFACleared);
+    window.addEventListener('mobile-auth-complete', handleMobileAuthComplete);
 
     // Set initial MFA state
     const initialMFAState = checkInitialMFAState();
@@ -50,18 +74,22 @@ export function useAuthState() {
       (user, session) => {
         if (!mounted) return;
 
+        const isMobile = window.innerWidth < 768;
         console.log('🔄 Auth: State change event:', { 
           user: !!user, 
           session: !!session,
           sessionId: session?.access_token ? 'present' : 'missing',
-          isMobile: window.innerWidth < 768
+          isMobile,
+          pathname: window.location.pathname
         });
 
         // For authenticated users
         if (user && session) {
           console.log('✅ Auth: User authenticated');
           
-          // Small delay to ensure MFA state is properly updated
+          // Longer delay for mobile to ensure proper state settling
+          const delay = isMobile ? 200 : 100;
+          
           setTimeout(() => {
             if (!mounted) return;
             
@@ -91,7 +119,7 @@ export function useAuthState() {
               setSession(null);
               setIsLoading(false);
             }
-          }, 100);
+          }, delay);
           return;
         }
 
@@ -161,6 +189,7 @@ export function useAuthState() {
       subscription.unsubscribe();
       window.removeEventListener('mfa-session-stored', handleMFAStored);
       window.removeEventListener('mfa-session-cleared', handleMFACleared);
+      window.removeEventListener('mobile-auth-complete', handleMobileAuthComplete);
     };
   }, []);
 

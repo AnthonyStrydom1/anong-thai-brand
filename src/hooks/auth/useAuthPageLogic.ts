@@ -89,14 +89,29 @@ export const useAuthPageLogic = () => {
       setMfaEmail('');
     };
 
+    // Mobile-specific auth completion handler
+    const handleMobileAuthComplete = () => {
+      console.log('📱 AuthPage: Mobile auth complete event received');
+      const isMobile = window.innerWidth < 768;
+      
+      if (isMobile) {
+        console.log('📱 AuthPage: Mobile navigation - redirecting to home');
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 200);
+      }
+    };
+
     window.addEventListener('mfa-session-stored', handleMFAStored as EventListener);
     window.addEventListener('mfa-session-cleared', handleMFACleared as EventListener);
+    window.addEventListener('mobile-auth-complete', handleMobileAuthComplete as EventListener);
 
     return () => {
       window.removeEventListener('mfa-session-stored', handleMFAStored as EventListener);
       window.removeEventListener('mfa-session-cleared', handleMFACleared as EventListener);
+      window.removeEventListener('mobile-auth-complete', handleMobileAuthComplete as EventListener);
     };
-  }, [isLogin]);
+  }, [isLogin, navigate]);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -146,15 +161,22 @@ export const useAuthPageLogic = () => {
       description: "You have been logged in successfully.",
     });
     
-    // For mobile, add extra delay to ensure auth state is updated
+    // Enhanced mobile navigation with longer delays
     const isMobile = window.innerWidth < 768;
-    const delay = isMobile ? 500 : 100;
+    const delay = isMobile ? 800 : 200; // Increased mobile delay
     
     console.log(`📱 AuthPage: Using ${delay}ms delay for ${isMobile ? 'mobile' : 'desktop'} navigation`);
     
     setTimeout(() => {
       console.log('🏠 AuthPage: Navigating to home page');
       navigate('/', { replace: true });
+      
+      // Force a page refresh on mobile to ensure clean state
+      if (isMobile) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
     }, delay);
   };
 

@@ -1,141 +1,98 @@
 
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from "@/hooks/use-toast";
-import SearchOverlay from './navigation/SearchOverlay';
-import MobileMenu from './navigation/MobileMenu';
-import LogoSection from './navigation/LogoSection';
+import { useIsMobile } from '@/hooks/use-mobile';
 import DesktopNav from './navigation/DesktopNav';
-import RightActions from './navigation/RightActions';
-import { navigationTranslations } from '@/translations/navigation';
+import MobileMenu from './navigation/MobileMenu';
 
 const NavigationBanner = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { language, toggleLanguage } = useLanguage();
-  const { user, signOut, mfaPending } = useAuth();
-  const currentPath = location.pathname;
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const { language } = useLanguage();
+  const { currency } = useCurrency();
+  const isMobile = useIsMobile();
   
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  
-  const toggleSearch = () => {
-    setIsSearchOpen(!isSearchOpen);
-    if (isSearchOpen) {
-      setSearchQuery('');
-    }
-  };
+  // Safely use auth hook with error boundary
+  let authState;
+  try {
+    authState = useAuth();
+  } catch (error) {
+    console.warn('Auth context not available in NavigationBanner:', error);
+    authState = {
+      user: null,
+      session: null,
+      isLoading: true,
+      mfaPending: false,
+      signOut: async () => {}
+    };
+  }
 
-  const handleClearSearch = () => {
-    setSearchQuery('');
-  };
+  const { user, session, isLoading, mfaPending, signOut } = authState;
+
+  // Enhanced mobile auth state detection
+  const isLoggedIn = !!(user && session && !mfaPending && !isLoading);
+
+  console.log('🧭 NavigationBanner: Auth state', { 
+    user: !!user, 
+    session: !!session,
+    mfaPending,
+    isLoading,
+    isLoggedIn,
+    isMobile,
+    pathname: window.location.pathname
+  });
 
   const handleLogout = async () => {
+    console.log('🚪 NavigationBanner: Logout initiated');
     try {
-      console.log('🔄 NavigationBanner: Starting logout process');
       await signOut();
       console.log('✅ NavigationBanner: Logout successful');
       
-      toast({
-        title: t.logoutSuccess || 'Successfully logged out',
-      });
-      
-      navigate('/');
-      
-    } catch (error: any) {
-      console.error('❌ NavigationBanner: Unexpected logout error:', error);
-      
-      toast({
-        title: 'Logged out successfully',
-        description: 'You have been logged out of your account',
-      });
-      
-      navigate('/');
+      // For mobile, ensure we navigate to home after logout
+      if (isMobile) {
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 100);
+      }
+    } catch (error) {
+      console.error('❌ NavigationBanner: Logout error:', error);
     }
   };
 
-  const handleMobileLogin = () => {
-    // This will be handled by the Link to /account in MobileMenu
-    // which will show the login modal when not authenticated
-  };
-  
-  const t = navigationTranslations[language];
-
-  const navItems = [
-    { path: '/', label: t.home },
-    { path: '/shop', label: t.shop },
-    { path: '/about', label: language === 'en' ? 'About Anong' : 'เกี่ยวกับอนงค์' },
-    { path: '/recipes', label: t.recipes },
-    { path: '/contact', label: t.contact },
-  ];
-
-  // Enhanced mobile translations with all required properties
-  const mobileTranslations = {
-    ...t,
-    account: t.account || (language === 'en' ? 'Account' : 'บัญชี'),
-    orders: t.orders || (language === 'en' ? 'Orders' : 'คำสั่งซื้อ'),
-    settings: t.settings || (language === 'en' ? 'Settings' : 'การตั้งค่า'),
-  };
-
-  useEffect(() => {
-    if (mfaPending && currentPath !== '/auth') {
-      navigate("/auth", { replace: true });
-    }
-  }, [mfaPending, currentPath, navigate]);
-
-  // Update "isLoggedIn" logic to factor mfaPending
-  const isLoggedIn = !!user && !mfaPending;
-
-  return (
-    <div className="bg-anong-black nav-premium sticky top-0 z-40 border-b border-anong-gold/20">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center py-4">
-          {/* Logo and Navigation */}
-          <div className="flex items-center">
-            <LogoSection />
-            <DesktopNav navItems={navItems} />
-          </div>
-
-          {/* Right side actions */}
-          <RightActions
-            language={language}
-            isLoggedIn={isLoggedIn}
-            isMenuOpen={isMenuOpen}
-            onToggleLanguage={toggleLanguage}
-            onToggleSearch={toggleSearch}
-            onToggleMenu={toggleMenu}
-            onLogout={handleLogout}
-            translations={mobileTranslations}
-          />
-        </div>
-
-        {/* Search overlay */}
-        <SearchOverlay 
-          isOpen={isSearchOpen}
-          searchQuery={searchQuery}
-          onSearchChange={(e) => setSearchQuery(e.target.value)}
-          onClear={handleClearSearch}
-          onClose={toggleSearch}
-          translations={mobileTranslations}
-        />
-      </div>
-      
-      {/* Mobile menu */}
-      <MobileMenu 
-        isOpen={isMenuOpen}
-        navItems={navItems}
+  // Mobile navigation component
+  if (isMobile) {
+    return (
+      <MobileMenu
         isLoggedIn={isLoggedIn}
-        onMenuItemClick={() => setIsMenuOpen(false)}
-        onSearchClick={toggleSearch}
-        onLoginClick={handleMobileLogin}
-        onLogoutClick={handleLogout}
-        translations={mobileTranslations}
+        onLogout={handleLogout}
+        translations={{
+          login: language === 'th' ? 'เข้าสู่ระบบ' : 'Login',
+          profile: language === 'th' ? 'โปรไฟล์' : 'Profile',
+          logout: language === 'th' ? 'ออกจากระบบ' : 'Logout',
+          account: language === 'th' ? 'บัญชี' : 'Account',
+          orders: language === 'th' ? 'คำสั่งซื้อ' : 'Orders',
+          settings: language === 'th' ? 'ตั้งค่า' : 'Settings'
+        }}
       />
-    </div>
+    );
+  }
+
+  // Desktop navigation component
+  return (
+    <DesktopNav
+      isLoggedIn={isLoggedIn}
+      onLogout={handleLogout}
+      translations={{
+        login: language === 'th' ? 'เข้าสู่ระบบ' : 'Login',
+        profile: language === 'th' ? 'โปรไฟล์' : 'Profile',
+        logout: language === 'th' ? 'ออกจากระบบ' : 'Logout',
+        account: language === 'th' ? 'บัญชี' : 'Account',
+        orders: language === 'th' ? 'คำสั่งซื้อ' : 'Orders',
+        settings: language === 'th' ? 'ตั้งค่า' : 'Settings'
+      }}
+    />
   );
 };
 
