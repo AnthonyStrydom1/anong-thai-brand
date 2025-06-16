@@ -12,7 +12,6 @@ import UserManagement from '@/components/admin/UserManagement';
 import ReviewManager from '@/components/admin/ReviewManager';
 import EventManager from '@/components/admin/EventManager';
 import OrphanedUserManager from '@/components/admin/OrphanedUserManager';
-import NewsletterManager from '@/components/admin/NewsletterManager';
 import MobileAdminLayout from '@/components/admin/MobileAdminLayout';
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
 import AdminHeader from '@/components/admin/AdminHeader';
@@ -118,8 +117,6 @@ const AdminPage = () => {
         return <EventManager />;
       case 'reviews':
         return <ReviewManager />;
-      case 'newsletter':
-        return <NewsletterManager />;
       case 'security':
         return <SecurityDashboard />;
       case 'analytics':
@@ -202,12 +199,6 @@ const AdminPage = () => {
               <TabsContent value="reviews" className="mt-0">
                 <div className="anong-card p-6">
                   <ReviewManager />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="newsletter" className="mt-0">
-                <div className="anong-card p-6">
-                  <NewsletterManager />
                 </div>
               </TabsContent>
 
