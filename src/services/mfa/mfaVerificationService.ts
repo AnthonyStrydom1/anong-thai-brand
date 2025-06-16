@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { mfaSessionManager } from './mfaSessionManager';
 import type { MFASessionData } from './mfaTypes';
@@ -85,24 +84,9 @@ export class MFAVerificationService {
       console.log('🧹 MFA Verification Service: Clearing MFA session after successful login');
       mfaSessionManager.clearSession();
       
-      // Dispatch event to notify that MFA has been cleared - with longer delay for mobile
-      const isMobile = window.innerWidth < 768;
-      const delay = isMobile ? 300 : 100;
-      
-      console.log(`📱 MFA Verification Service: Using ${delay}ms delay for ${isMobile ? 'mobile' : 'desktop'} event dispatch`);
-      
-      setTimeout(() => {
-        console.log('📡 MFA Verification Service: Dispatching mfa-session-cleared event');
-        window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
-        
-        // Additional mobile-specific event for navigation
-        if (isMobile) {
-          setTimeout(() => {
-            console.log('📱 MFA Verification Service: Dispatching mobile-auth-complete event');
-            window.dispatchEvent(new CustomEvent('mobile-auth-complete'));
-          }, 100);
-        }
-      }, delay);
+      // Dispatch event to notify that MFA has been cleared
+      console.log('📡 MFA Verification Service: Dispatching mfa-session-cleared event');
+      window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
 
       return data;
     } catch (error: any) {

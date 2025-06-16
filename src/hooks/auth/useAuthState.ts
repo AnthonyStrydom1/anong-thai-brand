@@ -15,19 +15,12 @@ export function useAuthState() {
   useEffect(() => {
     let mounted = true;
 
-    // Clear any stale MFA data on app start
-    console.log('🧹 Auth: Cleaning up any stale MFA data on app initialization');
-    
-    const checkInitialMFAState = () => {
-      const hasPendingMFA = mfaAuthService.hasPendingMFA();
-      console.log('🔍 Auth: Initial MFA check:', hasPendingMFA);
-      return hasPendingMFA;
-    };
-
+    // Simple MFA event handlers
     const handleMFAStored = () => { 
       if (mounted) {
         console.log('📧 Auth: MFA session stored - setting mfaPending to true');
         setMfaPending(true);
+        setIsLoading(false);
       }
     };
     
@@ -38,88 +31,52 @@ export function useAuthState() {
       }
     };
 
-    // Mobile-specific auth completion handler
-    const handleMobileAuthComplete = () => {
-      if (mounted) {
-        console.log('📱 Auth: Mobile auth complete - forcing state refresh');
-        const isMobile = window.innerWidth < 768;
-        
-        if (isMobile) {
-          // Force a complete auth state refresh on mobile
-          setTimeout(() => {
-            authService.getCurrentSession().then(session => {
-              if (session?.user && mounted) {
-                console.log('📱 Auth: Mobile auth refresh - setting authenticated state');
-                setUser(session.user);
-                setSession(session);
-                setMfaPending(false);
-                setIsLoading(false);
-              }
-            });
-          }, 100);
-        }
-      }
-    };
-
+    // Set up event listeners
     window.addEventListener('mfa-session-stored', handleMFAStored);
     window.addEventListener('mfa-session-cleared', handleMFACleared);
-    window.addEventListener('mobile-auth-complete', handleMobileAuthComplete);
 
-    // Set initial MFA state
-    const initialMFAState = checkInitialMFAState();
-    setMfaPending(initialMFAState);
+    // Check initial MFA state
+    const initialMFAState = mfaAuthService.hasPendingMFA();
     console.log('🎯 Auth: Initial MFA state:', initialMFAState);
+    setMfaPending(initialMFAState);
 
+    // Set up auth state change listener
     const { data: { subscription } } = authService.onAuthStateChange(
       (user, session) => {
         if (!mounted) return;
 
-        const isMobile = window.innerWidth < 768;
         console.log('🔄 Auth: State change event:', { 
           user: !!user, 
           session: !!session,
-          sessionId: session?.access_token ? 'present' : 'missing',
-          isMobile,
-          pathname: window.location.pathname
+          sessionId: session?.access_token ? 'present' : 'missing'
         });
 
-        // For authenticated users
+        // For authenticated users - only set if no MFA is pending
         if (user && session) {
-          console.log('✅ Auth: User authenticated');
+          const pendingMFA = mfaAuthService.hasPendingMFA();
+          console.log('🔍 Auth: Auth success - MFA check:', pendingMFA);
           
-          // Longer delay for mobile to ensure proper state settling
-          const delay = isMobile ? 200 : 100;
-          
-          setTimeout(() => {
-            if (!mounted) return;
-            
-            const pendingMFA = mfaAuthService.hasPendingMFA();
-            console.log('🔍 Auth: Post-auth MFA check:', pendingMFA);
-            
-            if (!pendingMFA) {
-              console.log('✅ Auth: No pending MFA, setting authenticated state');
-              setUser(user);
-              setSession(session);
-              setMfaPending(false);
-              setIsLoading(false);
+          if (!pendingMFA) {
+            console.log('✅ Auth: No pending MFA, setting authenticated state');
+            setUser(user);
+            setSession(session);
+            setMfaPending(false);
+            setIsLoading(false);
 
-              // Load user profile
-              authService.getUserProfile(user.id)
-                .then(profile => {
-                  if (mounted) setUserProfile(profile);
-                })
-                .catch(error => {
-                  console.error('❌ Auth: Failed to load user profile:', error);
-                  if (mounted) setUserProfile(null);
-                });
-            } else {
-              console.log('🔒 Auth: MFA still pending');
-              setMfaPending(true);
-              setUser(null);
-              setSession(null);
-              setIsLoading(false);
-            }
-          }, delay);
+            // Load user profile
+            authService.getUserProfile(user.id)
+              .then(profile => {
+                if (mounted) setUserProfile(profile);
+              })
+              .catch(error => {
+                console.error('❌ Auth: Failed to load user profile:', error);
+                if (mounted) setUserProfile(null);
+              });
+          } else {
+            console.log('🔒 Auth: MFA pending - keeping MFA state active');
+            // Don't change anything - let MFA flow continue
+            setIsLoading(false);
+          }
           return;
         }
 
@@ -127,29 +84,30 @@ export function useAuthState() {
         const pendingMFA = mfaAuthService.hasPendingMFA();
         console.log('🔍 Auth: No user/session, MFA check:', pendingMFA);
         
-        setMfaPending(pendingMFA);
-        setUser(null);
-        setSession(null);
-        setUserProfile(null);
+        // Only clear MFA state if there's truly no pending MFA
+        if (!pendingMFA) {
+          setMfaPending(false);
+          setUser(null);
+          setSession(null);
+          setUserProfile(null);
+        }
         setIsLoading(false);
       }
     );
 
+    // Check for existing session
     const checkSession = async () => {
       try {
         console.log('🔍 Auth: Checking existing session');
         const session = await authService.getCurrentSession();
         console.log('📊 Auth: Session check result:', { 
           hasSession: !!session, 
-          hasUser: !!session?.user,
-          sessionId: session?.access_token ? 'present' : 'missing'
+          hasUser: !!session?.user
         });
         
         if (mounted) {
           if (session?.user) {
-            console.log('✅ Auth: Found existing session');
-            
-            const pendingMFA = checkInitialMFAState();
+            const pendingMFA = mfaAuthService.hasPendingMFA();
             console.log('🔍 Auth: Existing session MFA check:', pendingMFA);
             
             if (!pendingMFA) {
@@ -160,12 +118,10 @@ export function useAuthState() {
             } else {
               console.log('🔒 Auth: MFA pending for existing session');
               setMfaPending(true);
-              setUser(null);
-              setSession(null);
+              // Don't clear user/session here - let MFA complete
             }
           } else {
-            console.log('❌ Auth: No existing session found');
-            const pendingMFA = checkInitialMFAState();
+            const pendingMFA = mfaAuthService.hasPendingMFA();
             setMfaPending(pendingMFA);
             setUser(null);
             setSession(null);
@@ -175,6 +131,8 @@ export function useAuthState() {
       } catch (error) {
         console.error('❌ Auth: Session check failed:', error);
         if (mounted) {
+          const pendingMFA = mfaAuthService.hasPendingMFA();
+          setMfaPending(pendingMFA);
           setUser(null);
           setSession(null);
           setIsLoading(false);
@@ -189,7 +147,6 @@ export function useAuthState() {
       subscription.unsubscribe();
       window.removeEventListener('mfa-session-stored', handleMFAStored);
       window.removeEventListener('mfa-session-cleared', handleMFACleared);
-      window.removeEventListener('mobile-auth-complete', handleMobileAuthComplete);
     };
   }, []);
 
