@@ -102,23 +102,27 @@ export function useAuthState() {
 
     // Set up auth state change listener
     const { data: { subscription } } = authService.onAuthStateChange(
-      async (user, session) => {
+      async (event, session) => {
         if (!mounted) return;
 
         console.log('🔄 Auth: State change event:', { 
-          user: !!user, 
+          event,
+          user: !!session?.user, 
           session: !!session,
-          sessionId: session?.access_token ? 'present' : 'missing'
+          sessionId: session?.access_token ? 'present' : 'missing',
+          userId: session?.user?.id || 'none'
         });
 
-        if (user && session) {
-          console.log('✅ Auth: User authenticated');
+        // Handle different auth events
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('✅ Auth: SIGNED_IN event with valid session');
           
           // Check if MFA is required/pending
           const pendingMFA = mfaAuthService.hasPendingMFA();
+          console.log('🔍 Auth: MFA pending check:', pendingMFA);
           
           if (pendingMFA) {
-            console.log('🔒 Auth: MFA verification required');
+            console.log('🔒 Auth: MFA verification still required, staying in pending state');
             setMfaPending(true);
             setUser(null);
             setSession(null);
@@ -126,10 +130,10 @@ export function useAuthState() {
             setIsLoading(false);
           } else {
             console.log('✅ Auth: No MFA required, setting authenticated state');
-            setAuthenticatedState(user, session);
+            setAuthenticatedState(session.user, session);
           }
-        } else {
-          console.log('❌ Auth: User logged out or session invalid');
+        } else if (event === 'SIGNED_OUT') {
+          console.log('❌ Auth: SIGNED_OUT event');
           const pendingMFA = mfaAuthService.hasPendingMFA();
           
           setMfaPending(pendingMFA);
@@ -137,6 +141,27 @@ export function useAuthState() {
           setSession(null);
           setUserProfile(null);
           setIsLoading(false);
+        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+          console.log('🔄 Auth: TOKEN_REFRESHED event');
+          const pendingMFA = mfaAuthService.hasPendingMFA();
+          
+          if (!pendingMFA) {
+            console.log('✅ Auth: Token refreshed, updating session');
+            setAuthenticatedState(session.user, session);
+          }
+        } else {
+          console.log(`⚠️ Auth: Unhandled event or invalid session:`, { event, hasSession: !!session, hasUser: !!session?.user });
+          
+          // Only clear state if we're certain there's no valid session
+          if (event === 'INITIAL_SESSION' && !session) {
+            console.log('❌ Auth: No initial session found');
+            const pendingMFA = mfaAuthService.hasPendingMFA();
+            setMfaPending(pendingMFA);
+            setUser(null);
+            setSession(null);
+            setUserProfile(null);
+            setIsLoading(false);
+          }
         }
       }
     );
