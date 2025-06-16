@@ -20,6 +20,10 @@ export function useAuthState() {
         console.log('📧 Auth: MFA session stored - setting mfaPending to true');
         setMfaPending(true);
         setIsLoading(false);
+        // Clear any existing user/session when MFA is required
+        setUser(null);
+        setSession(null);
+        setUserProfile(null);
       }
     };
     
@@ -41,6 +45,9 @@ export function useAuthState() {
     
     if (initialMFAState && isOnAuthPage) {
       setMfaPending(true);
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
     } else {
       setMfaPending(false);
       // Clear stale MFA if not on auth page
@@ -58,24 +65,16 @@ export function useAuthState() {
         console.log('🔄 Auth: State change event:', { 
           user: !!user, 
           session: !!session,
-          sessionId: session?.access_token ? 'present' : 'missing'
+          sessionId: session?.access_token ? 'present' : 'missing',
+          mfaPending
         });
 
-        // For authenticated users with valid session
-        if (user && session) {
-          console.log('✅ Auth: User authenticated successfully');
+        // CRITICAL: Only accept authenticated sessions if NO MFA is pending
+        if (user && session && !mfaPending) {
+          console.log('✅ Auth: User authenticated successfully (no MFA pending)');
           setUser(user);
           setSession(session);
           setIsLoading(false);
-          
-          // Only clear MFA pending if we have a valid session
-          // Give a small delay to prevent race conditions
-          setTimeout(() => {
-            if (mounted) {
-              console.log('🔄 Auth: Setting mfaPending to false after successful auth');
-              setMfaPending(false);
-            }
-          }, 500);
 
           // Load user profile
           authService.getUserProfile(user.id)
@@ -89,13 +88,21 @@ export function useAuthState() {
           return;
         }
 
+        // If we have a user/session but MFA is pending, ignore it
+        if (user && session && mfaPending) {
+          console.log('⏸️ Auth: Ignoring auth event - MFA is pending');
+          return;
+        }
+
         // For unauthenticated users
         console.log('❌ Auth: No user/session - user logged out');
-        setUser(null);
-        setSession(null);
-        setUserProfile(null);
+        if (!mfaPending) {
+          setUser(null);
+          setSession(null);
+          setUserProfile(null);
+        }
         
-        // Only keep MFA pending if we're on the auth page
+        // Only clear MFA pending if we're not on the auth page
         if (!window.location.pathname.includes('/auth')) {
           console.log('🧹 Auth: Not on auth page, clearing MFA state');
           setMfaPending(false);
@@ -113,17 +120,18 @@ export function useAuthState() {
         const session = await authService.getCurrentSession();
         console.log('📊 Auth: Session check result:', { 
           hasSession: !!session, 
-          hasUser: !!session?.user
+          hasUser: !!session?.user,
+          mfaPending
         });
         
         if (mounted) {
-          if (session?.user) {
-            console.log('✅ Auth: Found existing valid session');
+          // Only accept session if no MFA is pending
+          if (session?.user && !mfaPending) {
+            console.log('✅ Auth: Found existing valid session (no MFA pending)');
             setUser(session.user);
             setSession(session);
-            setMfaPending(false); // Clear MFA if we have valid session
           } else {
-            console.log('❌ Auth: No valid existing session');
+            console.log('❌ Auth: No valid existing session or MFA pending');
             setUser(null);
             setSession(null);
             // Only set MFA pending if we're on auth page
@@ -156,7 +164,7 @@ export function useAuthState() {
       window.removeEventListener('mfa-session-stored', handleMFAStored);
       window.removeEventListener('mfa-session-cleared', handleMFACleared);
     };
-  }, []);
+  }, []); // Remove mfaPending from dependency array to prevent loops
 
   return {
     user,

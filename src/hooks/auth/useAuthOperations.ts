@@ -1,4 +1,3 @@
-
 import { authService, type AuthUser } from '@/services/authService';
 import { mfaAuthService } from '@/services/mfaAuthService';
 
@@ -31,6 +30,11 @@ export function useAuthOperations(
     try {
       console.log('🔐 Starting sign in process with MFA enforcement');
       
+      // Clear any existing auth state first
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
+      
       mfaAuthService.clearMFASession();
       
       console.log('🔒 Initiating MFA signin (required for all users)');
@@ -39,7 +43,8 @@ export function useAuthOperations(
       console.log('🎯 MFA signin result:', mfaResult);
       
       if (mfaResult.mfaRequired) {
-        console.log('✅ MFA flow initiated successfully');
+        console.log('✅ MFA flow initiated successfully - setting MFA pending');
+        setMfaPending(true);
         return { mfaRequired: true };
       }
       
@@ -49,6 +54,7 @@ export function useAuthOperations(
     } catch (error) {
       console.error('❌ Sign in error:', error);
       mfaAuthService.clearMFASession();
+      setMfaPending(false);
       throw error;
     }
   };
