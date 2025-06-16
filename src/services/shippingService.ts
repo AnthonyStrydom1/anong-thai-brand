@@ -1,7 +1,5 @@
 
-// Legacy shipping service - kept for backward compatibility
-// Enhanced version available in shipping/enhancedShippingService.ts
-
+// Courier Guy shipping service
 export interface ShippingRate {
   service: string;
   cost: number;
