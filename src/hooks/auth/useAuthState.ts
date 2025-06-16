@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { AuthUser, authService } from '@/services/authService';
@@ -33,21 +34,20 @@ export function useAuthState() {
     window.addEventListener('mfa-session-stored', handleMFAStored);
     window.addEventListener('mfa-session-cleared', handleMFACleared);
 
-    // Check initial MFA state - but don't let stale MFA block normal flow
-    const initialMFAState = mfaAuthService.hasPendingMFA();
-    console.log('🎯 Auth: Initial MFA state:', initialMFAState);
-    
-    // Only set MFA pending if we're actually on auth page or just initiated MFA
+    // Check initial MFA state - only set if we're on auth page
     const isOnAuthPage = window.location.pathname === '/auth';
+    const initialMFAState = mfaAuthService.hasPendingMFA();
+    console.log('🎯 Auth: Initial MFA state:', initialMFAState, 'on auth page:', isOnAuthPage);
+    
     if (initialMFAState && isOnAuthPage) {
       setMfaPending(true);
-    } else if (initialMFAState && !isOnAuthPage) {
-      // Clear stale MFA session if we're not on auth page
-      console.log('🧹 Auth: Clearing stale MFA session - not on auth page');
-      mfaAuthService.clearMFASession();
-      setMfaPending(false);
     } else {
       setMfaPending(false);
+      // Clear stale MFA if not on auth page
+      if (initialMFAState && !isOnAuthPage) {
+        console.log('🧹 Auth: Clearing stale MFA session - not on auth page');
+        mfaAuthService.clearMFASession();
+      }
     }
 
     // Set up auth state change listener
@@ -61,13 +61,21 @@ export function useAuthState() {
           sessionId: session?.access_token ? 'present' : 'missing'
         });
 
-        // For authenticated users
+        // For authenticated users with valid session
         if (user && session) {
           console.log('✅ Auth: User authenticated successfully');
           setUser(user);
           setSession(session);
-          setMfaPending(false); // Clear MFA when auth is successful
           setIsLoading(false);
+          
+          // Only clear MFA pending if we have a valid session
+          // Give a small delay to prevent race conditions
+          setTimeout(() => {
+            if (mounted) {
+              console.log('🔄 Auth: Setting mfaPending to false after successful auth');
+              setMfaPending(false);
+            }
+          }, 500);
 
           // Load user profile
           authService.getUserProfile(user.id)

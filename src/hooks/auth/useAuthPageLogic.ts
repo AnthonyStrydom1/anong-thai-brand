@@ -11,7 +11,7 @@ export const useAuthPageLogic = () => {
   const [mfaEmail, setMfaEmail] = useState<string>('');
   const [isCheckingMFA, setIsCheckingMFA] = useState(true);
   const navigate = useNavigate();
-  const { user, mfaPending } = useAuth();
+  const { user, session, mfaPending } = useAuth();
 
   const {
     isLogin,
@@ -29,11 +29,11 @@ export const useAuthPageLogic = () => {
 
   // Redirect if already logged in (NO mfa pending)
   useEffect(() => {
-    if (user && !mfaPending) {
-      console.log('🏠 AuthPage: User authenticated, redirecting to home');
+    if (user && session && !mfaPending) {
+      console.log('🏠 AuthPage: User fully authenticated, redirecting to home');
       navigate('/', { replace: true });
     }
-  }, [user, mfaPending, navigate]);
+  }, [user, session, mfaPending, navigate]);
 
   // Check for existing MFA session on mount
   useEffect(() => {
@@ -89,27 +89,12 @@ export const useAuthPageLogic = () => {
       setMfaEmail('');
     };
 
-    // Mobile-specific auth completion handler
-    const handleMobileAuthComplete = () => {
-      console.log('📱 AuthPage: Mobile auth complete event received');
-      const isMobile = window.innerWidth < 768;
-      
-      if (isMobile) {
-        console.log('📱 AuthPage: Mobile navigation - redirecting to home');
-        setTimeout(() => {
-          navigate('/', { replace: true });
-        }, 200);
-      }
-    };
-
     window.addEventListener('mfa-session-stored', handleMFAStored as EventListener);
     window.addEventListener('mfa-session-cleared', handleMFACleared as EventListener);
-    window.addEventListener('mobile-auth-complete', handleMobileAuthComplete as EventListener);
 
     return () => {
       window.removeEventListener('mfa-session-stored', handleMFAStored as EventListener);
       window.removeEventListener('mfa-session-cleared', handleMFACleared as EventListener);
-      window.removeEventListener('mobile-auth-complete', handleMobileAuthComplete as EventListener);
     };
   }, [isLogin, navigate]);
 
@@ -151,33 +136,22 @@ export const useAuthPageLogic = () => {
   const handleMFASuccess = () => {
     console.log('✅ AuthPage: MFA verification successful');
     
-    // Clear MFA state immediately
-    setShowMFA(false);
-    setMfaEmail('');
-    mfaAuthService.clearMFASession();
-    
     toast({
       title: "Success!",
       description: "You have been logged in successfully.",
     });
     
-    // Enhanced mobile navigation with longer delays
-    const isMobile = window.innerWidth < 768;
-    const delay = isMobile ? 800 : 200; // Increased mobile delay
+    // Clear MFA state in UI immediately but let service handle session cleanup
+    setShowMFA(false);
+    setMfaEmail('');
     
-    console.log(`📱 AuthPage: Using ${delay}ms delay for ${isMobile ? 'mobile' : 'desktop'} navigation`);
+    // Wait longer for auth state to fully propagate before redirecting
+    console.log('⏳ AuthPage: Waiting for auth state to stabilize before redirect...');
     
     setTimeout(() => {
       console.log('🏠 AuthPage: Navigating to home page');
       navigate('/', { replace: true });
-      
-      // Force a page refresh on mobile to ensure clean state
-      if (isMobile) {
-        setTimeout(() => {
-          window.location.reload();
-        }, 100);
-      }
-    }, delay);
+    }, 2000); // Increased delay to 2 seconds
   };
 
   const handleMFACancel = () => {
