@@ -5,7 +5,10 @@ import { AuthContext } from './auth/AuthProvider';
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    // Instead of throwing an error immediately, return null
+    // This allows components to handle missing context gracefully
+    console.warn('useAuth called outside of AuthProvider context');
+    return null;
   }
   return context;
 }

@@ -4,7 +4,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
 export const useAuthModal = () => {
-  const { signIn, signUp, resetPassword } = useAuth();
+  const auth = useAuth();
+  
+  // Provide safe defaults if auth context is not available
+  const signIn = auth?.signIn || (async () => { throw new Error('Auth not available'); });
+  const signUp = auth?.signUp || (async () => { throw new Error('Auth not available'); });
+  const resetPassword = auth?.resetPassword || (async () => { throw new Error('Auth not available'); });
+  
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);

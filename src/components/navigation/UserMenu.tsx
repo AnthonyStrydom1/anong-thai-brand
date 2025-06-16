@@ -36,27 +36,7 @@ const UserMenu = ({
   
   // Check if AuthContext is available
   const authContext = useContext(AuthContext);
-  
-  // Only use useAuthModal if auth context is available
-  const authModalHook = authContext ? useAuthModal() : {
-    showLoginModal: false,
-    setShowLoginModal: () => {},
-    isSignUp: false,
-    setIsSignUp: () => {},
-    showForgotPassword: false,
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    isLoading: false,
-    handleAuthSubmit: async () => {},
-    handleForgotPassword: async () => {},
-    handleCloseModal: () => {},
-    handleEmailChange: () => {},
-    handlePasswordChange: () => {},
-    setFirstName: () => {},
-    setLastName: () => {},
-  };
+  const authModalHook = useAuthModal();
 
   const {
     showLoginModal,
@@ -164,18 +144,6 @@ const UserMenu = ({
 
   // Prevent dropdown from opening when not authenticated
   const shouldShowDropdown = isLoggedIn && isDropdownOpen;
-
-  console.log('🎯 UserMenu render decision:', { 
-    isLoggedIn, 
-    isDropdownOpen,
-    shouldShowDropdown,
-    mfaPending,
-    shouldBlockForMFA,
-    authLoading,
-    authContextAvailable: !!authContext,
-    currentPath: window.location.pathname,
-    isMobile
-  });
 
   return (
     <>
