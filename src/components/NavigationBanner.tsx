@@ -5,13 +5,14 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { navigationTranslations } from '@/translations/navigation';
 import DesktopNav from './navigation/DesktopNav';
 import MobileMenu from './navigation/MobileMenu';
 
 const NavigationBanner = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { currency } = useCurrency();
+  const { selectedCurrency } = useCurrency();
   const isMobile = useIsMobile();
   
   // Safely use auth hook with error boundary
@@ -61,19 +62,39 @@ const NavigationBanner = () => {
     }
   };
 
+  // Get navigation translations
+  const t = navigationTranslations[language];
+
+  // Navigation items for desktop
+  const navItems = [
+    { path: '/', label: t.home },
+    { path: '/shop', label: t.shop },
+    { path: '/recipes', label: t.recipes },
+    { path: '/events', label: t.events },
+    { path: '/about', label: t.about },
+    { path: '/contact', label: t.contact }
+  ];
+
   // Mobile navigation component
   if (isMobile) {
     return (
       <MobileMenu
+        isOpen={true}
+        navItems={navItems}
         isLoggedIn={isLoggedIn}
-        onLogout={handleLogout}
+        onMenuItemClick={() => {}}
+        onSearchClick={() => {}}
+        onLoginClick={() => navigate('/auth')}
+        onLogoutClick={handleLogout}
         translations={{
-          login: language === 'th' ? 'เข้าสู่ระบบ' : 'Login',
-          profile: language === 'th' ? 'โปรไฟล์' : 'Profile',
-          logout: language === 'th' ? 'ออกจากระบบ' : 'Logout',
-          account: language === 'th' ? 'บัญชี' : 'Account',
-          orders: language === 'th' ? 'คำสั่งซื้อ' : 'Orders',
-          settings: language === 'th' ? 'ตั้งค่า' : 'Settings'
+          search: t.search,
+          login: t.login,
+          profile: t.profile,
+          logout: t.logout,
+          myCart: t.myCart,
+          account: t.account,
+          orders: t.orders,
+          settings: t.settings
         }}
       />
     );
@@ -82,16 +103,7 @@ const NavigationBanner = () => {
   // Desktop navigation component
   return (
     <DesktopNav
-      isLoggedIn={isLoggedIn}
-      onLogout={handleLogout}
-      translations={{
-        login: language === 'th' ? 'เข้าสู่ระบบ' : 'Login',
-        profile: language === 'th' ? 'โปรไฟล์' : 'Profile',
-        logout: language === 'th' ? 'ออกจากระบบ' : 'Logout',
-        account: language === 'th' ? 'บัญชี' : 'Account',
-        orders: language === 'th' ? 'คำสั่งซื้อ' : 'Orders',
-        settings: language === 'th' ? 'ตั้งค่า' : 'Settings'
-      }}
+      navItems={navItems}
     />
   );
 };
