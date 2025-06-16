@@ -105,16 +105,18 @@ export function useAuthState() {
       async (event, session) => {
         if (!mounted) return;
 
+        const user = session?.user || null;
+
         console.log('🔄 Auth: State change event:', { 
           event,
-          user: !!session?.user, 
+          user: !!user, 
           session: !!session,
           sessionId: session?.access_token ? 'present' : 'missing',
-          userId: session?.user?.id || 'none'
+          userId: user?.id || 'none'
         });
 
         // Handle different auth events
-        if (event === 'SIGNED_IN' && session?.user) {
+        if (event === 'SIGNED_IN' && user && session) {
           console.log('✅ Auth: SIGNED_IN event with valid session');
           
           // Check if MFA is required/pending
@@ -130,7 +132,7 @@ export function useAuthState() {
             setIsLoading(false);
           } else {
             console.log('✅ Auth: No MFA required, setting authenticated state');
-            setAuthenticatedState(session.user, session);
+            setAuthenticatedState(user, session);
           }
         } else if (event === 'SIGNED_OUT') {
           console.log('❌ Auth: SIGNED_OUT event');
@@ -141,16 +143,16 @@ export function useAuthState() {
           setSession(null);
           setUserProfile(null);
           setIsLoading(false);
-        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+        } else if (event === 'TOKEN_REFRESHED' && user && session) {
           console.log('🔄 Auth: TOKEN_REFRESHED event');
           const pendingMFA = mfaAuthService.hasPendingMFA();
           
           if (!pendingMFA) {
             console.log('✅ Auth: Token refreshed, updating session');
-            setAuthenticatedState(session.user, session);
+            setAuthenticatedState(user, session);
           }
         } else {
-          console.log(`⚠️ Auth: Unhandled event or invalid session:`, { event, hasSession: !!session, hasUser: !!session?.user });
+          console.log(`⚠️ Auth: Unhandled event or invalid session:`, { event, hasSession: !!session, hasUser: !!user });
           
           // Only clear state if we're certain there's no valid session
           if (event === 'INITIAL_SESSION' && !session) {
