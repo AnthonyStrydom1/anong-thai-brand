@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { navigationTranslations } from '@/translations/navigation';
 import LogoSection from './navigation/LogoSection';
@@ -11,6 +10,10 @@ import DesktopNav from './navigation/DesktopNav';
 import RightActions from './navigation/RightActions';
 import MobileMenu from './navigation/MobileMenu';
 import SearchOverlay from './navigation/SearchOverlay';
+
+// Import the AuthContext directly to check if it's available
+import { AuthContext } from '@/hooks/auth/AuthProvider';
+import { useContext } from 'react';
 
 const NavigationBanner = () => {
   const navigate = useNavigate();
@@ -21,20 +24,19 @@ const NavigationBanner = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Safely use auth hook with error boundary
-  let authState;
-  try {
-    authState = useAuth();
-  } catch (error) {
-    console.warn('Auth context not available in NavigationBanner:', error);
-    authState = {
-      user: null,
-      session: null,
-      isLoading: true,
-      mfaPending: false,
-      signOut: async () => {}
-    };
-  }
+  // Check if AuthContext is available
+  const authContext = useContext(AuthContext);
+  
+  // If auth context is not available, provide safe defaults
+  const authState = authContext || {
+    user: null,
+    session: null,
+    isLoading: false,
+    mfaPending: false,
+    signOut: async () => {
+      console.warn('Auth context not available - signOut not functional');
+    }
+  };
 
   const { user, session, isLoading, mfaPending, signOut } = authState;
 
@@ -48,6 +50,7 @@ const NavigationBanner = () => {
     isLoading,
     isLoggedIn,
     isMobile,
+    authContextAvailable: !!authContext,
     pathname: window.location.pathname
   });
 

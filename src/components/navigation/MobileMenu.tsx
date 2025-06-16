@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import AuthModal from './AuthModal';
 import { useAuthModal } from '@/hooks/useAuthModal';
 import { mfaAuthService } from '@/services/mfaAuthService';
+import { AuthContext } from '@/hooks/auth/AuthProvider';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -37,6 +38,30 @@ const MobileMenu = ({
   onLogoutClick,
   translations
 }: MobileMenuProps) => {
+  // Check if AuthContext is available
+  const authContext = useContext(AuthContext);
+  
+  // Only use useAuthModal if auth context is available
+  const authModalHook = authContext ? useAuthModal() : {
+    showLoginModal: false,
+    setShowLoginModal: () => {},
+    isSignUp: false,
+    setIsSignUp: () => {},
+    showForgotPassword: false,
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    isLoading: false,
+    handleAuthSubmit: async () => {},
+    handleForgotPassword: async () => {},
+    handleCloseModal: () => {},
+    handleEmailChange: () => {},
+    handlePasswordChange: () => {},
+    setFirstName: () => {},
+    setLastName: () => {},
+  };
+
   const {
     showLoginModal,
     setShowLoginModal,
@@ -55,10 +80,18 @@ const MobileMenu = ({
     handlePasswordChange,
     setFirstName,
     setLastName,
-  } = useAuthModal();
+  } = authModalHook;
 
   const handleLoginClick = () => {
     console.log('📱 MobileMenu: Login clicked');
+    
+    // If auth context is not available, use the parent's login handler
+    if (!authContext) {
+      console.log('📱 MobileMenu: No auth context, using parent login handler');
+      onLoginClick();
+      return;
+    }
+    
     setShowLoginModal(true);
     onMenuItemClick(); // Close the mobile menu
   };
@@ -155,8 +188,8 @@ const MobileMenu = ({
         </div>
       </div>
 
-      {/* Auth Modal for mobile */}
-      {!window.location.pathname.includes('/auth') && (
+      {/* Auth Modal for mobile - only if auth context is available */}
+      {authContext && !window.location.pathname.includes('/auth') && (
         <AuthModal
           showModal={showLoginModal}
           isSignUp={isSignUp}

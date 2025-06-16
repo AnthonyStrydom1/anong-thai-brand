@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -10,7 +10,7 @@ import UserMenuDropdown from './UserMenuDropdown';
 import AuthModal from './AuthModal';
 import { useAuthModal } from '@/hooks/useAuthModal';
 import { mfaAuthService } from '@/services/mfaAuthService';
-import { useAuth } from '@/hooks/useAuth';
+import { AuthContext } from '@/hooks/auth/AuthProvider';
 
 interface UserMenuProps {
   isLoggedIn: boolean;
@@ -34,6 +34,30 @@ const UserMenu = ({
   const isMobile = useIsMobile();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   
+  // Check if AuthContext is available
+  const authContext = useContext(AuthContext);
+  
+  // Only use useAuthModal if auth context is available
+  const authModalHook = authContext ? useAuthModal() : {
+    showLoginModal: false,
+    setShowLoginModal: () => {},
+    isSignUp: false,
+    setIsSignUp: () => {},
+    showForgotPassword: false,
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    isLoading: false,
+    handleAuthSubmit: async () => {},
+    handleForgotPassword: async () => {},
+    handleCloseModal: () => {},
+    handleEmailChange: () => {},
+    handlePasswordChange: () => {},
+    setFirstName: () => {},
+    setLastName: () => {},
+  };
+
   const {
     showLoginModal,
     setShowLoginModal,
@@ -52,9 +76,17 @@ const UserMenu = ({
     handlePasswordChange,
     setFirstName,
     setLastName,
-  } = useAuthModal();
+  } = authModalHook;
 
-  const { user, session, mfaPending, isLoading: authLoading } = useAuth();
+  // Use auth context if available, otherwise use safe defaults
+  const authState = authContext || {
+    user: null,
+    session: null,
+    mfaPending: false,
+    isLoading: false
+  };
+
+  const { user, session, mfaPending, isLoading: authLoading } = authState;
 
   // Enhanced authentication state detection - don't let stale MFA block normal flow
   const isLoggedIn = !!(user && session && !authLoading);
@@ -67,6 +99,7 @@ const UserMenu = ({
     authLoading,
     shouldBlockForMFA,
     finalIsLoggedIn: isLoggedIn,
+    authContextAvailable: !!authContext,
     currentPath: window.location.pathname,
     isMobile
   });
@@ -89,6 +122,7 @@ const UserMenu = ({
       session: !!session,
       mfaPending,
       authLoading,
+      authContextAvailable: !!authContext,
       currentPath: window.location.pathname,
       isMobile
     });
@@ -107,6 +141,13 @@ const UserMenu = ({
     }
     
     console.log('❌ UserMenu: User not logged in, handling login flow');
+    
+    // If auth context is not available, navigate to auth page
+    if (!authContext) {
+      console.log('🔐 UserMenu: No auth context, navigating to auth page');
+      navigate('/auth');
+      return;
+    }
     
     // For both mobile and desktop, show the login modal
     console.log('🔐 UserMenu: Opening login modal');
@@ -131,6 +172,7 @@ const UserMenu = ({
     mfaPending,
     shouldBlockForMFA,
     authLoading,
+    authContextAvailable: !!authContext,
     currentPath: window.location.pathname,
     isMobile
   });
@@ -159,8 +201,8 @@ const UserMenu = ({
         )}
       </DropdownMenu>
 
-      {/* Auth Modal - show for both mobile and desktop when not logged in */}
-      {!window.location.pathname.includes('/auth') && !shouldBlockForMFA && (
+      {/* Auth Modal - show for both mobile and desktop when not logged in - only if auth context is available */}
+      {authContext && !window.location.pathname.includes('/auth') && !shouldBlockForMFA && (
         <AuthModal
           showModal={showLoginModal}
           isSignUp={isSignUp}
