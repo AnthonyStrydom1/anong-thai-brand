@@ -19,6 +19,7 @@ const NavigationBanner = () => {
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Safely use auth hook with error boundary
   let authState;
@@ -73,6 +74,14 @@ const NavigationBanner = () => {
 
   const handleToggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearchClear = () => {
+    setSearchQuery('');
   };
 
   // Get navigation translations
@@ -146,8 +155,14 @@ const NavigationBanner = () => {
       {/* Search Overlay */}
       <SearchOverlay 
         isOpen={isSearchOpen}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        onClear={handleSearchClear}
         onClose={() => setIsSearchOpen(false)}
-        language={language}
+        translations={{
+          search: t.search,
+          searchPlaceholder: language === 'th' ? 'ค้นหาสินค้า...' : 'Search products...'
+        }}
       />
     </>
   );
