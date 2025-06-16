@@ -6,6 +6,7 @@ import OrderManagerStats from './orders/OrderManagerStats';
 import OrderFiltersAdvanced from './orders/OrderFiltersAdvanced';
 import OrderTable from './orders/OrderTable';
 import OrderDialogs from './orders/OrderDialogs';
+import ShippingIntegrationStatus from './orders/ShippingIntegrationStatus';
 
 const OrderManager = () => {
   const {
@@ -61,6 +62,8 @@ const OrderManager = () => {
       <OrderManagerHeader onRefresh={loadOrders} />
       
       <OrderManagerStats orders={orders} />
+
+      <ShippingIntegrationStatus />
 
       <OrderFiltersAdvanced
         statusFilter={statusFilter}

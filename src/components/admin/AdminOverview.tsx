@@ -1,8 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, ShoppingCart, Users, BarChart3, Warehouse } from 'lucide-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import PaymentIntegrationStatus from './payments/PaymentIntegrationStatus';
+import ShippingIntegrationStatus from './orders/ShippingIntegrationStatus';
 
 interface AdminOverviewProps {
   stats: {
@@ -18,6 +19,8 @@ interface AdminOverviewProps {
 
 const AdminOverview = ({ stats, onTabChange }: AdminOverviewProps) => {
   const { formatPrice } = useCurrency();
+
+  console.log('AdminOverview: Rendering with PayFast integration status');
 
   return (
     <div className="space-y-6">
@@ -65,6 +68,13 @@ const AdminOverview = ({ stats, onTabChange }: AdminOverviewProps) => {
             <p className="text-xs text-muted-foreground">From completed orders</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Integration Status Cards */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-anong-black">Payment & Shipping Integration</h2>
+        <PaymentIntegrationStatus />
+        <ShippingIntegrationStatus />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

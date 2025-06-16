@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Edit } from 'lucide-react';
 import OrderActionButtons from './OrderActionButtons';
+import CreateShipmentButton from './CreateShipmentButton';
 import { ExtendedOrder } from '@/hooks/useOrderManager';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { format } from 'date-fns';
@@ -73,7 +74,7 @@ const OrderTable = ({
             <TableHead>Payment</TableHead>
             <TableHead>Tracking</TableHead>
             <TableHead className="text-right">Total</TableHead>
-            <TableHead className="w-32">Actions</TableHead>
+            <TableHead className="w-48">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -113,7 +114,15 @@ const OrderTable = ({
                     </span>
                   </div>
                 ) : (
-                  <span className="text-gray-400 text-sm">No tracking</span>
+                  <div className="flex flex-col space-y-1">
+                    <span className="text-gray-400 text-sm">No tracking</span>
+                    <CreateShipmentButton
+                      orderId={order.id}
+                      orderNumber={order.order_number}
+                      currentStatus={order.status}
+                      hasTrackingNumber={!!order.tracking_number}
+                    />
+                  </div>
                 )}
               </TableCell>
               <TableCell className="text-right font-medium">
