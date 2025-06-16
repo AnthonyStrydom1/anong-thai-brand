@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { AuthUser, authService } from '@/services/authService';
@@ -14,13 +13,37 @@ export function useAuthState() {
   useEffect(() => {
     let mounted = true;
 
-    // Simple MFA event handlers
+    // Check initial MFA state first
+    const initialMFAState = mfaAuthService.hasPendingMFA();
+    const isOnAuthPage = window.location.pathname === '/auth';
+    
+    console.log('🔍 Auth: Initial state check:', { 
+      initialMFAState, 
+      isOnAuthPage,
+      pathname: window.location.pathname 
+    });
+    
+    if (initialMFAState && isOnAuthPage) {
+      console.log('🔐 Auth: Setting initial MFA pending state');
+      setMfaPending(true);
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
+      setIsLoading(false);
+      return;
+    } else if (initialMFAState && !isOnAuthPage) {
+      console.log('🧹 Auth: Clearing stale MFA session - not on auth page');
+      mfaAuthService.clearMFASession();
+      setMfaPending(false);
+    }
+
+    // MFA event handlers
     const handleMFAStored = () => { 
       if (mounted) {
         console.log('📧 Auth: MFA session stored - setting mfaPending to true');
         setMfaPending(true);
         setIsLoading(false);
-        // Clear any existing user/session when MFA is required
+        // CRITICAL: Clear any existing auth state when MFA starts
         setUser(null);
         setSession(null);
         setUserProfile(null);
@@ -38,25 +61,6 @@ export function useAuthState() {
     window.addEventListener('mfa-session-stored', handleMFAStored);
     window.addEventListener('mfa-session-cleared', handleMFACleared);
 
-    // Check initial MFA state - only set if we're on auth page
-    const isOnAuthPage = window.location.pathname === '/auth';
-    const initialMFAState = mfaAuthService.hasPendingMFA();
-    console.log('🎯 Auth: Initial MFA state:', initialMFAState, 'on auth page:', isOnAuthPage);
-    
-    if (initialMFAState && isOnAuthPage) {
-      setMfaPending(true);
-      setUser(null);
-      setSession(null);
-      setUserProfile(null);
-    } else {
-      setMfaPending(false);
-      // Clear stale MFA if not on auth page
-      if (initialMFAState && !isOnAuthPage) {
-        console.log('🧹 Auth: Clearing stale MFA session - not on auth page');
-        mfaAuthService.clearMFASession();
-      }
-    }
-
     // Set up auth state change listener
     const { data: { subscription } } = authService.onAuthStateChange(
       (user, session) => {
@@ -66,7 +70,8 @@ export function useAuthState() {
           user: !!user, 
           session: !!session,
           sessionId: session?.access_token ? 'present' : 'missing',
-          mfaPending
+          mfaPending,
+          currentPath: window.location.pathname
         });
 
         // CRITICAL: Only accept authenticated sessions if NO MFA is pending
@@ -88,9 +93,10 @@ export function useAuthState() {
           return;
         }
 
-        // If we have a user/session but MFA is pending, ignore it
+        // If we have a user/session but MFA is pending, IGNORE it completely
         if (user && session && mfaPending) {
-          console.log('⏸️ Auth: Ignoring auth event - MFA is pending');
+          console.log('⏸️ Auth: IGNORING auth event - MFA is pending, preventing premature login');
+          // Don't update any auth state - keep MFA flow active
           return;
         }
 
@@ -113,38 +119,29 @@ export function useAuthState() {
       }
     );
 
-    // Check for existing session
+    // Check for existing session - but only if no MFA is pending
     const checkSession = async () => {
+      if (mfaPending) {
+        console.log('⏸️ Auth: Skipping session check - MFA is pending');
+        setIsLoading(false);
+        return;
+      }
+
       try {
         console.log('🔍 Auth: Checking existing session');
         const session = await authService.getCurrentSession();
-        console.log('📊 Auth: Session check result:', { 
-          hasSession: !!session, 
-          hasUser: !!session?.user,
-          mfaPending
-        });
+        console.log('📊 Auth: Session check result:', { hasSession: !!session, hasUser: !!session?.user });
         
-        if (mounted) {
-          // Only accept session if no MFA is pending
-          if (session?.user && !mfaPending) {
-            console.log('✅ Auth: Found existing valid session (no MFA pending)');
-            setUser(session.user);
-            setSession(session);
-          } else {
-            console.log('❌ Auth: No valid existing session or MFA pending');
-            setUser(null);
-            setSession(null);
-            // Only set MFA pending if we're on auth page
-            if (window.location.pathname.includes('/auth')) {
-              const pendingMFA = mfaAuthService.hasPendingMFA();
-              setMfaPending(pendingMFA);
-            } else {
-              setMfaPending(false);
-              mfaAuthService.clearMFASession();
-            }
-          }
-          setIsLoading(false);
+        if (mounted && session?.user) {
+          console.log('✅ Auth: Found existing valid session');
+          setUser(session.user);
+          setSession(session);
+        } else {
+          console.log('❌ Auth: No valid existing session');
+          setUser(null);
+          setSession(null);
         }
+        setIsLoading(false);
       } catch (error) {
         console.error('❌ Auth: Session check failed:', error);
         if (mounted) {
@@ -156,7 +153,10 @@ export function useAuthState() {
       }
     };
 
-    checkSession();
+    // Only check session if MFA is not pending
+    if (!initialMFAState) {
+      checkSession();
+    }
 
     return () => {
       mounted = false;
@@ -164,7 +164,7 @@ export function useAuthState() {
       window.removeEventListener('mfa-session-stored', handleMFAStored);
       window.removeEventListener('mfa-session-cleared', handleMFACleared);
     };
-  }, []); // Remove mfaPending from dependency array to prevent loops
+  }, []); // No dependencies to prevent loops
 
   return {
     user,

@@ -1,3 +1,4 @@
+
 import { authService, type AuthUser } from '@/services/authService';
 import { mfaAuthService } from '@/services/mfaAuthService';
 
@@ -30,11 +31,14 @@ export function useAuthOperations(
     try {
       console.log('🔐 Starting sign in process with MFA enforcement');
       
-      // Clear any existing auth state first
+      // CRITICAL: Clear any existing auth state FIRST
+      console.log('🧹 Clearing existing auth state before MFA');
       setUser(null);
       setSession(null);
       setUserProfile(null);
+      setMfaPending(false); // Reset MFA state first
       
+      // Clear any existing MFA session
       mfaAuthService.clearMFASession();
       
       console.log('🔒 Initiating MFA signin (required for all users)');
@@ -44,7 +48,8 @@ export function useAuthOperations(
       
       if (mfaResult.mfaRequired) {
         console.log('✅ MFA flow initiated successfully - setting MFA pending');
-        setMfaPending(true);
+        // The MFA service will trigger the 'mfa-session-stored' event
+        // which will be handled by useAuthState
         return { mfaRequired: true };
       }
       

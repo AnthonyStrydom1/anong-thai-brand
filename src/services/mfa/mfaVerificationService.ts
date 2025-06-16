@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { mfaSessionManager } from './mfaSessionManager';
 import type { MFASessionData } from './mfaTypes';
@@ -80,13 +81,15 @@ export class MFAVerificationService {
 
       const data = await this.signInWithCredentials(sessionData.email, sessionData.password);
 
-      // Clear MFA session IMMEDIATELY after successful sign-in
+      // CRITICAL: Clear MFA session IMMEDIATELY after successful sign-in
       console.log('✅ MFA Verification Service: Login successful, clearing MFA session');
       mfaSessionManager.clearSession();
       
-      // Dispatch event to notify that MFA has been cleared
+      // Dispatch event to notify that MFA has been cleared - with delay to ensure UI updates properly
       console.log('📡 MFA Verification Service: Dispatching mfa-session-cleared event');
-      window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
+      }, 100);
 
       return data;
     } catch (error: any) {
@@ -95,6 +98,7 @@ export class MFAVerificationService {
       // Only clear session on session expiration, not on invalid codes
       if (error.message?.includes('expired') || error.message?.includes('session')) {
         mfaSessionManager.clearSession();
+        window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
       }
       
       throw error;
