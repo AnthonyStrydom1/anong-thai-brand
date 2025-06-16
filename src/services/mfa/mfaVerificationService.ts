@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { mfaSessionManager } from './mfaSessionManager';
 import type { MFASessionData } from './mfaTypes';
@@ -84,8 +85,10 @@ export class MFAVerificationService {
       console.log('🧹 MFA Verification Service: Clearing MFA session after successful login');
       mfaSessionManager.clearSession();
       
-      // Dispatch event to notify that MFA has been cleared
-      window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
+      // Dispatch event to notify that MFA has been cleared - with delay for mobile
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
+      }, 100);
 
       return data;
     } catch (error: any) {

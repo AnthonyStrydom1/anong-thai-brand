@@ -54,7 +54,7 @@ const UserMenu = ({
 
   const { user, session, mfaPending, isLoading: authLoading } = useAuth();
 
-  // Enhanced authentication state detection with more stable logic
+  // Enhanced authentication state detection with mobile-specific handling
   const isLoggedIn = !!(user && session && !mfaPending && !authLoading);
 
   console.log('🎯 UserMenu: Auth state check:', { 
@@ -63,7 +63,8 @@ const UserMenu = ({
     mfaPending,
     authLoading,
     finalIsLoggedIn: isLoggedIn,
-    currentPath: window.location.pathname
+    currentPath: window.location.pathname,
+    isMobile
   });
 
   // Auto-close dropdown when auth state changes
@@ -76,11 +77,11 @@ const UserMenu = ({
 
   // Auto-open login modal on mobile when not logged in (only for /account route)
   useEffect(() => {
-    if (isMobile && !isLoggedIn && window.location.pathname === '/account') {
+    if (isMobile && !isLoggedIn && !mfaPending && window.location.pathname === '/account') {
       console.log('📱 UserMenu: Auto-opening login modal for mobile /account access');
       setShowLoginModal(true);
     }
-  }, [isMobile, isLoggedIn, setShowLoginModal]);
+  }, [isMobile, isLoggedIn, mfaPending, setShowLoginModal]);
 
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -92,7 +93,8 @@ const UserMenu = ({
       session: !!session,
       mfaPending,
       authLoading,
-      currentPath: window.location.pathname
+      currentPath: window.location.pathname,
+      isMobile
     });
     
     // If user is logged in, show dropdown menu
@@ -102,9 +104,9 @@ const UserMenu = ({
       return;
     }
     
-    // Don't interfere if we're on the auth page - let auth page handle everything
-    if (window.location.pathname === '/auth') {
-      console.log('🔄 UserMenu: On auth page, doing nothing');
+    // Don't interfere if we're on the auth page or MFA is pending
+    if (window.location.pathname === '/auth' || mfaPending) {
+      console.log('🔄 UserMenu: On auth page or MFA pending, doing nothing');
       return;
     }
     
@@ -137,7 +139,8 @@ const UserMenu = ({
     shouldShowDropdown,
     mfaPending,
     authLoading,
-    currentPath: window.location.pathname
+    currentPath: window.location.pathname,
+    isMobile
   });
 
   return (

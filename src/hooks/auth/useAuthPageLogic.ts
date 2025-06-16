@@ -30,7 +30,8 @@ export const useAuthPageLogic = () => {
   // Redirect if already logged in (NO mfa pending)
   useEffect(() => {
     if (user && !mfaPending) {
-      navigate('/');
+      console.log('🏠 AuthPage: User authenticated, redirecting to home');
+      navigate('/', { replace: true });
     }
   }, [user, mfaPending, navigate]);
 
@@ -57,8 +58,8 @@ export const useAuthPageLogic = () => {
       setIsCheckingMFA(false);
     };
 
-    // Check MFA status with a small delay to ensure all services are ready
-    const timer = setTimeout(checkMFAStatus, 100);
+    // Small delay to ensure all services are ready
+    const timer = setTimeout(checkMFAStatus, 50);
     return () => clearTimeout(timer);
   }, []);
 
@@ -110,10 +111,11 @@ export const useAuthPageLogic = () => {
       const result = await handleSubmit(e);
       console.log('📝 AuthPage: Form submission result:', result);
       
-      // Force MFA check after successful form submission
+      // Check for MFA requirement
       if (result?.mfaRequired) {
         console.log('🔐 AuthPage: MFA required! Checking for MFA session...');
-        // Wait a bit for the MFA session to be stored
+        
+        // Wait for the MFA session to be stored
         setTimeout(() => {
           const hasPending = mfaAuthService.hasPendingMFA();
           const pendingEmail = mfaAuthService.getPendingMFAEmail();
@@ -124,7 +126,7 @@ export const useAuthPageLogic = () => {
             setShowMFA(true);
             setMfaEmail(pendingEmail);
           }
-        }, 500);
+        }, 200);
       }
     } catch (error) {
       console.error('❌ AuthPage: Form submission error:', error);
@@ -144,10 +146,16 @@ export const useAuthPageLogic = () => {
       description: "You have been logged in successfully.",
     });
     
-    // Add a small delay to ensure auth state is properly updated before navigation
+    // For mobile, add extra delay to ensure auth state is updated
+    const isMobile = window.innerWidth < 768;
+    const delay = isMobile ? 500 : 100;
+    
+    console.log(`📱 AuthPage: Using ${delay}ms delay for ${isMobile ? 'mobile' : 'desktop'} navigation`);
+    
     setTimeout(() => {
+      console.log('🏠 AuthPage: Navigating to home page');
       navigate('/', { replace: true });
-    }, 100);
+    }, delay);
   };
 
   const handleMFACancel = () => {
