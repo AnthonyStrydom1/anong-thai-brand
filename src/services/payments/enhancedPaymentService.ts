@@ -77,23 +77,29 @@ export class EnhancedPaymentService {
   }
 
   public getAvailablePaymentMethods() {
+    console.log('📋 Getting available payment methods');
     return payFastService.getPaymentMethods();
   }
 
   public isPaymentGatewayEnabled(): boolean {
-    return payFastService.isApiIntegrationEnabled();
+    const isEnabled = payFastService.isApiIntegrationEnabled();
+    console.log('🔍 PayFast integration enabled:', isEnabled);
+    return isEnabled;
   }
 
   public getPaymentStatus() {
     const isEnabled = this.isPaymentGatewayEnabled();
     
-    return {
+    const status = {
       isEnabled,
       gateway: 'PayFast',
       message: isEnabled 
         ? "PayFast integration active - accepting card and instant EFT payments"
         : "Manual payment processing - PayFast integration available"
     };
+
+    console.log('📊 Payment status:', status);
+    return status;
   }
 }
 
