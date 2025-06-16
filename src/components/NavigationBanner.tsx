@@ -1,19 +1,24 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { navigationTranslations } from '@/translations/navigation';
+import LogoSection from './navigation/LogoSection';
 import DesktopNav from './navigation/DesktopNav';
+import RightActions from './navigation/RightActions';
 import MobileMenu from './navigation/MobileMenu';
+import SearchOverlay from './navigation/SearchOverlay';
 
 const NavigationBanner = () => {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   const { selectedCurrency } = useCurrency();
   const isMobile = useIsMobile();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   
   // Safely use auth hook with error boundary
   let authState;
@@ -62,10 +67,18 @@ const NavigationBanner = () => {
     }
   };
 
+  const handleToggleSearch = () => {
+    setIsSearchOpen(!isSearchOpen);
+  };
+
+  const handleToggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   // Get navigation translations
   const t = navigationTranslations[language];
 
-  // Navigation items for desktop
+  // Navigation items
   const navItems = [
     { path: '/', label: t.home },
     { path: '/shop', label: t.shop },
@@ -75,36 +88,68 @@ const NavigationBanner = () => {
     { path: '/contact', label: t.contact }
   ];
 
-  // Mobile navigation component
-  if (isMobile) {
-    return (
-      <MobileMenu
-        isOpen={true}
-        navItems={navItems}
-        isLoggedIn={isLoggedIn}
-        onMenuItemClick={() => {}}
-        onSearchClick={() => {}}
-        onLoginClick={() => navigate('/auth')}
-        onLogoutClick={handleLogout}
-        translations={{
-          search: t.search,
-          login: t.login,
-          profile: t.profile,
-          logout: t.logout,
-          myCart: t.myCart,
-          account: t.account,
-          orders: t.orders,
-          settings: t.settings
-        }}
-      />
-    );
-  }
-
-  // Desktop navigation component
   return (
-    <DesktopNav
-      navItems={navItems}
-    />
+    <>
+      <header className="bg-anong-black shadow-lg relative z-40">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16 lg:h-20">
+            <LogoSection />
+            
+            {/* Desktop Navigation */}
+            {!isMobile && (
+              <DesktopNav navItems={navItems} />
+            )}
+            
+            <RightActions
+              language={language}
+              isLoggedIn={isLoggedIn}
+              isMenuOpen={isMenuOpen}
+              onToggleLanguage={toggleLanguage}
+              onToggleSearch={handleToggleSearch}
+              onToggleMenu={handleToggleMenu}
+              onLogout={handleLogout}
+              translations={{
+                search: t.search,
+                account: t.account,
+                orders: t.orders,
+                settings: t.settings,
+                profile: t.profile,
+                login: t.login,
+                logout: t.logout
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <MobileMenu
+          isOpen={isMenuOpen}
+          navItems={navItems}
+          isLoggedIn={isLoggedIn}
+          onMenuItemClick={() => setIsMenuOpen(false)}
+          onSearchClick={handleToggleSearch}
+          onLoginClick={() => navigate('/auth')}
+          onLogoutClick={handleLogout}
+          translations={{
+            search: t.search,
+            login: t.login,
+            profile: t.profile,
+            logout: t.logout,
+            myCart: t.myCart,
+            account: t.account,
+            orders: t.orders,
+            settings: t.settings
+          }}
+        />
+      </header>
+
+      {/* Search Overlay */}
+      <SearchOverlay 
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        language={language}
+      />
+    </>
   );
 };
 
