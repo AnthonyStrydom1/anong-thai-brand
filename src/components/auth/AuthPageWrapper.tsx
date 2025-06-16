@@ -27,36 +27,40 @@ const AuthPageWrapper = () => {
     handleSwitchMode
   } = useAuthPageLogic();
 
-  console.log('🎯 AuthPageWrapper render state:', { 
+  console.log('🎯 AuthPage render state:', { 
     showMFA, 
     mfaEmail, 
     isLogin,
     isCheckingMFA,
-    mfaPending,
     hasUser: !!user
   });
+
+  // If MFA is pending, always render the OTP screen
+  if (mfaPending) {
+    // Get the most up-to-date pending MFA email
+    const pendingEmail = mfaAuthService.getPendingMFAEmail() || '';
+    return (
+      <MfaPageView
+        email={pendingEmail}
+        onSuccess={() => {
+          mfaAuthService.clearMFASession();
+          // Navigation handled by auth state change
+        }}
+        onCancel={() => {
+          mfaAuthService.clearMFASession();
+          // Navigation handled by clearing MFA state
+        }}
+      />
+    );
+  }
 
   // Show loading while checking MFA status
   if (isCheckingMFA) {
     return <LoadingView />;
   }
 
-  // CRITICAL: Always show MFA if mfaPending is true from auth state
-  if (mfaPending) {
-    const pendingEmail = mfaAuthService.getPendingMFAEmail() || '';
-    console.log('🔐 AuthPageWrapper: MFA pending, showing MFA view for:', pendingEmail);
-    return (
-      <MfaPageView
-        email={pendingEmail}
-        onSuccess={handleMFASuccess}
-        onCancel={handleMFACancel}
-      />
-    );
-  }
-
-  // Show MFA verification if local state indicates it
+  // Show MFA verification if needed
   if (showMFA && mfaEmail) {
-    console.log('🔐 AuthPageWrapper: Local MFA state, showing MFA view for:', mfaEmail);
     return (
       <MfaPageView
         email={mfaEmail}
@@ -67,7 +71,6 @@ const AuthPageWrapper = () => {
   }
 
   // Show auth form
-  console.log('📝 AuthPageWrapper: Showing auth form');
   return (
     <AuthFormView
       isLogin={isLogin}

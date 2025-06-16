@@ -11,7 +11,7 @@ export const useAuthPageLogic = () => {
   const [mfaEmail, setMfaEmail] = useState<string>('');
   const [isCheckingMFA, setIsCheckingMFA] = useState(true);
   const navigate = useNavigate();
-  const { user, session, mfaPending } = useAuth();
+  const { user, mfaPending } = useAuth();
 
   const {
     isLogin,
@@ -29,11 +29,10 @@ export const useAuthPageLogic = () => {
 
   // Redirect if already logged in (NO mfa pending)
   useEffect(() => {
-    if (user && session && !mfaPending) {
-      console.log('🏠 AuthPage: User fully authenticated, redirecting to home');
-      navigate('/', { replace: true });
+    if (user && !mfaPending) {
+      navigate('/');
     }
-  }, [user, session, mfaPending, navigate]);
+  }, [user, mfaPending, navigate]);
 
   // Check for existing MFA session on mount
   useEffect(() => {
@@ -58,8 +57,8 @@ export const useAuthPageLogic = () => {
       setIsCheckingMFA(false);
     };
 
-    // Small delay to ensure all services are ready
-    const timer = setTimeout(checkMFAStatus, 50);
+    // Check MFA status with a small delay to ensure all services are ready
+    const timer = setTimeout(checkMFAStatus, 100);
     return () => clearTimeout(timer);
   }, []);
 
@@ -96,7 +95,7 @@ export const useAuthPageLogic = () => {
       window.removeEventListener('mfa-session-stored', handleMFAStored as EventListener);
       window.removeEventListener('mfa-session-cleared', handleMFACleared as EventListener);
     };
-  }, [isLogin, navigate]);
+  }, [isLogin]);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -111,11 +110,10 @@ export const useAuthPageLogic = () => {
       const result = await handleSubmit(e);
       console.log('📝 AuthPage: Form submission result:', result);
       
-      // Check for MFA requirement
+      // Force MFA check after successful form submission
       if (result?.mfaRequired) {
         console.log('🔐 AuthPage: MFA required! Checking for MFA session...');
-        
-        // Wait for the MFA session to be stored
+        // Wait a bit for the MFA session to be stored
         setTimeout(() => {
           const hasPending = mfaAuthService.hasPendingMFA();
           const pendingEmail = mfaAuthService.getPendingMFAEmail();
@@ -126,7 +124,7 @@ export const useAuthPageLogic = () => {
             setShowMFA(true);
             setMfaEmail(pendingEmail);
           }
-        }, 200);
+        }, 500);
       }
     } catch (error) {
       console.error('❌ AuthPage: Form submission error:', error);
@@ -136,22 +134,20 @@ export const useAuthPageLogic = () => {
   const handleMFASuccess = () => {
     console.log('✅ AuthPage: MFA verification successful');
     
+    // Clear MFA state immediately
+    setShowMFA(false);
+    setMfaEmail('');
+    mfaAuthService.clearMFASession();
+    
     toast({
       title: "Success!",
       description: "You have been logged in successfully.",
     });
     
-    // Clear MFA state in UI immediately but let service handle session cleanup
-    setShowMFA(false);
-    setMfaEmail('');
-    
-    // Wait longer for auth state to fully propagate before redirecting
-    console.log('⏳ AuthPage: Waiting for auth state to stabilize before redirect...');
-    
+    // Add a small delay to ensure auth state is properly updated before navigation
     setTimeout(() => {
-      console.log('🏠 AuthPage: Navigating to home page');
       navigate('/', { replace: true });
-    }, 2000); // Increased delay to 2 seconds
+    }, 100);
   };
 
   const handleMFACancel = () => {

@@ -1,6 +1,5 @@
 
-import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   DropdownMenu,
@@ -10,7 +9,7 @@ import UserMenuDropdown from './UserMenuDropdown';
 import AuthModal from './AuthModal';
 import { useAuthModal } from '@/hooks/useAuthModal';
 import { mfaAuthService } from '@/services/mfaAuthService';
-import { AuthContext } from '@/hooks/auth/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UserMenuProps {
   isLoggedIn: boolean;
@@ -30,14 +29,9 @@ const UserMenu = ({
   onLogout,
   translations
 }: UserMenuProps) => {
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   
-  // Check if AuthContext is available
-  const authContext = useContext(AuthContext);
-  const authModalHook = useAuthModal();
-
   const {
     showLoginModal,
     setShowLoginModal,
@@ -56,32 +50,20 @@ const UserMenu = ({
     handlePasswordChange,
     setFirstName,
     setLastName,
-  } = authModalHook;
+  } = useAuthModal();
 
-  // Use auth context if available, otherwise use safe defaults
-  const authState = authContext || {
-    user: null,
-    session: null,
-    mfaPending: false,
-    isLoading: false
-  };
+  const { user, session, mfaPending, isLoading: authLoading } = useAuth();
 
-  const { user, session, mfaPending, isLoading: authLoading } = authState;
-
-  // Enhanced authentication state detection - don't let stale MFA block normal flow
-  const isLoggedIn = !!(user && session && !authLoading);
-  const shouldBlockForMFA = mfaPending && window.location.pathname === '/auth';
+  // Enhanced authentication state detection with more stable logic
+  const isLoggedIn = !!(user && session && !mfaPending && !authLoading);
 
   console.log('🎯 UserMenu: Auth state check:', { 
     user: !!user, 
     session: !!session,
     mfaPending,
     authLoading,
-    shouldBlockForMFA,
     finalIsLoggedIn: isLoggedIn,
-    authContextAvailable: !!authContext,
-    currentPath: window.location.pathname,
-    isMobile
+    currentPath: window.location.pathname
   });
 
   // Auto-close dropdown when auth state changes
@@ -91,6 +73,14 @@ const UserMenu = ({
       setIsDropdownOpen(false);
     }
   }, [isLoggedIn, isDropdownOpen]);
+
+  // Auto-open login modal on mobile when not logged in (only for /account route)
+  useEffect(() => {
+    if (isMobile && !isLoggedIn && window.location.pathname === '/account') {
+      console.log('📱 UserMenu: Auto-opening login modal for mobile /account access');
+      setShowLoginModal(true);
+    }
+  }, [isMobile, isLoggedIn, setShowLoginModal]);
 
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -102,9 +92,7 @@ const UserMenu = ({
       session: !!session,
       mfaPending,
       authLoading,
-      authContextAvailable: !!authContext,
-      currentPath: window.location.pathname,
-      isMobile
+      currentPath: window.location.pathname
     });
     
     // If user is logged in, show dropdown menu
@@ -114,24 +102,22 @@ const UserMenu = ({
       return;
     }
     
-    // Don't interfere if we're on the auth page and have valid MFA pending
-    if (window.location.pathname === '/auth' && shouldBlockForMFA) {
-      console.log('🔄 UserMenu: On auth page with valid MFA, doing nothing');
+    // Don't interfere if we're on the auth page - let auth page handle everything
+    if (window.location.pathname === '/auth') {
+      console.log('🔄 UserMenu: On auth page, doing nothing');
       return;
     }
     
-    console.log('❌ UserMenu: User not logged in, handling login flow');
+    console.log('❌ UserMenu: User not logged in, handling navigation');
     
-    // If auth context is not available, navigate to auth page
-    if (!authContext) {
-      console.log('🔐 UserMenu: No auth context, navigating to auth page');
-      navigate('/auth');
-      return;
+    // If not logged in and not on auth page, handle navigation
+    if (isMobile) {
+      console.log('📱 UserMenu: Mobile - redirecting to /auth');
+      window.location.href = '/auth';
+    } else {
+      console.log('💻 UserMenu: Desktop - showing login modal');
+      setShowLoginModal(true);
     }
-    
-    // For both mobile and desktop, show the login modal
-    console.log('🔐 UserMenu: Opening login modal');
-    setShowLoginModal(true);
   };
 
   const handleLogout = () => {
@@ -144,6 +130,15 @@ const UserMenu = ({
 
   // Prevent dropdown from opening when not authenticated
   const shouldShowDropdown = isLoggedIn && isDropdownOpen;
+
+  console.log('🎯 UserMenu render decision:', { 
+    isLoggedIn, 
+    isDropdownOpen,
+    shouldShowDropdown,
+    mfaPending,
+    authLoading,
+    currentPath: window.location.pathname
+  });
 
   return (
     <>
@@ -169,8 +164,8 @@ const UserMenu = ({
         )}
       </DropdownMenu>
 
-      {/* Auth Modal - show for both mobile and desktop when not logged in - only if auth context is available */}
-      {authContext && !window.location.pathname.includes('/auth') && !shouldBlockForMFA && (
+      {/* Auth Modal - only show if not on auth page and no pending MFA */}
+      {!window.location.pathname.includes('/auth') && !mfaPending && (
         <AuthModal
           showModal={showLoginModal}
           isSignUp={isSignUp}
