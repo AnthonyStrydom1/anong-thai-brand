@@ -1,13 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, User, Search } from 'lucide-react';
+import { Search, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import AdminLink from './AdminLink';
+import AuthModal from './AuthModal';
+import { useAuthModal } from '@/hooks/useAuthModal';
+import { mfaAuthService } from '@/services/mfaAuthService';
 
 interface MobileMenuProps {
   isOpen: boolean;
-  navItems: { path: string; label: string }[];
+  navItems: Array<{ path: string; label: string }>;
   isLoggedIn: boolean;
   onMenuItemClick: () => void;
   onSearchClick: () => void;
@@ -35,146 +37,146 @@ const MobileMenu = ({
   onLogoutClick,
   translations
 }: MobileMenuProps) => {
+  const {
+    showLoginModal,
+    setShowLoginModal,
+    isSignUp,
+    setIsSignUp,
+    showForgotPassword,
+    email,
+    password,
+    firstName,
+    lastName,
+    isLoading,
+    handleAuthSubmit,
+    handleForgotPassword,
+    handleCloseModal,
+    handleEmailChange,
+    handlePasswordChange,
+    setFirstName,
+    setLastName,
+  } = useAuthModal();
+
+  const handleLoginClick = () => {
+    console.log('📱 MobileMenu: Login clicked');
+    setShowLoginModal(true);
+    onMenuItemClick(); // Close the mobile menu
+  };
+
+  const handleLogoutClick = () => {
+    console.log('📱 MobileMenu: Logout clicked');
+    mfaAuthService.clearMFASession();
+    onLogoutClick();
+    onMenuItemClick(); // Close the mobile menu
+  };
+
   if (!isOpen) return null;
 
-  // Common button style for mobile menu links
-  const buttonStyle = "text-left w-full py-3 px-4 hover:bg-anong-gold hover:text-anong-black transition-colors justify-start font-serif";
-
   return (
-    <div className="md:hidden bg-anong-black shadow-lg absolute top-full left-0 w-full z-30 animate-in fade-in border-t border-anong-gold/20">
-      <nav className="flex flex-col">
-        {navItems.map((item) => (
-          <Link 
-            key={item.path}
-            to={item.path}
-            className="py-3 px-4 border-b border-anong-gold/10 hover:bg-anong-gold hover:text-anong-black transition-colors text-white font-serif"
-            onClick={onMenuItemClick}
-          >
-            {item.label}
-          </Link>
-        ))}
-        
-        <Button
-          variant="ghost"
-          className={buttonStyle}
-          onClick={() => {
-            onSearchClick();
-            onMenuItemClick();
-          }}
-        >
-          <div className="flex items-center text-white">
-            <Search className="mr-2 h-5 w-5" />
-            {translations.search}
-          </div>
-        </Button>
-        
-        {isLoggedIn ? (
-          <>
-            <Button
-              variant="ghost"
-              className={buttonStyle}
-              onClick={onMenuItemClick}
-              asChild
-            >
-              <Link to="/profile">
-                <div className="flex items-center text-white">
-                  <User className="mr-2 h-5 w-5" />
-                  {translations.profile}
-                </div>
+    <>
+      <div className="bg-anong-black border-t border-gray-800 md:hidden">
+        <div className="container mx-auto px-4 py-4">
+          <nav className="space-y-2">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="block py-2 px-3 text-white hover:bg-white hover:bg-opacity-10 rounded transition-colors"
+                onClick={onMenuItemClick}
+              >
+                {item.label}
               </Link>
-            </Button>
+            ))}
             
-            <Button
-              variant="ghost"
-              className={buttonStyle}
-              onClick={onMenuItemClick}
-              asChild
-            >
-              <Link to="/account">
-                <div className="flex items-center text-white">
-                  <User className="mr-2 h-5 w-5" />
-                  {translations.account}
-                </div>
-              </Link>
-            </Button>
-            
-            <Button
-              variant="ghost"
-              className={buttonStyle}
-              onClick={onMenuItemClick}
-              asChild
-            >
-              <Link to="/orders">
-                <div className="flex items-center text-white">
-                  <User className="mr-2 h-5 w-5" />
-                  {translations.orders}
-                </div>
-              </Link>
-            </Button>
-            
-            <Button
-              variant="ghost"
-              className={buttonStyle}
-              onClick={onMenuItemClick}
-              asChild
-            >
-              <Link to="/settings">
-                <div className="flex items-center text-white">
-                  <User className="mr-2 h-5 w-5" />
-                  {translations.settings}
-                </div>
-              </Link>
-            </Button>
-            
-            {/* Admin Dashboard Link for Mobile */}
-            <div className="border-b border-anong-gold/10">
-              <AdminLink />
+            <div className="border-t border-gray-800 pt-4 mt-4">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-white hover:bg-white hover:bg-opacity-10"
+                onClick={() => {
+                  onSearchClick();
+                  onMenuItemClick();
+                }}
+              >
+                <Search className="h-4 w-4 mr-2" />
+                {translations.search}
+              </Button>
+              
+              {isLoggedIn ? (
+                <>
+                  <Link
+                    to="/profile"
+                    className="block py-2 px-3 text-white hover:bg-white hover:bg-opacity-10 rounded transition-colors"
+                    onClick={onMenuItemClick}
+                  >
+                    <User className="h-4 w-4 inline mr-2" />
+                    {translations.profile}
+                  </Link>
+                  <Link
+                    to="/account"
+                    className="block py-2 px-3 text-white hover:bg-white hover:bg-opacity-10 rounded transition-colors"
+                    onClick={onMenuItemClick}
+                  >
+                    {translations.account}
+                  </Link>
+                  <Link
+                    to="/orders"
+                    className="block py-2 px-3 text-white hover:bg-white hover:bg-opacity-10 rounded transition-colors"
+                    onClick={onMenuItemClick}
+                  >
+                    {translations.orders}
+                  </Link>
+                  <Link
+                    to="/settings"
+                    className="block py-2 px-3 text-white hover:bg-white hover:bg-opacity-10 rounded transition-colors"
+                    onClick={onMenuItemClick}
+                  >
+                    {translations.settings}
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-red-400 hover:bg-red-400 hover:bg-opacity-10"
+                    onClick={handleLogoutClick}
+                  >
+                    {translations.logout}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-white hover:bg-white hover:bg-opacity-10"
+                  onClick={handleLoginClick}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  {translations.login}
+                </Button>
+              )}
             </div>
-            
-            <Button
-              variant="ghost"
-              className={buttonStyle}
-              onClick={() => {
-                onLogoutClick();
-                onMenuItemClick();
-              }}
-            >
-              <div className="flex items-center text-white">
-                {translations.logout}
-              </div>
-            </Button>
-          </>
-        ) : (
-          <Button
-            variant="ghost"
-            className={buttonStyle}
-            onClick={onMenuItemClick}
-            asChild
-          >
-            <Link to="/account">
-              <div className="flex items-center text-white">
-                <User className="mr-2 h-5 w-5" />
-                {translations.login}
-              </div>
-            </Link>
-          </Button>
-        )}
-        
-        <Button
-          variant="ghost"
-          className={buttonStyle}
-          onClick={onMenuItemClick}
-          asChild
-        >
-          <Link to="/cart">
-            <div className="flex items-center text-white">
-              <ShoppingCart className="mr-2 h-5 w-5" />
-              {translations.myCart}
-            </div>
-          </Link>
-        </Button>
-      </nav>
-    </div>
+          </nav>
+        </div>
+      </div>
+
+      {/* Auth Modal for mobile */}
+      {!window.location.pathname.includes('/auth') && (
+        <AuthModal
+          showModal={showLoginModal}
+          isSignUp={isSignUp}
+          showForgotPassword={showForgotPassword}
+          email={email}
+          password={password}
+          firstName={firstName}
+          lastName={lastName}
+          isLoading={isLoading}
+          onClose={handleCloseModal}
+          onToggleSignUp={() => setIsSignUp(!isSignUp)}
+          onSubmit={handleAuthSubmit}
+          onEmailChange={handleEmailChange}
+          onPasswordChange={handlePasswordChange}
+          onFirstNameChange={setFirstName}
+          onLastNameChange={setLastName}
+          onForgotPassword={handleForgotPassword}
+        />
+      )}
+    </>
   );
 };
 

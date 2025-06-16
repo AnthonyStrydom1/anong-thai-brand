@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   DropdownMenu,
@@ -29,6 +30,7 @@ const UserMenu = ({
   onLogout,
   translations
 }: UserMenuProps) => {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   
@@ -75,14 +77,6 @@ const UserMenu = ({
     }
   }, [isLoggedIn, isDropdownOpen]);
 
-  // Auto-open login modal on mobile when not logged in (only for /account route)
-  useEffect(() => {
-    if (isMobile && !isLoggedIn && !mfaPending && window.location.pathname === '/account') {
-      console.log('📱 UserMenu: Auto-opening login modal for mobile /account access');
-      setShowLoginModal(true);
-    }
-  }, [isMobile, isLoggedIn, mfaPending, setShowLoginModal]);
-
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -110,16 +104,11 @@ const UserMenu = ({
       return;
     }
     
-    console.log('❌ UserMenu: User not logged in, handling navigation');
+    console.log('❌ UserMenu: User not logged in, handling login flow');
     
-    // If not logged in and not on auth page, handle navigation
-    if (isMobile) {
-      console.log('📱 UserMenu: Mobile - redirecting to /auth');
-      window.location.href = '/auth';
-    } else {
-      console.log('💻 UserMenu: Desktop - showing login modal');
-      setShowLoginModal(true);
-    }
+    // For both mobile and desktop, show the login modal
+    console.log('🔐 UserMenu: Opening login modal');
+    setShowLoginModal(true);
   };
 
   const handleLogout = () => {
@@ -167,7 +156,7 @@ const UserMenu = ({
         )}
       </DropdownMenu>
 
-      {/* Auth Modal - only show if not on auth page and no pending MFA */}
+      {/* Auth Modal - show for both mobile and desktop when not logged in */}
       {!window.location.pathname.includes('/auth') && !mfaPending && (
         <AuthModal
           showModal={showLoginModal}
