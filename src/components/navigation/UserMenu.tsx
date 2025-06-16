@@ -56,14 +56,16 @@ const UserMenu = ({
 
   const { user, session, mfaPending, isLoading: authLoading } = useAuth();
 
-  // Enhanced authentication state detection with mobile-specific handling
-  const isLoggedIn = !!(user && session && !mfaPending && !authLoading);
+  // Enhanced authentication state detection - don't let stale MFA block normal flow
+  const isLoggedIn = !!(user && session && !authLoading);
+  const shouldBlockForMFA = mfaPending && window.location.pathname === '/auth';
 
   console.log('🎯 UserMenu: Auth state check:', { 
     user: !!user, 
     session: !!session,
     mfaPending,
     authLoading,
+    shouldBlockForMFA,
     finalIsLoggedIn: isLoggedIn,
     currentPath: window.location.pathname,
     isMobile
@@ -98,9 +100,9 @@ const UserMenu = ({
       return;
     }
     
-    // Don't interfere if we're on the auth page or MFA is pending
-    if (window.location.pathname === '/auth' || mfaPending) {
-      console.log('🔄 UserMenu: On auth page or MFA pending, doing nothing');
+    // Don't interfere if we're on the auth page and have valid MFA pending
+    if (window.location.pathname === '/auth' && shouldBlockForMFA) {
+      console.log('🔄 UserMenu: On auth page with valid MFA, doing nothing');
       return;
     }
     
@@ -127,6 +129,7 @@ const UserMenu = ({
     isDropdownOpen,
     shouldShowDropdown,
     mfaPending,
+    shouldBlockForMFA,
     authLoading,
     currentPath: window.location.pathname,
     isMobile
@@ -157,7 +160,7 @@ const UserMenu = ({
       </DropdownMenu>
 
       {/* Auth Modal - show for both mobile and desktop when not logged in */}
-      {!window.location.pathname.includes('/auth') && !mfaPending && (
+      {!window.location.pathname.includes('/auth') && !shouldBlockForMFA && (
         <AuthModal
           showModal={showLoginModal}
           isSignUp={isSignUp}

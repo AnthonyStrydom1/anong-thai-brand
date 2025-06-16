@@ -1,9 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { AuthUser, authService } from '@/services/authService';
 import { mfaAuthService } from '@/services/mfaAuthService';
-import { mfaSessionManager } from '@/services/mfa/mfaSessionManager';
 
 export function useAuthState() {
   const [user, setUser] = useState<User | null>(null);
@@ -35,10 +33,22 @@ export function useAuthState() {
     window.addEventListener('mfa-session-stored', handleMFAStored);
     window.addEventListener('mfa-session-cleared', handleMFACleared);
 
-    // Check initial MFA state
+    // Check initial MFA state - but don't let stale MFA block normal flow
     const initialMFAState = mfaAuthService.hasPendingMFA();
     console.log('🎯 Auth: Initial MFA state:', initialMFAState);
-    setMfaPending(initialMFAState);
+    
+    // Only set MFA pending if we're actually on auth page or just initiated MFA
+    const isOnAuthPage = window.location.pathname === '/auth';
+    if (initialMFAState && isOnAuthPage) {
+      setMfaPending(true);
+    } else if (initialMFAState && !isOnAuthPage) {
+      // Clear stale MFA session if we're not on auth page
+      console.log('🧹 Auth: Clearing stale MFA session - not on auth page');
+      mfaAuthService.clearMFASession();
+      setMfaPending(false);
+    } else {
+      setMfaPending(false);
+    }
 
     // Set up auth state change listener
     const { data: { subscription } } = authService.onAuthStateChange(
@@ -51,46 +61,39 @@ export function useAuthState() {
           sessionId: session?.access_token ? 'present' : 'missing'
         });
 
-        // For authenticated users - only set if no MFA is pending
+        // For authenticated users
         if (user && session) {
-          const pendingMFA = mfaAuthService.hasPendingMFA();
-          console.log('🔍 Auth: Auth success - MFA check:', pendingMFA);
-          
-          if (!pendingMFA) {
-            console.log('✅ Auth: No pending MFA, setting authenticated state');
-            setUser(user);
-            setSession(session);
-            setMfaPending(false);
-            setIsLoading(false);
+          console.log('✅ Auth: User authenticated successfully');
+          setUser(user);
+          setSession(session);
+          setMfaPending(false); // Clear MFA when auth is successful
+          setIsLoading(false);
 
-            // Load user profile
-            authService.getUserProfile(user.id)
-              .then(profile => {
-                if (mounted) setUserProfile(profile);
-              })
-              .catch(error => {
-                console.error('❌ Auth: Failed to load user profile:', error);
-                if (mounted) setUserProfile(null);
-              });
-          } else {
-            console.log('🔒 Auth: MFA pending - keeping MFA state active');
-            // Don't change anything - let MFA flow continue
-            setIsLoading(false);
-          }
+          // Load user profile
+          authService.getUserProfile(user.id)
+            .then(profile => {
+              if (mounted) setUserProfile(profile);
+            })
+            .catch(error => {
+              console.error('❌ Auth: Failed to load user profile:', error);
+              if (mounted) setUserProfile(null);
+            });
           return;
         }
 
         // For unauthenticated users
-        const pendingMFA = mfaAuthService.hasPendingMFA();
-        console.log('🔍 Auth: No user/session, MFA check:', pendingMFA);
+        console.log('❌ Auth: No user/session - user logged out');
+        setUser(null);
+        setSession(null);
+        setUserProfile(null);
         
-        // Only clear MFA state if there's truly no pending MFA
-        if (!pendingMFA) {
+        // Only keep MFA pending if we're on the auth page
+        if (!window.location.pathname.includes('/auth')) {
+          console.log('🧹 Auth: Not on auth page, clearing MFA state');
           setMfaPending(false);
-          setUser(null);
-          setSession(null);
-          setUserProfile(null);
+          mfaAuthService.clearMFASession();
         }
+        
         setIsLoading(false);
       }
     );
@@ -107,34 +110,31 @@ export function useAuthState() {
         
         if (mounted) {
           if (session?.user) {
-            const pendingMFA = mfaAuthService.hasPendingMFA();
-            console.log('🔍 Auth: Existing session MFA check:', pendingMFA);
-            
-            if (!pendingMFA) {
-              console.log('✅ Auth: No pending MFA for existing session');
-              setUser(session.user);
-              setSession(session);
-              setMfaPending(false);
-            } else {
-              console.log('🔒 Auth: MFA pending for existing session');
-              setMfaPending(true);
-              // Don't clear user/session here - let MFA complete
-            }
+            console.log('✅ Auth: Found existing valid session');
+            setUser(session.user);
+            setSession(session);
+            setMfaPending(false); // Clear MFA if we have valid session
           } else {
-            const pendingMFA = mfaAuthService.hasPendingMFA();
-            setMfaPending(pendingMFA);
+            console.log('❌ Auth: No valid existing session');
             setUser(null);
             setSession(null);
+            // Only set MFA pending if we're on auth page
+            if (window.location.pathname.includes('/auth')) {
+              const pendingMFA = mfaAuthService.hasPendingMFA();
+              setMfaPending(pendingMFA);
+            } else {
+              setMfaPending(false);
+              mfaAuthService.clearMFASession();
+            }
           }
           setIsLoading(false);
         }
       } catch (error) {
         console.error('❌ Auth: Session check failed:', error);
         if (mounted) {
-          const pendingMFA = mfaAuthService.hasPendingMFA();
-          setMfaPending(pendingMFA);
           setUser(null);
           setSession(null);
+          setMfaPending(false);
           setIsLoading(false);
         }
       }
