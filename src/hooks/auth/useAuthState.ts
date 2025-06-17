@@ -70,7 +70,8 @@ export function useAuthState() {
         console.log('🔄 Auth: State change event:', { 
           user: !!user, 
           session: !!session,
-          sessionId: session?.access_token ? 'present' : 'missing'
+          sessionId: session?.access_token ? 'present' : 'missing',
+          domain: window.location.hostname
         });
 
         // For authenticated users, check MFA state
@@ -128,7 +129,8 @@ export function useAuthState() {
         console.log('📊 Auth: Session check result:', { 
           hasSession: !!session, 
           hasUser: !!session?.user,
-          sessionId: session?.access_token ? 'present' : 'missing'
+          sessionId: session?.access_token ? 'present' : 'missing',
+          domain: window.location.hostname
         });
         
         if (mounted) {
