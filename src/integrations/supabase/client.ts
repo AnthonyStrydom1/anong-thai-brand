@@ -12,7 +12,22 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   throw new Error('Missing required Supabase environment variables');
 }
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
-
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// Enhanced client configuration for better mobile support
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    storage: localStorage,
+    storageKey: 'supabase.auth.token',
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce'
+  },
+  global: {
+    headers: {
+      'x-client-info': 'supabase-js-web'
+    }
+  },
+  db: {
+    schema: 'public'
+  }
+});

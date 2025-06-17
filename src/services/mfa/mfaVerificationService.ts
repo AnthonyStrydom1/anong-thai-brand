@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { mfaSessionManager } from './mfaSessionManager';
 import type { MFASessionData } from './mfaTypes';
@@ -32,8 +33,14 @@ export class MFAVerificationService {
   }
 
   async signInWithCredentials(email: string, password: string) {
-    // Complete sign in with verified credentials
     console.log('🔐 MFA Verification Service: Completing final sign in...');
+    
+    // Ensure we have a clean slate for the new session
+    await supabase.auth.signOut();
+    
+    // Wait a moment to ensure signout is complete
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -80,12 +87,24 @@ export class MFAVerificationService {
 
       const data = await this.signInWithCredentials(sessionData.email, sessionData.password);
 
-      // Clear MFA session after successful sign-in
-      console.log('🧹 MFA Verification Service: Clearing MFA session after successful login');
+      // Wait for the session to be properly established before clearing MFA
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Verify the session is actually established
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Failed to establish session after MFA verification');
+      }
+
+      console.log('✅ MFA Verification Service: Session established, clearing MFA session');
+      
+      // Clear MFA session after successful sign-in and session establishment
       mfaSessionManager.clearSession();
       
-      // Dispatch event to notify that MFA has been cleared
-      window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
+      // Dispatch event to notify that MFA has been cleared - with delay to ensure session is ready
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
+      }, 100);
 
       return data;
     } catch (error: any) {

@@ -30,7 +30,8 @@ export const useAuthPageLogic = () => {
   // Redirect if already logged in (NO mfa pending)
   useEffect(() => {
     if (user && !mfaPending) {
-      navigate('/');
+      console.log('🏠 AuthPage: User authenticated and no MFA pending, redirecting to home');
+      navigate('/', { replace: true });
     }
   }, [user, mfaPending, navigate]);
 
@@ -57,9 +58,7 @@ export const useAuthPageLogic = () => {
       setIsCheckingMFA(false);
     };
 
-    // Check MFA status with a small delay to ensure all services are ready
-    const timer = setTimeout(checkMFAStatus, 100);
-    return () => clearTimeout(timer);
+    checkMFAStatus();
   }, []);
 
   // Listen for MFA session events
@@ -137,17 +136,20 @@ export const useAuthPageLogic = () => {
     // Clear MFA state immediately
     setShowMFA(false);
     setMfaEmail('');
-    mfaAuthService.clearMFASession();
     
     toast({
       title: "Success!",
       description: "You have been logged in successfully.",
     });
     
-    // Add a small delay to ensure auth state is properly updated before navigation
+    // Don't clear MFA session here - let the verification service handle it
+    // This prevents race conditions on mobile
+    
+    // Add a longer delay to ensure auth state is properly updated before navigation
     setTimeout(() => {
+      console.log('🏠 AuthPage: Navigating to home after successful MFA');
       navigate('/', { replace: true });
-    }, 100);
+    }, 1500);
   };
 
   const handleMFACancel = () => {
