@@ -40,6 +40,18 @@ export function useAuthState() {
       if (mounted) {
         console.log('📡 Auth: MFA cleared event - setting mfaPending to false');
         setMfaPending(false);
+        // Force re-check auth state after MFA clearing
+        setTimeout(() => {
+          if (!mounted) return;
+          authService.getCurrentSession().then(session => {
+            if (session?.user && mounted) {
+              console.log('✅ Auth: Setting authenticated state after MFA clear');
+              setUser(session.user);
+              setSession(session);
+              setIsLoading(false);
+            }
+          });
+        }, 100);
       }
     };
 
@@ -61,40 +73,39 @@ export function useAuthState() {
           sessionId: session?.access_token ? 'present' : 'missing'
         });
 
-        // For authenticated users, wait longer for MFA clearing before proceeding
+        // For authenticated users, check MFA state
         if (user && session) {
-          console.log('✅ Auth: User authenticated, checking MFA state with extended delay');
+          console.log('✅ Auth: User authenticated, checking MFA state');
           
-          // Much longer delay to ensure MFA clearing has completed on mobile
-          setTimeout(() => {
-            if (!mounted) return;
-            
-            const pendingMFA = isMFAPending();
-            console.log('🔍 Auth: MFA check after login (extended delay):', pendingMFA);
-            
-            if (!pendingMFA) {
-              console.log('✅ Auth: No pending MFA, setting authenticated state');
-              setUser(user);
-              setSession(session);
-              setMfaPending(false);
+          // Quick MFA check for authenticated users
+          const pendingMFA = isMFAPending();
+          console.log('🔍 Auth: MFA check after login:', pendingMFA);
+          
+          if (!pendingMFA) {
+            console.log('✅ Auth: No pending MFA, setting authenticated state');
+            setUser(user);
+            setSession(session);
+            setMfaPending(false);
 
-              // Load user profile
-              setTimeout(async () => {
-                if (!mounted) return;
-                try {
-                  const profile = await authService.getUserProfile(user.id);
-                  if (mounted) setUserProfile(profile);
-                } catch (error) {
-                  console.error('❌ Auth: Failed to load user profile:', error);
-                  if (mounted) setUserProfile(null);
-                }
-              }, 0);
-              
-              setIsLoading(false);
-            } else {
-              console.log('🔒 Auth: MFA still pending, waiting...');
-            }
-          }, 2000); // Increased from 100ms to 2000ms
+            // Load user profile
+            setTimeout(async () => {
+              if (!mounted) return;
+              try {
+                const profile = await authService.getUserProfile(user.id);
+                if (mounted) setUserProfile(profile);
+              } catch (error) {
+                console.error('❌ Auth: Failed to load user profile:', error);
+                if (mounted) setUserProfile(null);
+              }
+            }, 0);
+            
+            setIsLoading(false);
+          } else {
+            console.log('🔒 Auth: MFA still pending, waiting...');
+            setMfaPending(true);
+            setUser(null);
+            setSession(null);
+          }
           return;
         }
 
@@ -122,28 +133,23 @@ export function useAuthState() {
         
         if (mounted) {
           if (session?.user) {
-            console.log('✅ Auth: Found existing session, checking MFA with extended delay');
+            console.log('✅ Auth: Found existing session, checking MFA state');
             
-            // Extended wait time for potential MFA clearing
-            setTimeout(() => {
-              if (!mounted) return;
-              
-              const pendingMFA = isMFAPending();
-              console.log('🔍 Auth: Existing session MFA check (extended delay):', pendingMFA);
-              
-              if (!pendingMFA) {
-                console.log('✅ Auth: No pending MFA for existing session');
-                setUser(session.user);
-                setSession(session);
-                setMfaPending(false);
-              } else {
-                console.log('🔒 Auth: MFA pending for existing session');
-                setMfaPending(true);
-                setUser(null);
-                setSession(null);
-              }
-              setIsLoading(false);
-            }, 1000); // Increased from 50ms to 1000ms
+            const pendingMFA = isMFAPending();
+            console.log('🔍 Auth: Existing session MFA check:', pendingMFA);
+            
+            if (!pendingMFA) {
+              console.log('✅ Auth: No pending MFA for existing session');
+              setUser(session.user);
+              setSession(session);
+              setMfaPending(false);
+            } else {
+              console.log('🔒 Auth: MFA pending for existing session');
+              setMfaPending(true);
+              setUser(null);
+              setSession(null);
+            }
+            setIsLoading(false);
           } else {
             console.log('❌ Auth: No existing session found');
             const pendingMFA = isMFAPending();

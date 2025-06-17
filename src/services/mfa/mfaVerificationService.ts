@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { mfaSessionManager } from './mfaSessionManager';
 import type { MFASessionData } from './mfaTypes';
@@ -39,7 +38,7 @@ export class MFAVerificationService {
     await supabase.auth.signOut();
     
     // Wait a moment to ensure signout is complete
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -87,39 +86,15 @@ export class MFAVerificationService {
 
       const data = await this.signInWithCredentials(sessionData.email, sessionData.password);
 
-      // Wait for the session to be properly established before clearing MFA
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Verify the session is actually established multiple times
-      let sessionEstablished = false;
-      let attempts = 0;
-      const maxAttempts = 10;
-      
-      while (!sessionEstablished && attempts < maxAttempts) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session && session.access_token) {
-          console.log('✅ MFA Verification Service: Session verified on attempt', attempts + 1);
-          sessionEstablished = true;
-        } else {
-          console.log('⏳ MFA Verification Service: Waiting for session... attempt', attempts + 1);
-          await new Promise(resolve => setTimeout(resolve, 500));
-          attempts++;
-        }
-      }
-      
-      if (!sessionEstablished) {
-        throw new Error('Failed to establish session after MFA verification');
-      }
-
-      console.log('✅ MFA Verification Service: Session established, clearing MFA session');
-      
-      // Clear MFA session after successful sign-in and session establishment
+      // Clear MFA session immediately after successful sign-in
+      console.log('✅ MFA Verification Service: Clearing MFA session after successful auth');
       mfaSessionManager.clearSession();
       
-      // Dispatch event to notify that MFA has been cleared - with delay to ensure session is ready
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
-      }, 500);
+      // Dispatch event to notify that MFA has been cleared immediately
+      window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
+
+      // Wait for auth state to propagate properly
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       return data;
     } catch (error: any) {
@@ -128,6 +103,7 @@ export class MFAVerificationService {
       // Only clear session on session expiration, not on invalid codes
       if (error.message?.includes('expired') || error.message?.includes('session')) {
         mfaSessionManager.clearSession();
+        window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
       }
       
       throw error;

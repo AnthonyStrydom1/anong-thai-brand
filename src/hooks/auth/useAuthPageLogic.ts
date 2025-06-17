@@ -142,9 +142,8 @@ export const useAuthPageLogic = () => {
       description: "You have been logged in successfully.",
     });
     
-    // Don't navigate immediately - let auth state changes handle navigation
-    // The auth state will update and trigger the redirect useEffect above
-    console.log('🏠 AuthPageLogic: MFA success - letting auth state handle navigation');
+    // Navigation will be handled by the auth state change in the main useEffect
+    console.log('🏠 AuthPageLogic: MFA success - navigation will be handled by auth state');
   };
 
   const handleMFACancel = () => {
