@@ -30,27 +30,27 @@ export const useAuthPageLogic = () => {
   // Redirect if already logged in (NO mfa pending)
   useEffect(() => {
     if (user && !mfaPending) {
-      console.log('🏠 AuthPage: User authenticated and no MFA pending, redirecting to home');
+      console.log('🏠 AuthPageLogic: User authenticated and no MFA pending, redirecting to home');
       navigate('/', { replace: true });
     }
   }, [user, mfaPending, navigate]);
 
   // Check for existing MFA session on mount
   useEffect(() => {
-    console.log('🔍 AuthPage: Checking for existing MFA session...');
+    console.log('🔍 AuthPageLogic: Checking for existing MFA session...');
     
     const checkMFAStatus = () => {
       const hasPending = mfaAuthService.hasPendingMFA();
       const pendingEmail = mfaAuthService.getPendingMFAEmail();
       
-      console.log('📊 AuthPage: MFA Status Check:', { hasPending, pendingEmail });
+      console.log('📊 AuthPageLogic: MFA Status Check:', { hasPending, pendingEmail });
       
       if (hasPending && pendingEmail) {
-        console.log('✅ AuthPage: Found existing MFA session for:', pendingEmail);
+        console.log('✅ AuthPageLogic: Found existing MFA session for:', pendingEmail);
         setShowMFA(true);
         setMfaEmail(pendingEmail);
       } else {
-        console.log('❌ AuthPage: No existing MFA session found');
+        console.log('❌ AuthPageLogic: No existing MFA session found');
         setShowMFA(false);
         setMfaEmail('');
       }
@@ -64,10 +64,10 @@ export const useAuthPageLogic = () => {
   // Listen for MFA session events
   useEffect(() => {
     const handleMFAStored = (event: CustomEvent) => {
-      console.log('📧 AuthPage: MFA session stored event received:', event.detail);
+      console.log('📧 AuthPageLogic: MFA session stored event received:', event.detail);
       const email = event.detail?.email;
       if (email) {
-        console.log('🔄 AuthPage: Switching to MFA verification for:', email);
+        console.log('🔄 AuthPageLogic: Switching to MFA verification for:', email);
         setShowMFA(true);
         setMfaEmail(email);
         setIsCheckingMFA(false);
@@ -82,7 +82,7 @@ export const useAuthPageLogic = () => {
     };
 
     const handleMFACleared = () => {
-      console.log('🧹 AuthPage: MFA session cleared event received');
+      console.log('🧹 AuthPageLogic: MFA session cleared event received');
       setShowMFA(false);
       setMfaEmail('');
     };
@@ -105,33 +105,33 @@ export const useAuthPageLogic = () => {
     e.preventDefault();
     
     try {
-      console.log('🚀 AuthPage: Starting form submission...');
+      console.log('🚀 AuthPageLogic: Starting form submission...');
       const result = await handleSubmit(e);
-      console.log('📝 AuthPage: Form submission result:', result);
+      console.log('📝 AuthPageLogic: Form submission result:', result);
       
       // Force MFA check after successful form submission
       if (result?.mfaRequired) {
-        console.log('🔐 AuthPage: MFA required! Checking for MFA session...');
+        console.log('🔐 AuthPageLogic: MFA required! Checking for MFA session...');
         // Wait a bit for the MFA session to be stored
         setTimeout(() => {
           const hasPending = mfaAuthService.hasPendingMFA();
           const pendingEmail = mfaAuthService.getPendingMFAEmail();
-          console.log('🔍 AuthPage: Post-submit MFA check:', { hasPending, pendingEmail });
+          console.log('🔍 AuthPageLogic: Post-submit MFA check:', { hasPending, pendingEmail });
           
           if (hasPending && pendingEmail) {
-            console.log('✅ AuthPage: MFA session found, showing OTP screen');
+            console.log('✅ AuthPageLogic: MFA session found, showing OTP screen');
             setShowMFA(true);
             setMfaEmail(pendingEmail);
           }
         }, 500);
       }
     } catch (error) {
-      console.error('❌ AuthPage: Form submission error:', error);
+      console.error('❌ AuthPageLogic: Form submission error:', error);
     }
   };
 
   const handleMFASuccess = () => {
-    console.log('✅ AuthPage: MFA verification successful');
+    console.log('✅ AuthPageLogic: MFA verification successful');
     
     // Clear MFA state immediately
     setShowMFA(false);
@@ -143,15 +143,12 @@ export const useAuthPageLogic = () => {
     });
     
     // Don't navigate immediately - let auth state changes handle navigation
-    // Add a much longer delay to ensure auth state is properly updated
-    setTimeout(() => {
-      console.log('🏠 AuthPage: Checking auth state for navigation...');
-      // Navigation will be handled by the useEffect that watches user/mfaPending
-    }, 3000);
+    // The auth state will update and trigger the redirect useEffect above
+    console.log('🏠 AuthPageLogic: MFA success - letting auth state handle navigation');
   };
 
   const handleMFACancel = () => {
-    console.log('❌ AuthPage: MFA verification cancelled');
+    console.log('❌ AuthPageLogic: MFA verification cancelled');
     setShowMFA(false);
     setMfaEmail('');
     mfaAuthService.clearMFASession();

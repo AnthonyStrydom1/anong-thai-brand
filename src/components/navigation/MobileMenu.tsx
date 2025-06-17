@@ -151,7 +151,7 @@ const MobileMenu = ({
             onClick={onMenuItemClick}
             asChild
           >
-            <Link to="/account">
+            <Link to="/auth">
               <div className="flex items-center text-white">
                 <User className="mr-2 h-5 w-5" />
                 {translations.login}

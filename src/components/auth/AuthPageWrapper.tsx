@@ -27,28 +27,32 @@ const AuthPageWrapper = () => {
     handleSwitchMode
   } = useAuthPageLogic();
 
-  console.log('🎯 AuthPage render state:', { 
+  console.log('🎯 AuthPageWrapper render state:', { 
     showMFA, 
     mfaEmail, 
     isLogin,
     isCheckingMFA,
-    hasUser: !!user
+    hasUser: !!user,
+    mfaPending,
+    currentPath: window.location.pathname
   });
 
-  // If MFA is pending, always render the OTP screen
+  // If MFA is pending from auth state, always show MFA screen
   if (mfaPending) {
-    // Get the most up-to-date pending MFA email
     const pendingEmail = mfaAuthService.getPendingMFAEmail() || '';
+    console.log('🔐 AuthPageWrapper: MFA pending from auth state, showing MFA screen for:', pendingEmail);
     return (
       <MfaPageView
         email={pendingEmail}
         onSuccess={() => {
+          console.log('✅ AuthPageWrapper: MFA success from auth state flow');
           mfaAuthService.clearMFASession();
-          // Navigation handled by auth state change
+          // Don't navigate - let auth state changes handle it
         }}
         onCancel={() => {
+          console.log('❌ AuthPageWrapper: MFA cancelled from auth state flow');
           mfaAuthService.clearMFASession();
-          // Navigation handled by clearing MFA state
+          // Don't navigate - let auth state changes handle it
         }}
       />
     );
@@ -56,11 +60,13 @@ const AuthPageWrapper = () => {
 
   // Show loading while checking MFA status
   if (isCheckingMFA) {
+    console.log('⏳ AuthPageWrapper: Still checking MFA status...');
     return <LoadingView />;
   }
 
-  // Show MFA verification if needed
+  // Show MFA verification if needed (local state)
   if (showMFA && mfaEmail) {
+    console.log('🔐 AuthPageWrapper: Showing MFA from local state for:', mfaEmail);
     return (
       <MfaPageView
         email={mfaEmail}
@@ -71,6 +77,7 @@ const AuthPageWrapper = () => {
   }
 
   // Show auth form
+  console.log('📝 AuthPageWrapper: Showing auth form');
   return (
     <AuthFormView
       isLogin={isLogin}

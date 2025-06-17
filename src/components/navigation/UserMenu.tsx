@@ -74,9 +74,11 @@ const UserMenu = ({
     }
   }, [isLoggedIn, isDropdownOpen]);
 
-  // Auto-open login modal on mobile when not logged in (only for /account route)
+  // Don't auto-open modal on mobile for /account - let the page handle it
+  // This prevents conflicts between modal and full auth page
   useEffect(() => {
-    if (isMobile && !isLoggedIn && window.location.pathname === '/account') {
+    // Only auto-open if we're NOT on the auth page already
+    if (isMobile && !isLoggedIn && window.location.pathname === '/account' && window.location.pathname !== '/auth') {
       console.log('📱 UserMenu: Auto-opening login modal for mobile /account access');
       setShowLoginModal(true);
     }
@@ -105,6 +107,13 @@ const UserMenu = ({
     // Don't interfere if we're on the auth page - let auth page handle everything
     if (window.location.pathname === '/auth') {
       console.log('🔄 UserMenu: On auth page, doing nothing');
+      return;
+    }
+    
+    // Don't interfere if MFA is pending - let the auth flow handle it
+    if (mfaPending) {
+      console.log('🔐 UserMenu: MFA pending, redirecting to auth page');
+      window.location.href = '/auth';
       return;
     }
     
