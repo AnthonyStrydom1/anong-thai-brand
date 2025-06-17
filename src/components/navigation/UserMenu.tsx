@@ -78,8 +78,8 @@ const UserMenu = ({
   // This prevents conflicts between modal and full auth page
   useEffect(() => {
     const currentPath = window.location.pathname;
-    // Only auto-open if we're on /account but NOT already on /auth
-    if (isMobile && !isLoggedIn && currentPath === '/account' && currentPath !== '/auth') {
+    // Only auto-open if we're on /account (and not already authenticated)
+    if (isMobile && !isLoggedIn && currentPath === '/account') {
       console.log('📱 UserMenu: Auto-opening login modal for mobile /account access');
       setShowLoginModal(true);
     }
