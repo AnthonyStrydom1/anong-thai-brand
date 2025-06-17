@@ -142,14 +142,12 @@ export const useAuthPageLogic = () => {
       description: "You have been logged in successfully.",
     });
     
-    // Don't clear MFA session here - let the verification service handle it
-    // This prevents race conditions on mobile
-    
-    // Add a longer delay to ensure auth state is properly updated before navigation
+    // Don't navigate immediately - let auth state changes handle navigation
+    // Add a much longer delay to ensure auth state is properly updated
     setTimeout(() => {
-      console.log('🏠 AuthPage: Navigating to home after successful MFA');
-      navigate('/', { replace: true });
-    }, 1500);
+      console.log('🏠 AuthPage: Checking auth state for navigation...');
+      // Navigation will be handled by the useEffect that watches user/mfaPending
+    }, 3000);
   };
 
   const handleMFACancel = () => {

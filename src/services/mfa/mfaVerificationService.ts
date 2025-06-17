@@ -39,7 +39,7 @@ export class MFAVerificationService {
     await supabase.auth.signOut();
     
     // Wait a moment to ensure signout is complete
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -88,11 +88,26 @@ export class MFAVerificationService {
       const data = await this.signInWithCredentials(sessionData.email, sessionData.password);
 
       // Wait for the session to be properly established before clearing MFA
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Verify the session is actually established
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      // Verify the session is actually established multiple times
+      let sessionEstablished = false;
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      while (!sessionEstablished && attempts < maxAttempts) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.access_token) {
+          console.log('✅ MFA Verification Service: Session verified on attempt', attempts + 1);
+          sessionEstablished = true;
+        } else {
+          console.log('⏳ MFA Verification Service: Waiting for session... attempt', attempts + 1);
+          await new Promise(resolve => setTimeout(resolve, 500));
+          attempts++;
+        }
+      }
+      
+      if (!sessionEstablished) {
         throw new Error('Failed to establish session after MFA verification');
       }
 
@@ -104,7 +119,7 @@ export class MFAVerificationService {
       // Dispatch event to notify that MFA has been cleared - with delay to ensure session is ready
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
-      }, 100);
+      }, 500);
 
       return data;
     } catch (error: any) {

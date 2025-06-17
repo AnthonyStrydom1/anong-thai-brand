@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { AuthUser, authService } from '@/services/authService';
@@ -28,7 +29,13 @@ export function useAuthState() {
       return mfaPendingRaw;
     };
 
-    const handleMFAStored = () => { if (mounted) setMfaPending(true); };
+    const handleMFAStored = () => { 
+      if (mounted) {
+        console.log('📡 Auth: MFA stored event - setting mfaPending to true');
+        setMfaPending(true);
+      }
+    };
+    
     const handleMFACleared = () => { 
       if (mounted) {
         console.log('📡 Auth: MFA cleared event - setting mfaPending to false');
@@ -54,16 +61,16 @@ export function useAuthState() {
           sessionId: session?.access_token ? 'present' : 'missing'
         });
 
-        // For authenticated users, wait for MFA clearing before proceeding
+        // For authenticated users, wait longer for MFA clearing before proceeding
         if (user && session) {
-          console.log('✅ Auth: User authenticated, checking MFA state');
+          console.log('✅ Auth: User authenticated, checking MFA state with extended delay');
           
-          // Small delay to ensure MFA clearing has completed
+          // Much longer delay to ensure MFA clearing has completed on mobile
           setTimeout(() => {
             if (!mounted) return;
             
             const pendingMFA = isMFAPending();
-            console.log('🔍 Auth: MFA check after login:', pendingMFA);
+            console.log('🔍 Auth: MFA check after login (extended delay):', pendingMFA);
             
             if (!pendingMFA) {
               console.log('✅ Auth: No pending MFA, setting authenticated state');
@@ -87,7 +94,7 @@ export function useAuthState() {
             } else {
               console.log('🔒 Auth: MFA still pending, waiting...');
             }
-          }, 100);
+          }, 2000); // Increased from 100ms to 2000ms
           return;
         }
 
@@ -115,14 +122,14 @@ export function useAuthState() {
         
         if (mounted) {
           if (session?.user) {
-            console.log('✅ Auth: Found existing session, checking MFA');
+            console.log('✅ Auth: Found existing session, checking MFA with extended delay');
             
-            // Wait a moment for potential MFA clearing
+            // Extended wait time for potential MFA clearing
             setTimeout(() => {
               if (!mounted) return;
               
               const pendingMFA = isMFAPending();
-              console.log('🔍 Auth: Existing session MFA check:', pendingMFA);
+              console.log('🔍 Auth: Existing session MFA check (extended delay):', pendingMFA);
               
               if (!pendingMFA) {
                 console.log('✅ Auth: No pending MFA for existing session');
@@ -136,7 +143,7 @@ export function useAuthState() {
                 setSession(null);
               }
               setIsLoading(false);
-            }, 50);
+            }, 1000); // Increased from 50ms to 1000ms
           } else {
             console.log('❌ Auth: No existing session found');
             const pendingMFA = isMFAPending();
