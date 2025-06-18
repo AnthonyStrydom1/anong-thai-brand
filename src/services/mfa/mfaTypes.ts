@@ -6,10 +6,11 @@ export interface MFASignInData {
 
 export interface MFASessionData {
   email: string;
-  password: string;
+  password?: string; // Optional for password change flow
   timestamp: number;
   userId?: string;
-  type: 'signin' | 'signup';
+  challengeId?: string; // Added for password change flow
+  type: 'signin' | 'signup' | 'password_change'; // Added password_change
 }
 
 export interface MFAAuthResult {
