@@ -36,7 +36,7 @@ const NavigationBanner = () => {
 
   const handleLogout = async () => {
     try {
-      console.log('🔄 NavigationBanner: Starting logout process');
+      console.log('🔄 NavigationBanner: Starting logout');
       await signOut();
       console.log('✅ NavigationBanner: Logout successful');
       
@@ -47,7 +47,7 @@ const NavigationBanner = () => {
       navigate('/');
       
     } catch (error: any) {
-      console.error('❌ NavigationBanner: Unexpected logout error:', error);
+      console.error('❌ NavigationBanner: Logout error:', error);
       
       toast({
         title: 'Logged out successfully',
@@ -59,8 +59,7 @@ const NavigationBanner = () => {
   };
 
   const handleMobileLogin = () => {
-    // This will be handled by the Link to /account in MobileMenu
-    // which will show the login modal when not authenticated
+    // Handled by Link to /account in MobileMenu
   };
   
   const t = navigationTranslations[language];
@@ -73,7 +72,6 @@ const NavigationBanner = () => {
     { path: '/contact', label: t.contact },
   ];
 
-  // Enhanced mobile translations with all required properties
   const mobileTranslations = {
     ...t,
     account: t.account || (language === 'en' ? 'Account' : 'บัญชี'),
@@ -81,26 +79,24 @@ const NavigationBanner = () => {
     settings: t.settings || (language === 'en' ? 'Settings' : 'การตั้งค่า'),
   };
 
+  // Redirect to auth if MFA is pending
   useEffect(() => {
     if (mfaPending && currentPath !== '/auth') {
       navigate("/auth", { replace: true });
     }
   }, [mfaPending, currentPath, navigate]);
 
-  // Update "isLoggedIn" logic to factor mfaPending
   const isLoggedIn = !!user && !mfaPending;
 
   return (
     <div className="bg-anong-black nav-premium sticky top-0 z-40 border-b border-anong-gold/20">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
-          {/* Logo and Navigation */}
           <div className="flex items-center">
             <LogoSection />
             <DesktopNav navItems={navItems} />
           </div>
 
-          {/* Right side actions */}
           <RightActions
             language={language}
             isLoggedIn={isLoggedIn}
@@ -113,7 +109,6 @@ const NavigationBanner = () => {
           />
         </div>
 
-        {/* Search overlay */}
         <SearchOverlay 
           isOpen={isSearchOpen}
           searchQuery={searchQuery}
@@ -124,7 +119,6 @@ const NavigationBanner = () => {
         />
       </div>
       
-      {/* Mobile menu */}
       <MobileMenu 
         isOpen={isMenuOpen}
         navItems={navItems}

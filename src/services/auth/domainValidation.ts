@@ -1,3 +1,4 @@
+
 export class DomainValidationService {
   private readonly DOMAIN_KEY = 'anongthaibrand_domain';
   private readonly TARGET_DOMAIN = 'anongthaibrand.com';
@@ -6,27 +7,29 @@ export class DomainValidationService {
     const currentDomain = window.location.hostname.toLowerCase();
     const normalizedDomain = currentDomain.replace(/^www\./, '');
 
-    // ✅ Allow the target production domain (with or without www)
+    // Allow target production domain
     if (normalizedDomain === this.TARGET_DOMAIN) {
       return true;
     }
 
-    // ✅ Allow localhost for development
+    // Allow localhost for development
     if (currentDomain === 'localhost') {
       return true;
     }
 
-    // ✅ Allow Lovable preview domains (pattern: *.lovableproject.com)
+    // Allow Lovable preview domains
     if (currentDomain.endsWith('.lovableproject.com')) {
       return true;
     }
 
-    // ✅ Allow any other development/staging domains for flexibility
+    // Allow other development/staging domains
     if (
       currentDomain.includes('localhost') || 
       currentDomain.includes('127.0.0.1') ||
       currentDomain.includes('preview') ||
-      currentDomain.includes('staging')
+      currentDomain.includes('staging') ||
+      currentDomain.includes('dev') ||
+      currentDomain.includes('test')
     ) {
       return true;
     }
