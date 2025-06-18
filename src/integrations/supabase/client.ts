@@ -3,17 +3,16 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// PRODUCTION FIX: Force new credentials (June 18, 2025)
-// TODO: Revert to environment variables once production env is updated
+// UPDATED: Fresh Supabase credentials (June 18, 2025)
 const SUPABASE_URL = "https://nyadgiutmweuyxqetfuh.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55YWRnaXV0bXdldXl4cWV0ZnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkyOTA3MjQsImV4cCI6MjA2NDg2NjcyNH0.2A1-OfpJiAxIGWxa4PdBtnFNDwBuV3X38fB21AWo88A";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55YWRnaXV0bXdldXl4cWV0ZnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNzM0OTksImV4cCI6MjA2NTg0OTQ5OX0.VTEDEpoDtq_C_gglFz8Zrs_3HsX43VM3ZXsoYgTMP5c";
 
 // Validate credentials
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   throw new Error('Missing required Supabase credentials');
 }
 
-console.log('🔧 Supabase Integration: Using hardcoded credentials for production fix');
+console.log('🔧 Supabase Integration: Using fresh credentials (June 18, 2025)');
 
 // Enhanced client configuration for better mobile support
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
