@@ -1,0 +1,177 @@
+# Anthony_Anong Project Cleanup and Security Audit PRD
+
+<context>
+# Overview  
+The Anthony_Anong project is a full-stack React/TypeScript application with a Node.js backend, built using modern technologies including Vite, shadcn-ui, Tailwind CSS, and Supabase. The project requires comprehensive cleanup, security hardening, and optimization to ensure production readiness, maintainability, and adherence to best practices.
+
+The primary goals are to:
+- Eliminate security vulnerabilities and exposed credentials
+- Remove duplicate code and unused dependencies
+- Optimize project structure and organization
+- Implement proper error handling and monitoring
+- Ensure code quality and consistency
+- Document and standardize development workflows
+
+# Core Issues Identified  
+Based on initial analysis, the following critical issues need addressing:
+
+**CRITICAL SECURITY ISSUES:**
+- Exposed Supabase service role key in backend/.env file (committed to version control)
+- Potential security vulnerabilities in authentication and authorization flows
+- Missing security headers and CORS configuration review
+
+**CODE QUALITY ISSUES:**
+- Multiple TODO/FIXME/BUG comments throughout codebase indicating incomplete implementations
+- Potential duplicate dependencies between frontend and backend
+- Inconsistent error handling patterns
+- Missing comprehensive test coverage
+
+**PROJECT ORGANIZATION:**
+- Mixed configuration files and potential conflicts (package-lock.json vs bun.lockb)
+- Unclear project structure documentation
+- Missing environment configuration validation
+- Incomplete documentation and setup instructions
+
+# User Experience Impact
+This cleanup will benefit:
+- **Developers**: Cleaner, more maintainable codebase with clear documentation
+- **DevOps/Security Teams**: Secure, auditable application with proper credential management
+- **End Users**: More stable, performant application with better error handling
+- **Project Stakeholders**: Reduced technical debt and improved development velocity
+</context>
+
+<PRD>
+# Technical Architecture Review
+The current architecture consists of:
+
+**Frontend Stack:**
+- React 18 with TypeScript
+- Vite for build tooling
+- shadcn-ui component library
+- Tailwind CSS for styling
+- React Router for navigation
+- Supabase for backend services
+
+**Backend Stack:**
+- Node.js with Express
+- Supabase integration
+- CORS middleware
+- Environment-based configuration
+
+**Key Areas for Improvement:**
+- Security layer implementation
+- Error boundary and logging systems
+- Performance monitoring
+- Test infrastructure setup
+- CI/CD pipeline configuration
+
+# Development Roadmap  
+
+## Phase 1: Critical Security Fixes (IMMEDIATE)
+**Priority: CRITICAL - Must be completed first**
+- Remove exposed credentials from version control
+- Implement proper environment variable management
+- Audit and fix authentication/authorization vulnerabilities
+- Review and harden security headers and CORS policies
+- Implement credential rotation procedures
+
+## Phase 2: Code Quality and Cleanup
+**Priority: HIGH - Foundation for further development**
+- Remove duplicate and unused dependencies
+- Resolve all TODO/FIXME/BUG comments with proper implementations
+- Standardize error handling patterns across the application
+- Implement comprehensive logging and monitoring
+- Clean up inconsistent package management (npm vs bun)
+
+## Phase 3: Testing and Documentation
+**Priority: HIGH - Essential for maintainability**
+- Implement comprehensive test coverage (unit, integration, e2e)
+- Create detailed API documentation
+- Document development setup and deployment procedures
+- Implement code quality gates and linting rules
+- Create security audit checklist and procedures
+
+## Phase 4: Performance and Optimization
+**Priority: MEDIUM - Enhances user experience**
+- Optimize bundle sizes and loading performance
+- Implement proper caching strategies
+- Review and optimize database queries and API calls
+- Implement monitoring and alerting systems
+- Performance testing and optimization
+
+## Phase 5: Developer Experience Improvements
+**Priority: MEDIUM - Improves development workflow**
+- Set up automated CI/CD pipelines
+- Implement pre-commit hooks and automated code formatting
+- Create development environment containerization
+- Implement automated dependency updates and security scanning
+- Create contributor guidelines and onboarding documentation
+
+# Logical Dependency Chain
+**Critical Path Dependencies:**
+
+1. **Security First**: All security issues must be resolved before any other work
+   - Credential exposure fixes cannot wait
+   - Security audit must validate all authentication flows
+
+2. **Code Quality Foundation**: Clean, maintainable code enables everything else
+   - Dependency cleanup enables performance optimization
+   - Error handling standardization enables reliable testing
+   - Code organization improvements enable team collaboration
+
+3. **Testing Infrastructure**: Required before major refactoring or new features
+   - Unit tests validate individual component behavior
+   - Integration tests ensure system components work together
+   - E2E tests validate complete user workflows
+
+4. **Documentation and Monitoring**: Enable sustainable development practices
+   - API documentation enables frontend/backend development coordination
+   - Monitoring enables proactive issue detection and resolution
+
+# Risks and Mitigations  
+
+**High-Risk Areas:**
+- **Credential Exposure**: Active security vulnerability requiring immediate attention
+  - Mitigation: Immediate credential rotation and proper secret management implementation
+  
+- **Production Dependencies**: Changes to core dependencies could break functionality
+  - Mitigation: Comprehensive testing strategy and staged rollout approach
+  
+- **Database Schema Changes**: Supabase configuration changes could affect data integrity
+  - Mitigation: Database backup procedures and migration testing
+
+**Medium-Risk Areas:**
+- **Build System Changes**: Moving from mixed package managers could cause build issues
+  - Mitigation: Thorough testing in development environment before production deployment
+  
+- **Authentication Flow Changes**: Security improvements could break existing user sessions
+  - Mitigation: Gradual rollout with user session migration strategy
+
+# Success Metrics
+- Zero exposed credentials or security vulnerabilities
+- 90%+ test coverage across critical application paths
+- Documentation completeness score of 95%+
+- Build time optimization of 30%+ improvement
+- Zero critical or high-severity dependency vulnerabilities
+- Developer onboarding time reduced by 50%
+
+# Appendix  
+**Technologies to Leverage:**
+- ESLint and Prettier for code quality
+- Husky for pre-commit hooks
+- Jest and React Testing Library for testing
+- Docker for development environment consistency
+- GitHub Actions for CI/CD automation
+- Sentry or similar for error monitoring
+
+**Security Tools:**
+- npm audit / yarn audit for dependency vulnerabilities
+- OWASP ZAP for security testing
+- git-secrets for preventing credential commits
+- Environment variable validation libraries
+
+**Performance Tools:**
+- Lighthouse for web performance auditing
+- Bundle analyzer for optimization opportunities
+- Performance monitoring solutions
+</PRD>
