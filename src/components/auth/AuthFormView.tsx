@@ -1,11 +1,13 @@
 
 import React from 'react';
 import NavigationBanner from '@/components/NavigationBanner';
-import AuthForm from '@/components/auth/AuthForm';
+import AuthForm from './AuthForm';
+import LoadingTransition from './LoadingTransition';
 
 interface AuthFormViewProps {
   isLogin: boolean;
   isLoading: boolean;
+  isTransitioning?: boolean;
   showPassword: boolean;
   showForgotPassword: boolean;
   formData: {
@@ -15,7 +17,7 @@ interface AuthFormViewProps {
     lastName: string;
   };
   onTogglePassword: () => void;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputChange: (field: string, value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onForgotPassword: () => void;
   onSwitchMode: () => void;
@@ -24,6 +26,7 @@ interface AuthFormViewProps {
 const AuthFormView = ({
   isLogin,
   isLoading,
+  isTransitioning = false,
   showPassword,
   showForgotPassword,
   formData,
@@ -33,13 +36,33 @@ const AuthFormView = ({
   onForgotPassword,
   onSwitchMode
 }: AuthFormViewProps) => {
-  console.log('📝 AuthFormView: Rendering auth form');
-  
+  // Adapter function to convert change events to field/value format
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    onInputChange(name, value);
+  };
+
+  // Show loading transition when processing auth
+  if (isTransitioning) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <NavigationBanner />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="w-full max-w-md">
+            <LoadingTransition 
+              message={isLogin ? "Preparing secure login..." : "Setting up your account..."} 
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <NavigationBanner />
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-4">
+        <div className="w-full max-w-md">
           <AuthForm
             isLogin={isLogin}
             isLoading={isLoading}
@@ -47,7 +70,7 @@ const AuthFormView = ({
             showForgotPassword={showForgotPassword}
             formData={formData}
             onTogglePassword={onTogglePassword}
-            onInputChange={onInputChange}
+            onInputChange={handleInputChange}
             onSubmit={onSubmit}
             onForgotPassword={onForgotPassword}
             onSwitchMode={onSwitchMode}

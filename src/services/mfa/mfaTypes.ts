@@ -6,11 +6,11 @@ export interface MFASignInData {
 
 export interface MFASessionData {
   email: string;
-  password?: string; // Added for signin flow
-  userId?: string; // Added for user identification
-  challengeId?: string;
-  type: 'signin' | 'password_change';
+  password?: string; // Optional for password change flow
   timestamp: number;
+  userId?: string;
+  challengeId?: string; // Added for password change flow
+  type: 'signin' | 'signup' | 'password_change'; // Added password_change
 }
 
 export interface MFAAuthResult {
@@ -21,4 +21,13 @@ export interface MFAAuthResult {
 
 export interface MFAResendResult {
   success: boolean;
+  error?: string;
+  challengeId?: string;
+}
+
+export interface MFAVerificationResult {
+  success: boolean;
+  user?: any;
+  session?: any;
+  error?: string;
 }

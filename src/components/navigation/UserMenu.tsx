@@ -1,9 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  DropdownMenu,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import UserMenuButton from './UserMenuButton';
 import UserMenuDropdown from './UserMenuDropdown';
 import AuthModal from './AuthModal';
@@ -24,136 +22,94 @@ interface UserMenuProps {
   };
 }
 
-const UserMenu = ({
-  isLoggedIn: isLoggedInProp,
-  onLogout,
-  translations
-}: UserMenuProps) => {
+const UserMenu = ({ isLoggedIn: isLoggedInProp, onLogout, translations }: UserMenuProps) => {
   const isMobile = useIsMobile();
-  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
-  const {
-    showLoginModal,
-    setShowLoginModal,
-    isSignUp,
-    setIsSignUp,
-    showForgotPassword,
-    email,
-    password,
-    firstName,
-    lastName,
-    isLoading,
-    handleAuthSubmit,
-    handleForgotPassword,
-    handleCloseModal,
-    handleEmailChange,
-    handlePasswordChange,
-    setFirstName,
-    setLastName,
-  } = useAuthModal();
-
+  const authModal = useAuthModal();
   const { user, session, mfaPending, isLoading: authLoading } = useAuth();
 
-  // Enhanced authentication state detection with more stable logic
+  // Enhanced authentication state with stability checks
   const isLoggedIn = !!(user && session && !mfaPending && !authLoading);
 
-  console.log('🎯 UserMenu: Auth state check:', { 
+  console.log('🎯 UserMenu: Auth state:', { 
     user: !!user, 
     session: !!session,
     mfaPending,
     authLoading,
-    finalIsLoggedIn: isLoggedIn,
+    isLoggedIn,
     currentPath: window.location.pathname
   });
 
-  // Auto-close dropdown when auth state changes
+  // Auto-close dropdown on auth state changes
   useEffect(() => {
     if (!isLoggedIn && isDropdownOpen) {
-      console.log('🔒 UserMenu: Closing dropdown due to auth state change');
+      console.log('🔒 UserMenu: Closing dropdown - auth state changed');
       setIsDropdownOpen(false);
     }
   }, [isLoggedIn, isDropdownOpen]);
 
-  // Don't auto-open modal on mobile for /account - let the page handle it
-  // This prevents conflicts between modal and full auth page
+  // Auto-open modal for mobile /account access
   useEffect(() => {
     const currentPath = window.location.pathname;
-    // Only auto-open if we're on /account (and not already authenticated)
     if (isMobile && !isLoggedIn && currentPath === '/account') {
-      console.log('📱 UserMenu: Auto-opening login modal for mobile /account access');
-      setShowLoginModal(true);
+      console.log('📱 UserMenu: Auto-opening login for mobile /account');
+      authModal.setShowLoginModal(true);
     }
-  }, [isMobile, isLoggedIn, setShowLoginModal]);
+  }, [isMobile, isLoggedIn, authModal.setShowLoginModal]);
 
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🖱️ UserMenu: Button clicked - Auth state:', { 
+    console.log('🖱️ UserMenu: Button clicked:', { 
       isLoggedIn,
-      user: !!user,
-      session: !!session,
-      mfaPending,
-      authLoading,
-      currentPath: window.location.pathname
+      currentPath: window.location.pathname,
+      mfaPending
     });
     
-    // If user is logged in, show dropdown menu
     if (isLoggedIn) {
-      console.log('✅ UserMenu: User is logged in, toggling dropdown');
+      console.log('✅ UserMenu: Toggling dropdown for authenticated user');
       setIsDropdownOpen(!isDropdownOpen);
       return;
     }
     
-    // Don't interfere if we're on the auth page - let auth page handle everything
+    // Don't interfere with auth page
     if (window.location.pathname === '/auth') {
-      console.log('🔄 UserMenu: On auth page, doing nothing');
+      console.log('🔄 UserMenu: On auth page, no action needed');
       return;
     }
     
-    // Don't interfere if MFA is pending - let the auth flow handle it
+    // Handle MFA pending state
     if (mfaPending) {
-      console.log('🔐 UserMenu: MFA pending, redirecting to auth page');
+      console.log('🔐 UserMenu: MFA pending, redirecting to auth');
       window.location.href = '/auth';
       return;
     }
     
-    console.log('❌ UserMenu: User not logged in, handling navigation');
+    console.log('❌ UserMenu: User not authenticated, handling login');
     
-    // If not logged in and not on auth page, handle navigation
     if (isMobile) {
       console.log('📱 UserMenu: Mobile - redirecting to /auth');
       window.location.href = '/auth';
     } else {
-      console.log('💻 UserMenu: Desktop - showing login modal');
-      setShowLoginModal(true);
+      console.log('💻 UserMenu: Desktop - showing modal');
+      authModal.setShowLoginModal(true);
     }
   };
 
   const handleLogout = () => {
     console.log('🚪 UserMenu: Logout initiated');
     setIsDropdownOpen(false);
-    // Clear any MFA session on logout
     mfaAuthService.clearMFASession();
     onLogout();
   };
 
-  // Prevent dropdown from opening when not authenticated
   const shouldShowDropdown = isLoggedIn && isDropdownOpen;
-
-  console.log('🎯 UserMenu render decision:', { 
-    isLoggedIn, 
-    isDropdownOpen,
-    shouldShowDropdown,
-    mfaPending,
-    authLoading,
-    currentPath: window.location.pathname
-  });
 
   return (
     <>
       <DropdownMenu open={shouldShowDropdown} onOpenChange={(open) => {
-        // Only allow opening if user is authenticated
         if (isLoggedIn) {
           setIsDropdownOpen(open);
         } else {
@@ -177,22 +133,22 @@ const UserMenu = ({
       {/* Auth Modal - only show if not on auth page and no pending MFA */}
       {!window.location.pathname.includes('/auth') && !mfaPending && (
         <AuthModal
-          showModal={showLoginModal}
-          isSignUp={isSignUp}
-          showForgotPassword={showForgotPassword}
-          email={email}
-          password={password}
-          firstName={firstName}
-          lastName={lastName}
-          isLoading={isLoading}
-          onClose={handleCloseModal}
-          onToggleSignUp={() => setIsSignUp(!isSignUp)}
-          onSubmit={handleAuthSubmit}
-          onEmailChange={handleEmailChange}
-          onPasswordChange={handlePasswordChange}
-          onFirstNameChange={setFirstName}
-          onLastNameChange={setLastName}
-          onForgotPassword={handleForgotPassword}
+          showModal={authModal.showLoginModal}
+          isSignUp={authModal.isSignUp}
+          showForgotPassword={authModal.showForgotPassword}
+          email={authModal.email}
+          password={authModal.password}
+          firstName={authModal.firstName}
+          lastName={authModal.lastName}
+          isLoading={authModal.isLoading}
+          onClose={authModal.handleCloseModal}
+          onToggleSignUp={() => authModal.setIsSignUp(!authModal.isSignUp)}
+          onSubmit={authModal.handleAuthSubmit}
+          onEmailChange={authModal.handleEmailChange}
+          onPasswordChange={authModal.handlePasswordChange}
+          onFirstNameChange={authModal.setFirstName}
+          onLastNameChange={authModal.setLastName}
+          onForgotPassword={authModal.handleForgotPassword}
         />
       )}
     </>

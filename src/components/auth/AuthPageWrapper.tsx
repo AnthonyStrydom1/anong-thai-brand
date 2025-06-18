@@ -3,6 +3,7 @@ import React from 'react';
 import { mfaAuthService } from '@/services/mfaAuthService';
 import { useAuthPageLogic } from '@/hooks/auth/useAuthPageLogic';
 import LoadingView from './LoadingView';
+import LoadingTransition from './LoadingTransition';
 import MfaPageView from './MfaPageView';
 import AuthFormView from './AuthFormView';
 
@@ -11,6 +12,7 @@ const AuthPageWrapper = () => {
     showMFA,
     mfaEmail,
     isCheckingMFA,
+    isTransitioning,
     user,
     mfaPending,
     isLogin,
@@ -32,6 +34,7 @@ const AuthPageWrapper = () => {
     mfaEmail, 
     isLogin,
     isCheckingMFA,
+    isTransitioning,
     hasUser: !!user,
     mfaPending,
     currentPath: window.location.pathname
@@ -76,12 +79,13 @@ const AuthPageWrapper = () => {
     );
   }
 
-  // Show auth form
+  // Show auth form with transition support
   console.log('📝 AuthPageWrapper: Showing auth form');
   return (
     <AuthFormView
       isLogin={isLogin}
       isLoading={isLoading}
+      isTransitioning={isTransitioning}
       showPassword={showPassword}
       showForgotPassword={showForgotPassword}
       formData={formData}

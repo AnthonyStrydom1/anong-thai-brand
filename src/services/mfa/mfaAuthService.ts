@@ -61,9 +61,9 @@ class MFAAuthService {
 
       if (emailResult.success) {
         console.log('✅ MFA Service: MFA email sent successfully');
-        // Trigger MFA session stored event to update UI
+        // Trigger MFA session stored event to update UI - but don't show success toast yet
         window.dispatchEvent(new CustomEvent('mfa-session-stored', { 
-          detail: { email, challengeId: emailResult.challengeId } 
+          detail: { email, challengeId: emailResult.challengeId, skipSuccessToast: true } 
         }));
         console.log('🎯 MFA Service: MANDATORY MFA flow initiated successfully');
       } else {

@@ -1,10 +1,11 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { mfaSessionManager } from './mfaSessionManager';
 import type { MFASessionData } from './mfaTypes';
 
 export class MFAVerificationService {
   async verifyCode(code: string, sessionData: MFASessionData) {
-    console.log('🔍 MFA Verification Service: Verifying code with Supabase...');
+    console.log('🔍 MFA Verification: Verifying code');
     
     const { data: verifyData, error: verifyError } = await supabase.rpc('verify_mfa_challenge', {
       user_email: sessionData.email,
@@ -12,9 +13,8 @@ export class MFAVerificationService {
     });
 
     if (verifyError) {
-      console.log('❌ MFA Verification Service: Code verification failed:', verifyError);
+      console.log('❌ MFA Verification: Code verification failed:', verifyError);
       
-      // Check if it's an expiration error
       if (verifyError.message?.includes('No valid challenge found') || 
           verifyError.message?.includes('expired')) {
         throw new Error('Verification code has expired. Please request a new code.');
@@ -27,17 +27,15 @@ export class MFAVerificationService {
       throw new Error('Invalid verification code');
     }
 
-    console.log('✅ MFA Verification Service: Code verified successfully');
+    console.log('✅ MFA Verification: Code verified successfully');
     return verifyData;
   }
 
   async signInWithCredentials(email: string, password: string) {
-    console.log('🔐 MFA Verification Service: Completing final sign in...');
+    console.log('🔐 MFA Verification: Completing sign in');
     
-    // Ensure we have a clean slate for the new session
+    // Ensure clean slate
     await supabase.auth.signOut();
-    
-    // Wait a moment to ensure signout is complete
     await new Promise(resolve => setTimeout(resolve, 500));
     
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -46,61 +44,59 @@ export class MFAVerificationService {
     });
 
     if (error) {
-      console.log('❌ MFA Verification Service: Final sign in failed:', error);
+      console.log('❌ MFA Verification: Sign in failed:', error);
       throw error;
     }
 
-    console.log('✅ MFA Verification Service: Sign in completed successfully');
+    console.log('✅ MFA Verification: Sign in completed');
     return data;
   }
 
   async verifyAndSignIn(code: string) {
-    console.log('🔍 MFA Verification Service: Starting verification with code:', code);
+    console.log('🔍 MFA Verification: Starting verification with code:', code);
     
     const sessionData = mfaSessionManager.getSessionData();
     if (!sessionData) {
-      console.log('❌ MFA Verification Service: No session data found');
+      console.log('❌ MFA Verification: No session data');
       throw new Error('No pending MFA verification. Please sign in again.');
     }
 
-    console.log('📋 MFA Verification Service: Found session data for:', sessionData.email);
+    console.log('📋 MFA Verification: Session found for:', sessionData.email);
 
-    // Check session timeout - keep at 15 minutes
+    // Check session timeout (15 minutes)
     const sessionAge = Date.now() - sessionData.timestamp;
-    const maxAge = 15 * 60 * 1000; // 15 minutes
+    const maxAge = 15 * 60 * 1000;
     
     if (sessionAge > maxAge) {
-      console.log('⏰ MFA Verification Service: Session expired');
+      console.log('⏰ MFA Verification: Session expired');
       mfaSessionManager.clearSession();
       throw new Error('MFA session expired. Please sign in again.');
     }
 
     try {
-      // Verify the MFA code first
+      // Verify MFA code
       await this.verifyCode(code, sessionData);
 
-      // If verification successful, complete sign in
       if (!sessionData.password) {
         throw new Error('Invalid session data - missing credentials');
       }
 
+      // Complete sign in
       const data = await this.signInWithCredentials(sessionData.email, sessionData.password);
 
-      // Clear MFA session immediately after successful sign-in
-      console.log('✅ MFA Verification Service: Clearing MFA session after successful auth');
+      // Clear MFA session immediately
+      console.log('✅ MFA Verification: Clearing session after success');
       mfaSessionManager.clearSession();
-      
-      // Dispatch event to notify that MFA has been cleared immediately
       window.dispatchEvent(new CustomEvent('mfa-session-cleared'));
 
-      // Wait for auth state to propagate properly
+      // Allow auth state to propagate
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       return data;
     } catch (error: any) {
-      console.error('❌ MFA Verification Service: Verification failed:', error);
+      console.error('❌ MFA Verification: Failed:', error);
       
-      // Only clear session on session expiration, not on invalid codes
+      // Only clear session on expiration/session errors
       if (error.message?.includes('expired') || error.message?.includes('session')) {
         mfaSessionManager.clearSession();
         window.dispatchEvent(new CustomEvent('mfa-session-cleared'));

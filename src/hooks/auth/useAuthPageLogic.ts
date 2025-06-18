@@ -5,52 +5,45 @@ import { toast } from '@/hooks/use-toast';
 import { mfaAuthService } from '@/services/mfaAuthService';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useAuth } from '@/hooks/useAuth';
+import type { MFAAuthResult } from '@/services/mfa/mfaTypes';
 
 export const useAuthPageLogic = () => {
   const [showMFA, setShowMFA] = useState(false);
   const [mfaEmail, setMfaEmail] = useState<string>('');
   const [isCheckingMFA, setIsCheckingMFA] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const navigate = useNavigate();
   const { user, mfaPending } = useAuth();
 
-  const {
-    isLogin,
-    isLoading,
-    showPassword,
-    showForgotPassword,
-    formData,
-    setShowPassword,
-    handleSubmit,
-    handleForgotPassword,
-    handleInputChange,
-    switchToLogin,
-    switchToSignUp
-  } = useAuthForm();
+  const authFormHook = useAuthForm();
 
-  // Redirect if already logged in (NO mfa pending)
+  // Only redirect authenticated users to home when auth is fully complete
   useEffect(() => {
-    if (user && !mfaPending) {
-      console.log('🏠 AuthPageLogic: User authenticated and no MFA pending, redirecting to home');
-      navigate('/', { replace: true });
+    if (user && !mfaPending && !showMFA && !isTransitioning) {
+      console.log('🏠 AuthPageLogic: Full authentication complete, redirecting home');
+      // Add a small delay to ensure clean transition
+      setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 100);
     }
-  }, [user, mfaPending, navigate]);
+  }, [user, mfaPending, showMFA, isTransitioning, navigate]);
 
-  // Check for existing MFA session on mount
+  // Check for existing MFA session
   useEffect(() => {
-    console.log('🔍 AuthPageLogic: Checking for existing MFA session...');
+    console.log('🔍 AuthPageLogic: Checking MFA status');
     
     const checkMFAStatus = () => {
       const hasPending = mfaAuthService.hasPendingMFA();
       const pendingEmail = mfaAuthService.getPendingMFAEmail();
       
-      console.log('📊 AuthPageLogic: MFA Status Check:', { hasPending, pendingEmail });
+      console.log('📊 AuthPageLogic: MFA Status:', { hasPending, pendingEmail });
       
       if (hasPending && pendingEmail) {
-        console.log('✅ AuthPageLogic: Found existing MFA session for:', pendingEmail);
+        console.log('✅ AuthPageLogic: Found MFA session for:', pendingEmail);
         setShowMFA(true);
         setMfaEmail(pendingEmail);
       } else {
-        console.log('❌ AuthPageLogic: No existing MFA session found');
+        console.log('❌ AuthPageLogic: No MFA session found');
         setShowMFA(false);
         setMfaEmail('');
       }
@@ -61,30 +54,40 @@ export const useAuthPageLogic = () => {
     checkMFAStatus();
   }, []);
 
-  // Listen for MFA session events
+  // Listen for MFA events
   useEffect(() => {
     const handleMFAStored = (event: CustomEvent) => {
-      console.log('📧 AuthPageLogic: MFA session stored event received:', event.detail);
+      console.log('📧 AuthPageLogic: MFA session stored:', event.detail);
       const email = event.detail?.email;
+      const skipSuccessToast = event.detail?.skipSuccessToast;
+      
       if (email) {
-        console.log('🔄 AuthPageLogic: Switching to MFA verification for:', email);
+        console.log('🔄 AuthPageLogic: Switching to MFA for:', email);
+        setIsTransitioning(true);
         setShowMFA(true);
         setMfaEmail(email);
         setIsCheckingMFA(false);
         
-        toast({
-          title: isLogin ? "MFA Required" : "Account Created!",
-          description: isLogin 
-            ? "Please check your email for the verification code."
-            : "Please check your email for the verification code to complete your registration.",
-        });
+        // Only show toast if not skipped (to prevent premature success message)
+        if (!skipSuccessToast) {
+          toast({
+            title: authFormHook.isLogin ? "MFA Required" : "Account Created!",
+            description: authFormHook.isLogin 
+              ? "Please check your email for the verification code."
+              : "Please check your email for the verification code to complete registration.",
+          });
+        }
+        
+        // Clear transition state after a brief moment
+        setTimeout(() => setIsTransitioning(false), 300);
       }
     };
 
     const handleMFACleared = () => {
-      console.log('🧹 AuthPageLogic: MFA session cleared event received');
+      console.log('🧹 AuthPageLogic: MFA cleared');
       setShowMFA(false);
       setMfaEmail('');
+      setIsTransitioning(false);
     };
 
     window.addEventListener('mfa-session-stored', handleMFAStored as EventListener);
@@ -94,9 +97,9 @@ export const useAuthPageLogic = () => {
       window.removeEventListener('mfa-session-stored', handleMFAStored as EventListener);
       window.removeEventListener('mfa-session-cleared', handleMFACleared as EventListener);
     };
-  }, [isLogin]);
+  }, [authFormHook.isLogin]);
 
-  // Scroll to top when component mounts
+  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -105,64 +108,72 @@ export const useAuthPageLogic = () => {
     e.preventDefault();
     
     try {
-      console.log('🚀 AuthPageLogic: Starting form submission...');
-      const result = await handleSubmit(e);
-      console.log('📝 AuthPageLogic: Form submission result:', result);
+      console.log('🚀 AuthPageLogic: Form submission started');
+      setIsTransitioning(true);
       
-      // Force MFA check after successful form submission
-      if (result?.mfaRequired) {
-        console.log('🔐 AuthPageLogic: MFA required! Checking for MFA session...');
-        // Wait a bit for the MFA session to be stored
+      const result = await authFormHook.handleSubmit(e);
+      console.log('📝 AuthPageLogic: Form result:', result);
+      
+      // Check if result has mfaRequired property (it's an MFAAuthResult)
+      const mfaResult = result as MFAAuthResult;
+      if (mfaResult?.mfaRequired) {
+        console.log('🔐 AuthPageLogic: MFA required, checking session');
+        // The MFA session should already be set up, just wait for UI update
         setTimeout(() => {
           const hasPending = mfaAuthService.hasPendingMFA();
           const pendingEmail = mfaAuthService.getPendingMFAEmail();
           console.log('🔍 AuthPageLogic: Post-submit MFA check:', { hasPending, pendingEmail });
           
           if (hasPending && pendingEmail) {
-            console.log('✅ AuthPageLogic: MFA session found, showing OTP screen');
+            console.log('✅ AuthPageLogic: MFA session ready');
             setShowMFA(true);
             setMfaEmail(pendingEmail);
           }
+          setIsTransitioning(false);
         }, 500);
+      } else {
+        setIsTransitioning(false);
       }
     } catch (error) {
       console.error('❌ AuthPageLogic: Form submission error:', error);
+      setIsTransitioning(false);
     }
   };
 
   const handleMFASuccess = () => {
-    console.log('✅ AuthPageLogic: MFA verification successful');
-    
-    // Clear MFA state immediately
+    console.log('✅ AuthPageLogic: MFA success');
+    setIsTransitioning(true);
     setShowMFA(false);
     setMfaEmail('');
     
+    // Show success toast only after MFA completion
     toast({
-      title: "Success!",
-      description: "You have been logged in successfully.",
+      title: "Successfully Signed In!",
+      description: "Welcome back! Redirecting to your dashboard...",
     });
-    
-    // Navigation will be handled by the auth state change in the main useEffect
-    console.log('🏠 AuthPageLogic: MFA success - navigation will be handled by auth state');
+
+    // Clear transition state after toast
+    setTimeout(() => setIsTransitioning(false), 1000);
   };
 
   const handleMFACancel = () => {
-    console.log('❌ AuthPageLogic: MFA verification cancelled');
+    console.log('❌ AuthPageLogic: MFA cancelled');
     setShowMFA(false);
     setMfaEmail('');
+    setIsTransitioning(false);
     mfaAuthService.clearMFASession();
   };
 
   const handleSwitchMode = () => {
-    // Clear MFA state when switching modes
     setShowMFA(false);
     setMfaEmail('');
+    setIsTransitioning(false);
     mfaAuthService.clearMFASession();
     
-    if (isLogin) {
-      switchToSignUp();
+    if (authFormHook.isLogin) {
+      authFormHook.switchToSignUp();
     } else {
-      switchToLogin();
+      authFormHook.switchToLogin();
     }
   };
 
@@ -170,17 +181,11 @@ export const useAuthPageLogic = () => {
     showMFA,
     mfaEmail,
     isCheckingMFA,
+    isTransitioning,
     user,
     mfaPending,
-    isLogin,
-    isLoading,
-    showPassword,
-    showForgotPassword,
-    formData,
-    setShowPassword,
+    ...authFormHook,
     handleFormSubmit,
-    handleForgotPassword,
-    handleInputChange,
     handleMFASuccess,
     handleMFACancel,
     handleSwitchMode
