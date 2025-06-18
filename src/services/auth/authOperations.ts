@@ -21,6 +21,12 @@ export class AuthOperationsService {
   async signUp(data: SignUpData) {
     try {
       console.log('🔐 AuthOperations: Starting sign up process for:', data.email);
+      console.log('🔐 AuthOperations: Sign up data:', {
+        email: data.email,
+        hasPassword: !!data.password,
+        firstName: data.firstName,
+        lastName: data.lastName
+      });
       
       const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
@@ -40,6 +46,11 @@ export class AuthOperationsService {
       }
 
       console.log('🔐 AuthOperations: Sign up successful, user created:', authData.user?.id);
+      console.log('🔐 AuthOperations: Auth data received:', {
+        userId: authData.user?.id,
+        userEmail: authData.user?.email,
+        hasSession: !!authData.session
+      });
 
       // Send welcome email after successful signup
       if (authData.user && data.firstName) {

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { WelcomeEmailService } from '@/services/welcomeEmailService';
 import type { Database } from '@/integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];
@@ -134,6 +135,23 @@ export const useUserCreation = (onUserCreated: () => void) => {
               variant: "destructive"
             });
             return;
+          }
+        }
+
+        // Send welcome email for non-admin users (regular customers)
+        if (!formData.roles.includes('admin') && formData.firstName) {
+          try {
+            console.log('👋 UserCreation: Sending welcome email to new user:', formData.email);
+            const customerName = formData.firstName + (formData.lastName ? ` ${formData.lastName}` : '');
+            
+            await WelcomeEmailService.sendWelcomeEmail({
+              customerName: customerName,
+              customerEmail: formData.email,
+            });
+            console.log('✅ UserCreation: Welcome email sent successfully');
+          } catch (emailError: any) {
+            console.error('❌ UserCreation: Failed to send welcome email:', emailError);
+            // Don't fail the user creation process if email fails
           }
         }
 
