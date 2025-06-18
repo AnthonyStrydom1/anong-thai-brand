@@ -24,6 +24,11 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
     
     if (isSubmitting) return;
     
+    console.log('🔄 EditProfileForm: Starting profile update...');
+    console.log('📝 EditProfileForm: Form data:', { firstName, lastName, phone });
+    console.log('👤 EditProfileForm: Current user:', user?.id);
+    console.log('📋 EditProfileForm: Current profile:', userProfile);
+    
     setIsSubmitting(true);
     
     try {
@@ -36,8 +41,11 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
         phone,
       });
       
+      console.log('✅ EditProfileForm: Auth profile updated successfully');
+      
       // Also update the customer record if it exists
       if (user) {
+        console.log('🔍 EditProfileForm: Looking for customer record...');
         const customer = await supabaseService.getCurrentUserCustomer();
         if (customer) {
           console.log('👤 Updating customer record:', customer.id);
@@ -48,6 +56,8 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
             phone: phone,
           });
           console.log('✅ Customer record updated successfully');
+        } else {
+          console.log('ℹ️ EditProfileForm: No customer record found');
         }
       }
       
@@ -56,9 +66,15 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
         description: 'Your changes have been saved.',
       });
       
+      console.log('✅ EditProfileForm: Profile update completed successfully');
       onSave();
     } catch (error: any) {
       console.error('❌ Profile update error:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       toast({
         title: 'Update failed',
         description: error.message || 'Failed to update profile',
@@ -70,12 +86,21 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
   };
 
   if (isLoading) {
+    console.log('⏳ EditProfileForm: Profile data loading...');
     return (
       <div className="flex items-center justify-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-anong-gold"></div>
       </div>
     );
   }
+
+  console.log('🎯 EditProfileForm: Rendering form with:', { 
+    firstName, 
+    lastName, 
+    phone, 
+    isSubmitting,
+    userProfile 
+  });
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -88,7 +113,10 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
             id="firstName"
             type="text"
             value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            onChange={(e) => {
+              console.log('📝 EditProfileForm: First name changed to:', e.target.value);
+              setFirstName(e.target.value);
+            }}
             className="border-anong-sage/20 bg-anong-warm-cream/50 font-serif"
             placeholder="Enter your first name"
           />
@@ -102,7 +130,10 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
             id="lastName"
             type="text"
             value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            onChange={(e) => {
+              console.log('📝 EditProfileForm: Last name changed to:', e.target.value);
+              setLastName(e.target.value);
+            }}
             className="border-anong-sage/20 bg-anong-warm-cream/50 font-serif"
             placeholder="Enter your last name"
           />
@@ -116,7 +147,10 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
             id="phone"
             type="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => {
+              console.log('📝 EditProfileForm: Phone changed to:', e.target.value);
+              setPhone(e.target.value);
+            }}
             className="border-anong-sage/20 bg-anong-warm-cream/50 font-serif"
             placeholder="Enter your phone number"
           />
@@ -129,6 +163,10 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
           disabled={isSubmitting}
           variant="gold"
           className="font-serif"
+          onClick={(e) => {
+            console.log('🔘 EditProfileForm: Save button clicked');
+            // The form onSubmit will handle the actual submission
+          }}
         >
           {isSubmitting ? 'Saving...' : 'Save Changes'}
         </Button>
@@ -136,7 +174,10 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ onCancel, onSave }) =
         <Button
           type="button"
           variant="outline"
-          onClick={onCancel}
+          onClick={() => {
+            console.log('❌ EditProfileForm: Cancel button clicked');
+            onCancel();
+          }}
           disabled={isSubmitting}
           className="border-anong-sage/20 text-anong-charcoal hover:bg-anong-sage/10 font-serif"
         >
