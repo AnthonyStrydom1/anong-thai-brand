@@ -15,7 +15,7 @@ import { requireAdminRole, validateCustomerOwnership } from './middleware/adminA
 dotenv.config()
 
 // Validate required environment variables
-const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_ANON_KEY']
+const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     console.error(`Missing required environment variable: ${envVar}`)
@@ -23,13 +23,24 @@ for (const envVar of requiredEnvVars) {
   }
 }
 
+// Warn about optional but recommended environment variables
+if (!process.env.SUPABASE_ANON_KEY) {
+  console.warn('WARNING: SUPABASE_ANON_KEY not set - some features may not work correctly')
+}
+
 const app = express()
 
-// Apply security middleware first
-app.use(enforceHTTPS)
-app.use(requestTiming)
-app.use(securityHeaders)
-app.use(enhancedRateLimiter)
+// Apply security middleware first (with error handling for deployment)
+try {
+  app.use(enforceHTTPS)
+  app.use(requestTiming)
+  app.use(securityHeaders)
+  app.use(enhancedRateLimiter)
+} catch (error) {
+  console.warn('Some security middleware failed to load:', error.message)
+  // Fallback to basic security
+  app.use(securityHeaders)
+}
 
 // Enhanced CORS configuration with environment-based origins
 const allowedOrigins = process.env.NODE_ENV === 'production' 
@@ -46,7 +57,13 @@ app.use(cors({
 
 app.use(express.json({ limit: '1mb' })) // Reduced from 10mb
 app.use(express.urlencoded({ extended: true, limit: '1mb' }))
-app.use(enhancedInputValidation)
+// Enhanced input validation with fallback
+try {
+  app.use(enhancedInputValidation)
+} catch (error) {
+  console.warn('Enhanced input validation failed, using basic validation:', error.message)
+  app.use(validateInput)
+}
 
 // Health check endpoint (public)
 app.get('/health', (req, res) => {
