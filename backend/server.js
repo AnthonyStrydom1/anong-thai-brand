@@ -1,7 +1,11 @@
 
+import dotenv from 'dotenv'
+
+// Load environment variables FIRST before importing anything else
+dotenv.config()
+
 import express from 'express'
 import cors from 'cors'
-import dotenv from 'dotenv'
 
 // Import routes
 import productsRouter from './routes/products.js'
@@ -11,8 +15,6 @@ import contactRouter from './routes/contact.js'
 import { verifyJWT, validateInput } from './middleware/jwtAuth.js'
 import { securityHeaders, enhancedRateLimiter, enhancedInputValidation, enforceHTTPS, requestTiming } from './middleware/securityHeaders.js'
 import { requireAdminRole, validateCustomerOwnership } from './middleware/adminAuth.js'
-
-dotenv.config()
 
 // Validate required environment variables
 const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']
