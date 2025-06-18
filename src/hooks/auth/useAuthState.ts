@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { AuthUser, authService } from '@/services/authService';
@@ -15,7 +14,7 @@ export function useAuthState() {
   useEffect(() => {
     let mounted = true;
 
-    // Force clear all MFA data on app start
+    // Force clear all MFA data on app start to prevent stale sessions
     console.log('🚨 Auth: Force clearing MFA data on app initialization');
     mfaSessionManager.forceCleanupAll();
 
@@ -29,6 +28,9 @@ export function useAuthState() {
       if (mounted) {
         console.log('📡 Auth: MFA stored - setting pending true');
         setMfaPending(true);
+        // Keep user and session null during MFA to prevent premature navigation
+        setUser(null);
+        setSession(null);
       }
     };
     
@@ -37,7 +39,7 @@ export function useAuthState() {
         console.log('📡 Auth: MFA cleared - setting pending false');
         setMfaPending(false);
         
-        // Re-check auth state after MFA clearing
+        // Re-check auth state after MFA clearing with a slight delay
         setTimeout(() => {
           if (!mounted) return;
           authService.getCurrentSession().then(session => {
@@ -48,7 +50,7 @@ export function useAuthState() {
               setIsLoading(false);
             }
           });
-        }, 100);
+        }, 200);
       }
     };
 
@@ -93,10 +95,11 @@ export function useAuthState() {
             
             setIsLoading(false);
           } else {
-            console.log('🔒 Auth: MFA pending for authenticated user');
+            console.log('🔒 Auth: MFA pending for authenticated user - keeping user null');
             setMfaPending(true);
             setUser(null);
             setSession(null);
+            setIsLoading(false);
           }
           return;
         }
