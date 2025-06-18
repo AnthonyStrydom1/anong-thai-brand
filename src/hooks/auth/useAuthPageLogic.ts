@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { mfaAuthService } from '@/services/mfaAuthService';
 import { useAuthForm } from '@/hooks/useAuthForm';
 import { useAuth } from '@/hooks/useAuth';
+import type { MFAAuthResult } from '@/services/mfa/mfaTypes';
 
 export const useAuthPageLogic = () => {
   const [showMFA, setShowMFA] = useState(false);
@@ -113,7 +114,9 @@ export const useAuthPageLogic = () => {
       const result = await authFormHook.handleSubmit(e);
       console.log('📝 AuthPageLogic: Form result:', result);
       
-      if (result?.mfaRequired) {
+      // Check if result has mfaRequired property (it's an MFAAuthResult)
+      const mfaResult = result as MFAAuthResult;
+      if (mfaResult?.mfaRequired) {
         console.log('🔐 AuthPageLogic: MFA required, checking session');
         // The MFA session should already be set up, just wait for UI update
         setTimeout(() => {
