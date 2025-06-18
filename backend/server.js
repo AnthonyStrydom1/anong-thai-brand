@@ -8,35 +8,45 @@ import productsRouter from './routes/products.js'
 import contactRouter from './routes/contact.js'
 
 // Import security middleware
-import { verifyJWT, rateLimiter, validateInput } from './middleware/jwtAuth.js'
-import { securityHeaders } from './middleware/securityHeaders.js'
+import { verifyJWT, validateInput } from './middleware/jwtAuth.js'
+import { securityHeaders, enhancedRateLimiter, enhancedInputValidation, enforceHTTPS, requestTiming } from './middleware/securityHeaders.js'
 import { requireAdminRole, validateCustomerOwnership } from './middleware/adminAuth.js'
 
 dotenv.config()
 
 // Validate required environment variables
-if (!process.env.SUPABASE_URL) {
-  console.error('Missing required environment variable: SUPABASE_URL')
-  process.exit(1)
+const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_ANON_KEY']
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.error(`Missing required environment variable: ${envVar}`)
+    process.exit(1)
+  }
 }
 
 const app = express()
 
 // Apply security middleware first
+app.use(enforceHTTPS)
+app.use(requestTiming)
 app.use(securityHeaders)
-app.use(rateLimiter)
+app.use(enhancedRateLimiter)
 
-// CORS configuration
+// Enhanced CORS configuration with environment-based origins
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [process.env.FRONTEND_URL].filter(Boolean)
+  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || ['http://localhost:3000', 'http://localhost:5173'],
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-client-info', 'apikey']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-client-info', 'apikey'],
+  maxAge: 86400 // 24 hours preflight cache
 }))
 
 app.use(express.json({ limit: '1mb' })) // Reduced from 10mb
 app.use(express.urlencoded({ extended: true, limit: '1mb' }))
-app.use(validateInput)
+app.use(enhancedInputValidation)
 
 // Health check endpoint (public)
 app.get('/health', (req, res) => {
