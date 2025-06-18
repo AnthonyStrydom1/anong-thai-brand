@@ -36,6 +36,12 @@ const AuthFormView = ({
   onForgotPassword,
   onSwitchMode
 }: AuthFormViewProps) => {
+  // Adapter function to convert change events to field/value format
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    onInputChange(name, value);
+  };
+
   // Show loading transition when processing auth
   if (isTransitioning) {
     return (
@@ -64,7 +70,7 @@ const AuthFormView = ({
             showForgotPassword={showForgotPassword}
             formData={formData}
             onTogglePassword={onTogglePassword}
-            onInputChange={onInputChange}
+            onInputChange={handleInputChange}
             onSubmit={onSubmit}
             onForgotPassword={onForgotPassword}
             onSwitchMode={onSwitchMode}
