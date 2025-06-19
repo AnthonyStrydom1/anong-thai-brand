@@ -320,17 +320,14 @@ export function extractFormErrors(error: BaseError): Record<string, string> {
 
   const fieldErrors: Record<string, string> = {};
 
-  // Handle single field error
   if (error.context?.field && error.userMessage) {
     fieldErrors[error.context.field] = error.userMessage;
   }
 
-  // Handle multiple field errors
   if (error.context?.fields) {
     Object.assign(fieldErrors, error.context.fields);
   }
 
-  // Handle missing fields
   if (error.context?.missingFields && Array.isArray(error.context.missingFields)) {
     error.context.missingFields.forEach((field: string) => {
       fieldErrors[field] = `${field} is required`;
