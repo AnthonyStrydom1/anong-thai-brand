@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anong Thai Brand - Deployment Force Update</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 FORCE UPDATE - Anong Thai Brand</h1>
+        <p><strong>Timestamp:</strong> <span id="time"></span></p>
+        <p><strong>Commit ID:</strong> a9cb9b3</p>
+        <p><strong>Status:</strong> Hardcoded credentials deployed</p>
+        <p>If you see this, the deployment is working but React app has issues.</p>
+    </div>
+    <script>
+        document.getElementById('time').textContent = new Date().toLocaleString();
+        console.log('🔥 Force update page loaded - commit a9cb9b3');
+    </script>
+</body>
+</html>
