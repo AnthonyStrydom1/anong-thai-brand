@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -38,78 +39,116 @@ import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import DebugPage from "./pages/DebugPage";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
+  console.log('🚀 App component initializing...');
+
   // Initialize logger with user context when available
   React.useEffect(() => {
-    logger.info('Application started', {
-      userAgent: navigator.userAgent,
-      url: window.location.href,
-      timestamp: new Date().toISOString()
-    });
+    try {
+      logger.info('Application started', {
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        timestamp: new Date().toISOString()
+      });
+      console.log('✅ Logger initialized successfully');
+    } catch (error) {
+      console.error('❌ Logger initialization failed:', error);
+    }
   }, []);
 
-  return (
-    <ErrorBoundary
-      showDetails={process.env.NODE_ENV === 'development'}
-      onError={(error, errorInfo) => {
-        logger.critical('Application-level error caught', error, {
-          errorInfo,
-          source: 'app_error_boundary'
-        });
-      }}
-    >
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <LanguageProvider>
-            <CurrencyProvider>
-              <CartProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <RouteErrorBoundary>
-                      <Routes>
-                        <Route path="/" element={<Index />} />
-                        <Route path="/menu" element={<Menu />} />
-                        <Route path="/about" element={<About />} />
-                        <Route path="/contact" element={<Contact />} />
-                        <Route path="/recipes" element={<Recipes />} />
-                        <Route path="/recipes/:id" element={<RecipeDetail />} />
-                        <Route path="/recipe/:id" element={<RecipeDetail />} />
-                        <Route path="/shop" element={<Shop />} />
-                        <Route path="/product/:id" element={<ProductDetailPage />} />
-                        <Route path="/cart" element={<CartPage />} />
-                        <Route path="/checkout" element={<Checkout />} />
-                        <Route path="/events" element={<Events />} />
-                        <Route path="/account" element={<Account />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/orders" element={<Orders />} />
-                        <Route path="/orders/:id" element={<OrderDetailsPage />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="/admin" element={<AdminPage />} />
-                        <Route path="/admin-setup" element={<AdminSetupPage />} />
-                        <Route path="/auth" element={<AuthPage />} />
-                        <Route path="/create-customer" element={<CreateCustomerPage />} />
-                        <Route path="/shipping" element={<Shipping />} />
-                        <Route path="/returns" element={<Returns />} />
-                        <Route path="/privacy" element={<Privacy />} />
-                        <Route path="/terms" element={<Terms />} />
-                        <Route path="/debug" element={<DebugPage />} />
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </RouteErrorBoundary>
-                    <ChatBot />
-                  </BrowserRouter>
-                </TooltipProvider>
-              </CartProvider>
-            </CurrencyProvider>
-          </LanguageProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
-  );
+  try {
+    return (
+      <ErrorBoundary
+        showDetails={true}
+        onError={(error, errorInfo) => {
+          console.error('🚨 Application-level error caught:', error);
+          console.error('Error info:', errorInfo);
+          try {
+            logger.critical('Application-level error caught', error, {
+              errorInfo,
+              source: 'app_error_boundary'
+            });
+          } catch (logError) {
+            console.error('Failed to log error:', logError);
+          }
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <LanguageProvider>
+              <CurrencyProvider>
+                <CartProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    <BrowserRouter>
+                      <RouteErrorBoundary>
+                        <Routes>
+                          <Route path="/" element={<Index />} />
+                          <Route path="/menu" element={<Menu />} />
+                          <Route path="/about" element={<About />} />
+                          <Route path="/contact" element={<Contact />} />
+                          <Route path="/recipes" element={<Recipes />} />
+                          <Route path="/recipes/:id" element={<RecipeDetail />} />
+                          <Route path="/recipe/:id" element={<RecipeDetail />} />
+                          <Route path="/shop" element={<Shop />} />
+                          <Route path="/product/:id" element={<ProductDetailPage />} />
+                          <Route path="/cart" element={<CartPage />} />
+                          <Route path="/checkout" element={<Checkout />} />
+                          <Route path="/events" element={<Events />} />
+                          <Route path="/account" element={<Account />} />
+                          <Route path="/profile" element={<Profile />} />
+                          <Route path="/orders" element={<Orders />} />
+                          <Route path="/orders/:id" element={<OrderDetailsPage />} />
+                          <Route path="/settings" element={<Settings />} />
+                          <Route path="/admin" element={<AdminPage />} />
+                          <Route path="/admin-setup" element={<AdminSetupPage />} />
+                          <Route path="/auth" element={<AuthPage />} />
+                          <Route path="/create-customer" element={<CreateCustomerPage />} />
+                          <Route path="/shipping" element={<Shipping />} />
+                          <Route path="/returns" element={<Returns />} />
+                          <Route path="/privacy" element={<Privacy />} />
+                          <Route path="/terms" element={<Terms />} />
+                          <Route path="/debug" element={<DebugPage />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </RouteErrorBoundary>
+                      <ChatBot />
+                    </BrowserRouter>
+                  </TooltipProvider>
+                </CartProvider>
+              </CurrencyProvider>
+            </LanguageProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    );
+  } catch (error) {
+    console.error('🚨 Critical error in App component:', error);
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Critical Error</h1>
+          <p className="text-gray-600 mb-4">Something went wrong while loading the application.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default App;
