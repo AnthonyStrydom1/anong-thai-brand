@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page - Anong Thai Brand</title>
+</head>
+<body>
+    <h1>🧪 TEST PAGE WORKING</h1>
+    <p>If you can see this, Render is serving files correctly.</p>
+    <p>Current time: <script>document.write(new Date())</script></p>
+    
+    <h2>Environment Test:</h2>
+    <div id="env-test">Testing environment variables...</div>
+    
+    <script>
+        console.log('🧪 Test page loaded successfully');
+        
+        // Try to access the same environment variables your app uses
+        console.log('Environment check:', {
+            url: 'PLACEHOLDER_URL',
+            key: 'PLACEHOLDER_KEY'
+        });
+        
+        document.getElementById('env-test').innerHTML = 
+            'Render is serving files correctly! Check console for details.';
+    </script>
+</body>
+</html>
