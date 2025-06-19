@@ -1,4 +1,3 @@
-
 /**
  * TEST UTILITIES
  * Reusable testing utilities and helpers
@@ -8,8 +7,9 @@ import React from 'react'
 import { render, RenderOptions, waitFor, screen, expect } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
-import { vi } from 'vitest'
+import { vi, expect } from 'vitest'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { ErrorCategory, ErrorSeverity } from '@/types/errors'
 
 // ========================
 // TEST PROVIDERS WRAPPER
@@ -104,8 +104,8 @@ export interface MockError {
   name: string
   code: string
   message: string
-  category: string
-  severity: string
+  category: ErrorCategory
+  severity: ErrorSeverity
   timestamp: Date
   trackingId: string
   userMessage: string
@@ -118,8 +118,8 @@ export function createMockError(overrides: Partial<MockError> = {}): MockError {
     name: 'TestError',
     code: 'TEST_ERROR',
     message: 'Test error message',
-    category: 'system',
-    severity: 'medium',
+    category: ErrorCategory.SYSTEM,
+    severity: ErrorSeverity.MEDIUM,
     timestamp: new Date(),
     trackingId: 'test-tracking-id',
     userMessage: 'Something went wrong. Please try again.',
@@ -235,10 +235,7 @@ export function mockSupabaseOperation(result: { data?: any; error?: any }) {
 // ========================
 
 export async function checkA11y(container: HTMLElement) {
-  // Basic accessibility checks
   expect(container).toBeInTheDocument()
-  
-  // Check for proper ARIA labels
   expect(container.querySelector('[aria-label], [aria-labelledby]')).toBeTruthy()
 }
 
@@ -254,15 +251,12 @@ export function measureRenderTime(renderFn: () => void): number {
 }
 
 export function expectNoMemoryLeaks() {
-  // Mock memory leak detection
   const initialMemory = (performance as any).memory?.usedJSHeapSize || 0
   
   return {
     check: () => {
       const currentMemory = (performance as any).memory?.usedJSHeapSize || 0
       const memoryIncrease = currentMemory - initialMemory
-      
-      // Allow for reasonable memory increase (1MB)
       expect(memoryIncrease).toBeLessThan(1024 * 1024)
     }
   }
