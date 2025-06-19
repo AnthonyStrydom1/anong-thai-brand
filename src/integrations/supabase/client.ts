@@ -3,16 +3,22 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// UPDATED: Fresh Supabase credentials (June 18, 2025)
-const SUPABASE_URL = "https://nyadgiutmweuyxqetfuh.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55YWRnaXV0bXdldXl4cWV0ZnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNzM0OTksImV4cCI6MjA2NTg0OTQ5OX0.VTEDEpoDtq_C_gglFz8Zrs_3HsX43VM3ZXsoYgTMP5c";
+// Use environment variables for credentials
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Validate credentials
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error('Missing required Supabase credentials');
+  throw new Error(
+    'Missing required Supabase credentials. Please check your .env file contains:\n' +
+    '- VITE_SUPABASE_URL\n' +
+    '- VITE_SUPABASE_ANON_KEY'
+  );
 }
 
-console.log('🔧 Supabase Integration: Using fresh credentials (June 18, 2025)');
+console.log('🔧 Supabase Integration: Using environment variables');
+console.log('📍 URL:', SUPABASE_URL);
+console.log('🔑 Key prefix:', SUPABASE_PUBLISHABLE_KEY?.substring(0, 20) + '...');
 
 // Enhanced client configuration for better mobile support
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {

@@ -9,13 +9,6 @@ const AdminLink = () => {
   const { user } = useAuth();
   const { isAdmin, isLoading } = useUserRoles();
 
-  console.log('🔍 AdminLink: Debug info', { 
-    hasUser: !!user, 
-    isLoading, 
-    isAdminResult: isAdmin(),
-    userId: user?.id 
-  });
-
   // Don't show anything while loading, or if no user, or not admin
   if (isLoading || !user || !isAdmin()) {
     return null;

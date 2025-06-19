@@ -43,14 +43,6 @@ const ProductDetail = () => {
   // Fallback to local products data if Supabase product not found
   const localProduct = products.find(p => p.id === id);
   
-  console.log('Product debug:', { 
-    id, 
-    supabaseProduct, 
-    localProduct,
-    supabaseIngredients: supabaseProduct?.ingredients,
-    localProductIngredients: localProduct?.ingredients 
-  });
-  
   // Priority: use Supabase data but get translated content from ProductDataMapper
   const product = supabaseProduct ? (() => {
     const productData = getProductData(supabaseProduct.name);

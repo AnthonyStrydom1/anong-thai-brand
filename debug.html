@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emergency Supabase Debug</title>
+</head>
+<body>
+    <h1>🚨 Emergency Supabase Debug</h1>
+    <div id="debug-output"></div>
+    
+    <script type="module">
+        const output = document.getElementById('debug-output');
+        
+        function log(message) {
+            output.innerHTML += '<p>' + message + '</p>';
+            console.log(message);
+        }
+        
+        log('🔧 DEBUGGING SUPABASE CONNECTION');
+        log('================================');
+        
+        // 1. Test environment variables
+        log('📍 VITE_SUPABASE_URL: ' + import.meta.env.VITE_SUPABASE_URL);
+        log('🔑 VITE_SUPABASE_ANON_KEY: ' + (import.meta.env.VITE_SUPABASE_ANON_KEY ? 'EXISTS' : 'MISSING'));
+        
+        if (import.meta.env.VITE_SUPABASE_ANON_KEY) {
+            log('🔑 Key prefix: ' + import.meta.env.VITE_SUPABASE_ANON_KEY.substring(0, 20) + '...');
+        }
+        
+        // 2. Test if we can import Supabase
+        try {
+            import('./src/integrations/supabase/client.ts').then(module => {
+                log('✅ Supabase client imported successfully');
+                
+                // 3. Test basic connection
+                const { supabase } = module;
+                
+                supabase.from('products').select('count(*)', { count: 'exact', head: true })
+                    .then(({ data, error }) => {
+                        if (error) {
+                            log('❌ Supabase test failed: ' + error.message);
+                        } else {
+                            log('✅ Supabase connection successful!');
+                        }
+                    })
+                    .catch(err => {
+                        log('❌ Supabase test error: ' + err.message);
+                    });
+                    
+            }).catch(err => {
+                log('❌ Failed to import Supabase: ' + err.message);
+            });
+        } catch (err) {
+            log('❌ Import error: ' + err.message);
+        }
+        
+        log('================================');
+    </script>
+</body>
+</html>
