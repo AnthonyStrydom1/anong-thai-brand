@@ -4,6 +4,7 @@
  * Common error handling patterns and utility functions
  */
 
+import React from 'react';
 import { toast } from 'sonner';
 import { BaseError, ErrorCategory, ErrorSeverity } from '@/types/errors';
 import { logger } from '@/services/logger';

@@ -5,7 +5,7 @@
  */
 
 import React from 'react'
-import { render, RenderOptions, waitFor, screen } from '@testing-library/react'
+import { render, RenderOptions, waitFor, screen, expect } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import { vi } from 'vitest'
@@ -101,6 +101,7 @@ export function renderWithProviders(
 // ========================
 
 export interface MockError {
+  name: string
   code: string
   message: string
   category: string
@@ -114,6 +115,7 @@ export interface MockError {
 
 export function createMockError(overrides: Partial<MockError> = {}): MockError {
   return {
+    name: 'TestError',
     code: 'TEST_ERROR',
     message: 'Test error message',
     category: 'system',

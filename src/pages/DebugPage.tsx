@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 
 const DebugPage = () => {
@@ -26,12 +27,12 @@ const DebugPage = () => {
       // Test 2: Import emergency client
       try {
         addLog('🔧 Importing emergency Supabase client...');
-        const { supabase } = await import('@/lib/emergency-supabase');
+        const { emergencySupabase } = await import('@/lib/emergency-supabase');
         addLog('✅ Emergency client imported successfully');
 
         // Test 3: Connection test
         addLog('🔗 Testing Supabase connection...');
-        const { data, error } = await supabase
+        const { data, error } = await emergencySupabase
           .from('products')
           .select('count(*)', { count: 'exact', head: true });
 
@@ -45,7 +46,7 @@ const DebugPage = () => {
 
         // Test 4: Auth test
         addLog('👤 Testing auth status...');
-        const { data: authData, error: authError } = await supabase.auth.getUser();
+        const { data: authData, error: authError } = await emergencySupabase.auth.getUser();
         if (authError) {
           addLog(`⚠️ Auth error: ${authError.message}`);
         } else {
@@ -67,9 +68,9 @@ const DebugPage = () => {
   const testLogin = async () => {
     try {
       addLog('🔐 Testing login...');
-      const { supabase } = await import('@/lib/emergency-supabase');
+      const { emergencySupabase } = await import('@/lib/emergency-supabase');
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await emergencySupabase.auth.signInWithPassword({
         email: 'test@example.com',
         password: 'testpassword'
       });
@@ -87,9 +88,9 @@ const DebugPage = () => {
   const testProducts = async () => {
     try {
       addLog('📦 Testing product loading...');
-      const { supabase } = await import('@/lib/emergency-supabase');
+      const { emergencySupabase } = await import('@/lib/emergency-supabase');
       
-      const { data, error } = await supabase
+      const { data, error } = await emergencySupabase
         .from('products')
         .select('*')
         .limit(5);
