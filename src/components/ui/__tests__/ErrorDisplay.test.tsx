@@ -15,6 +15,7 @@ import {
   ValidationErrorSummary
 } from '@/components/ui/ErrorDisplay'
 import { render, createMockError } from '@/test/utils'
+import { ErrorSeverity } from '@/types/errors'
 
 describe('Error Display Components', () => {
   beforeEach(() => {
@@ -53,7 +54,7 @@ describe('Error Display Components', () => {
   describe('FullPageError', () => {
     it('should display full page error', () => {
       const error = createMockError({
-        severity: 'critical',
+        severity: ErrorSeverity.CRITICAL,
         userMessage: 'Critical system error'
       })
       

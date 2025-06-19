@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { render, RenderOptions, waitFor, screen, expect } from '@testing-library/react'
+import { render, RenderOptions, waitFor, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import { vi, expect } from 'vitest'
