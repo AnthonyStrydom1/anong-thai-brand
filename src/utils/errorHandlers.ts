@@ -345,13 +345,11 @@ export function createErrorFallback(
   customMessage?: string
 ) {
   return function ErrorFallback() {
-    return (
-      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <p className="text-sm text-gray-600">
-          {customMessage || `Unable to load ${componentName}. Please refresh the page.`}
-        </p>
-      </div>
-    );
+    return React.createElement('div', {
+      className: 'p-4 bg-gray-50 rounded-lg border border-gray-200'
+    }, React.createElement('p', {
+      className: 'text-sm text-gray-600'
+    }, customMessage || `Unable to load ${componentName}. Please refresh the page.`));
   };
 }
 
