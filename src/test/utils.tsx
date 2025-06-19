@@ -5,7 +5,7 @@
  */
 
 import React from 'react'
-import { render, RenderOptions } from '@testing-library/react'
+import { render, RenderOptions, waitFor, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import { vi } from 'vitest'
@@ -150,7 +150,62 @@ export function createMockLogger() {
     error: vi.fn(),
     critical: vi.fn(),
     logError: vi.fn(),
+    performance: vi.fn(),
   }
+}
+
+// ========================
+// ASYNC ERROR COMPONENT
+// ========================
+
+export function AsyncThrowErrorComponent({ 
+  shouldThrow = true, 
+  delay = 0,
+  error = new Error('Async test error'),
+  children 
+}: { 
+  shouldThrow?: boolean
+  delay?: number
+  error?: Error
+  children?: React.ReactNode 
+}) {
+  React.useEffect(() => {
+    if (shouldThrow) {
+      setTimeout(() => {
+        throw error
+      }, delay)
+    }
+  }, [shouldThrow, delay, error])
+
+  return <>{children || <div>Async component loaded</div>}</>
+}
+
+// ========================
+// FORM TESTING UTILITIES
+// ========================
+
+export async function fillAndSubmitForm(
+  formFields: Record<string, string>,
+  submitButtonText = 'Submit'
+) {
+  const { userEvent } = await import('@testing-library/user-event')
+  const user = userEvent.setup()
+  
+  for (const [fieldName, value] of Object.entries(formFields)) {
+    const field = screen.getByLabelText(new RegExp(fieldName, 'i'))
+    await user.clear(field)
+    await user.type(field, value)
+  }
+  
+  const submitButton = screen.getByRole('button', { name: new RegExp(submitButtonText, 'i') })
+  await user.click(submitButton)
+}
+
+export function expectFormError(fieldName: string, errorMessage?: string) {
+  const errorElement = screen.getByText(
+    errorMessage ? new RegExp(errorMessage, 'i') : new RegExp(`${fieldName}.*required`, 'i')
+  )
+  expect(errorElement).toBeInTheDocument()
 }
 
 // ========================
@@ -166,6 +221,81 @@ export function mockApiSuccess(data: any, delay = 0) {
 export function mockApiError(error: any, delay = 0) {
   return new Promise((_, reject) => 
     setTimeout(() => reject(error), delay)
+  )
+}
+
+export function mockSupabaseOperation(result: { data?: any; error?: any }) {
+  return vi.fn().mockResolvedValue(result)
+}
+
+// ========================
+// ACCESSIBILITY UTILITIES
+// ========================
+
+export async function checkA11y(container: HTMLElement) {
+  // Basic accessibility checks
+  expect(container).toBeInTheDocument()
+  
+  // Check for proper ARIA labels
+  expect(container.querySelector('[aria-label], [aria-labelledby]')).toBeTruthy()
+}
+
+// ========================
+// PERFORMANCE UTILITIES
+// ========================
+
+export function measureRenderTime(renderFn: () => void): number {
+  const start = performance.now()
+  renderFn()
+  const end = performance.now()
+  return end - start
+}
+
+export function expectNoMemoryLeaks() {
+  // Mock memory leak detection
+  const initialMemory = (performance as any).memory?.usedJSHeapSize || 0
+  
+  return {
+    check: () => {
+      const currentMemory = (performance as any).memory?.usedJSHeapSize || 0
+      const memoryIncrease = currentMemory - initialMemory
+      
+      // Allow for reasonable memory increase (1MB)
+      expect(memoryIncrease).toBeLessThan(1024 * 1024)
+    }
+  }
+}
+
+// ========================
+// WAITING UTILITIES
+// ========================
+
+export async function waitForElement(
+  selector: string,
+  timeout = 5000
+): Promise<HTMLElement> {
+  return waitFor(
+    () => {
+      const element = screen.getByTestId(selector) || screen.getByText(selector)
+      expect(element).toBeInTheDocument()
+      return element
+    },
+    { timeout }
+  )
+}
+
+export async function waitForError(
+  errorText?: string,
+  timeout = 5000
+): Promise<void> {
+  return waitFor(
+    () => {
+      const errorElement = errorText 
+        ? screen.getByText(new RegExp(errorText, 'i'))
+        : screen.getByText(/error|wrong|failed/i)
+      expect(errorElement).toBeInTheDocument()
+    },
+    { timeout }
   )
 }
 

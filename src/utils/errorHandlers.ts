@@ -5,7 +5,7 @@
  */
 
 import { toast } from 'sonner';
-import { BaseError } from '@/types/errors';
+import { BaseError, ErrorCategory, ErrorSeverity } from '@/types/errors';
 import { logger } from '@/services/logger';
 
 // ========================
@@ -33,16 +33,19 @@ export async function safeAsync<T>(
       name: error instanceof Error ? error.name : 'UnknownError',
       message: error instanceof Error ? error.message : 'An unknown error occurred',
       code: 'UNKNOWN_ERROR',
-      severity: 'medium',
+      severity: ErrorSeverity.MEDIUM,
       userMessage: 'Something went wrong. Please try again.',
       trackingId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       retryable: true,
-      category: 'unknown',
+      category: ErrorCategory.SYSTEM,
       timestamp: new Date(),
       details: context
     } as BaseError;
     
-    logger.error('Safe async operation failed', error, context);
+    logger.error('Safe async operation failed', error, {
+      source: 'safe_async',
+      ...context
+    });
     
     return { error: classifiedError, success: false };
   }
@@ -71,17 +74,20 @@ export function handleUserError(
     name: error instanceof Error ? error.name : 'UnknownError',
     message: error instanceof Error ? error.message : 'An unknown error occurred',
     code: 'UNKNOWN_ERROR',
-    severity: 'medium',
+    severity: ErrorSeverity.MEDIUM,
     userMessage: 'Something went wrong. Please try again.',
     trackingId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     retryable: true,
-    category: 'unknown',
+    category: ErrorCategory.SYSTEM,
     timestamp: new Date(),
     details: context
   } as BaseError;
 
   if (logError) {
-    logger.error('User error handled', error, context);
+    logger.error('User error handled', error, {
+      source: 'user_error_handler',
+      ...context
+    });
   }
 
   if (showToast) {
@@ -144,9 +150,223 @@ export async function safeFetch<T>(
   });
 }
 
+/**
+ * Retry mechanism with exponential backoff
+ */
+interface RetryOptions {
+  maxRetries?: number;
+  baseDelay?: number;
+  maxDelay?: number;
+  backoffFactor?: number;
+  retryCondition?: (error: any) => boolean;
+}
+
+export async function withRetry<T>(
+  operation: () => Promise<T>,
+  options: RetryOptions = {}
+): Promise<T> {
+  const {
+    maxRetries = 3,
+    baseDelay = 1000,
+    maxDelay = 10000,
+    backoffFactor = 2,
+    retryCondition = () => true
+  } = options;
+
+  let lastError: any;
+  let attempt = 0;
+
+  while (attempt <= maxRetries) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      attempt++;
+
+      if (attempt > maxRetries || !retryCondition(error)) {
+        throw error;
+      }
+
+      const delay = Math.min(baseDelay * Math.pow(backoffFactor, attempt - 1), maxDelay);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError;
+}
+
+/**
+ * Circuit breaker pattern implementation
+ */
+interface CircuitBreakerOptions {
+  failureThreshold: number;
+  resetTimeout: number;
+  monitoringPeriod: number;
+}
+
+export class CircuitBreaker {
+  private failures = 0;
+  private lastFailureTime = 0;
+  private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+
+  constructor(private options: CircuitBreakerOptions) {}
+
+  async execute<T>(operation: () => Promise<T>): Promise<T> {
+    if (this.state === 'OPEN') {
+      if (Date.now() - this.lastFailureTime > this.options.resetTimeout) {
+        this.state = 'HALF_OPEN';
+      } else {
+        throw new Error('Circuit breaker is OPEN');
+      }
+    }
+
+    try {
+      const result = await operation();
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onFailure();
+      throw error;
+    }
+  }
+
+  private onSuccess() {
+    this.failures = 0;
+    this.state = 'CLOSED';
+  }
+
+  private onFailure() {
+    this.failures++;
+    this.lastFailureTime = Date.now();
+
+    if (this.failures >= this.options.failureThreshold) {
+      this.state = 'OPEN';
+    }
+  }
+
+  getState() {
+    return {
+      state: this.state,
+      failures: this.failures,
+      lastFailureTime: this.lastFailureTime
+    };
+  }
+}
+
+/**
+ * Supabase operation wrapper
+ */
+export async function safeSupabaseOperation<T>(
+  operation: () => Promise<{ data: T | null; error: any }>,
+  context?: Record<string, any>
+): Promise<AsyncResult<T>> {
+  return safeAsync(async () => {
+    const { data, error } = await operation();
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data!;
+  }, {
+    source: 'supabase_operation',
+    ...context
+  });
+}
+
+/**
+ * Performance tracking wrapper
+ */
+export async function withPerformanceTracking<T>(
+  operation: () => Promise<T>,
+  operationName: string,
+  slowThreshold?: number
+): Promise<T> {
+  const startTime = performance.now();
+  
+  try {
+    const result = await operation();
+    const duration = performance.now() - startTime;
+    
+    logger.performance(operationName, duration);
+    
+    if (slowThreshold && duration > slowThreshold) {
+      logger.warn(`Slow operation detected: ${operationName}`, {
+        duration,
+        threshold: slowThreshold
+      });
+    }
+    
+    return result;
+  } catch (error) {
+    const duration = performance.now() - startTime;
+    
+    logger.error('Operation failed with performance context', error, {
+      operationName,
+      duration
+    });
+    
+    throw error;
+  }
+}
+
+/**
+ * Extract form errors from validation error
+ */
+export function extractFormErrors(error: BaseError): Record<string, string> {
+  if (error.category !== ErrorCategory.VALIDATION) {
+    return {};
+  }
+
+  const fieldErrors: Record<string, string> = {};
+
+  // Handle single field error
+  if (error.context?.field && error.userMessage) {
+    fieldErrors[error.context.field] = error.userMessage;
+  }
+
+  // Handle multiple field errors
+  if (error.context?.fields) {
+    Object.assign(fieldErrors, error.context.fields);
+  }
+
+  // Handle missing fields
+  if (error.context?.missingFields && Array.isArray(error.context.missingFields)) {
+    error.context.missingFields.forEach((field: string) => {
+      fieldErrors[field] = `${field} is required`;
+    });
+  }
+
+  return fieldErrors;
+}
+
+/**
+ * Create error fallback component
+ */
+export function createErrorFallback(
+  componentName: string,
+  customMessage?: string
+) {
+  return function ErrorFallback() {
+    return (
+      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <p className="text-sm text-gray-600">
+          {customMessage || `Unable to load ${componentName}. Please refresh the page.`}
+        </p>
+      </div>
+    );
+  };
+}
+
 export default {
   safeAsync,
   handleUserError,
   showSuccess,
-  safeFetch
+  safeFetch,
+  withRetry,
+  CircuitBreaker,
+  safeSupabaseOperation,
+  withPerformanceTracking,
+  extractFormErrors,
+  createErrorFallback
 };

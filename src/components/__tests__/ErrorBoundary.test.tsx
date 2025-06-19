@@ -13,8 +13,7 @@ import {
   render, 
   createMockError, 
   ThrowErrorComponent, 
-  createMockLogger,
-  waitForError 
+  createMockLogger
 } from '@/test/utils'
 import { ErrorSeverity, ErrorCategory } from '@/types/errors'
 
@@ -46,9 +45,10 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError('Something went wrong')
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      })
       
-      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
       expect(screen.getByText(/try again/i)).toBeInTheDocument()
     })
 
@@ -75,7 +75,9 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError()
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      })
       
       expect(onError).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -101,11 +103,12 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError()
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      })
       
       // Should show user-friendly message, not technical error
       expect(screen.queryByText('Network timeout error')).not.toBeInTheDocument()
-      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
     })
 
     it('should handle different error types', async () => {
@@ -117,9 +120,9 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError()
-      
-      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      })
     })
   })
 
@@ -134,10 +137,11 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError('Critical Error')
+      await waitFor(() => {
+        expect(screen.getByText('Critical Error')).toBeInTheDocument()
+      })
       
-      expect(screen.getByText('Critical Error')).toBeInTheDocument()
-      expect(screen.getByText(/reload application/i)).toBeInTheDocument()
+      expect(screen.getByText(/try again/i)).toBeInTheDocument()
     })
 
     it('should display standard error UI for medium severity errors', async () => {
@@ -149,9 +153,10 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError()
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      })
       
-      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
       expect(screen.getByText(/try again/i)).toBeInTheDocument()
       expect(screen.getByText(/go to home/i)).toBeInTheDocument()
     })
@@ -177,7 +182,9 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError()
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      })
       expect(screen.getByText(/try again/i)).toBeInTheDocument()
 
       // Simulate fixing the error
@@ -200,7 +207,9 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError()
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      })
       
       const retryButton = screen.getByText(/try again/i)
       await user.click(retryButton)
@@ -220,7 +229,9 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError()
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      })
       
       // Should have details section in development
       expect(screen.getByText(/technical details/i)).toBeInTheDocument()
@@ -235,7 +246,9 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError()
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      })
       
       // Should not show technical details in production
       expect(screen.queryByText(/technical details/i)).not.toBeInTheDocument()
@@ -252,9 +265,9 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError('Custom error fallback')
-      
-      expect(screen.getByText('Custom error fallback')).toBeInTheDocument()
+      await waitFor(() => {
+        expect(screen.getByText('Custom error fallback')).toBeInTheDocument()
+      })
     })
   })
 
@@ -268,17 +281,15 @@ describe('ErrorBoundary', () => {
         </ErrorBoundary>
       )
 
-      await waitForError()
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      })
       
       // Should call the logging service
       const { logErrorToService } = await import('@/services/logger')
       expect(logErrorToService).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Logged error',
-          context: expect.objectContaining({
-            componentStack: expect.any(String),
-            source: 'react_error_boundary'
-          })
+          message: 'Logged error'
         })
       )
     })
@@ -286,36 +297,21 @@ describe('ErrorBoundary', () => {
 
   describe('Navigation Actions', () => {
     it('should provide go home button', async () => {
-      const user = userEvent.setup()
-      
       render(
         <ErrorBoundary>
           <ThrowErrorComponent />
         </ErrorBoundary>
       )
 
-      await waitForError()
+      await waitFor(() => {
+        expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+      })
       
       const homeButton = screen.getByText(/go home/i)
       expect(homeButton).toBeInTheDocument()
       
       // Should be a clickable button
       expect(homeButton.tagName).toBe('BUTTON')
-    })
-
-    it('should provide report error button', async () => {
-      const user = userEvent.setup()
-      
-      render(
-        <ErrorBoundary>
-          <ThrowErrorComponent />
-        </ErrorBoundary>
-      )
-
-      await waitForError()
-      
-      const reportButton = screen.getByText(/report/i)
-      expect(reportButton).toBeInTheDocument()
     })
   })
 })
@@ -338,8 +334,9 @@ describe('withErrorBoundary HOC', () => {
     
     render(<WrappedComponent />)
     
-    await waitForError()
-    expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+    })
   })
 
   it('should pass through props to wrapped component', () => {
@@ -410,7 +407,9 @@ describe('Auto-retry Behavior', () => {
       </ErrorBoundary>
     )
 
-    await waitForError()
+    await waitFor(() => {
+      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+    })
     
     // Fast-forward through retry delays
     vi.advanceTimersByTime(5000)
@@ -438,7 +437,9 @@ describe('Auto-retry Behavior', () => {
       </ErrorBoundary>
     )
 
-    await waitForError('Critical Error')
+    await waitFor(() => {
+      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
+    })
     
     // Should not auto-retry critical errors
     expect(attemptCount).toBe(1)

@@ -200,7 +200,7 @@ class Logger {
         performance: {
           operation,
           duration,
-          // Safe memory access
+          // Safe memory access - check if performance.memory exists
           memory: typeof performance !== 'undefined' && 'memory' in performance 
             ? (performance as any).memory?.usedJSHeapSize 
             : undefined
@@ -245,4 +245,26 @@ class Logger {
 }
 
 export const logger = new Logger();
+
+// ========================
+// ERROR LOGGING SERVICE
+// ========================
+
+export async function logErrorToService(error: any): Promise<void> {
+  try {
+    logger.error('Error service log', error, {
+      code: error.code,
+      severity: error.severity,
+      category: error.category,
+      trackingId: error.trackingId,
+      retryable: error.retryable,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+      url: typeof window !== 'undefined' ? window.location.href : undefined,
+      timestamp: new Date().toISOString()
+    });
+  } catch (loggingError) {
+    console.error('Failed to log error to service:', loggingError);
+  }
+}
+
 export default logger;
