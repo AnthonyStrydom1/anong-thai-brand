@@ -2,14 +2,7 @@
 /**
  * CENTRALIZED LOGGING SERVICE
  * Provides structured logging with different levels and targets
- * 
- * Handles development vs production logging behavior and
- * provides consistent logging interface across the application
  */
-
-// ========================
-// LOGGING LEVELS
-// ========================
 
 export enum LogLevel {
   DEBUG = 0,
@@ -38,10 +31,6 @@ export interface LogEntry {
   };
 }
 
-// ========================
-// LOGGER CONFIGURATION
-// ========================
-
 interface LoggerConfig {
   minLevel: LogLevel;
   enableConsole: boolean;
@@ -60,7 +49,6 @@ class Logger {
   constructor() {
     this.sessionId = this.generateSessionId();
     
-    // Default configuration
     this.config = {
       minLevel: process.env.NODE_ENV === 'production' ? LogLevel.INFO : LogLevel.DEBUG,
       enableConsole: true,
@@ -70,7 +58,6 @@ class Logger {
       bufferSize: 100
     };
 
-    // Initialize logger
     this.info('Logger initialized', {
       environment: process.env.NODE_ENV,
       sessionId: this.sessionId,
@@ -141,7 +128,6 @@ class Logger {
           console.log(message, entry.context);
       }
     } catch (consoleError) {
-      // Fallback if console methods fail
       console.log(`Logger error: ${consoleError}, Original: ${message}`);
     }
   }
@@ -158,62 +144,46 @@ class Logger {
         body: JSON.stringify(entry)
       });
     } catch (error) {
-      // Don't log remote logging errors to avoid infinite loops
       console.warn('Failed to send log to remote endpoint:', error);
     }
   }
 
   private processLogEntry(entry: LogEntry): void {
-    // Add to buffer
     this.buffer.push(entry);
     if (this.buffer.length > this.config.bufferSize) {
-      this.buffer.shift(); // Remove oldest entry
+      this.buffer.shift();
     }
 
-    // Log to console
     this.logToConsole(entry);
-
-    // Log to remote (async, non-blocking)
-    this.logToRemote(entry).catch(() => {
-      // Silently fail remote logging
-    });
+    this.logToRemote(entry).catch(() => {});
   }
-
-  // ========================
-  // PUBLIC LOGGING METHODS
-  // ========================
 
   debug(message: string, context?: Record<string, any>): void {
     if (!this.shouldLog(LogLevel.DEBUG)) return;
-    
     const entry = this.createLogEntry(LogLevel.DEBUG, message, undefined, context);
     this.processLogEntry(entry);
   }
 
   info(message: string, context?: Record<string, any>): void {
     if (!this.shouldLog(LogLevel.INFO)) return;
-    
     const entry = this.createLogEntry(LogLevel.INFO, message, undefined, context);
     this.processLogEntry(entry);
   }
 
   warn(message: string, context?: Record<string, any>): void {
     if (!this.shouldLog(LogLevel.WARN)) return;
-    
     const entry = this.createLogEntry(LogLevel.WARN, message, undefined, context);
     this.processLogEntry(entry);
   }
 
   error(message: string, error?: any, context?: Record<string, any>): void {
     if (!this.shouldLog(LogLevel.ERROR)) return;
-    
     const entry = this.createLogEntry(LogLevel.ERROR, message, error, context);
     this.processLogEntry(entry);
   }
 
   critical(message: string, error?: any, context?: Record<string, any>): void {
     if (!this.shouldLog(LogLevel.CRITICAL)) return;
-    
     const entry = this.createLogEntry(LogLevel.CRITICAL, message, error, context);
     this.processLogEntry(entry);
   }
@@ -230,18 +200,15 @@ class Logger {
         performance: {
           operation,
           duration,
-          memory: typeof performance !== 'undefined' && performance.memory 
-            ? performance.memory.usedJSHeapSize 
+          // Safe memory access
+          memory: typeof performance !== 'undefined' && 'memory' in performance 
+            ? (performance as any).memory?.usedJSHeapSize 
             : undefined
         }
       }
     );
     this.processLogEntry(entry);
   }
-
-  // ========================
-  // ERROR LOGGING HELPER
-  // ========================
 
   logError(error: any, context?: Record<string, any>): void {
     try {
@@ -255,14 +222,9 @@ class Logger {
         this.error(error?.message || 'Unknown error occurred', error, context);
       }
     } catch (logError) {
-      // Fallback logging
       console.error('Logger.logError failed:', logError, 'Original error:', error);
     }
   }
-
-  // ========================
-  // UTILITY METHODS
-  // ========================
 
   getBuffer(): LogEntry[] {
     return [...this.buffer];
@@ -282,14 +244,5 @@ class Logger {
   }
 }
 
-// ========================
-// SINGLETON INSTANCE
-// ========================
-
 export const logger = new Logger();
-
-// ========================
-// CONVENIENCE EXPORTS
-// ========================
-
 export default logger;

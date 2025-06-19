@@ -4,7 +4,6 @@ import { AlertTriangle, RefreshCw, Home, Bug, AlertCircle } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { BaseError } from '@/types/errors';
 
 // ========================
 // ERROR SEVERITY MAPPING
@@ -15,6 +14,18 @@ export enum ErrorSeverity {
   MEDIUM = 'medium',
   HIGH = 'high',
   CRITICAL = 'critical'
+}
+
+interface BaseError {
+  code?: string;
+  message: string;
+  severity?: string;
+  userMessage?: string;
+  trackingId?: string;
+  retryable?: boolean;
+  category?: string;
+  details?: Record<string, any>;
+  timestamp?: Date;
 }
 
 const ErrorIcons = {
@@ -226,7 +237,97 @@ export function FullPageError({
   );
 }
 
+// ========================
+// LOADING WITH ERROR COMPONENT
+// ========================
+
+interface LoadingWithErrorProps {
+  isLoading: boolean;
+  error: BaseError | null;
+  children: React.ReactNode;
+  loadingMessage?: string;
+  onRetry?: () => void;
+}
+
+export function LoadingWithError({ 
+  isLoading, 
+  error, 
+  children, 
+  loadingMessage = "Loading...",
+  onRetry 
+}: LoadingWithErrorProps) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">{loadingMessage}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <InlineError error={error} onRetry={onRetry} />;
+  }
+
+  return <>{children}</>;
+}
+
+// ========================
+// FIELD ERROR COMPONENT
+// ========================
+
+interface FieldErrorProps {
+  error?: string;
+  className?: string;
+}
+
+export function FieldError({ error, className = "" }: FieldErrorProps) {
+  if (!error) return null;
+
+  return (
+    <p className={`text-sm text-red-600 mt-1 ${className}`}>
+      {error}
+    </p>
+  );
+}
+
+// ========================
+// VALIDATION ERROR SUMMARY
+// ========================
+
+interface ValidationErrorSummaryProps {
+  errors: Record<string, string>;
+  className?: string;
+}
+
+export function ValidationErrorSummary({ errors, className = "" }: ValidationErrorSummaryProps) {
+  const errorEntries = Object.entries(errors).filter(([, message]) => message);
+  
+  if (errorEntries.length === 0) return null;
+
+  return (
+    <Alert className={`border-red-200 bg-red-50 ${className}`}>
+      <AlertTriangle className="h-4 w-4 text-red-600" />
+      <AlertDescription>
+        <div className="font-medium text-red-800 mb-2">
+          Please fix the following errors:
+        </div>
+        <ul className="space-y-1 text-sm text-red-700">
+          {errorEntries.map(([field, message]) => (
+            <li key={field}>• {message}</li>
+          ))}
+        </ul>
+      </AlertDescription>
+    </Alert>
+  );
+}
+
 export default {
   InlineError,
-  FullPageError
+  FullPageError,
+  LoadingWithError,
+  FieldError,
+  ValidationErrorSummary
 };
