@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: anong-thai-brand
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    domains:
+      - anongthaibrand.com
+      - www.anongthaibrand.com
+    envVars:
+      - key: VITE_SUPABASE_URL
+        value: https://nyadgiutmweuyxqetfuh.supabase.co
+      - key: VITE_SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55YWRnaXV0bXdldXl4cWV0ZnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkyOTA3MjQsImV4cCI6MjA2NDg2NjcyNH0.2A1-OfpJiAxIGWxa4PdBtnFNDwBuV3X38fB21AWo88A
+      - key: VITE_ENVIRONMENT
+        value: production
+      - key: VITE_CSRF_SECRET
+        value: prod-csrf-secret-key-2025-anong-thai-brand
