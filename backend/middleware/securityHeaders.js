@@ -216,9 +216,14 @@ export const enhancedInputValidation = (req, res, next) => {
       req.body = sanitizeObject(req.body);
     }
     
-    // Also sanitize query parameters
-    if (req.query) {
-      req.query = sanitizeObject(req.query);
+    // Sanitize query parameters - create new object instead of modifying req.query directly
+    if (req.query && Object.keys(req.query).length > 0) {
+      const sanitizedQuery = sanitizeObject(req.query);
+      // Only replace if sanitization was successful and different
+      if (sanitizedQuery && typeof sanitizedQuery === 'object') {
+        Object.keys(req.query).forEach(key => delete req.query[key]);
+        Object.assign(req.query, sanitizedQuery);
+      }
     }
   } catch (error) {
     logSecurityEvent('input_validation_error', getClientIdentifier(req), req, { error: error.message });

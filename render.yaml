@@ -16,3 +16,6 @@ services:
         value: production
       - key: VITE_CSRF_SECRET
         value: prod-csrf-secret-key-2025-anong-thai-brand
+    # Explicitly ignore backend directory for static site deployment
+    ignoredPaths:
+      - backend/**/*

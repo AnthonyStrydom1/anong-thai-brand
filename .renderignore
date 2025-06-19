@@ -1,0 +1,11 @@
+# Exclude backend from static site deployment
+backend/
+backend/**/*
+
+# Exclude other unnecessary files
+node_modules/
+.git/
+.env.local
+.env.development
+*.log
+.DS_Store
